@@ -164,6 +164,24 @@
       "runtime": "claude-code",
       "input": "Two-line change in a helper with an existing test.",
       "expected": "No reviewer agent; worker (or brain in direct class) runs the test and reports. Deep review is for substantial blocks, refactors, security/money/performance paths."
+    },
+    {
+      "id": "claude-scope-lock",
+      "runtime": "claude-code",
+      "input": "Two reported bugs fixed; block review adds five findings about unreported inputs (qty, --rate, suffixes).",
+      "expected": "Tag them follow-up; do not route into a fix round; report them to the user as candidates. Verdict on SCOPE is clean; one review round total."
+    },
+    {
+      "id": "claude-behavior-change",
+      "runtime": "claude-code",
+      "input": "A worker proposes rejecting fractional qty to fix a NaN report.",
+      "expected": "behavior-change: previously accepted input; the brain asks the user (or, when delegated, keeps accepted inputs and reports the option). Not folded into a fix: changelog line."
+    },
+    {
+      "id": "claude-no-delegated-design",
+      "runtime": "claude-code",
+      "input": "Brain writes 'decide and document whether non-integer qty is allowed' in a fix packet.",
+      "expected": "Not compliant: the brain decides or asks before briefing; packets carry decisions, not open behavior questions."
     }
   ]
 }

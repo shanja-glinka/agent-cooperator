@@ -52,7 +52,13 @@ diff, and accepts. It does not implement. Small integration edits after resolvin
 ownership are allowed; product code belongs to workers. In `direct` work the brain
 simply does the work.
 
-Read applicable instructions, entry points, and the dirty tree before planning.
+Before planning, find the repository's own rules and treat them as binding for
+you and every child: `CLAUDE.md` (root, `.claude/`, and subdirectories),
+`AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`, and lint or test configuration
+that encodes conventions. Claude Code loads `CLAUDE.md` automatically but not
+`AGENTS.md`; read it yourself and list every applicable file in the packet's
+PROJECT_RULES line so children read them too. Where a project rule conflicts with
+this kit, the project rule wins. Read entry points and the dirty tree next.
 Define the requested result, concrete acceptance examples, ownership, dependencies,
 and the real checks with cwd. Find the actual package checks, including harnesses
 outside the default glob. Preserve the user's branch and excluded directories.
@@ -64,8 +70,9 @@ typecheck do not prove the requested behavior. Baseline failures stay separate.
 ## 4. Brief workers with complete owned blocks
 
 Use the [work packet](references/dispatch.md#self-contained-work-packet) and the
-actual [tool surface](references/tools.md). Every Agent call names the model and
-effort explicitly; do not rely on inheritance. Each block states REQUEST_KIND,
+actual [tool surface](references/tools.md). Every Agent call names the model
+explicitly; do not rely on inheritance. Effort comes from role frontmatter or the
+session, so state the intended effort in the packet rather than on the call. Each block states REQUEST_KIND,
 USER_OUTCOME, ACCEPTANCE_EXAMPLE, NOT_DONE_IF, WRITE_SET, DO_NOT_TOUCH, CHECKS.
 
 Assign substantial independent blocks with disjoint WRITE_SETs, not a task per
@@ -78,12 +85,30 @@ A worker's fresh context is the point: give it exact sources, not your history.
 Save the brief and decisions to files the worker can read; context does not
 survive compaction.
 
+Lock the scope in the packet. SCOPE lists the reported scenarios and the
+acceptance examples; OUT_OF_SCOPE names what the block must not do even if it
+looks related. Make design decisions yourself before briefing, or ask the user;
+never hand a worker "decide and document" inside a fix packet. Any change that
+rejects previously accepted input, alters accepted behavior without a failing
+test, or tightens a parser is a behavior change: it needs the user's decision, an
+explicit line in the report, and a CHECK against the currently accepted inputs.
+
 ## 5. Reuse the same agents for fix rounds
 
 Do not spawn a new cold agent for every correction. Bundle review findings into
 one message and continue the same worker with SendMessage; it already holds the
 files and the investigation, so a round costs only the delta. Continue the same
 reviewer the same way to re-check only the correction delta.
+
+A fix round carries only in-scope findings: defects that break SCOPE, the
+acceptance examples, or a project rule. A finding about a scenario the user did
+not report is a candidate follow-up, not a correction. Do not route it into the
+same worker; list it for the user in the final report, or, when the user has
+delegated execution, note it and continue only if it blocks the reported outcome.
+A review round that returns only out-of-scope findings ends the loop with a clean
+verdict on the scope. A fix round never widens WRITE_SET or changes accepted
+behavior; if it would, stop and get the user's decision. In build work, one
+review round is the norm; a second needs a stated in-scope reason.
 
 Spawn a fresh agent only when independence matters (the reviewer is never the
 author; stage review is a separate agent), a different model tier is needed, or
@@ -111,7 +136,8 @@ substantial block, MODE=block. Stage review: a separate reviewer before closing 
 major stage, MODE=stage. Do not call each edit a stage. Freeze the reviewed scope
 and identify its revision plus dirty diff.
 
-Block review checks bugs, regressions, conventions, docs, and consumer integration.
+Block review checks bugs, regressions, conventions, docs, and consumer integration
+within SCOPE, and tags anything else as a candidate follow-up.
 Stage review checks the original outcome, cross-boundary behavior, removed old
 paths, compatibility, and the required package gates. Honor project-specific
 acceptance requirements; fold them into stage review when allowed rather than
@@ -126,8 +152,11 @@ that is impossible, say so. Failed, blocked, and not-run are not PASS.
 ## 8. Report honestly
 
 Distinguish submitted -> block reviewed -> stage accepted -> merge ready. Report
-achieved behavior, verification, review findings, remaining scope, and the actual
-routing used when it deviated from the plan. Progress is accepted outcomes, not tool
+achieved behavior, verification, review findings, candidate follow-ups the review
+surfaced but the block did not implement, behavior changes if any, and the actual
+routing used when it deviated from the plan. Changelog and release notes describe
+user-observable behavior only, one line per change, never the rounds, reviewers,
+or regressions fixed along the way. Progress is accepted outcomes, not tool
 calls or files touched. Do not finish with unhandled running children. Commit,
 push, merge, deployment, and messages to third parties need the user's
 authorization; this skill grants none. Avoid duplicated logs and report files.

@@ -28,13 +28,21 @@ ownership on `fable` or `opus xhigh` with a stated reason. Adapt to the models t
 account can use and to the user's effort and budget limits; report material
 deviations honestly.
 
+The repository's own rules come first. Read `CLAUDE.md`, `AGENTS.md`,
+`.claude/rules/`, and `CONTRIBUTING.md` in every repository you work in (Claude
+Code does not load `AGENTS.md` by itself), pass them to every child as
+PROJECT_RULES, and let them override this kit where they conflict.
+
 Rules that apply in every profile: the brain does not write product code in build
 or pipeline work; every Agent call sets `model` explicitly; workers get a complete
 packet with an explicit WRITE_SET, DO_NOT_TOUCH, and CHECKS; fix rounds continue
 the same worker and the same reviewer with SendMessage instead of spawning cold
 agents; a fresh agent is for independence, a different tier, or a polluted
 context; the reviewer is never the author; review happens on finished boundaries,
-not after every edit; plans, briefs, and decisions live in files or git, not only
+not after every edit; the packet locks SCOPE and OUT_OF_SCOPE, review findings
+outside the reported scenarios are follow-ups for the user rather than extra fix
+rounds, and rejecting previously accepted input is a behavior change that needs
+the user's decision; plans, briefs, and decisions live in files or git, not only
 in context; nothing is done until it is proven end to end.
 
 Only the user-facing session asks questions. Delegated roles inherit PROFILE and

@@ -27,8 +27,11 @@ finished boundaries only.
 Model aliases are the ones Claude Code accepts in the `model` frontmatter field and
 the Agent tool: `haiku`, `sonnet`, `opus`, `fable`, `inherit`, or a full model id.
 The role files use `model: inherit` on purpose so that the explicit model on each
-Agent call is what runs. Effort values are `low`, `medium`, `high`, `xhigh`, `max`;
-a session effort cap set by the user is binding.
+Agent call is what runs. Effort values are `low`, `medium`, `high`, `xhigh`, `max`.
+The Agent tool has no per-call effort field: effort comes from the role's
+frontmatter (worker `high`, probe `medium`, reviewer `high` as installed) or the
+session setting, and a user's effort cap is binding. The efforts in the table are
+therefore the installed defaults, not something to pass on the call.
 
 ## Tier guidance
 
@@ -91,6 +94,12 @@ evidence. State the question and the expected benefit first. No automatic `max`
 based on elapsed time, task size, or a single failure. Stage-review effort rises
 only when the acceptance problem itself warrants it.
 
+Scope guard: a fix round carries in-scope findings only. A finding outside SCOPE
+is a candidate follow-up for the user. A round that would widen WRITE_SET, reject
+previously accepted input, or change accepted behavior stops for the user's
+decision. Decide open design questions before briefing; a packet never says
+"decide and document" for a behavior change.
+
 Worker ladder: fix rounds 1-3 continue the same worker via SendMessage. From round
 4, or when the worker loops, spawn a fresh worker one tier up with the bundled
 findings and the same WRITE_SET. Record the escalation and its reason in the task
@@ -117,6 +126,9 @@ USER_OUTCOME: result requested by the user
 GOAL: complete result owned by this block
 ACCEPTANCE_EXAMPLE: concrete before/after scenario
 NOT_DONE_IF: intermediate results that do not satisfy GOAL
+SCOPE: reported scenarios and acceptance examples this block covers
+OUT_OF_SCOPE: related things this block must not do; candidate follow-ups go to the report
+PROJECT_RULES: repository instruction files to read first (CLAUDE.md, AGENTS.md, rules, CONTRIBUTING)
 INPUTS: exact sources, contracts, revision and relevant dirty diff
 WRITE_SET: owned files/modules, or none for read-only work
 DO_NOT_TOUCH: exclusions and others' ownership

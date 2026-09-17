@@ -10,25 +10,84 @@
   },
   "profiles": {
     "standard": {
-      "orchestrator": { "model": "opus", "effort": "medium", "role": "brain: plan, brief, integrate, accept; writes code only in direct-class work" },
-      "probe": { "model": "haiku", "effort": "medium", "escalateTo": { "model": "sonnet", "effort": "medium" } },
-      "worker": { "model": "sonnet", "effort": "high" },
-      "blockReviewer": { "model": "opus", "effort": "high" },
-      "stageReviewer": { "model": "opus", "effort": "high" },
-      "design": { "model": "opus", "effort": "high", "scope": "targeted-assistance" }
+      "orchestrator": {
+        "model": "opus",
+        "effort": "medium",
+        "role": "brain: plan, brief, integrate, accept; writes code only in direct-class work"
+      },
+      "probe": {
+        "model": "haiku",
+        "effort": "medium",
+        "escalateTo": {
+          "model": "sonnet",
+          "effort": "medium"
+        }
+      },
+      "worker": {
+        "model": "sonnet",
+        "effort": "high"
+      },
+      "blockReviewer": {
+        "model": "opus",
+        "effort": "high"
+      },
+      "stageReviewer": {
+        "model": "opus",
+        "effort": "high"
+      },
+      "design": {
+        "model": "opus",
+        "effort": "high",
+        "scope": "targeted-assistance"
+      }
     },
     "enhanced": {
-      "orchestrator": { "model": "opus", "effort": "high", "role": "brain with open design ownership" },
-      "probe": { "model": "sonnet", "effort": "medium" },
-      "worker": { "model": "sonnet", "effort": "high", "escalateTo": { "model": "opus", "effort": "high" } },
-      "blockReviewer": { "model": "opus", "effort": "high" },
-      "stageReviewer": { "model": "fable", "effort": "high", "fallback": { "model": "opus", "effort": "xhigh" } },
-      "design": { "model": "fable", "effort": "high", "scope": "bounded-open-design", "fallback": { "model": "opus", "effort": "xhigh" } }
+      "orchestrator": {
+        "model": "opus",
+        "effort": "high",
+        "role": "brain with open design ownership"
+      },
+      "probe": {
+        "model": "sonnet",
+        "effort": "medium"
+      },
+      "worker": {
+        "model": "sonnet",
+        "effort": "high",
+        "escalateTo": {
+          "model": "opus",
+          "effort": "high"
+        }
+      },
+      "blockReviewer": {
+        "model": "opus",
+        "effort": "high"
+      },
+      "stageReviewer": {
+        "model": "fable",
+        "effort": "high",
+        "fallback": {
+          "model": "opus",
+          "effort": "xhigh"
+        }
+      },
+      "design": {
+        "model": "fable",
+        "effort": "high",
+        "scope": "bounded-open-design",
+        "fallback": {
+          "model": "opus",
+          "effort": "xhigh"
+        }
+      }
     }
   },
   "escalation": {
     "model": "fable",
-    "efforts": ["high", "xhigh"],
+    "efforts": [
+      "high",
+      "xhigh"
+    ],
     "requires": "A stated unresolved reasoning problem (architecture, money path, security boundary, repeated failed attempts) and the expected benefit. Respect user effort caps and budget. Fall back to opus xhigh when fable is unavailable.",
     "workerLadder": "Fix rounds 1-3 continue the same worker; from round 4, or when the worker loops without new evidence, spawn a fresh worker one tier up with the bundled findings."
   },
@@ -38,7 +97,8 @@
     "probeMaxTurns": 20,
     "reviewerMaxTurns": 30,
     "fixRoundsBeforeEscalation": 3,
-    "note": "Defaults for assignments and role frontmatter. User limits and project rules override them."
+    "note": "Defaults for assignments and role frontmatter. User limits and project rules override them. A second review round in build work needs a stated in-scope reason.",
+    "reviewRoundsPerBuildBlock": 1
   },
   "selectionRules": {
     "default": "standard",
@@ -54,5 +114,12 @@
     "freshWhen": "Independence is required (adversarial or stage review), a different model tier is needed, or the agent's context is polluted or exhausted.",
     "stateInFiles": "Plans, briefs, decisions, and summaries live in files or git, not only in context; context does not survive compaction."
   },
-  "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding."
+  "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
+  "scopeGuard": {
+    "packet": "SCOPE and OUT_OF_SCOPE are required packet fields.",
+    "findings": "Reviewer tags findings in-scope | follow-up | behavior-change; only in-scope findings enter a fix round.",
+    "behaviorChange": "Rejecting previously accepted input, altering accepted behavior without a failing test, or tightening a parser needs the user's decision and a check against currently accepted inputs.",
+    "designDecisions": "The brain decides or asks before briefing; a packet never delegates 'decide and document' for a behavior change.",
+    "changelog": "User-observable behavior only, one line per change, no process narration."
+  }
 }

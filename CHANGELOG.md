@@ -11,6 +11,12 @@
   code, explicit `model` per Agent call, write sets and turn budgets, same-agent fix
   rounds via SendMessage, review on finished boundaries, state in files, end-to-end
   proof. See `docs/research.md`.
+- Add repository-rule reading (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`,
+  `CONTRIBUTING.md`) to every Claude role and a `PROJECT_RULES` packet field;
+  add scope lock (`SCOPE`, `OUT_OF_SCOPE`), reviewer finding tags
+  (in-scope / follow-up / behavior-change), and changelog content rules after a
+  behavioral check showed a Sonnet brain expanding a two-bug fix into three review
+  rounds. See "Behavioral check" in `docs/claude-code.md`.
 - Make the installer target-aware: payload moved to `payload/codex` and
   `payload/claude`; one manifest, state directory, and marker pair per target so
   both kits can share a machine. `--home` is accepted as a generic alias.

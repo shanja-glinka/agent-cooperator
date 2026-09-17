@@ -112,6 +112,17 @@ it, the fallback is `opus` at `xhigh`.
   worker/probe/reviewer. User limits override these.
 - Nothing is done until it is proven end to end. Green tests are necessary, not
   sufficient. Failed, blocked, and not-run are not PASS.
+- The repository's own rules come first. The brain reads `CLAUDE.md`, `AGENTS.md`,
+  `.claude/rules/`, and `CONTRIBUTING.md` (Claude Code loads `CLAUDE.md` by
+  itself but not `AGENTS.md`), lists them as `PROJECT_RULES` in every packet, and
+  every role reads them before touching code. Where they conflict with the kit,
+  the project wins.
+- Scope is locked in the packet (`SCOPE`, `OUT_OF_SCOPE`). The reviewer tags each
+  finding `in-scope`, `follow-up`, or `behavior-change`; only in-scope findings
+  enter a fix round, follow-ups go to the user in the report, and rejecting
+  previously accepted input needs the user's decision. The brain decides open
+  design questions before briefing instead of writing "decide and document" into
+  a fix packet. Changelog lines describe user-observable behavior only.
 
 ### Roles
 
@@ -122,6 +133,38 @@ it, the fallback is `opus` at `xhigh`.
 | `workforce-reviewer` | inherit | all except Agent/Edit/Write/NotebookEdit | 30 | `workforce-review` |
 
 Roles do not spawn children. Only the user-facing session asks questions.
+
+## Behavioral check on 2026-09-17
+
+The instructions were exercised, not only installed. A fixture repository with an
+`AGENTS.md` (CommonJS only, JSDoc on exports, regression test per fix, frozen
+`src/legacy/`, integer cents, run test and lint before done, no commits, changelog
+line per fix) contained two planted bugs. A `sonnet` session was given the kit's
+files, the bug report, and "work autonomously", and asked to report every Agent
+call, continuation, and check.
+
+Run 1, before the scope rules existed: `AGENTS.md` was found unprompted and all
+eight rules were honored; classification `build` / Standard / automatic; worker
+`sonnet` and reviewer `opus` with explicit models; fix rounds reused the same two
+agents through SendMessage. But the reviewer's findings about unreported inputs
+were routed into two extra fix rounds, `qty` was silently narrowed to integers, a
+parser change regressed `.50` for one round, and the changelog grew to ten lines.
+
+| | Run 1 | Run 2 |
+| --- | ---: | ---: |
+| Source and test lines changed | ~230 | ~80 |
+| Changelog lines | 10 | 2 |
+| Review rounds | 3 | 1 |
+| SendMessage continuations | 6 | 0 |
+| Child tokens (worker + reviewer) | ~462k | ~114k |
+| Previously valid inputs rejected | fractional `qty`, `1e2` | none |
+
+The post-mortem answers from that session produced the scope-lock, follow-up
+tagging, behavior-change, design-decision, and changelog rules above. Run 2 on a
+reset fixture with the updated instructions produced the table's second column
+and listed the unreported inputs as candidate follow-ups for the user instead of
+implementing them. One run each; treat the numbers as an illustration of the
+failure mode and its fix, not as a benchmark.
 
 ## Verify
 
