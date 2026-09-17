@@ -124,7 +124,9 @@ precedence; see [installation details](docs/installation.md).
 `workforce-probe`, `workforce-reviewer`; the `/workforce-orchestrate` skill with its
 dispatch and tool references; worker, probe, review, and smoke skills; a routing
 policy; and a managed block in the user `CLAUDE.md`. Both kits can live in one
-machine; each owns only its own files and markers.
+machine; each owns only its own files and markers. The kit is opt-in: ordinary
+sessions spawn nothing; it runs only on `/workforce-orchestrate` or an explicit
+request for Workforce, subagents, or multi-agent work.
 
 The Claude workflow adds what the [research](docs/research.md) found in live
 configurations: classify work as `direct` / `build` / `pipeline` before spawning

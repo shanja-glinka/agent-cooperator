@@ -11,6 +11,9 @@
   code, explicit `model` per Agent call, write sets and turn budgets, same-agent fix
   rounds via SendMessage, review on finished boundaries, state in files, end-to-end
   proof. See `docs/research.md`.
+- Make the Claude kit opt-in: the managed block and the orchestration skill run
+  only on `/workforce-orchestrate` or an explicit request; ordinary sessions spawn
+  nothing. Normalize CRLF payload checkouts (Windows CI) and pin LF in git.
 - Add repository-rule reading (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`,
   `CONTRIBUTING.md`) to every Claude role and a `PROJECT_RULES` packet field;
   add scope lock (`SCOPE`, `OUT_OF_SCOPE`), reviewer finding tags

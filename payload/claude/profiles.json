@@ -121,5 +121,14 @@
     "behaviorChange": "Rejecting previously accepted input, altering accepted behavior without a failing test, or tightening a parser needs the user's decision and a check against currently accepted inputs.",
     "designDecisions": "The brain decides or asks before briefing; a packet never delegates 'decide and document' for a behavior change.",
     "changelog": "User-observable behavior only, one line per change, no process narration."
+  },
+  "activation": {
+    "mode": "opt-in",
+    "triggers": [
+      "/workforce-orchestrate",
+      "user asks for workforce, subagents, or multi-agent work",
+      "project instruction file requires it"
+    ],
+    "otherwise": "Normal single session; no agents spawned; the global block adds no other behavior."
   }
 }

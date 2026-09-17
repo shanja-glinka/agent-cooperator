@@ -47,13 +47,20 @@ take precedence over the user-level files, as in any Claude Code setup.
 
 ## Use
 
-Start any implementation task normally, or explicitly:
+The kit is opt-in. Ordinary sessions are unaffected: the managed block in
+`CLAUDE.md` only tells Claude that the kit exists and when to use it, and the
+orchestration skill refuses to run for tasks that did not ask for it. Nothing is
+spawned unless you invoke `/workforce-orchestrate`, ask for Workforce, subagents,
+or multi-agent work, or a project's own instruction file requires it. The only
+per-session cost is the short block and the skill descriptions.
+
+Start a task with the kit explicitly:
 
 ```text
 /workforce-orchestrate Migrate the resolver to the generated DTO and switch its consumers.
-Use Enhanced. Resolve the ambiguous contract, then complete the migration.
-Fix the described validation error.            (direct or build, no question)
-Analyze these options only. Do not edit files. (analysis stays analysis)
+/workforce-orchestrate Use Enhanced. Resolve the ambiguous contract, then complete the migration.
+Use workforce: fix the described validation error.   (build, no question)
+Fix the described validation error.                  (no kit: normal session)
 ```
 
 The user-facing session is the brain. It classifies the work, resolves the profile,

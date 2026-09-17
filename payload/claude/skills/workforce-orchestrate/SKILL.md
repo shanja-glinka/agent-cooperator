@@ -1,8 +1,11 @@
 ---
 name: workforce-orchestrate
-description: "Brain/worker orchestration for implementation, refactoring, and automation in Claude Code: classify the work first, keep the brain out of the code, give workers complete owned blocks with explicit model and write set, reuse the same worker and reviewer for fix rounds, review only on finished boundaries. User-facing session only."
+description: "Opt-in brain/worker orchestration. Use ONLY when the user invokes /workforce-orchestrate or explicitly asks for Workforce, subagents, or multi-agent work; never for ordinary tasks. Classifies work first, keeps the brain out of the code, briefs workers with explicit model and write set, reuses the same worker and reviewer for fix rounds, reviews only finished blocks."
 argument-hint: "[task description or plan path]"
 ---
+
+This skill is optional. If the user did not ask for Workforce or multi-agent work
+and no project rule requires it, do not use it: work as a normal single session.
 
 # Workforce: deliver the requested result
 
