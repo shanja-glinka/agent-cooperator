@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.1.0",
+  "policyVersion": "1.2.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -73,5 +73,12 @@
     "askOnly": "Long-running multi-stage work with substantial unresolved solution choices and material approach/resource impact, with no applicable choice or delegated selection.",
     "runtimeMismatch": "Adapt to available settings even for a user-selected preset without a new approval gate. Report material actual routing honestly; separately explicit strict model/effort/budget requirements remain binding."
   },
-  "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding."
+  "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
+  "scopeGuard": {
+    "packet": "SCOPE, OUT_OF_SCOPE, and PROJECT_RULES are required packet fields.",
+    "findings": "Reviewer tags findings in-scope | follow-up | behavior-change; only in-scope findings enter a correction round.",
+    "behaviorChange": "Rejecting previously accepted input, altering accepted behavior without a failing test, or tightening a parser needs the user's decision and a check against currently accepted inputs.",
+    "designDecisions": "The orchestrator decides or asks before briefing; a packet never delegates 'decide and document' for a behavior change.",
+    "changelog": "User-observable behavior only, one line per change, no process narration."
+  }
 }

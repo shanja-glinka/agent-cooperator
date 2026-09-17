@@ -36,6 +36,13 @@ A selected profile also permits adaptation to available runtime settings without
 a new approval gate; disclose material routing choices honestly. Explicit strict model,
 effort, and budget requirements still apply; never claim a model changed through text.
 
+Read the repository's `AGENTS.md`, `CLAUDE.md`, and `CONTRIBUTING.md` in every
+repository, pass them to every child as PROJECT_RULES, and let them override this
+kit. Lock SCOPE and OUT_OF_SCOPE in each packet; review findings outside the
+reported scope are follow-ups for the user, not extra correction rounds, and
+rejecting previously accepted input is a behavior change that needs the user's
+decision.
+
 Delegate complete results with explicit ownership; workers self-review, an
 independent reviewer checks a completed substantial block, and an independent stage reviewer accepts a
 major stage (Astra high is the recommended starting point). Do not attach permanent auditors, repeat reviews after every edit,

@@ -41,13 +41,25 @@ inline without inventing stages or spawning workers.
 
 ## Preserve the deliverable
 
-Read applicable instructions, relevant entry points, and existing dirty changes.
+Before planning, find the repository's own rules and treat them as binding for
+you and every child: `AGENTS.md` (root and subdirectories), `CLAUDE.md`,
+`CONTRIBUTING.md`, and lint or test configuration that encodes conventions. List
+every applicable file in the packet's PROJECT_RULES line so children read them
+too; where a project rule conflicts with this kit, the project rule wins.
+Read relevant entry points and existing dirty changes next.
 Define the requested result, concrete acceptance examples, ownership, dependencies,
 and necessary checks with cwd. Preserve the user's branch and excluded directories.
 Find actual package checks, including relevant harnesses outside the default glob.
 
 Each block states REQUEST_KIND (analysis or implementation), USER_OUTCOME,
-ACCEPTANCE_EXAMPLE, and NOT_DONE_IF. These belong in the assignment or existing plan,
+ACCEPTANCE_EXAMPLE, NOT_DONE_IF, SCOPE, and OUT_OF_SCOPE. SCOPE lists the reported
+scenarios and acceptance examples; OUT_OF_SCOPE names what the block must not do
+even if it looks related. Make design decisions yourself before briefing, or ask
+the user; never hand a worker "decide and document" inside a fix packet. A change
+that rejects previously accepted input, alters accepted behavior without a
+failing test, or tightens a parser is a behavior change: it needs the user's
+decision, an explicit line in the report, and a check against the currently
+accepted inputs. These belong in the assignment or existing plan,
 not mandatory new files. A worker cannot replace implementation with an inventory,
 or treat an intermediate prerequisite as completion. If its scope cannot reach the
 outcome, fix ownership/dependencies rather than silently shrinking that outcome.
@@ -73,7 +85,13 @@ ownership. In Enhanced, Astra may own a bounded unresolved design/algorithm bloc
 Once that contract is stable, pass ordinary implementation to GPT-5.5.
 
 Reuse workers for related corrections. Do not repeat their investigation; inspect
-exact evidence needed for a decision or verification. Workers self-review conventions,
+exact evidence needed for a decision or verification. A correction round carries
+only in-scope findings: defects that break SCOPE, the acceptance examples, or a
+project rule. A finding about a scenario the user did not report is a candidate
+follow-up for the user's report, not a correction; a round never widens the
+WRITE_SET or changes accepted behavior without the user's decision. A review that
+returns only out-of-scope findings ends the loop with a clean verdict on the
+scope; for a bounded block one review round is the norm. Workers self-review conventions,
 documentation, compatibility, and completeness. No permanent paired auditors and
 no independent review after each small edit.
 
@@ -117,7 +135,10 @@ Do not blame the environment without evidence. Failed, blocked, and not-run are 
 
 Distinguish submitted -> block reviewed -> stage accepted -> merge ready. Every major
 stage criterion must be met before acceptance. Report achieved behavior, verification,
-review findings, and remaining scope. Progress is accepted outcomes, not tool calls or
+review findings, candidate follow-ups the review surfaced but the block did not
+implement, behavior changes if any, and remaining scope. Changelog and release
+notes describe user-observable behavior only, one line per change, never the
+rounds or regressions fixed along the way. Progress is accepted outcomes, not tool calls or
 files touched. Label estimates. Do not finish with unhandled running children.
 Commit, push, merge, deployment, and messages to third parties require authorization
 from the user; the skill does not grant it. Avoid duplicated logs and report files.

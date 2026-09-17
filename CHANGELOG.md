@@ -11,6 +11,10 @@
   code, explicit `model` per Agent call, write sets and turn budgets, same-agent fix
   rounds via SendMessage, review on finished boundaries, state in files, end-to-end
   proof. See `docs/research.md`.
+- Port the shared workflow rules to the Codex edition: repository rules as
+  PROJECT_RULES, SCOPE/OUT_OF_SCOPE packet fields, in-scope/follow-up/
+  behavior-change finding tags, decision-before-brief, changelog content rule
+  (Codex policy 1.2.0). Rewrite both READMEs around the two editions.
 - Make the Claude kit opt-in: the managed block and the orchestration skill run
   only on `/workforce-orchestrate` or an explicit request; ordinary sessions spawn
   nothing. Normalize CRLF payload checkouts (Windows CI) and pin LF in git.

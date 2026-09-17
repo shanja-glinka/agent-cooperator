@@ -93,6 +93,12 @@ a new profile choice. Preserve the user's approach preference and state material
 changes in approach or expected resource use; stay within explicit user limits.
 Stage-review effort increases only when the acceptance problem itself warrants it.
 
+Scope guard: a correction round carries in-scope findings only. A finding outside
+SCOPE is a candidate follow-up for the user. A round that would widen WRITE_SET,
+reject previously accepted input, or change accepted behavior stops for the
+user's decision. Decide open design questions before briefing; a packet never
+says "decide and document" for a behavior change.
+
 Compare available total usage, attempts, rework, and accepted outcomes. If telemetry
 is missing, report it as unavailable. Do not promise subscription savings or treat
 benchmark results as a guaranteed price reduction for every coding task.
@@ -109,6 +115,9 @@ USER_OUTCOME: result requested by the user
 GOAL: complete result owned by this block
 ACCEPTANCE_EXAMPLE: concrete before/after scenario
 NOT_DONE_IF: intermediate results that do not satisfy GOAL
+SCOPE: reported scenarios and acceptance examples this block covers
+OUT_OF_SCOPE: related things this block must not do; candidate follow-ups go to the report
+PROJECT_RULES: repository instruction files to read first (AGENTS.md, CLAUDE.md, CONTRIBUTING)
 INPUTS: exact sources, contracts, revision and relevant dirty diff
 WRITE_SET: owned files/modules, or none for read-only work
 DO_NOT_TOUCH: exclusions and others' ownership

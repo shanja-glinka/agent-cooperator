@@ -87,6 +87,16 @@ the available settings when material. A user-selected profile also allows adapta
 explicit strict model/effort/budget requirements need the required
 setting or an accepted fallback before dependent work. Do not claim exact routing.
 
+## Scope stays put
+
+Every packet carries SCOPE, OUT_OF_SCOPE, and PROJECT_RULES. The reviewer tags each
+finding in-scope, follow-up, or behavior-change; only in-scope findings return to
+the same worker, follow-ups go to the user in the report, and rejecting previously
+accepted input needs the user's decision. Open design questions are decided before
+the brief, never delegated inside a correction packet. This applies to both
+editions; the Claude edition's behavioral check that motivated it is in
+[claude-code.md](claude-code.md).
+
 ## Complete blocks, proportional verification
 
 Every implementation packet includes the user's original outcome, an acceptance

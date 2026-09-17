@@ -1,73 +1,74 @@
-# Codex Workforce
+# Codex Workforce and Claude Workforce
 
-**Two hybrid profiles. Complete work blocks. Reviews when the work is ready.**
+**Complete work blocks. Reviews when the work is ready. Scope that stays put.**
 
-[Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Contributing](CONTRIBUTING.md)
+[Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
 A small, inspectable set of agents and skills for agentic development, shipped for
-two runtimes from one package:
+two runtimes from one package and one installer:
 
 - **Codex Workforce** combines **GPT-6 Astra** with **GPT-5.5**. Astra orchestrates
   and accepts the result; GPT-5.5 does the bulk of implementation.
 - **Claude Workforce** applies the same roles to **Claude Code**: an `opus` brain,
-  `sonnet` workers, `haiku` probes, `opus` reviewers, and `fable` as a reserve tier.
-  See the [Claude Code edition](docs/claude-code.md).
+  `sonnet` workers, `haiku` probes, `opus` reviewers, `fable` as a reserve tier.
 
-Choose Standard for a sufficiently described solution, or Enhanced when the
-solution itself still needs to be found.
+Both editions share one workflow: the orchestrator reads the repository's own rules
+first, briefs workers with complete owned blocks and a locked scope, reuses the same
+worker and reviewer for correction rounds, reviews only finished blocks, and hands
+findings outside the reported scope to the user as follow-ups instead of new work.
+Choose Standard for a sufficiently described solution, or Enhanced when the solution
+itself still needs to be found.
 
 No API proxy, background service, GSD dependency, or new task management engine.
 This is an instruction pack with a Node.js installer, not a guarantee of model
-behavior or lower cost. Independent community project; not affiliated with OpenAI.
+behavior or lower cost. Independent community project; not affiliated with OpenAI
+or Anthropic.
 
 ## Install
 
-Requires Node.js 22+ and npm, Git for the GitHub package spec, and a Codex runtime
-with custom agents, explicit model/effort overrides, and access to both models.
-The package runs directly from GitHub; an npm registry publication is not required.
+Requires Node.js 22+, npm, and Git. The package runs directly from GitHub; an npm
+registry publication is not required. It ships two binaries.
 
 ```sh
-# Codex
+# Codex (default binary, same name as the package)
 npx --yes github:shanja-glinka/codex-workforce install
+npx --yes github:shanja-glinka/codex-workforce update
+npx --yes github:shanja-glinka/codex-workforce status
+npx --yes github:shanja-glinka/codex-workforce uninstall
 
-# Claude Code (second binary of the same package)
+# Claude Code (second binary, selected with -p)
 npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce update
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
-The current release also installs optional native launch shortcuts:
+`update` replaces the kit's previous files and removes stale owned files; `status`
+reports drift; `uninstall` removes only what the kit owns. For a reproducible
+version, replace the package spec with `github:shanja-glinka/codex-workforce#v1.1.0`
+or a reviewed commit SHA. `npx --yes` accepts npm's download prompt; it does not
+answer the agent's Standard/Enhanced question or grant publishing rights. Start a
+fresh Codex or Claude Code session after installing or updating. Both kits can live
+on one machine; each owns its own files, state directory, and instruction markers.
+
+Options shared by both binaries: `--dry-run`, `--force` (back up and replace edited
+owned files), `--json`. Codex: `--codex-home PATH` (precedence: option, `CODEX_HOME`,
+`~/.codex`) and `--skills-dir PATH` for the `~/.agents/skills` discovery links.
+Claude Code: `--claude-home PATH` (precedence: option, `CLAUDE_CONFIG_DIR`,
+`~/.claude`); skills are discovered inside that directory, so there is no
+`--skills-dir`. The installer never touches `config.toml`, `settings.json`, model
+defaults, or permissions.
+
+## Codex edition
+
+Roles `workforce_probe`, `workforce_worker`, `workforce_reviewer` (model-neutral
+TOML), five skills, two optional native launch layers, and a managed block in the
+effective global `AGENTS.md`:
 
 ```sh
 codex -p workforce-standard
 codex -p workforce-enhanced
 ```
-
-These explicitly choose a profile and set the root model/effort for that launch.
-
-Restart Codex or start a fresh session to load the new global instructions and roles.
-Concrete tasks proceed without a profile question. Autonomous instructions let the
-agent choose; existing choices and standing preferences are reused. The question is
-reserved for long-running, multi-stage work with substantial unresolved design where
-the choice matters and has not been delegated. See [selection rules](docs/profiles.md).
-You can still write **“Use Enhanced”**; workers inherit the resolved choice.
-
-```sh
-# Replace the kit's previous version, removing stale owned files
-npx --yes github:shanja-glinka/codex-workforce update
-
-# Inspect the installed files and discovery links
-npx --yes github:shanja-glinka/codex-workforce status
-
-# Remove this kit, preserving other agents, settings, and instructions
-npx --yes github:shanja-glinka/codex-workforce uninstall
-```
-
-The same `update`, `status`, and `uninstall` commands exist for `claude-workforce`.
-For a reproducible version, replace the package spec with
-`github:shanja-glinka/codex-workforce#v1.1.0`. Use a newer tag when updating a pinned
-installation. `npx --yes` accepts npm's download prompt; it does not answer the
-agent's Standard/Enhanced question or grant publishing rights.
-
-## Choose a profile
 
 | Responsibility | Standard | Enhanced |
 | --- | --- | --- |
@@ -78,61 +79,32 @@ agent's Standard/Enhanced question or grant publishing rights.
 | Completed block review | GPT-5.5 xhigh | GPT-5.5 xhigh |
 | Major stage acceptance | Astra high | Astra high |
 
-The presets recommend both families. They are optional starting points; custom
-setups and adaptations are allowed even after choosing a profile. Only separately
-explicit model, effort, and budget constraints make exact settings mandatory.
-Enhanced does not automatically move all work to Astra.
-A fully specified difficult algorithm can stay with GPT-5.5. Astra xhigh/max is a
-reasoned escalation for uncertainty, not an automatic choice for every long task.
+Concrete tasks proceed without a profile question. Autonomous instructions let the
+agent choose; existing choices and standing preferences are reused. The question is
+reserved for long-running, multi-stage work with substantial unresolved design where
+the choice matters and has not been delegated. You can still write **"Use
+Enhanced"**; workers inherit the resolved choice. See [selection rules](docs/profiles.md).
 
-The selected profile is a routing policy. **Instructions cannot change the already
-running orchestrator's model.** Set Astra and the corresponding effort in your
-client; the agent must disclose a mismatch instead of pretending it changed settings.
-For any approach, including a user-selected profile, adapt to available settings and
-continue; explicit strict model, effort, and budget requirements remain binding.
-The installer does not overwrite your `config.toml`, model defaults, or permissions.
-
-## How work flows
-
-1. Choose a profile once for the task.
-2. Agree the actual outcome and concrete acceptance example. “Analyze” stays analysis.
-3. Assign complete blocks with clear ownership and exact sources.
-4. Workers implement, connect consumers, and self-review their whole result.
-5. Independently review each completed substantial block; return findings as one packet.
-6. Astra checks the original outcome before closing a major stage.
-
-No permanent auditor per worker. No mandatory fan-out for tiny edits. No new reviewer
-after every correction. Repeat affected checks and review the correction's impact.
-An inventory, a generated shell, or a green typecheck is not a completed migration.
-
-## What gets installed
-
-- Three model-neutral roles: `workforce_probe`, `workforce_worker`, `workforce_reviewer`.
-- Five skills: orchestration, worker, probe, review, and optional live smoke.
-- A marked instruction block in the effective global `AGENTS` file.
-- Owned-file metadata for update, status, and removal.
-
-Files live under `CODEX_HOME` (default `~/.codex`). Skills are linked into
-`~/.agents/skills` for native discovery. Paths can be overridden for isolated profiles
-and tests. Existing project-local agents/skills and global overrides may take
-precedence; see [installation details](docs/installation.md).
+The presets are optional starting points; custom setups are allowed even after
+choosing a profile. Only separately explicit model, effort, and budget constraints
+make exact settings mandatory. **Instructions cannot change the already running
+orchestrator's model.** Set Astra and the effort in your client; the agent must
+disclose a mismatch instead of pretending it changed settings.
 
 ## Claude Code edition
 
-`claude-workforce` installs the Claude Code counterpart into `~/.claude` (or
-`CLAUDE_CONFIG_DIR` / `--claude-home`): subagents `workforce-worker`,
-`workforce-probe`, `workforce-reviewer`; the `/workforce-orchestrate` skill with its
-dispatch and tool references; worker, probe, review, and smoke skills; a routing
-policy; and a managed block in the user `CLAUDE.md`. Both kits can live in one
-machine; each owns only its own files and markers. The kit is opt-in: ordinary
-sessions spawn nothing; it runs only on `/workforce-orchestrate` or an explicit
-request for Workforce, subagents, or multi-agent work.
+Subagents `workforce-worker`, `workforce-probe`, `workforce-reviewer` (Markdown
+roles with `model: inherit`, `effort`, `maxTurns`, no child spawning), the
+`/workforce-orchestrate` skill with dispatch and tool references, worker, probe,
+review, and smoke skills, a routing policy, and a managed block in the user
+`CLAUDE.md`. See the [Claude Code edition](docs/claude-code.md).
 
-The Claude workflow adds what the [research](docs/research.md) found in live
-configurations: classify work as `direct` / `build` / `pipeline` before spawning
-anything, keep the brain out of product code, set `model` on every Agent call, give
-workers an explicit write set and turn budget, continue the same worker and
-reviewer for fix rounds with SendMessage, and review only on finished boundaries.
+The kit is opt-in. Ordinary sessions spawn nothing; it runs only on
+`/workforce-orchestrate`, an explicit request for Workforce, subagents, or
+multi-agent work, or a project instruction file that requires it. Inside the kit,
+work is classified first: `direct` is done inline with no agents, `build` gets one
+worker and one review of the finished diff, `pipeline` gets a plan, parallel
+workers with disjoint write sets, block reviews, and a stage review.
 
 | Responsibility | Standard | Enhanced |
 | --- | --- | --- |
@@ -143,6 +115,44 @@ reviewer for fix rounds with SendMessage, and review only on finished boundaries
 | Block review | `opus` high | `opus` high |
 | Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) |
 
+Every Agent call sets `model` explicitly; effort comes from role frontmatter or the
+session. Correction rounds continue the same worker and reviewer with SendMessage;
+a fresh agent is for independence, a different tier, or a polluted context.
+
+## How work flows (both editions)
+
+1. Read the repository's own rules (`AGENTS.md`, `CLAUDE.md`, `.claude/rules/`,
+   `CONTRIBUTING.md`) and pass them to every child as PROJECT_RULES; they override
+   the kit.
+2. Resolve the profile once for the task; classify the work before spawning anyone.
+3. Agree the actual outcome and a concrete acceptance example. "Analyze" stays analysis.
+4. Assign complete blocks with clear ownership, exact sources, a locked SCOPE and
+   OUT_OF_SCOPE. Design decisions are made before the brief, not delegated inside it.
+5. Workers implement, connect consumers, self-review their whole result, and list
+   out-of-scope observations as follow-ups instead of implementing them.
+6. Independently review each completed substantial block on its diff. Findings are
+   tagged in-scope, follow-up, or behavior-change; only in-scope findings go back to
+   the same worker, and rejecting previously accepted input needs the user's decision.
+7. A separate reviewer accepts a major stage against the original outcome and the
+   required package gates. Nothing is done until proven end to end.
+
+No permanent auditor per worker. No mandatory fan-out for tiny edits. No new reviewer
+after every correction. An inventory, a generated shell, or a green typecheck is not
+a completed migration. Changelog lines describe user-observable behavior only.
+
+## What gets installed
+
+| | Codex (`CODEX_HOME`, default `~/.codex`) | Claude Code (`~/.claude`) |
+| --- | --- | --- |
+| Roles | `agents/workforce_*.toml` | `agents/workforce-*.md` |
+| Skills | `skills/workforce-*/` linked into `~/.agents/skills` | `skills/workforce-*/` |
+| Launch layers | `workforce-standard.config.toml`, `workforce-enhanced.config.toml` | none |
+| Policy and manifest | `codex-workforce/profiles.json`, `manifest.json` | `claude-workforce/profiles.json`, `manifest.json` |
+| Instructions | marked block in `AGENTS.md` (or active `AGENTS.override.md`) | marked block in `CLAUDE.md` |
+
+Existing project-local agents, skills, and instruction files may take precedence;
+see [installation details](docs/installation.md).
+
 ## Develop
 
 ```sh
@@ -150,11 +160,14 @@ git clone https://github.com/shanja-glinka/codex-workforce.git
 cd codex-workforce
 npm test
 node bin/codex-workforce.js --help
+node bin/claude-workforce.js --help
 ```
 
-Tests use disposable homes. They do not invoke paid models or mutate your actual
-Codex installation. See [contributing](CONTRIBUTING.md) for the distinction between
-installer tests, instruction cases, and live model verification.
+Payloads live in `payload/codex` and `payload/claude`; `lib/targets.js` describes
+each runtime and `lib/installer.js` serves both. Tests use disposable homes and do
+not invoke paid models or mutate your actual installations. The Claude edition was
+also exercised behaviorally on a fixture repository; the runs are documented in
+[docs/claude-code.md](docs/claude-code.md). See [contributing](CONTRIBUTING.md).
 
 ## License
 
