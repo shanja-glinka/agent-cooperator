@@ -3,6 +3,7 @@
 import { runCli } from '../lib/cli.js';
 
 runCli(process.argv.slice(2), {
+  target: 'codex',
   env: process.env,
   stdout: process.stdout,
   stderr: process.stderr,

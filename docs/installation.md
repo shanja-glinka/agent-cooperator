@@ -2,16 +2,23 @@
 
 ## Distribution and commands
 
-Node.js 22+, npm, and Git are required for the GitHub package command:
+Node.js 22+, npm, and Git are required for the GitHub package command. The package
+ships two binaries: `codex-workforce` (the default, same name as the package) and
+`claude-workforce` (selected with `npx -p`):
 
 ```sh
 npx --yes github:shanja-glinka/codex-workforce install
 npx --yes github:shanja-glinka/codex-workforce update
 npx --yes github:shanja-glinka/codex-workforce status
 npx --yes github:shanja-glinka/codex-workforce uninstall
+
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce update
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
-Use `github:shanja-glinka/codex-workforce#v1.0.0` to pin this release, or a reviewed
+Use `github:shanja-glinka/codex-workforce#v1.1.0` to pin this release, or a reviewed
 commit SHA. Updating with a pinned spec installs that pinned version; choose a newer
 tag explicitly. `update` reads the payload in the invoked package. It does not run
 `git pull`, an npm updater, or an arbitrary remote install script inside the CLI.
@@ -21,6 +28,8 @@ not modify Codex. A mutation requires an explicit `install`, `update`, or `unins
 command. A separate npm registry publication is unnecessary for this distribution.
 
 ## Destinations
+
+### Codex
 
 Codex home is selected in this order: `--codex-home PATH`, existing `CODEX_HOME`,
 then `~/.codex`. The command does not rewrite environment variables or shell profiles.
@@ -59,6 +68,39 @@ For multiple Codex homes, the same global skill names cannot simultaneously link
 to different owners. The installer must report this collision rather than replace
 another home's links. Choose the intended installation and discovery arrangement.
 
+### Claude Code
+
+Claude home is selected in this order: `--claude-home PATH` (or `--home`), existing
+`CLAUDE_CONFIG_DIR`, then `~/.claude`. Claude Code discovers agents and skills inside
+that directory, so there is no discovery link and `--skills-dir` is rejected.
+
+```text
+CLAUDE_HOME/
+  agents/workforce-worker.md
+  agents/workforce-probe.md
+  agents/workforce-reviewer.md
+  skills/workforce-orchestrate/...
+  skills/workforce-worker/...
+  skills/workforce-probe/...
+  skills/workforce-review/...
+  skills/workforce-smoke/...
+  claude-workforce/profiles.json
+  claude-workforce/manifest.json
+  CLAUDE.md                         (managed block between claude-workforce markers)
+```
+
+The managed block goes into the user `CLAUDE.md`; there is no override file in
+Claude Code. `settings.json`, the session model, effort caps, permissions, and
+project-level `.claude/` directories are never touched. Both kits may share a home
+directory: each has its own manifest, state directory, and markers, so installing,
+updating, or removing one leaves the other intact.
+
+```sh
+node bin/claude-workforce.js install --claude-home /tmp/workforce-demo/claude
+node bin/claude-workforce.js status --claude-home /tmp/workforce-demo/claude
+node bin/claude-workforce.js uninstall --claude-home /tmp/workforce-demo/claude
+```
+
 ## Preservation and ownership
 
 The installer tracks owned file hashes, skill links, and its exact marked instruction
@@ -84,7 +126,9 @@ complete installed CLI surface. Do not manually edit the ownership manifest.
 
 ## Loading and verification
 
-Start a fresh Codex session after installing or updating. Current Codex automatically
+Start a fresh Codex or Claude Code session after installing or updating. In Claude
+Code, `/agents` lists the three roles and `/workforce-orchestrate` appears in the
+skill menu; `/workforce-smoke` runs the live routing check on explicit request. Current Codex automatically
 discovers named TOML agents; this kit does not add legacy agent registration tables
 or change `[agents]` settings. If your configuration disables subagents, installation
 does not silently enable them. You must resolve that runtime setting yourself.

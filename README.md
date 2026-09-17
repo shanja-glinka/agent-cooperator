@@ -2,12 +2,19 @@
 
 **Two hybrid profiles. Complete work blocks. Reviews when the work is ready.**
 
-[Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Installer contract](docs/installation.md) · [Contributing](CONTRIBUTING.md)
+[Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Contributing](CONTRIBUTING.md)
 
-A small, inspectable set of Codex agents and skills that combines **GPT-6 Astra**
-with **GPT-5.5**. Astra orchestrates and accepts the result; GPT-5.5 does the bulk
-of implementation. Choose Standard for a sufficiently described solution, or
-Enhanced when the solution itself still needs to be found.
+A small, inspectable set of agents and skills for agentic development, shipped for
+two runtimes from one package:
+
+- **Codex Workforce** combines **GPT-6 Astra** with **GPT-5.5**. Astra orchestrates
+  and accepts the result; GPT-5.5 does the bulk of implementation.
+- **Claude Workforce** applies the same roles to **Claude Code**: an `opus` brain,
+  `sonnet` workers, `haiku` probes, `opus` reviewers, and `fable` as a reserve tier.
+  See the [Claude Code edition](docs/claude-code.md).
+
+Choose Standard for a sufficiently described solution, or Enhanced when the
+solution itself still needs to be found.
 
 No API proxy, background service, GSD dependency, or new task management engine.
 This is an instruction pack with a Node.js installer, not a guarantee of model
@@ -20,7 +27,11 @@ with custom agents, explicit model/effort overrides, and access to both models.
 The package runs directly from GitHub; an npm registry publication is not required.
 
 ```sh
+# Codex
 npx --yes github:shanja-glinka/codex-workforce install
+
+# Claude Code (second binary of the same package)
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
 ```
 
 The current release also installs optional native launch shortcuts:
@@ -50,8 +61,9 @@ npx --yes github:shanja-glinka/codex-workforce status
 npx --yes github:shanja-glinka/codex-workforce uninstall
 ```
 
+The same `update`, `status`, and `uninstall` commands exist for `claude-workforce`.
 For a reproducible version, replace the package spec with
-`github:shanja-glinka/codex-workforce#v1.0.0`. Use a newer tag when updating a pinned
+`github:shanja-glinka/codex-workforce#v1.1.0`. Use a newer tag when updating a pinned
 installation. `npx --yes` accepts npm's download prompt; it does not answer the
 agent's Standard/Enhanced question or grant publishing rights.
 
@@ -104,6 +116,30 @@ Files live under `CODEX_HOME` (default `~/.codex`). Skills are linked into
 `~/.agents/skills` for native discovery. Paths can be overridden for isolated profiles
 and tests. Existing project-local agents/skills and global overrides may take
 precedence; see [installation details](docs/installation.md).
+
+## Claude Code edition
+
+`claude-workforce` installs the Claude Code counterpart into `~/.claude` (or
+`CLAUDE_CONFIG_DIR` / `--claude-home`): subagents `workforce-worker`,
+`workforce-probe`, `workforce-reviewer`; the `/workforce-orchestrate` skill with its
+dispatch and tool references; worker, probe, review, and smoke skills; a routing
+policy; and a managed block in the user `CLAUDE.md`. Both kits can live in one
+machine; each owns only its own files and markers.
+
+The Claude workflow adds what the [research](docs/research.md) found in live
+configurations: classify work as `direct` / `build` / `pipeline` before spawning
+anything, keep the brain out of product code, set `model` on every Agent call, give
+workers an explicit write set and turn budget, continue the same worker and
+reviewer for fix rounds with SendMessage, and review only on finished boundaries.
+
+| Responsibility | Standard | Enhanced |
+| --- | --- | --- |
+| Brain (your session) | `opus` medium | `opus` high |
+| Bounded research | `haiku` medium | `sonnet` medium |
+| Implementation | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
+| Unresolved design | targeted `opus` high | bounded `fable` high (fallback `opus` xhigh) |
+| Block review | `opus` high | `opus` high |
+| Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) |
 
 ## Develop
 

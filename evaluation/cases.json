@@ -116,6 +116,54 @@
       "id": "no-named-profile",
       "input": "Worker receives a complete owned assignment and explicit constraints, but no named profile.",
       "expected": "Execute the clear assignment without requesting a profile label from the parent or user."
+    },
+    {
+      "id": "claude-direct-class",
+      "runtime": "claude-code",
+      "input": "Fix a typo in a config comment; kit installed.",
+      "expected": "WORK_CLASS=direct: edit inline with no Agent calls, no reviewer agent, no profile question."
+    },
+    {
+      "id": "claude-build-class",
+      "runtime": "claude-code",
+      "input": "Fix a validation bug with a known cause across three files.",
+      "expected": "WORK_CLASS=build: one workforce-worker with explicit model (sonnet) and WRITE_SET; brain does not write product code; one block review on the finished diff."
+    },
+    {
+      "id": "claude-fix-round-continuity",
+      "runtime": "claude-code",
+      "input": "Block review returned four findings on a worker's diff.",
+      "expected": "Bundle findings into one SendMessage to the same worker; then re-review the delta with the same reviewer. No fresh cold agent per finding."
+    },
+    {
+      "id": "claude-escalation-ladder",
+      "runtime": "claude-code",
+      "input": "The same worker failed three fix rounds without new evidence.",
+      "expected": "Identify the cause; spawn a fresh worker one tier up (opus) with the bundled findings and the same WRITE_SET; record the escalation and reason."
+    },
+    {
+      "id": "claude-explicit-model",
+      "runtime": "claude-code",
+      "input": "Brain spawns a workforce-worker without a model field.",
+      "expected": "Not compliant: every Agent call names model explicitly; role frontmatter uses inherit so the call decides."
+    },
+    {
+      "id": "claude-fable-unavailable",
+      "runtime": "claude-code",
+      "input": "Enhanced stage review requested; account cannot use fable.",
+      "expected": "Report MODEL_UNAVAILABLE, fall back to opus xhigh for the stage reviewer, state the deviation once, continue."
+    },
+    {
+      "id": "claude-session-model-mismatch",
+      "runtime": "claude-code",
+      "input": "User says 'use Enhanced' while the session runs sonnet.",
+      "expected": "Say once that the brain runs on the session model and a prompt cannot change it; continue with Enhanced routing for children; do not open a second session."
+    },
+    {
+      "id": "claude-review-not-default",
+      "runtime": "claude-code",
+      "input": "Two-line change in a helper with an existing test.",
+      "expected": "No reviewer agent; worker (or brain in direct class) runs the test and reports. Deep review is for substantial blocks, refactors, security/money/performance paths."
     }
   ]
 }

@@ -2,12 +2,18 @@
 
 **Два смешанных профиля. Законченные блоки работы. Ревью готового результата.**
 
-[English](README.md) · [Профили](docs/profiles.md) · [Установка](docs/installation.md)
+[English](README.md) · [Профили](docs/profiles.md) · [Версия для Claude Code](docs/claude-code.md) · [Исследование](docs/research.md) · [Установка](docs/installation.md)
 
-Агенты и skills для Codex: **GPT-6 Astra** отвечает за оркестрацию, сложные решения
-и приёмку, **GPT-5.5** выполняет основной объём реализации. В обоих профилях работают
-обе модели. Пакет не требует GSD, отдельного сервера или нового менеджера задач.
-Это независимый проект, не официальный продукт OpenAI.
+Агенты и skills для агентной разработки в двух средах из одного пакета:
+
+- **Codex Workforce**: **GPT-6 Astra** отвечает за оркестрацию, сложные решения и
+  приёмку, **GPT-5.5** выполняет основной объём реализации.
+- **Claude Workforce**: те же роли для **Claude Code**: «мозг» на `opus`, исполнители
+  на `sonnet`, разведка на `haiku`, ревью на `opus`, `fable` как резервный уровень.
+  Подробности в [версии для Claude Code](docs/claude-code.md).
+
+Пакет не требует GSD, отдельного сервера или нового менеджера задач.
+Это независимый проект, не официальный продукт OpenAI или Anthropic.
 
 ## Установка и обновление
 
@@ -15,14 +21,21 @@
 явного выбора model/effort и доступом к обеим моделям.
 
 ```sh
+# Codex
 npx --yes github:shanja-glinka/codex-workforce install
 npx --yes github:shanja-glinka/codex-workforce update
 npx --yes github:shanja-glinka/codex-workforce status
 npx --yes github:shanja-glinka/codex-workforce uninstall
+
+# Claude Code: второй бинарник того же пакета
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce update
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
+npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
 Пакет запускается напрямую из публичного GitHub. Для фиксированной версии используйте
-`github:shanja-glinka/codex-workforce#v1.0.0`. При обновлении фиксированной установки
+`github:shanja-glinka/codex-workforce#v1.1.0`. При обновлении фиксированной установки
 укажите новый тег. После установки откройте новую сессию Codex.
 
 `update` заменяет предыдущие файлы пакета и удаляет устаревшие файлы, которыми он
@@ -94,6 +107,31 @@ effort и бюджет сохраняются. Установщик не пер�
 `~/.agents/skills`, откуда Codex их обнаруживает. Глобальная инструкция добавляется
 отдельным управляемым блоком. Локальные копии в проекте могут иметь приоритет —
 их миграция описана в документации.
+
+## Версия для Claude Code
+
+`claude-workforce` ставит аналог в `~/.claude` (или `CLAUDE_CONFIG_DIR` /
+`--claude-home`): subagents `workforce-worker`, `workforce-probe`,
+`workforce-reviewer`; skill `/workforce-orchestrate` со справочниками по маршрутизации
+и инструментам; skills исполнителя, разведки, ревью и smoke; политику маршрутизации
+и управляемый блок в пользовательском `CLAUDE.md`. Оба набора могут стоять на одной
+машине: каждый владеет только своими файлами и маркерами.
+
+Схема для Claude закрепляет то, что [исследование](docs/research.md) нашло в живых
+конфигурациях: сначала классифицировать работу как `direct` / `build` / `pipeline`
+и не запускать агентов на мелочь; «мозг» не пишет продуктовый код; модель задаётся
+явно в каждом вызове Agent; исполнитель получает явный набор файлов и лимит ходов;
+исправления возвращаются тому же исполнителю и тому же ревьюеру через SendMessage,
+а не новому холодному агенту; ревью только на границе готового блока или этапа.
+
+| Ответственность | Стандартный | Усиленный |
+| --- | --- | --- |
+| Мозг (ваша сессия) | `opus` medium | `opus` high |
+| Ограниченное исследование | `haiku` medium | `sonnet` medium |
+| Реализация | `sonnet` high | `sonnet` high, `opus` для нетривиальных блоков |
+| Неописанное решение | точечно `opus` high | отдельный блок `fable` high (запасной `opus` xhigh) |
+| Ревью блока | `opus` high | `opus` high |
+| Приёмка этапа | `opus` high | `fable` high (запасной `opus` xhigh) |
 
 Пакет не гарантирует идеального следования инструкциям или экономии токенов.
 Стоимость оценивается по принятому результату и доступной телеметрии, с учётом

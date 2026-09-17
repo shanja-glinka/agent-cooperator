@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "runtime": "claude-code",
+  "selection": "contextual",
+  "workClasses": {
+    "direct": "Question, status, analysis-only, config or doc edit, trivial or single-file fix. Answer or edit inline; no subagents, no review agent.",
+    "build": "Bug fix or ordinary feature with a known shape, typically one to five files. Brain plans; one worker per complete block; independent block review on the finished diff.",
+    "pipeline": "Multi-stage, cross-cutting, or design-open work. Brain plans and accepts; parallel workers with disjoint write sets; block review per block; stage review before closing."
+  },
+  "profiles": {
+    "standard": {
+      "orchestrator": { "model": "opus", "effort": "medium", "role": "brain: plan, brief, integrate, accept; writes code only in direct-class work" },
+      "probe": { "model": "haiku", "effort": "medium", "escalateTo": { "model": "sonnet", "effort": "medium" } },
+      "worker": { "model": "sonnet", "effort": "high" },
+      "blockReviewer": { "model": "opus", "effort": "high" },
+      "stageReviewer": { "model": "opus", "effort": "high" },
+      "design": { "model": "opus", "effort": "high", "scope": "targeted-assistance" }
+    },
+    "enhanced": {
+      "orchestrator": { "model": "opus", "effort": "high", "role": "brain with open design ownership" },
+      "probe": { "model": "sonnet", "effort": "medium" },
+      "worker": { "model": "sonnet", "effort": "high", "escalateTo": { "model": "opus", "effort": "high" } },
+      "blockReviewer": { "model": "opus", "effort": "high" },
+      "stageReviewer": { "model": "fable", "effort": "high", "fallback": { "model": "opus", "effort": "xhigh" } },
+      "design": { "model": "fable", "effort": "high", "scope": "bounded-open-design", "fallback": { "model": "opus", "effort": "xhigh" } }
+    }
+  },
+  "escalation": {
+    "model": "fable",
+    "efforts": ["high", "xhigh"],
+    "requires": "A stated unresolved reasoning problem (architecture, money path, security boundary, repeated failed attempts) and the expected benefit. Respect user effort caps and budget. Fall back to opus xhigh when fable is unavailable.",
+    "workerLadder": "Fix rounds 1-3 continue the same worker; from round 4, or when the worker loops without new evidence, spawn a fresh worker one tier up with the bundled findings."
+  },
+  "budgets": {
+    "maxParallelWorkers": 3,
+    "workerMaxTurns": 60,
+    "probeMaxTurns": 20,
+    "reviewerMaxTurns": 30,
+    "fixRoundsBeforeEscalation": 3,
+    "note": "Defaults for assignments and role frontmatter. User limits and project rules override them."
+  },
+  "selectionRules": {
+    "default": "standard",
+    "classifyFirst": "Decide direct | build | pipeline before choosing any profile or spawning any agent. Direct work never spawns agents.",
+    "reuse": "Explicit task choice, active task context, or an applicable standing preference.",
+    "autonomous": "Choose Standard for a clear solution or Enhanced for substantial unresolved design; proceed without asking. Applies to unattended and headless execution.",
+    "askOnly": "Long-running multi-stage work with substantial unresolved solution choices and material approach or resource impact, with no applicable choice or delegated selection.",
+    "runtimeMismatch": "Model and effort are set per Agent call and per role frontmatter; the running session model is set by the user. Report material deviations honestly; explicit strict model, effort, and budget requirements remain binding."
+  },
+  "continuity": {
+    "sameOwnerForFixes": "Bundle findings back to the same worker via SendMessage; do not spawn a fresh worker per correction.",
+    "sameReviewerForRecheck": "Re-review the correction delta with the same reviewer via SendMessage.",
+    "freshWhen": "Independence is required (adversarial or stage review), a different model tier is needed, or the agent's context is polluted or exhausted.",
+    "stateInFiles": "Plans, briefs, decisions, and summaries live in files or git, not only in context; context does not survive compaction."
+  },
+  "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding."
+}

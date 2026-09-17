@@ -1,8 +1,11 @@
 # Profiles, models, and task ownership
 
 The product name and role names are independent of model generations. The current
-release combines GPT-6 Astra and GPT-5.5. Future releases can update model policy
-without changing the install command or renaming your agents.
+release combines GPT-6 Astra and GPT-5.5 for Codex. The Claude Code edition uses the
+same roles with Claude model tiers; see [claude-code.md](claude-code.md) for its
+profile table and [research.md](research.md) for the evidence behind it. Future
+releases can update model policy without changing the install command or renaming
+your agents.
 
 [`payload/profiles.json`](../payload/profiles.json) is the machine-readable routing
 policy. [`dispatch.md`](../payload/skills/workforce-orchestrate/references/dispatch.md)

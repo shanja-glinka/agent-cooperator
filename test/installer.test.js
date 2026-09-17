@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { runCli } from '../lib/cli.js';
-import { MANAGED_BEGIN, MANAGED_END, runCommand } from '../lib/installer.js';
+import { MANAGED_BEGIN, MANAGED_END, TARGETS, managedMarkers, runCommand } from '../lib/installer.js';
 
 test('install is idempotent and uninstall preserves foreign bytes', async () => {
   const fixture = await makeFixture();
@@ -39,10 +39,10 @@ test('update replaces owned files and removes stale owned payload files only', a
   const fixture = await makeFixture();
   await runCommand('install', fixture.options);
 
-  await fs.rm(path.join(fixture.packageRoot, 'payload', 'skills', 'workforce-worker', 'extra.md'));
-  await fs.rm(path.join(fixture.packageRoot, 'payload', 'profiles.json'));
-  await fs.rm(path.join(fixture.packageRoot, 'payload', 'config', 'workforce-enhanced.config.toml'));
-  await fs.writeFile(path.join(fixture.packageRoot, 'payload', 'skills', 'workforce-worker', 'SKILL.md'), 'new {{CODEX_HOME}}\n');
+  await fs.rm(path.join(fixture.packageRoot, 'payload', 'codex', 'skills', 'workforce-worker', 'extra.md'));
+  await fs.rm(path.join(fixture.packageRoot, 'payload', 'codex', 'profiles.json'));
+  await fs.rm(path.join(fixture.packageRoot, 'payload', 'codex', 'config', 'workforce-enhanced.config.toml'));
+  await fs.writeFile(path.join(fixture.packageRoot, 'payload', 'codex', 'skills', 'workforce-worker', 'SKILL.md'), 'new {{CODEX_HOME}}\n');
   await fs.writeFile(path.join(fixture.codexHome, 'skills', 'workforce-worker', 'foreign.md'), 'foreign\n');
 
   const updated = await runCommand('update', fixture.options);
@@ -183,6 +183,7 @@ test('CLI honors --codex-home over CODEX_HOME and isolates --skills-dir with non
     '--codex-home', fixture.codexHome,
     '--skills-dir', fixture.skillsDir,
   ], {
+    target: 'codex',
     packageRoot: fixture.packageRoot,
     env: { ...process.env, CODEX_HOME: envHome },
     stdout: { write: (value) => { stdout += value; } },
@@ -268,30 +269,31 @@ async function makeFixture(codexHomeName = 'Codex Home', packageVersion = '1.0.0
   const packageRoot = path.join(temp, 'package root');
   const codexHome = path.join(temp, codexHomeName);
   const skillsDir = path.join(temp, 'Native Skills');
-  await fs.mkdir(path.join(packageRoot, 'payload', 'agents'), { recursive: true });
-  await fs.mkdir(path.join(packageRoot, 'payload', 'skills', 'workforce-worker', 'nested'), { recursive: true });
-  await fs.mkdir(path.join(packageRoot, 'payload', 'skills', 'workforce-probe'), { recursive: true });
-  await fs.mkdir(path.join(packageRoot, 'payload', 'config'), { recursive: true });
+  await fs.mkdir(path.join(packageRoot, 'payload', 'codex', 'agents'), { recursive: true });
+  await fs.mkdir(path.join(packageRoot, 'payload', 'codex', 'skills', 'workforce-worker', 'nested'), { recursive: true });
+  await fs.mkdir(path.join(packageRoot, 'payload', 'codex', 'skills', 'workforce-probe'), { recursive: true });
+  await fs.mkdir(path.join(packageRoot, 'payload', 'codex', 'config'), { recursive: true });
   await fs.mkdir(codexHome, { recursive: true });
   await fs.mkdir(skillsDir, { recursive: true });
   await writeFixturePackageJson(packageRoot, packageVersion);
-  await fs.writeFile(path.join(packageRoot, 'payload', 'agents', 'workforce_worker.toml'), 'name = "workforce_worker"\nhome = "{{CODEX_HOME}}"\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'skills', 'workforce-worker', 'SKILL.md'), '# skill\n{{CODEX_HOME}}\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'skills', 'workforce-worker', 'extra.md'), 'old\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'skills', 'workforce-worker', 'nested', 'note.md'), 'nested\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'skills', 'workforce-probe', 'SKILL.md'), '# probe\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'global-instructions.md'), 'global instructions for {{CODEX_HOME}}\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'profiles.json'), '{"home":"{{CODEX_HOME}}"}\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'config', 'workforce-standard.config.toml'), 'profile = "standard"\nhome = "{{CODEX_HOME}}"\n');
-  await fs.writeFile(path.join(packageRoot, 'payload', 'config', 'workforce-enhanced.config.toml'), 'profile = "enhanced"\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'agents', 'workforce_worker.toml'), 'name = "workforce_worker"\nhome = "{{CODEX_HOME}}"\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'skills', 'workforce-worker', 'SKILL.md'), '# skill\n{{CODEX_HOME}}\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'skills', 'workforce-worker', 'extra.md'), 'old\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'skills', 'workforce-worker', 'nested', 'note.md'), 'nested\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'skills', 'workforce-probe', 'SKILL.md'), '# probe\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'global-instructions.md'), 'global instructions for {{CODEX_HOME}}\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'profiles.json'), '{"home":"{{CODEX_HOME}}"}\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'config', 'workforce-standard.config.toml'), 'profile = "standard"\nhome = "{{CODEX_HOME}}"\n');
+  await fs.writeFile(path.join(packageRoot, 'payload', 'codex', 'config', 'workforce-enhanced.config.toml'), 'profile = "enhanced"\n');
   return {
     temp,
     packageRoot,
     codexHome,
     skillsDir,
     options: {
+      target: 'codex',
       packageRoot,
-      codexHome,
+      home: codexHome,
       skillsDir,
       env: {},
     },
@@ -316,7 +318,7 @@ test('update installs the real contextual policy into existing consumers and pre
   const configPath = path.join(fixture.codexHome, 'config.toml');
   await fs.writeFile(agentsPath, 'User standing instructions\n');
   await fs.writeFile(configPath, 'model = "user-selected-model"\n');
-  await fs.writeFile(path.join(fixture.packageRoot, 'payload', 'global-instructions.md'),
+  await fs.writeFile(path.join(fixture.packageRoot, 'payload', 'codex', 'global-instructions.md'),
     'Before every task, ask Standard or Enhanced and wait.\n');
   await runCommand('install', fixture.options);
   await fs.appendFile(agentsPath, '\nUser additions after install\n');
@@ -325,7 +327,7 @@ test('update installs the real contextual policy into existing consumers and pre
   const options = { ...fixture.options, packageRoot };
   const updated = await runCommand('update', options);
   assert.equal(updated.exitCode, 0, updated.issues.join('\n'));
-  const sourceGlobal = await fs.readFile(path.join(packageRoot, 'payload', 'global-instructions.md'), 'utf8');
+  const sourceGlobal = await fs.readFile(path.join(packageRoot, 'payload', 'codex', 'global-instructions.md'), 'utf8');
   const actualGlobal = await fs.readFile(agentsPath, 'utf8');
   assert.ok(actualGlobal.includes(sourceGlobal.replaceAll('{{CODEX_HOME}}', portable(fixture.codexHome)).trim()));
   assert.doesNotMatch(actualGlobal, /Before every task, ask Standard or Enhanced and wait/);
@@ -337,7 +339,7 @@ test('update installs the real contextual policy into existing consumers and pre
     'skills/workforce-orchestrate/references/dispatch.md',
     'skills/workforce-smoke/SKILL.md',
   ]) {
-    const expected = (await fs.readFile(path.join(packageRoot, 'payload', relative), 'utf8'))
+    const expected = (await fs.readFile(path.join(packageRoot, 'payload', 'codex', relative), 'utf8'))
       .replaceAll('{{CODEX_HOME}}', portable(fixture.codexHome));
     assert.equal(await fs.readFile(path.join(fixture.codexHome, relative), 'utf8'), expected);
   }

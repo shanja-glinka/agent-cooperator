@@ -1,7 +1,19 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — 2026-09-17
 
+- Add the Claude Code edition: `claude-workforce` binary installing subagent roles
+  (`workforce-worker`, `workforce-probe`, `workforce-reviewer`), the
+  `/workforce-orchestrate` skill with dispatch and tool references, worker, probe,
+  review, and smoke skills, a routing policy, and a managed block in `CLAUDE.md`.
+- Encode the brain/worker pattern found in live Claude Code configurations:
+  `direct`/`build`/`pipeline` classification before any spawn, brain out of product
+  code, explicit `model` per Agent call, write sets and turn budgets, same-agent fix
+  rounds via SendMessage, review on finished boundaries, state in files, end-to-end
+  proof. See `docs/research.md`.
+- Make the installer target-aware: payload moved to `payload/codex` and
+  `payload/claude`; one manifest, state directory, and marker pair per target so
+  both kits can share a machine. `--home` is accepted as a generic alias.
 - Treat named profiles as optional, adaptable recommendations; support custom or
   unnamed routing without inferring strict model requirements from a profile choice.
 

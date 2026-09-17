@@ -5,6 +5,16 @@ outcome, the two optional hybrid presets and adaptive routing, contextual profil
 Do not add company-specific paths, private examples, account data, or mandatory
 third-party workflow dependencies to the public payload.
 
+## Two targets, one installer
+
+`payload/codex` and `payload/claude` are installed by the same code in
+`lib/installer.js`, parametrized by the descriptors in `lib/targets.js`. Keep role and
+skill names aligned across both payloads; a workflow change normally lands in both,
+adapted to each runtime's real tool surface (Codex spawn tools versus the Claude Code
+Agent and SendMessage tools). Do not describe tool fields that the runtime does not
+expose. `docs/research.md` records the external evidence the Claude edition relies
+on; update it with dated sources when the routing policy changes.
+
 ## Local checks
 
 Run `npm test`. Tests must use disposable Codex and discovery homes, never the real
