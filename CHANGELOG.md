@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Codex delegates to GPT-5.6 Terra instead of GPT-5.5; block review defaults to high, with xhigh/max reserved for rare justified reasoning needs.
+
 ## 1.1.0 — 2026-09-17
 
 - Add the Claude Code edition: `claude-workforce` binary installing subagent roles

@@ -1,7 +1,7 @@
 # Profiles, models, and task ownership
 
 The product name and role names are independent of model generations. The current
-release combines GPT-6 Astra and GPT-5.5 for Codex. The Claude Code edition uses the
+release combines GPT-6 Astra and GPT-5.6 Terra for Codex. The Claude Code edition uses the
 same roles with Claude model tiers; see [claude-code.md](claude-code.md) for its
 profile table and [research.md](research.md) for the evidence behind it. Future
 releases can update model policy without changing the install command or renaming
@@ -22,15 +22,15 @@ without a named profile. Only separately explicit model/effort/budget constraint
 make those settings mandatory. Keep review independence and verification requirements.
 
 Use when the requirements and solution are sufficiently described. Astra low owns
-orchestration, GPT-5.5 medium owns bounded investigation, GPT-5.5 high implements,
-GPT-5.5 xhigh independently reviews complete blocks, and Astra high accepts major
+orchestration, GPT-5.6 Terra medium owns bounded investigation, GPT-5.6 Terra high implements,
+GPT-5.6 Terra high independently reviews complete blocks, and Astra high accepts major
 stages. A bounded open decision can still receive Astra high assistance.
 
 ## Enhanced
 
 The same workers, block reviewers, and acceptance flow remain. Astra high orchestrates
 and owns bounded uncertain design or algorithm work. Once a contract is clear, ordinary
-implementation and consumer migration return to GPT-5.5. Use xhigh/max only with a
+implementation and consumer migration return to GPT-5.6 Terra. Use xhigh/max only with a
 stated unresolved question and expected benefit, respecting the user's limits.
 
 The distinction is solution uncertainty. Many lines of code, a long runtime, or a

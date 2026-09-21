@@ -22,10 +22,10 @@ routing to the task, available capabilities, and user limits, or use a custom se
 without a named profile. Only separately explicit model/effort/budget constraints
 make those settings mandatory. Keep review independence and verification requirements.
 
-The recommended presets combine GPT-6 Astra and GPT-5.5. Standard suggests Astra low for
-orchestration, GPT-5.5 medium for research, GPT-5.5 high for implementation,
-GPT-5.5 xhigh for block review, and Astra high for stage acceptance. Enhanced
-retains these GPT-5.5 roles, uses Astra high for orchestration, and assigns bounded
+The recommended presets combine GPT-6 Astra and GPT-5.6 Terra. Standard suggests Astra low for
+orchestration, GPT-5.6 Terra medium for research, GPT-5.6 Terra high for implementation,
+GPT-5.6 Terra high for block review, and Astra high for stage acceptance. Enhanced
+retains these GPT-5.6 Terra roles, uses Astra high for orchestration, and assigns bounded
 unresolved design/algorithm work to Astra high; xhigh/max requires a stated reason.
 
 Only the user-facing orchestrator asks. Delegated agents inherit PROFILE and read
@@ -52,3 +52,9 @@ project conventions and the user's scope and publication permissions.
 Model and effort must be selected through actual runtime controls. Never claim
 that an instruction changed the running model. Read dispatch for mismatch handling.
 This kit neither requires GSD nor grants extra file, network, or publication rights.
+
+Routine research uses medium; implementation and block review use high as starting
+points. Use lower effort when sufficient. xhigh/max are rare exceptions, never
+routine work or review defaults: state the unresolved problem, why medium/high is
+insufficient, and the expected benefit before escalating. Task size, importance, or
+a single failed attempt alone does not justify escalation.

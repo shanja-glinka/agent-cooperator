@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.2.0",
+  "policyVersion": "1.3.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -9,16 +9,16 @@
         "effort": "low"
       },
       "probe": {
-        "model": "gpt-5.5",
+        "model": "gpt-5.6-terra",
         "effort": "medium"
       },
       "worker": {
-        "model": "gpt-5.5",
+        "model": "gpt-5.6-terra",
         "effort": "high"
       },
       "blockReviewer": {
-        "model": "gpt-5.5",
-        "effort": "xhigh"
+        "model": "gpt-5.6-terra",
+        "effort": "high"
       },
       "stageReviewer": {
         "model": "gpt-6-astra",
@@ -36,16 +36,16 @@
         "effort": "high"
       },
       "probe": {
-        "model": "gpt-5.5",
+        "model": "gpt-5.6-terra",
         "effort": "medium"
       },
       "worker": {
-        "model": "gpt-5.5",
+        "model": "gpt-5.6-terra",
         "effort": "high"
       },
       "blockReviewer": {
-        "model": "gpt-5.5",
-        "effort": "xhigh"
+        "model": "gpt-5.6-terra",
+        "effort": "high"
       },
       "stageReviewer": {
         "model": "gpt-6-astra",
@@ -64,7 +64,7 @@
       "xhigh",
       "max"
     ],
-    "requires": "A stated unresolved reasoning problem and expected benefit; respect user budget and effort limits."
+    "requires": "Rare exception only: state a concrete unresolved reasoning problem, why medium/high is insufficient, and the expected benefit. Never use xhigh/max by default for implementation or review, or solely because a task is large, important, or a prior attempt failed. Respect user budget and effort limits."
   },
   "selectionRules": {
     "default": "standard",

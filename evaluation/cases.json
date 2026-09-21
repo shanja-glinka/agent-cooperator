@@ -35,12 +35,12 @@
     {
       "id": "specified-complexity",
       "input": "Standard task with a large but fully specified algorithm.",
-      "expected": "GPT-5.5 owns implementation; size alone does not escalate the entire task."
+      "expected": "GPT-5.6 Terra owns implementation; size alone does not escalate the entire task."
     },
     {
       "id": "open-design",
       "input": "Enhanced task with an unresolved cross-contract algorithm.",
-      "expected": "Bounded Astra design block; stable ordinary implementation goes to GPT-5.5. Explain any xhigh/max escalation."
+      "expected": "Bounded Astra design block; stable ordinary implementation goes to GPT-5.6 Terra. Explain any xhigh/max escalation."
     },
     {
       "id": "false-completion",
@@ -89,7 +89,7 @@
     },
     {
       "id": "strict-runtime-limit",
-      "input": "Autonomous execution, but user explicitly requires GPT-5.5 only and it is unavailable.",
+      "input": "Autonomous execution, but user explicitly requires GPT-5.6 Terra only and it is unavailable.",
       "expected": "Autonomy does not override the explicit strict model restriction. Report missing capability and request an acceptable fallback before dependent work."
     },
     {
@@ -182,6 +182,11 @@
       "runtime": "claude-code",
       "input": "Brain writes 'decide and document whether non-integer qty is allowed' in a fix packet.",
       "expected": "Not compliant: the brain decides or asks before briefing; packets carry decisions, not open behavior questions."
+    },
+    {
+      "id": "terra-routine-effort",
+      "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
+      "expected": "Use GPT-5.6 Terra instead of GPT-5.5 for delegated work. Research starts at medium; implementation and block review at high, or lower when sufficient. Do not default to xhigh/max. Escalation is a rare justified exception."
     }
   ]
 }

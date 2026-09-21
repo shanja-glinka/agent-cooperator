@@ -11,17 +11,17 @@ routing to the task, available capabilities, and user limits, or use a custom se
 without a named profile. Only separately explicit model/effort/budget constraints
 make those settings mandatory. Keep review independence and verification requirements.
 
-The recommended presets combine **GPT-6 Astra and GPT-5.5**. Enhanced emphasizes
+The recommended presets combine **GPT-6 Astra and GPT-5.6 Terra**. Enhanced emphasizes
 uncertain solution work; it does not automatically move all workers to Astra. The
 table describes starting recommendations, not mandatory runtime settings.
 
 | Responsibility | Standard | Enhanced |
 | --- | --- | --- |
 | User-facing orchestrator | `gpt-6-astra`, `low` | `gpt-6-astra`, `high` |
-| Bounded research (`workforce_probe`) | `gpt-5.5`, `medium` | `gpt-5.5`, `medium` |
-| Main implementation (`workforce_worker`) | `gpt-5.5`, `high` | `gpt-5.5`, `high` |
+| Bounded research (`workforce_probe`) | `gpt-5.6-terra`, `medium` | `gpt-5.6-terra`, `medium` |
+| Main implementation (`workforce_worker`) | `gpt-5.6-terra`, `high` | `gpt-5.6-terra`, `high` |
 | Unresolved design/algorithm | Targeted Astra assistance when needed | Bounded Astra `high` block |
-| Completed block (`workforce_reviewer`, `MODE=block`) | `gpt-5.5`, `xhigh` | `gpt-5.5`, `xhigh` |
+| Completed block (`workforce_reviewer`, `MODE=block`) | `gpt-5.6-terra`, `high` | `gpt-5.6-terra`, `high` |
 | Major stage (`workforce_reviewer`, `MODE=stage`) | `gpt-6-astra`, `high` | `gpt-6-astra`, `high` |
 
 ## Resolve, ask only when useful, inherit
@@ -41,9 +41,9 @@ Apply these rules in order:
 4. Ask only before long-running, multi-stage work with substantial unresolved solution
    choices where profile selection materially changes the approach or resource use,
    and only if none of the preceding rules applies. Briefly explain both profiles:
-   Standard uses Astra low to orchestrate, GPT-5.5 medium to investigate, GPT-5.5 high
-   to implement, GPT-5.5 xhigh to review blocks, and Astra high to accept stages.
-   Enhanced retains those GPT-5.5 roles and uses Astra high for orchestration and
+   Standard uses Astra low to orchestrate, GPT-5.6 Terra medium to investigate, GPT-5.6 Terra high
+   to implement, GPT-5.6 Terra high to review blocks, and Astra high to accept stages.
+   Enhanced retains those GPT-5.6 Terra roles and uses Astra high for orchestration and
    bounded open design. Ask once in the user's language about the preferred approach;
    offer Standard and Enhanced as examples and allow a custom setup or delegated
    selection. Do not force a binary choice between the presets.
@@ -135,3 +135,9 @@ through the parent rather than quietly abandoning the user outcome.
 
 Shared checkout edits already exist on disk; a new child is not a new worktree.
 Use worktrees only for concrete conflicts. Bundle follow-up findings to the same owner.
+
+Routine research uses medium; implementation and block review use high as starting
+points. Use lower effort when sufficient. xhigh/max are rare exceptions, never
+routine work or review defaults: state the unresolved problem, why medium/high is
+insufficient, and the expected benefit before escalating. Task size, importance, or
+a single failed attempt alone does not justify escalation.

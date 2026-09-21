@@ -12,7 +12,7 @@ Typical bounded implementation in either profile:
 {
   "task_name": "consumer_cutover",
   "agent_type": "workforce_worker",
-  "model": "gpt-5.5",
+  "model": "gpt-5.6-terra",
   "reasoning_effort": "high",
   "fork_turns": "none",
   "message": "<complete assignment including PROFILE>"
@@ -22,7 +22,7 @@ Typical bounded implementation in either profile:
 For a bounded Enhanced design block, use the same appropriate role with
 `gpt-6-astra` and `high`, explicitly assigning that open decision. A read-only design
 investigation uses `workforce_probe`; an implementation uses `workforce_worker`.
-Block review uses `workforce_reviewer`, GPT-5.5 xhigh, MODE=block. Major stage acceptance
+Block review uses `workforce_reviewer`, GPT-5.6 Terra high, MODE=block. Major stage acceptance
 uses a separate `workforce_reviewer`, Astra high, MODE=stage. Do not reuse the author as
 its independent reviewer.
 

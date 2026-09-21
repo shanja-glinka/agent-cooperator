@@ -7,8 +7,8 @@
 A small, inspectable set of agents and skills for agentic development, shipped for
 two runtimes from one package and one installer:
 
-- **Codex Workforce** combines **GPT-6 Astra** with **GPT-5.5**. Astra orchestrates
-  and accepts the result; GPT-5.5 does the bulk of implementation.
+- **Codex Workforce** combines **GPT-6 Astra** with **GPT-5.6 Terra**. Astra orchestrates
+  and accepts the result; GPT-5.6 Terra does the bulk of implementation.
 - **Claude Workforce** applies the same roles to **Claude Code**: an `opus` brain,
   `sonnet` workers, `haiku` probes, `opus` reviewers, `fable` as a reserve tier.
 
@@ -73,10 +73,10 @@ codex -p workforce-enhanced
 | Responsibility | Standard | Enhanced |
 | --- | --- | --- |
 | Orchestrator | Astra low | Astra high |
-| Bounded research | GPT-5.5 medium | GPT-5.5 medium |
-| Main implementation | GPT-5.5 high | GPT-5.5 high |
+| Bounded research | GPT-5.6 Terra medium | GPT-5.6 Terra medium |
+| Main implementation | GPT-5.6 Terra high | GPT-5.6 Terra high |
 | Unresolved design/algorithm | Targeted Astra assistance as needed | Bounded Astra high work |
-| Completed block review | GPT-5.5 xhigh | GPT-5.5 xhigh |
+| Completed block review | GPT-5.6 Terra high | GPT-5.6 Terra high |
 | Major stage acceptance | Astra high | Astra high |
 
 Concrete tasks proceed without a profile question. Autonomous instructions let the
