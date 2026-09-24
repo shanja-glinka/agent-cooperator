@@ -25,13 +25,33 @@ finished boundaries only.
 | Major stage (`workforce-reviewer`, MODE=stage) | `opus`, `high` | `fable`, `high` (fallback `opus xhigh`) |
 
 Model aliases are the ones Claude Code accepts in the `model` frontmatter field and
-the Agent tool: `haiku`, `sonnet`, `opus`, `fable`, `inherit`, or a full model id.
+the Agent tool: `haiku`, `sonnet`, `opus`, `fable`, `best`, `inherit`, or a full
+model id. The kit uses aliases so that a model release does not require a kit
+release; what an alias runs is decided by Claude Code and the provider:
+
+| Alias | Resolves to (Claude API provider, checked 2026-09-24) | Price in/out per MTok | Default effort |
+| --- | --- | --- | --- |
+| `fable` | Claude Fable 5.1 (`claude-fable-5-1`) | $10 / $50 | `high` |
+| `opus` | Claude Opus 5.5 (`claude-opus-5-5`) | $4 / $20 | `medium` |
+| `sonnet` | Claude Sonnet 5 (`claude-sonnet-5`) | $2 / $10 | `high` |
+| `haiku` | Claude Haiku 4.5 (`claude-haiku-4-5`) | $1 / $5 | not supported |
+| `best` | `fable` where available, else `opus` | | |
+
+Other providers differ: on Bedrock and Vertex `sonnet` currently means Sonnet 4.5,
+on Microsoft Foundry `opus` means Opus 4.6. Legacy models (Fable 5, Opus 5,
+Opus 4.8 and earlier) stay reachable only by full id. Haiku 4.5 has a retirement
+commitment no sooner than 2026-10-15; if `haiku` stops resolving, run probes on
+`sonnet` and say so.
+
 The role files use `model: inherit` on purpose so that the explicit model on each
 Agent call is what runs. Effort values are `low`, `medium`, `high`, `xhigh`, `max`.
 The Agent tool has no per-call effort field: effort comes from the role's
 frontmatter (worker `high`, probe `medium`, reviewer `high` as installed) or the
 session setting, and a user's effort cap is binding. The efforts in the table are
-therefore the installed defaults, not something to pass on the call.
+therefore the installed defaults, not something to pass on the call. Opus 5.5
+defaults to `medium` when nothing sets effort, which is why the reviewer role
+pins `high` explicitly; a brain session on `opus` runs at `medium` unless you set
+`/effort` or `effortLevel` yourself.
 
 ## Tier guidance
 
@@ -43,9 +63,10 @@ therefore the installed defaults, not something to pass on the call.
   and re-spawn stronger if it struggles, except for planning, review, debugging,
   and non-trivial implementation, which start on `opus`.
 - `fable`: reserve tier for the hardest architecture, money-path, and security
-  decisions, and for stage acceptance in Enhanced. Roughly twice the cost of
-  `opus`; requires a stated unresolved problem and expected benefit. If the account
-  cannot use it, fall back to `opus xhigh` and say so.
+  decisions, and for stage acceptance in Enhanced. About 2.5x the per-token cost
+  of `opus` (Opus 5.5 is priced below Opus 5); requires a stated unresolved
+  problem and expected benefit. If the account cannot use it, fall back to
+  `opus xhigh` and say so.
 
 Turn count beats token price: a cheaper model that takes three times the turns on
 a hard block costs more. Choose the worker tier by the block's uncertainty, not by

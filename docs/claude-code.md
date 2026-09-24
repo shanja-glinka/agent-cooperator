@@ -94,6 +94,25 @@ multi-stage work with substantial unresolved design where nothing already applie
 | Block review (`workforce-reviewer`, MODE=block) | `opus` high | `opus` high |
 | Stage acceptance (`workforce-reviewer`, MODE=stage) | `opus` high | `fable` high (fallback `opus` xhigh) |
 
+The kit routes on aliases. What they run is decided by Claude Code and the
+provider; the current resolution is recorded in `profiles.json` under
+`modelResolution`:
+
+| Alias | Resolves to (Claude API provider, checked 2026-09-24) | Price in/out per MTok | Default effort |
+| --- | --- | --- | --- |
+| `fable` | Claude Fable 5.1 (`claude-fable-5-1`) | $10 / $50 | `high` |
+| `opus` | Claude Opus 5.5 (`claude-opus-5-5`) | $4 / $20 | `medium` |
+| `sonnet` | Claude Sonnet 5 (`claude-sonnet-5`) | $2 / $10 | `high` |
+| `haiku` | Claude Haiku 4.5 (`claude-haiku-4-5`) | $1 / $5 | not supported |
+| `best` | `fable` where available, else `opus` | | |
+
+Opus 5.5 replaced Opus 5 behind the `opus` alias at a lower price and with a
+`medium` default effort, so the reviewer role pins `effort: high` and a brain on
+`opus` runs at `medium` unless you set `/effort`. `fable` now costs about 2.5x
+`opus` per token. Haiku 4.5 has a retirement commitment no sooner than
+2026-10-15; probes fall back to `sonnet` if the alias stops resolving. Legacy
+models are reachable only by full id.
+
 The session's own model is whatever the user selected; a prompt cannot change it.
 If it differs from the preset, the brain says so once and continues. The role files
 declare `model: inherit` so that the `model` passed on each Agent call is what runs.

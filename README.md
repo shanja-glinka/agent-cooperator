@@ -115,8 +115,10 @@ workers with disjoint write sets, block reviews, and a stage review.
 | Block review | `opus` high | `opus` high |
 | Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) |
 
-Every Agent call sets `model` explicitly; effort comes from role frontmatter or the
-session. Correction rounds continue the same worker and reviewer with SendMessage;
+Aliases currently resolve to Fable 5.1, Opus 5.5, Sonnet 5, and Haiku 4.5 on the
+Claude API (checked 2026-09-24; see `docs/claude-code.md`). Every Agent call sets
+`model` explicitly; effort comes from role frontmatter or the session, and note
+that Opus 5.5 defaults to `medium` effort. Correction rounds continue the same worker and reviewer with SendMessage;
 a fresh agent is for independence, a different tier, or a polluted context.
 
 ## How work flows (both editions)

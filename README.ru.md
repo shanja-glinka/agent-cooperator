@@ -110,8 +110,10 @@ Subagents `workforce-worker`, `workforce-probe`, `workforce-reviewer` (Markdown-
 | Ревью блока | `opus` high | `opus` high |
 | Приёмка этапа | `opus` high | `fable` high (запасной `opus` xhigh) |
 
-Модель задаётся явно в каждом вызове Agent; effort берётся из frontmatter роли или
-сессии. Правки идут тем же исполнителю и ревьюеру через SendMessage; новый агент
+Алиасы сейчас резолвятся в Fable 5.1, Opus 5.5, Sonnet 5 и Haiku 4.5 на Claude API
+(проверено 2026-09-24, подробности в `docs/claude-code.md`). Модель задаётся явно в
+каждом вызове Agent; effort берётся из frontmatter роли или сессии, при этом у
+Opus 5.5 effort по умолчанию `medium`. Правки идут тем же исполнителю и ревьюеру через SendMessage; новый агент
 нужен только для независимости, другого уровня модели или загрязнённого контекста.
 
 ## Как идёт работа (обе версии)

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Document the current Claude model resolution behind the kit's aliases: `fable`
+  is Claude Fable 5.1, `opus` is Claude Opus 5.5 (lower price, `medium` default
+  effort), `sonnet` is Claude Sonnet 5, `haiku` is Claude Haiku 4.5 with a
+  retirement commitment no sooner than 2026-10-15 and `sonnet` as the probe
+  fallback. Recorded in `profiles.json` (`modelResolution`, policy 1.1.0),
+  dispatch, and the Claude Code docs. Workflow and role files unchanged.
 - Codex delegates to GPT-5.6 Terra instead of GPT-5.5; block review defaults to high, with xhigh/max reserved for rare justified reasoning needs.
 
 ## 1.1.0 — 2026-09-17

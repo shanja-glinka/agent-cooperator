@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.0.0",
+  "policyVersion": "1.1.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
@@ -130,5 +130,51 @@
       "project instruction file requires it"
     ],
     "otherwise": "Normal single session; no agents spawned; the global block adds no other behavior."
+  },
+  "modelResolution": {
+    "checkedOn": "2026-09-24",
+    "provider": "Claude API (Pro/Max/Team/Enterprise/API); other providers differ",
+    "aliases": {
+      "fable": {
+        "model": "claude-fable-5-1",
+        "name": "Claude Fable 5.1",
+        "priceInOutPerMTok": [
+          10,
+          50
+        ],
+        "defaultEffort": "high"
+      },
+      "opus": {
+        "model": "claude-opus-5-5",
+        "name": "Claude Opus 5.5",
+        "priceInOutPerMTok": [
+          4,
+          20
+        ],
+        "defaultEffort": "medium"
+      },
+      "sonnet": {
+        "model": "claude-sonnet-5",
+        "name": "Claude Sonnet 5",
+        "priceInOutPerMTok": [
+          2,
+          10
+        ],
+        "defaultEffort": "high"
+      },
+      "haiku": {
+        "model": "claude-haiku-4-5",
+        "name": "Claude Haiku 4.5",
+        "priceInOutPerMTok": [
+          1,
+          5
+        ],
+        "defaultEffort": null,
+        "retirementNotBefore": "2026-10-15",
+        "fallback": "sonnet"
+      },
+      "best": "fable where available, else opus"
+    },
+    "note": "Aliases are what the kit routes on; Claude Code and the provider decide the concrete model. A model release updates this record, not the workflow."
   }
 }
