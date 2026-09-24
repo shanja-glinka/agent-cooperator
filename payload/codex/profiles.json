@@ -1,23 +1,31 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.3.0",
+  "policyVersion": "1.4.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
       "orchestrator": {
-        "model": "gpt-6-astra",
-        "effort": "low"
+        "model": "gpt-6-sol",
+        "effort": "high",
+        "note": "Cost choice: Sol is Codex's recommended default and about 5x cheaper per token than Astra; Astra keeps stage acceptance and Enhanced."
       },
       "probe": {
-        "model": "gpt-5.6-terra",
-        "effort": "medium"
+        "model": "gpt-6-luna",
+        "effort": "medium",
+        "scope": "read-only lookups: symbols, consumers, contracts",
+        "escalateTo": {
+          "model": "gpt-6-sol",
+          "effort": "medium",
+          "when": "the question needs judgment, not search"
+        }
       },
       "worker": {
-        "model": "gpt-5.6-terra",
-        "effort": "high"
+        "model": "gpt-6-sol",
+        "effort": "high",
+        "effortRule": "medium for blocks with a settled contract and clear shape; high for debugging, unclear failures, and non-trivial implementation"
       },
       "blockReviewer": {
-        "model": "gpt-5.6-terra",
+        "model": "gpt-6-sol",
         "effort": "high"
       },
       "stageReviewer": {
@@ -36,15 +44,21 @@
         "effort": "high"
       },
       "probe": {
-        "model": "gpt-5.6-terra",
-        "effort": "medium"
+        "model": "gpt-6-luna",
+        "effort": "medium",
+        "escalateTo": {
+          "model": "gpt-6-sol",
+          "effort": "medium",
+          "when": "the question needs judgment, not search"
+        }
       },
       "worker": {
-        "model": "gpt-5.6-terra",
-        "effort": "high"
+        "model": "gpt-6-sol",
+        "effort": "high",
+        "effortRule": "medium for blocks with a settled contract and clear shape; high for debugging, unclear failures, and non-trivial implementation"
       },
       "blockReviewer": {
-        "model": "gpt-5.6-terra",
+        "model": "gpt-6-sol",
         "effort": "high"
       },
       "stageReviewer": {
@@ -80,5 +94,43 @@
     "behaviorChange": "Rejecting previously accepted input, altering accepted behavior without a failing test, or tightening a parser needs the user's decision and a check against currently accepted inputs.",
     "designDecisions": "The orchestrator decides or asks before briefing; a packet never delegates 'decide and document' for a behavior change.",
     "changelog": "User-observable behavior only, one line per change, no process narration."
+  },
+  "modelResolution": {
+    "checkedOn": "2026-09-24",
+    "models": {
+      "gpt-6-astra": {
+        "priceInOutPerMTok": [
+          10,
+          50
+        ],
+        "role": "most capable; stage acceptance, Enhanced brain, bounded open design"
+      },
+      "gpt-6-sol": {
+        "priceInOutPerMTok": [
+          2,
+          10
+        ],
+        "role": "Codex recommended default; Standard brain, implementation, block review",
+        "succeeds": "gpt-5.6-terra"
+      },
+      "gpt-6-luna": {
+        "priceInOutPerMTok": [
+          0.1,
+          0.5
+        ],
+        "role": "read-only lookups and mechanical checks; Codex suggests it when rate limits are hit"
+      },
+      "gpt-5.6-terra": {
+        "priceInOutPerMTok": [
+          2,
+          12
+        ],
+        "status": "still served; superseded by gpt-6-sol in this policy"
+      },
+      "gpt-5.5": {
+        "status": "retiring 2026-10-14; not used"
+      }
+    },
+    "note": "Codex efforts: Astra light by default; Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra."
   }
 }

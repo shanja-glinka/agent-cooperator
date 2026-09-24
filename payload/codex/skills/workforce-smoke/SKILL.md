@@ -21,14 +21,14 @@ for custom roles and model/effort overrides. Report missing capability rather th
 claiming success. Do not install another runtime or change account configuration.
 
 Choose a bounded read-only question and a run token in the existing task state.
-Spawn one `workforce_probe` with GPT-5.6 Terra medium to inspect a concrete source path, and
+Spawn one `workforce_probe` with GPT-6 Luna medium to inspect a concrete source path, and
 one independent `workforce_probe` with Astra high to check a different bounded fact.
 This explicitly scoped smoke tests both families, not the cost of a normal task.
 Pass PROFILE, ROOT, token, exact scope, and no-write/no-children constraints.
 
 While they run, read the installation's manifest/status without duplicating their
 investigation. Obtain actual results, verify the token and evidence, then issue one
-related follow-up to the GPT-5.6 Terra probe through the runtime's idle-agent continuation
+related follow-up to the Luna probe through the runtime's idle-agent continuation
 tool. Await the result. Do not infer parallel execution merely from two spawn calls.
 
 Report PASS / FAIL / UNVERIFIED separately for skill discovery, custom roles,

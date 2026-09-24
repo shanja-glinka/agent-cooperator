@@ -1,60 +1,28 @@
 ## Codex Workforce
 
 For a new implementation, refactoring, or automation task, use the installed
-`workforce-orchestrate` skill at `{{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md`.
-Resolve the profile using `references/dispatch.md`. Reuse explicit choices and
-applicable standing preferences. Concrete, sufficiently specified tasks and small
-fixes proceed with Standard without a questionnaire. "Work autonomously", "choose
-for me", "no profile questions", and unattended execution delegate selection: choose
-Standard for clear solutions or Enhanced for substantial unresolved design and proceed.
-Ask only for long-running, multi-stage work with substantial unresolved solution
-choices where the profile materially affects approach or resource use, with no prior
-choice or delegated selection. Duration, production risk, urgency, and step count alone
-are not reasons to ask. If this narrow question applies, explain both profiles and
-wait for an explicit answer while completing independent authorized prerequisites.
-Preserve the choice and its source for continuations; do not stop routine or autonomous
-work with PROFILE_REQUIRED.
+`workforce-orchestrate` skill at `{{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md`
+and resolve routing with its `references/dispatch.md`. Direct answers, status
+reports, analysis-only requests, and tiny fixes do not start orchestration.
 
-Standard and Enhanced are optional starting recommendations, not exhaustive or
-binding model/effort schedules. Choosing a profile expresses an approach preference;
-it does not by itself require its exact models, efforts, or team composition. Adapt
-routing to the task, available capabilities, and user limits, or use a custom setup
-without a named profile. Only separately explicit model/effort/budget constraints
-make those settings mandatory. Keep review independence and verification requirements.
+Concrete, sufficiently specified work proceeds with Standard without a question.
+"Work autonomously", "choose for me", and unattended runs delegate the choice:
+Standard for clear solutions, Enhanced for substantial unresolved design. Ask only
+for long-running, multi-stage work with substantial unresolved solution choices
+where the profile materially affects approach or resource use and nothing already
+applies; never stop routine or autonomous work with PROFILE_REQUIRED. Profiles are
+optional recommendations, not binding model schedules; explicit user model, effort,
+and budget limits are binding, and a prompt never changes the running model.
 
-The recommended presets combine GPT-6 Astra and GPT-5.6 Terra. Standard suggests Astra low for
-orchestration, GPT-5.6 Terra medium for research, GPT-5.6 Terra high for implementation,
-GPT-5.6 Terra high for block review, and Astra high for stage acceptance. Enhanced
-retains these GPT-5.6 Terra roles, uses Astra high for orchestration, and assigns bounded
-unresolved design/algorithm work to Astra high; xhigh/max requires a stated reason.
+Recommended presets: Standard runs GPT-6 Sol high as orchestrator, GPT-6 Luna for
+read-only lookups (Sol when judgment is needed), Sol for implementation and block
+review, and GPT-6 Astra high for stage acceptance. Enhanced moves orchestration
+and bounded open design to Astra high. xhigh/max/ultra need a stated reason.
 
-Only the user-facing orchestrator asks. Delegated agents inherit PROFILE and read
-their assigned worker/probe/review skill; they do not ask the user again or spawn
-children. Direct answers, status reports, and analysis-only requests do not start
-implementation. For tiny changes, use the selected profile without mandatory fan-out.
-A selected profile also permits adaptation to available runtime settings without
-a new approval gate; disclose material routing choices honestly. Explicit strict model,
-effort, and budget requirements still apply; never claim a model changed through text.
-
-Read the repository's `AGENTS.md`, `CLAUDE.md`, and `CONTRIBUTING.md` in every
-repository, pass them to every child as PROJECT_RULES, and let them override this
-kit. Lock SCOPE and OUT_OF_SCOPE in each packet; review findings outside the
-reported scope are follow-ups for the user, not extra correction rounds, and
-rejecting previously accepted input is a behavior change that needs the user's
-decision.
-
-Delegate complete results with explicit ownership; workers self-review, an
-independent reviewer checks a completed substantial block, and an independent stage reviewer accepts a
-major stage (Astra high is the recommended starting point). Do not attach permanent auditors, repeat reviews after every edit,
-or substitute inventory/counts for requested implementation. Follow applicable
-project conventions and the user's scope and publication permissions.
-
-Model and effort must be selected through actual runtime controls. Never claim
-that an instruction changed the running model. Read dispatch for mismatch handling.
-This kit neither requires GSD nor grants extra file, network, or publication rights.
-
-Routine research uses medium; implementation and block review use high as starting
-points. Use lower effort when sufficient. xhigh/max are rare exceptions, never
-routine work or review defaults: state the unresolved problem, why medium/high is
-insufficient, and the expected benefit before escalating. Task size, importance, or
-a single failed attempt alone does not justify escalation.
+Read the repository's `AGENTS.md`, `CLAUDE.md`, and `CONTRIBUTING.md`, pass them to
+every child as PROJECT_RULES, and let them override this kit. Lock SCOPE and
+OUT_OF_SCOPE in each packet; findings outside the reported scope are follow-ups
+for the user, and rejecting previously accepted input needs the user's decision.
+Delegated roles inherit PROFILE, read their skill, and never ask the user or spawn
+children. Commit, push, merge, deployment, and third-party messages need the
+user's authorization.

@@ -79,10 +79,13 @@ do not fill slots without useful work. Children do not spawn more children.
 The recommended presets assign Astra requirements, open decisions, integration,
 dependencies, and acceptance. Adapt the following model assignments under dispatch;
 they are recommendations, not requirements implied by the profile name.
-GPT-5.6 Terra is the recommended implementation model in **both** presets. Astra need not write
-product code to stay busy; small integration edits are allowed after resolving file
-ownership. In Enhanced, Astra may own a bounded unresolved design/algorithm block.
-Once that contract is stable, pass ordinary implementation to GPT-5.6 Terra.
+GPT-6 Sol is the recommended implementation model in **both** presets, and the
+Standard orchestrator itself; Luna answers read-only lookups. The orchestrator need
+not write product code to stay busy; small integration edits are allowed after
+resolving file ownership. In Enhanced, Astra may own a bounded unresolved
+design/algorithm block. Once that contract is stable, pass ordinary implementation
+to Sol. Set effort per block: `medium` when the contract is settled and the shape
+is clear, `high` for debugging and non-trivial work.
 
 Reuse workers for related corrections. Do not repeat their investigation; inspect
 exact evidence needed for a decision or verification. A correction round carries
@@ -115,7 +118,7 @@ confirm the pause, and update dependent assignments and invalidated evidence.
 
 ## Review once the block is ready
 
-Use an independent reviewer for a completed substantial block (GPT-5.6 Terra high is the
+Use an independent reviewer for a completed substantial block (GPT-6 Sol high is the
 recommended starting point). Before closing a major stage, use a separate stage
 reviewer (Astra high is recommended). Adapt models and effort under dispatch. Do not call each edit
 a stage. Freeze the reviewed scope and identify its revision plus dirty diff.

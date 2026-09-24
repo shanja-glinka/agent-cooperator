@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Move the Codex edition to the GPT-6 family (policy 1.4.0): GPT-6 Sol replaces
+  GPT-5.6 Terra for implementation and block review and becomes the Standard
+  orchestrator (a stated cost choice; Astra keeps stage acceptance, the Enhanced
+  brain, and open design); GPT-6 Luna answers read-only lookups with Sol as the
+  judgment fallback; effort is set per block (`medium` for settled blocks, `high`
+  for debugging and non-trivial work). The `workforce-standard` launch layer now
+  sets Sol high. Trim the Codex global block and document optional `config.toml`
+  cost settings the kit does not install.
 - Document the current Claude model resolution behind the kit's aliases: `fable`
   is Claude Fable 5.1, `opus` is Claude Opus 5.5 (lower price, `medium` default
   effort), `sonnet` is Claude Sonnet 5, `haiku` is Claude Haiku 4.5 with a

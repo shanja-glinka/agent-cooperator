@@ -124,6 +124,26 @@ Use `--dry-run` with a mutation command to inspect the proposed operation withou
 writing. `--json` provides structured results for scripts. Consult `--help` for the
 complete installed CLI surface. Do not manually edit the ownership manifest.
 
+## Optional cost settings (not installed)
+
+The kit never edits `config.toml`. These Codex settings cut usage without touching
+the workflow and are worth setting yourself:
+
+```toml
+# Cap how much of each tool output is kept in history (fewer tokens per turn)
+tool_output_token_limit = 4000
+# Compact history before it grows past the point where every turn is expensive
+model_auto_compact_token_limit = 200000
+# Safety net if a spawn omits an explicit model: use the cheap default, not the root model
+[agents]
+default_subagent_model = "gpt-6-sol"
+default_subagent_reasoning_effort = "medium"
+max_concurrent_threads_per_session = 3
+```
+
+Adjust the numbers to your plan and project; the keys are documented in the Codex
+config reference. `/usage` in Codex shows actual token totals per session.
+
 ## Loading and verification
 
 Start a fresh Codex or Claude Code session after installing or updating. In Claude

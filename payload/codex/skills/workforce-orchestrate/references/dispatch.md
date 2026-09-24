@@ -11,18 +11,48 @@ routing to the task, available capabilities, and user limits, or use a custom se
 without a named profile. Only separately explicit model/effort/budget constraints
 make those settings mandatory. Keep review independence and verification requirements.
 
-The recommended presets combine **GPT-6 Astra and GPT-5.6 Terra**. Enhanced emphasizes
-uncertain solution work; it does not automatically move all workers to Astra. The
-table describes starting recommendations, not mandatory runtime settings.
+The recommended presets combine the **GPT-6 family: Astra, Sol, and Luna**.
+Enhanced emphasizes uncertain solution work; it does not automatically move all
+workers to Astra. The table describes starting recommendations, not mandatory
+runtime settings.
 
 | Responsibility | Standard | Enhanced |
 | --- | --- | --- |
-| User-facing orchestrator | `gpt-6-astra`, `low` | `gpt-6-astra`, `high` |
-| Bounded research (`workforce_probe`) | `gpt-5.6-terra`, `medium` | `gpt-5.6-terra`, `medium` |
-| Main implementation (`workforce_worker`) | `gpt-5.6-terra`, `high` | `gpt-5.6-terra`, `high` |
+| User-facing orchestrator | `gpt-6-sol`, `high` | `gpt-6-astra`, `high` |
+| Bounded research (`workforce_probe`) | `gpt-6-luna`, `medium`; `gpt-6-sol` when judgment is needed | same |
+| Main implementation (`workforce_worker`) | `gpt-6-sol`, `high` (`medium` for settled blocks) | same |
 | Unresolved design/algorithm | Targeted Astra assistance when needed | Bounded Astra `high` block |
-| Completed block (`workforce_reviewer`, `MODE=block`) | `gpt-5.6-terra`, `high` | `gpt-5.6-terra`, `high` |
+| Completed block (`workforce_reviewer`, `MODE=block`) | `gpt-6-sol`, `high` | same |
 | Major stage (`workforce_reviewer`, `MODE=stage`) | `gpt-6-astra`, `high` | `gpt-6-astra`, `high` |
+
+Prices and roles as checked on 2026-09-24 (see `profiles.json`, `modelResolution`):
+Astra $10/$50 per MTok in/out, Sol $2/$10, Luna $0.1/$0.5. Sol is the model Codex
+itself recommends by default and succeeds GPT-5.6 Terra at the same input price
+with cheaper output; Luna is what Codex suggests when rate limits are hit. Standard
+puts the orchestrator on Sol deliberately: the orchestrator holds the longest
+context, and Astra costs about five times more per token. Astra keeps stage
+acceptance, the Enhanced brain, and bounded open-design blocks, where its
+reasoning changes the outcome. GPT-5.5 retires on 2026-10-14 and is not used.
+
+## Tier and effort guidance
+
+- `gpt-6-luna`: read-only lookups (where a symbol lives, who imports it, what a
+  contract says), mechanical checks, smoke probes. Not for judgment calls; when a
+  probe question needs an assessment rather than a search, use Sol.
+- `gpt-6-sol`: orchestration in Standard, implementation with a decided shape,
+  block review, ordinary debugging. Effort `medium` for a block whose contract is
+  settled and shape is clear; `high` for debugging, unclear failures, and
+  non-trivial implementation. Sol's own default is `medium`, so set effort
+  explicitly on every spawn.
+- `gpt-6-astra`: stage acceptance, the Enhanced brain, bounded unresolved design or
+  algorithm work, and targeted assistance in Standard. Astra's own default effort
+  is `light` (`low` in config); the kit uses `high` for these roles.
+- `xhigh`, `max`, and Codex's `ultra` (which enables Codex-native subagents) are
+  rare, stated exceptions, never a default.
+
+Turn count beats token price: a cheaper model that loops three times on a hard
+block costs more than the right model once. Choose the tier by the block's
+uncertainty, not by its line count.
 
 ## Resolve, ask only when useful, inherit
 
@@ -41,10 +71,9 @@ Apply these rules in order:
 4. Ask only before long-running, multi-stage work with substantial unresolved solution
    choices where profile selection materially changes the approach or resource use,
    and only if none of the preceding rules applies. Briefly explain both profiles:
-   Standard uses Astra low to orchestrate, GPT-5.6 Terra medium to investigate, GPT-5.6 Terra high
-   to implement, GPT-5.6 Terra high to review blocks, and Astra high to accept stages.
-   Enhanced retains those GPT-5.6 Terra roles and uses Astra high for orchestration and
-   bounded open design. Ask once in the user's language about the preferred approach;
+   Standard uses Sol high to orchestrate, Luna to look things up, Sol to implement
+   and review blocks, and Astra high to accept stages. Enhanced keeps those workers
+   and uses Astra high for orchestration and bounded open design. Ask once in the user's language about the preferred approach;
    offer Standard and Enhanced as examples and allow a custom setup or delegated
    selection. Do not force a binary choice between the presets.
 5. For remaining bounded tasks, default to Standard with targeted assistance as

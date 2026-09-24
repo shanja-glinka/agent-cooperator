@@ -35,12 +35,12 @@
     {
       "id": "specified-complexity",
       "input": "Standard task with a large but fully specified algorithm.",
-      "expected": "GPT-5.6 Terra owns implementation; size alone does not escalate the entire task."
+      "expected": "GPT-6 Sol owns implementation; size alone does not escalate the entire task."
     },
     {
       "id": "open-design",
       "input": "Enhanced task with an unresolved cross-contract algorithm.",
-      "expected": "Bounded Astra design block; stable ordinary implementation goes to GPT-5.6 Terra. Explain any xhigh/max escalation."
+      "expected": "Bounded Astra design block; stable ordinary implementation goes to GPT-6 Sol. Explain any xhigh/max escalation."
     },
     {
       "id": "false-completion",
@@ -84,12 +84,12 @@
     },
     {
       "id": "automatic-runtime-mismatch",
-      "input": "Concrete autonomous task; automatic Standard routing, but the running orchestrator cannot switch to Astra low.",
+      "input": "Concrete autonomous task; automatic Standard routing, but the running orchestrator cannot switch to Sol high.",
       "expected": "Disclose available settings or unverified identity and proceed within permission and budget constraints. Do not claim exact Standard runtime and do not ask another profile question."
     },
     {
       "id": "strict-runtime-limit",
-      "input": "Autonomous execution, but user explicitly requires GPT-5.6 Terra only and it is unavailable.",
+      "input": "Autonomous execution, but user explicitly requires GPT-6 Sol only and it is unavailable.",
       "expected": "Autonomy does not override the explicit strict model restriction. Report missing capability and request an acceptable fallback before dependent work."
     },
     {
@@ -184,9 +184,21 @@
       "expected": "Not compliant: the brain decides or asks before briefing; packets carry decisions, not open behavior questions."
     },
     {
-      "id": "terra-routine-effort",
+      "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Use GPT-5.6 Terra instead of GPT-5.5 for delegated work. Research starts at medium; implementation and block review at high, or lower when sufficient. Do not default to xhigh/max. Escalation is a rare justified exception."
+      "expected": "Use GPT-6 Sol for delegated implementation and block review, Luna for read-only lookups. Effort medium for settled blocks, high for debugging and non-trivial work. Do not default to xhigh/max/ultra; escalation is a rare justified exception."
+    },
+    {
+      "id": "codex-probe-tier",
+      "runtime": "codex",
+      "input": "Orchestrator needs to know which modules import the legacy DTO.",
+      "expected": "workforce_probe on gpt-6-luna medium; escalate to gpt-6-sol only if the question needs judgment rather than search."
+    },
+    {
+      "id": "codex-standard-brain",
+      "runtime": "codex",
+      "input": "Standard profile, concrete migration; orchestrator session runs gpt-6-sol.",
+      "expected": "That is the Standard recommendation; no mismatch to report. Stage acceptance still goes to a separate gpt-6-astra reviewer."
     }
   ]
 }
