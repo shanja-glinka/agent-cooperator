@@ -19,7 +19,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
 `-p` selects the package; `claude-workforce` is its second binary. Pin a release
-with `github:shanja-glinka/codex-workforce#v1.1.0`. Start a new Claude Code session
+with `github:shanja-glinka/codex-workforce#v1.2.0`. Start a new Claude Code session
 after installing or updating. Options: `--claude-home PATH` (precedence: option,
 `CLAUDE_CONFIG_DIR`, `~/.claude`), `--dry-run`, `--force`, `--json`. There is no
 `--skills-dir`: Claude Code discovers skills inside its home directory.

@@ -44,7 +44,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 
 `update` заменяет предыдущие файлы пакета и удаляет устаревшие файлы, которыми он
 владеет. `status` показывает дрейф. `uninstall` удаляет только своё. Для
-фиксированной версии используйте `github:shanja-glinka/codex-workforce#v1.1.0` или
+фиксированной версии используйте `github:shanja-glinka/codex-workforce#v1.2.0` или
 проверенный SHA коммита. После установки откройте новую сессию Codex или Claude Code.
 Оба набора могут стоять на одной машине: у каждого свои файлы, состояние и маркеры.
 

@@ -18,7 +18,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
 npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
-Use `github:shanja-glinka/codex-workforce#v1.1.0` to pin this release, or a reviewed
+Use `github:shanja-glinka/codex-workforce#v1.2.0` to pin this release, or a reviewed
 commit SHA. Updating with a pinned spec installs that pinned version; choose a newer
 tag explicitly. `update` reads the payload in the invoked package. It does not run
 `git pull`, an npm updater, or an arbitrary remote install script inside the CLI.

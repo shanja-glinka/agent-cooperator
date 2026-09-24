@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — 2026-09-24
 
 - Move the Codex edition to the GPT-6 family (policy 1.4.0): GPT-6 Sol replaces
   GPT-5.6 Terra for implementation and block review and becomes the Standard
