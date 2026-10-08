@@ -15,6 +15,17 @@ Agent and SendMessage tools). Do not describe tool fields that the runtime does 
 expose. `docs/research.md` records the external evidence the Claude edition relies
 on; update it with dated sources when the routing policy changes.
 
+## Authorship
+
+Commits are authored by people. Do not add `Co-Authored-By` or similar trailers
+crediting an AI assistant (Claude, Codex, Copilot, or any other); the maintainer
+removed such trailers from history on 2026-10-08 and CI now rejects them. Enable
+the local guard once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
 ## Local checks
 
 Run `npm test`. Tests must use disposable Codex and discovery homes, never the real

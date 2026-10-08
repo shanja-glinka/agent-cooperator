@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.3.0 — 2026-10-08
 
+- Reject AI co-author trailers in commit messages: CI job plus a versioned
+  `commit-msg` hook in `.githooks/` (enable with `git config core.hooksPath .githooks`).
 - Add the auditor role to both editions: `workforce-auditor` (Claude Code,
   `haiku` at `effort: xhigh`, read-only, 25 turns) and `workforce_auditor`
   (Codex, GPT-6 Luna at xhigh, read-only), with the `workforce-audit` skill.

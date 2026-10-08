@@ -18,3 +18,14 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm test
       - run: npm pack --dry-run
+  commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reject AI co-author trailers
+        run: node scripts/check-no-ai-coauthor.js "${{ github.event.before && github.event.before != '0000000000000000000000000000000000000000' && format('{0}..{1}', github.event.before, github.sha) || github.event.pull_request.base.sha && format('{0}..{1}', github.event.pull_request.base.sha, github.sha) || github.sha }}"

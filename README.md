@@ -47,7 +47,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 
 `update` replaces the kit's previous files and removes stale owned files; `status`
 reports drift; `uninstall` removes only what the kit owns. For a reproducible
-version, replace the package spec with `github:shanja-glinka/codex-workforce#v1.2.0`
+version, replace the package spec with `github:shanja-glinka/codex-workforce#v1.3.0`
 or a reviewed commit SHA. `npx --yes` accepts npm's download prompt; it does not
 answer the agent's Standard/Enhanced question or grant publishing rights. Start a
 fresh Codex or Claude Code session after installing or updating. Both kits can live
