@@ -121,7 +121,27 @@ tier up with the bundled findings as described in dispatch. Identify whether the
 cause is the assignment, a missing contract, the environment, or unresolved
 reasoning, and fix that cause rather than relaunching the project.
 
-## 6. Integrate the real change
+## 6. Audit the finished block cheaply
+
+When a worker returns READY_FOR_INTEGRATION in `build` or `pipeline` work, freeze
+the snapshot and, in one message, spawn two or three `workforce-auditor` agents
+on `haiku` with one LENS each: `docs` (code against documentation and
+contracts), `task` (diff against SCOPE, acceptance example, OUT_OF_SCOPE), and
+`conventions` (PROJECT_RULES, lint, tests, changelog). Each gets the same
+snapshot, the packet, and PROJECT_RULES; each is read-only and returns a tagged
+findings packet. Skip a lens that cannot apply (no documentation touched, no
+project rules found); never run more than three.
+
+Deduplicate their findings, drop what you can disprove, and send the in-scope
+ones to the same worker as one bundle before any reviewer runs. The auditors
+cost a small fraction of one `opus` round and catch the cheap defect classes, so
+the reviewer gets a block that is already documented, in scope, and conventional
+and can spend its turns on correctness, regressions, and consumers. Pass the
+auditors' packets to the reviewer as evidence; the reviewer does not repeat those
+lenses. Auditors never replace the reviewer for correctness and never run in
+`direct` work.
+
+## 7. Integrate the real change
 
 READY_FOR_INTEGRATION requires a complete block, self-review, relevant checks, and
 stable contracts. Inspect the actual diff, including new files and real consumers;
@@ -132,15 +152,16 @@ remaining compatibility.
 Start dependent work when its inputs are ready. If a shared contract changes,
 pause affected work, update dependent briefs, and invalidate stale evidence.
 
-## 7. Review on finished boundaries
+## 8. Review on finished boundaries
 
 Block review: an independent `workforce-reviewer` on the finished diff of a
 substantial block, MODE=block. Stage review: a separate reviewer before closing a
 major stage, MODE=stage. Do not call each edit a stage. Freeze the reviewed scope
 and identify its revision plus dirty diff.
 
-Block review checks bugs, regressions, conventions, docs, and consumer integration
-within SCOPE, and tags anything else as a candidate follow-up.
+Block review checks bugs, regressions, and consumer integration within SCOPE,
+takes the auditors' docs, task, and conventions packets as evidence rather than
+repeating them, and tags anything else as a candidate follow-up.
 Stage review checks the original outcome, cross-boundary behavior, removed old
 paths, compatibility, and the required package gates. Honor project-specific
 acceptance requirements; fold them into stage review when allowed rather than
@@ -152,7 +173,7 @@ claimed consumer; isolated mocks prove only that scope. Before calling anything
 done, prove it end to end: run the command, hit the endpoint, use the feature. If
 that is impossible, say so. Failed, blocked, and not-run are not PASS.
 
-## 8. Report honestly
+## 9. Report honestly
 
 Distinguish submitted -> block reviewed -> stage accepted -> merge ready. Report
 achieved behavior, verification, review findings, candidate follow-ups the review

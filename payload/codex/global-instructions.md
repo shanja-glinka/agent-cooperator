@@ -14,9 +14,10 @@ applies; never stop routine or autonomous work with PROFILE_REQUIRED. Profiles a
 optional recommendations, not binding model schedules; explicit user model, effort,
 and budget limits are binding, and a prompt never changes the running model.
 
-Recommended presets: Standard runs GPT-6 Sol high as orchestrator, GPT-6 Luna for
-read-only lookups (Sol when judgment is needed), Sol for implementation and block
-review, and GPT-6 Astra high for stage acceptance. Enhanced moves orchestration
+Recommended presets: Standard runs GPT-6.1 Sol high as orchestrator, GPT-6 Luna for
+read-only lookups (Sol when judgment is needed) and for two or three parallel
+audit lenses at xhigh (docs, task, conventions) before block review, Sol for
+implementation and block review, and GPT-6 Astra high for stage acceptance. Enhanced moves orchestration
 and bounded open design to Astra high. xhigh/max/ultra need a stated reason.
 
 Read the repository's `AGENTS.md`, `CLAUDE.md`, and `CONTRIBUTING.md`, pass them to

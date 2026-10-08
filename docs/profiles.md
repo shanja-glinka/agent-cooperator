@@ -21,7 +21,7 @@ routing to the task, available capabilities, and user limits, or use a custom se
 without a named profile. Only separately explicit model/effort/budget constraints
 make those settings mandatory. Keep review independence and verification requirements.
 
-Use when the requirements and solution are sufficiently described. GPT-6 Sol high
+Use when the requirements and solution are sufficiently described. GPT-6.1 Sol high
 owns orchestration, GPT-6 Luna owns read-only lookups (Sol when judgment is needed),
 Sol implements at `medium` for settled blocks and `high` for debugging and
 non-trivial work, Sol high independently reviews complete blocks, and Astra high
@@ -90,6 +90,18 @@ without those capabilities cannot provide this routing; the agent must disclose
 the available settings when material. A user-selected profile also allows adaptation;
 explicit strict model/effort/budget requirements need the required
 setting or an accepted fallback before dependent work. Do not claim exact routing.
+
+## Cheap auditors before the reviewer
+
+When a worker reports READY_FOR_INTEGRATION, the orchestrator spawns two or three
+auditors in parallel on the cheapest model at `xhigh` (Haiku 5.5 in Claude Code,
+GPT-6 Luna in Codex), one lens each: docs (code against documentation and
+contracts), task (diff against SCOPE and acceptance), conventions (project
+rules, lint, tests, changelog). They are read-only, return tagged findings with
+`file:line`, and cost a small fraction of one reviewer round. In-scope findings go
+to the worker as one bundle; the packets go to the reviewer as evidence, so the
+expensive review spends its turns on correctness, regressions, and consumers.
+Auditors never fix and never replace the reviewer.
 
 ## Scope stays put
 

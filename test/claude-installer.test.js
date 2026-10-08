@@ -132,7 +132,7 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.ok(actual.endsWith('\nUser additions after install\n'));
   assert.doesNotMatch(actual, /\{\{CLAUDE_HOME\}\}/);
 
-  for (const name of ['workforce-worker', 'workforce-probe', 'workforce-reviewer']) {
+  for (const name of ['workforce-worker', 'workforce-probe', 'workforce-auditor', 'workforce-reviewer']) {
     const agent = await fs.readFile(path.join(fixture.home, 'agents', `${name}.md`), 'utf8');
     assert.match(agent, new RegExp(`^---\\nname: ${name}\\n`));
     assert.match(agent, /\nmodel: inherit\n/);
@@ -140,7 +140,7 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
     assert.match(agent, /\ndisallowedTools: Agent/);
     assert.doesNotMatch(agent, /\{\{CLAUDE_HOME\}\}/);
   }
-  for (const name of ['workforce-orchestrate', 'workforce-worker', 'workforce-probe', 'workforce-review', 'workforce-smoke']) {
+  for (const name of ['workforce-orchestrate', 'workforce-worker', 'workforce-probe', 'workforce-audit', 'workforce-review', 'workforce-smoke']) {
     const skill = await fs.readFile(path.join(fixture.home, 'skills', name, 'SKILL.md'), 'utf8');
     assert.match(skill, new RegExp(`^---\\nname: ${name}\\n`));
     assert.doesNotMatch(skill, /\{\{CLAUDE_HOME\}\}/);
@@ -153,6 +153,11 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.equal(policy.selectionRules.default, 'standard');
   assert.deepEqual(Object.keys(policy.workClasses), ['direct', 'build', 'pipeline']);
   assert.equal(policy.profiles.standard.worker.model, 'sonnet');
+  assert.equal(policy.profiles.standard.auditor.model, 'haiku');
+  assert.equal(policy.profiles.standard.auditor.effort, 'xhigh');
+  const auditor = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-auditor.md'), 'utf8');
+  assert.match(auditor, /\neffort: xhigh\n/);
+  assert.match(auditor, /\ndisallowedTools: Agent, Edit, Write, NotebookEdit\n/);
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
 });

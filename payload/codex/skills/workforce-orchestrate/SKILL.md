@@ -79,7 +79,7 @@ do not fill slots without useful work. Children do not spawn more children.
 The recommended presets assign Astra requirements, open decisions, integration,
 dependencies, and acceptance. Adapt the following model assignments under dispatch;
 they are recommendations, not requirements implied by the profile name.
-GPT-6 Sol is the recommended implementation model in **both** presets, and the
+GPT-6.1 Sol is the recommended implementation model in **both** presets, and the
 Standard orchestrator itself; Luna answers read-only lookups. The orchestrator need
 not write product code to stay busy; small integration edits are allowed after
 resolving file ownership. In Enhanced, Astra may own a bounded unresolved
@@ -103,6 +103,25 @@ whether the cause is the assignment, missing contract, environment, or unresolve
 reasoning. Correct that cause and revise the same owner's assignment. Escalate a
 bounded reasoning problem under dispatch; do not relaunch the whole project blindly.
 
+## Audit the finished block cheaply
+
+When a worker returns READY_FOR_INTEGRATION, freeze the snapshot and spawn two or
+three `workforce_auditor` tasks in one turn on GPT-6 Luna at `xhigh`, one LENS
+each: `docs` (code against documentation and contracts), `task` (diff against
+SCOPE, acceptance example, OUT_OF_SCOPE), and `conventions` (PROJECT_RULES,
+lint, tests, changelog). Each gets the same snapshot, the packet, and
+PROJECT_RULES; each is read-only and returns a tagged findings packet. Skip a
+lens that cannot apply; never run more than three; never audit tiny inline
+changes.
+
+Deduplicate their findings, drop what you can disprove, and send the in-scope
+ones to the same worker as one bundle before any reviewer runs. The auditors cost
+a small fraction of one Sol review round and catch the cheap defect classes, so
+the reviewer gets a block that is already documented, in scope, and conventional
+and spends its turns on correctness, regressions, and consumers. Pass the
+auditors' packets to the reviewer as evidence; it does not repeat those lenses.
+Auditors never replace the reviewer for correctness.
+
 ## Integrate the real change
 
 READY_FOR_INTEGRATION requires a complete block, self-review, relevant checks, and
@@ -118,7 +137,7 @@ confirm the pause, and update dependent assignments and invalidated evidence.
 
 ## Review once the block is ready
 
-Use an independent reviewer for a completed substantial block (GPT-6 Sol high is the
+Use an independent reviewer for a completed substantial block (GPT-6.1 Sol high is the
 recommended starting point). Before closing a major stage, use a separate stage
 reviewer (Astra high is recommended). Adapt models and effort under dispatch. Do not call each edit
 a stage. Freeze the reviewed scope and identify its revision plus dirty diff.

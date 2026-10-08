@@ -1,7 +1,8 @@
 ## Claude Workforce (opt-in)
 
 A brain/worker orchestration kit is installed: roles `workforce-worker`,
-`workforce-probe`, `workforce-reviewer` and the `/workforce-orchestrate` skill at
+`workforce-probe`, `workforce-auditor`, `workforce-reviewer` and the
+`/workforce-orchestrate` skill at
 `{{CLAUDE_HOME}}/skills/workforce-orchestrate/SKILL.md`. It is optional. Use it
 only when the user invokes `/workforce-orchestrate`, asks for "workforce",
 subagents, or multi-agent work, or a project instruction file requires it.
@@ -14,7 +15,9 @@ repository's `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, and `CONTRIBUTING.md` a
 pass them to every child as PROJECT_RULES, letting them override the kit; set
 `model` on every Agent call; lock SCOPE and OUT_OF_SCOPE in each packet; continue
 the same worker and reviewer for fix rounds with SendMessage; treat findings
-outside the reported scope as follow-ups for the user; review only finished
-blocks. Profiles (Standard, Enhanced) are optional recommendations; the user's
+outside the reported scope as follow-ups for the user; before the reviewer, run
+two or three `haiku` auditors in parallel, one lens each (docs, task,
+conventions), and bundle their in-scope findings to the worker; review only
+finished blocks. Profiles (Standard, Enhanced) are optional recommendations; the user's
 model, effort, and budget limits are binding. Commit, push, merge, deployment,
 and messages to third parties need the user's authorization.

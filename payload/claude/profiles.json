@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.1.0",
+  "policyVersion": "1.2.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
@@ -39,6 +39,17 @@
         "model": "opus",
         "effort": "high",
         "scope": "targeted-assistance"
+      },
+      "auditor": {
+        "model": "haiku",
+        "effort": "xhigh",
+        "lenses": [
+          "docs",
+          "task",
+          "conventions"
+        ],
+        "parallel": 3,
+        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never in direct work"
       }
     },
     "enhanced": {
@@ -79,6 +90,17 @@
           "model": "opus",
           "effort": "xhigh"
         }
+      },
+      "auditor": {
+        "model": "haiku",
+        "effort": "xhigh",
+        "lenses": [
+          "docs",
+          "task",
+          "conventions"
+        ],
+        "parallel": 3,
+        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never in direct work"
       }
     }
   },
@@ -98,7 +120,9 @@
     "reviewerMaxTurns": 30,
     "fixRoundsBeforeEscalation": 3,
     "note": "Defaults for assignments and role frontmatter. User limits and project rules override them. A second review round in build work needs a stated in-scope reason.",
-    "reviewRoundsPerBuildBlock": 1
+    "reviewRoundsPerBuildBlock": 1,
+    "auditorMaxTurns": 25,
+    "auditorsPerBlock": 3
   },
   "selectionRules": {
     "default": "standard",
@@ -132,7 +156,7 @@
     "otherwise": "Normal single session; no agents spawned; the global block adds no other behavior."
   },
   "modelResolution": {
-    "checkedOn": "2026-09-24",
+    "checkedOn": "2026-10-08",
     "provider": "Claude API (Pro/Max/Team/Enterprise/API); other providers differ",
     "aliases": {
       "fable": {
@@ -154,8 +178,8 @@
         "defaultEffort": "medium"
       },
       "sonnet": {
-        "model": "claude-sonnet-5",
-        "name": "Claude Sonnet 5",
+        "model": "claude-sonnet-5-5",
+        "name": "Claude Sonnet 5.5",
         "priceInOutPerMTok": [
           2,
           10
@@ -163,18 +187,23 @@
         "defaultEffort": "high"
       },
       "haiku": {
-        "model": "claude-haiku-4-5",
-        "name": "Claude Haiku 4.5",
+        "model": "claude-haiku-5-5",
+        "name": "Claude Haiku 5.5",
         "priceInOutPerMTok": [
-          1,
-          5
+          0.1,
+          0.5
         ],
-        "defaultEffort": null,
-        "retirementNotBefore": "2026-10-15",
-        "fallback": "sonnet"
+        "defaultEffort": "medium",
+        "effortUpTo": "xhigh"
       },
       "best": "fable where available, else opus"
     },
+    "legacyById": [
+      "claude-sonnet-5",
+      "claude-haiku-4-5",
+      "claude-opus-5",
+      "claude-fable-5"
+    ],
     "note": "Aliases are what the kit routes on; Claude Code and the provider decide the concrete model. A model release updates this record, not the workflow."
   }
 }

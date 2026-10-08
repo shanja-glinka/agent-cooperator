@@ -12,7 +12,7 @@ Typical bounded implementation in either profile:
 {
   "task_name": "consumer_cutover",
   "agent_type": "workforce_worker",
-  "model": "gpt-6-sol",
+  "model": "gpt-6.1-sol",
   "reasoning_effort": "high",
   "fork_turns": "none",
   "message": "<complete assignment including PROFILE>"
@@ -23,7 +23,10 @@ For a bounded Enhanced design block, use the same appropriate role with
 `gpt-6-astra` and `high`, explicitly assigning that open decision. A read-only design
 investigation uses `workforce_probe`; an implementation uses `workforce_worker`.
 A read-only lookup uses `workforce_probe` with `gpt-6-luna` and `medium`; a probe
-that needs judgment uses `gpt-6-sol`. Block review uses `workforce_reviewer`, GPT-6 Sol
+that needs judgment uses `gpt-6.1-sol`. Before block review, spawn two or three
+`workforce_auditor` tasks in one turn with `gpt-6-luna` and `xhigh`, one LENS each
+(`docs`, `task`, `conventions`), the same frozen snapshot, and PROJECT_RULES; they
+are read-only and return findings packets in parallel. Block review uses `workforce_reviewer`, GPT-6.1 Sol
 high, MODE=block. Major stage acceptance
 uses a separate `workforce_reviewer`, Astra high, MODE=stage. Do not reuse the author as
 its independent reviewer.

@@ -1,6 +1,6 @@
 # Claude Workforce: agentic development in Claude Code
 
-This is the Claude Code edition of the kit. It installs three subagent roles, five
+This is the Claude Code edition of the kit. It installs four subagent roles, six
 skills, a routing policy, and a managed block in the user `CLAUDE.md`. The workflow
 is the same brain/worker pattern the [research](research.md) found in live public
 configurations; the roles and skill names match the Codex edition so both can be
@@ -28,12 +28,14 @@ after installing or updating. Options: `--claude-home PATH` (precedence: option,
 ~/.claude/
   agents/workforce-worker.md
   agents/workforce-probe.md
+  agents/workforce-auditor.md
   agents/workforce-reviewer.md
   skills/workforce-orchestrate/SKILL.md          /workforce-orchestrate
   skills/workforce-orchestrate/references/dispatch.md
   skills/workforce-orchestrate/references/tools.md
   skills/workforce-worker/SKILL.md               preloaded into workforce-worker
   skills/workforce-probe/SKILL.md                preloaded into workforce-probe
+  skills/workforce-audit/SKILL.md                preloaded into workforce-auditor
   skills/workforce-review/SKILL.md               preloaded into workforce-reviewer
   skills/workforce-smoke/SKILL.md                /workforce-smoke (explicit only)
   claude-workforce/profiles.json
@@ -91,6 +93,7 @@ multi-stage work with substantial unresolved design where nothing already applie
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium |
 | Implementation (`workforce-worker`) | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` xhigh) |
+| Audit lenses (`workforce-auditor`, 2-3 in parallel) | `haiku` xhigh | `haiku` xhigh |
 | Block review (`workforce-reviewer`, MODE=block) | `opus` high | `opus` high |
 | Stage acceptance (`workforce-reviewer`, MODE=stage) | `opus` high | `fable` high (fallback `opus` xhigh) |
 
@@ -98,20 +101,20 @@ The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
 `modelResolution`:
 
-| Alias | Resolves to (Claude API provider, checked 2026-09-24) | Price in/out per MTok | Default effort |
+| Alias | Resolves to (Claude API provider, checked 2026-10-08) | Price in/out per MTok | Default effort |
 | --- | --- | --- | --- |
 | `fable` | Claude Fable 5.1 (`claude-fable-5-1`) | $10 / $50 | `high` |
 | `opus` | Claude Opus 5.5 (`claude-opus-5-5`) | $4 / $20 | `medium` |
-| `sonnet` | Claude Sonnet 5 (`claude-sonnet-5`) | $2 / $10 | `high` |
-| `haiku` | Claude Haiku 4.5 (`claude-haiku-4-5`) | $1 / $5 | not supported |
+| `sonnet` | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | $2 / $10 | `high` |
+| `haiku` | Claude Haiku 5.5 (`claude-haiku-5-5`) | from $0.10 / $0.50 | `medium` |
 | `best` | `fable` where available, else `opus` | | |
 
 Opus 5.5 replaced Opus 5 behind the `opus` alias at a lower price and with a
 `medium` default effort, so the reviewer role pins `effort: high` and a brain on
-`opus` runs at `medium` unless you set `/effort`. `fable` now costs about 2.5x
-`opus` per token. Haiku 4.5 has a retirement commitment no sooner than
-2026-10-15; probes fall back to `sonnet` if the alias stops resolving. Legacy
-models are reachable only by full id.
+`opus` runs at `medium` unless you set `/effort`. `fable` costs about 2.5x `opus`
+per token. Sonnet 5.5 and Haiku 5.5 arrived on 2026-10-07; Haiku 5.5 supports
+effort up to `xhigh`, which is what the auditor role runs at. Legacy models
+(Sonnet 5, Haiku 4.5, Opus 5, Fable 5) are reachable only by full id.
 
 The session's own model is whatever the user selected; a prompt cannot change it.
 If it differs from the preset, the brain says so once and continues. The role files
@@ -130,12 +133,20 @@ it, the fallback is `opus` at `xhigh`.
   or on a loop without new evidence, a fresh worker one tier up gets the bundle.
 - A fresh agent is for independence (the reviewer is never the author; stage review
   is a separate agent), a different tier, or a polluted context.
+- Before the reviewer, two or three `haiku` auditors at `xhigh` run in parallel,
+  one lens each: docs (code against documentation and contracts), task (diff
+  against SCOPE and acceptance), conventions (project rules, lint, tests,
+  changelog). Their in-scope findings go to the worker as one bundle; their
+  packets go to the reviewer as evidence, so the `opus` round spends its turns on
+  correctness. Auditors never fix, never run in `direct` work, and never replace
+  the reviewer.
 - Review happens on finished boundaries: a substantial block, a refactor, security
   or money paths, performance-sensitive code. Not after every edit.
 - Plans, briefs, decisions, and summaries live in files or git; context does not
   survive compaction.
-- Budgets: at most three parallel workers, `maxTurns` 60/20/30 for
-  worker/probe/reviewer. User limits override these.
+- Budgets: at most three parallel workers and three auditors per block,
+  `maxTurns` 60/20/25/30 for worker/probe/auditor/reviewer. User limits override
+  these.
 - Nothing is done until it is proven end to end. Green tests are necessary, not
   sufficient. Failed, blocked, and not-run are not PASS.
 - The repository's own rules come first. The brain reads `CLAUDE.md`, `AGENTS.md`,
@@ -156,6 +167,7 @@ it, the fallback is `opus` at `xhigh`.
 | --- | --- | --- | --- | --- |
 | `workforce-worker` | inherit | all except Agent | 60 | `workforce-worker` |
 | `workforce-probe` | inherit | Read, Grep, Glob, Bash, WebFetch; no Agent/Edit/Write | 20 | `workforce-probe` |
+| `workforce-auditor` | inherit (`haiku` on the call), `effort: xhigh` | Read, Grep, Glob, Bash; no Agent/Edit/Write | 25 | `workforce-audit` |
 | `workforce-reviewer` | inherit | all except Agent/Edit/Write/NotebookEdit | 30 | `workforce-review` |
 
 Roles do not spawn children. Only the user-facing session asks questions.

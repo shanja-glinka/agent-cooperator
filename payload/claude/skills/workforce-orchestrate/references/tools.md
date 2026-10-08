@@ -6,8 +6,8 @@ use those. Use [dispatch](dispatch.md) for the chosen profile and the packet.
 
 ## Agent: spawn a role with an explicit model
 
-Roles installed by this kit are `workforce-worker`, `workforce-probe`, and
-`workforce-reviewer`. Pass them as `subagent_type` and always set `model`
+Roles installed by this kit are `workforce-worker`, `workforce-probe`,
+`workforce-auditor`, and `workforce-reviewer`. Pass them as `subagent_type` and always set `model`
 explicitly; the role files use `inherit` so the call decides.
 
 ```json
@@ -27,6 +27,20 @@ explicitly; the role files use `inherit` so the call decides.
   only when the child genuinely needs everything you have seen.
 - `isolation: "worktree"` gives the child its own checkout; use it only for
   concrete write conflicts and merge the result back deliberately.
+- Audit before review: in one message spawn two or three `workforce-auditor`
+  calls with `model: "haiku"`, one LENS each (`docs`, `task`, `conventions`),
+  the same frozen snapshot, and the packet's PROJECT_RULES. They are read-only
+  and return in parallel; the role pins `effort: xhigh`.
+
+```json
+{
+  "subagent_type": "workforce-auditor",
+  "model": "haiku",
+  "description": "Audit lens: conventions",
+  "prompt": "<packet with LENS: conventions, SNAPSHOT, SCOPE, PROJECT_RULES, CHECKS>"
+}
+```
+
 - The reviewer is never the author. Block review uses a `workforce-reviewer` with
   `model: "opus"`, MODE=block. Stage acceptance uses a separate `workforce-reviewer`
   (`opus`, or `fable` in Enhanced), MODE=stage.

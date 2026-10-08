@@ -11,7 +11,8 @@ two runtimes from one package and one installer:
   does the bulk of implementation and review, Luna answers lookups, Astra accepts
   stages and orchestrates in Enhanced.
 - **Claude Workforce** applies the same roles to **Claude Code**: an `opus` brain,
-  `sonnet` workers, `haiku` probes, `opus` reviewers, `fable` as a reserve tier.
+  `sonnet` workers, `haiku` probes and auditors, `opus` reviewers, `fable` as a
+  reserve tier.
 
 Both editions share one workflow: the orchestrator reads the repository's own rules
 first, briefs workers with complete owned blocks and a locked scope, reuses the same
@@ -77,6 +78,7 @@ codex -p workforce-enhanced
 | Bounded research | Luna medium, Sol when judgment is needed | same |
 | Main implementation | Sol high, medium for settled blocks | same |
 | Unresolved design/algorithm | Targeted Astra assistance as needed | Bounded Astra high work |
+| Audit lenses (2-3 parallel) | Luna xhigh | Luna xhigh |
 | Completed block review | Sol high | Sol high |
 | Major stage acceptance | Astra high | Astra high |
 
@@ -113,11 +115,12 @@ workers with disjoint write sets, block reviews, and a stage review.
 | Bounded research | `haiku` medium | `sonnet` medium |
 | Implementation | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
 | Unresolved design | targeted `opus` high | bounded `fable` high (fallback `opus` xhigh) |
+| Audit lenses (2-3 parallel) | `haiku` xhigh | `haiku` xhigh |
 | Block review | `opus` high | `opus` high |
 | Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) |
 
-Aliases currently resolve to Fable 5.1, Opus 5.5, Sonnet 5, and Haiku 4.5 on the
-Claude API (checked 2026-09-24; see `docs/claude-code.md`). Every Agent call sets
+Aliases currently resolve to Fable 5.1, Opus 5.5, Sonnet 5.5, and Haiku 5.5 on the
+Claude API (checked 2026-10-08; see `docs/claude-code.md`). Every Agent call sets
 `model` explicitly; effort comes from role frontmatter or the session, and note
 that Opus 5.5 defaults to `medium` effort. Correction rounds continue the same worker and reviewer with SendMessage;
 a fresh agent is for independence, a different tier, or a polluted context.
@@ -133,10 +136,14 @@ a fresh agent is for independence, a different tier, or a polluted context.
    OUT_OF_SCOPE. Design decisions are made before the brief, not delegated inside it.
 5. Workers implement, connect consumers, self-review their whole result, and list
    out-of-scope observations as follow-ups instead of implementing them.
-6. Independently review each completed substantial block on its diff. Findings are
+6. Before the reviewer, run two or three cheap auditors in parallel at `xhigh`
+   (Haiku 5.5 or GPT-6 Luna), one lens each: docs, task, conventions. Their
+   in-scope findings go to the worker as one bundle; their packets go to the
+   reviewer as evidence.
+7. Independently review each completed substantial block on its diff. Findings are
    tagged in-scope, follow-up, or behavior-change; only in-scope findings go back to
    the same worker, and rejecting previously accepted input needs the user's decision.
-7. A separate reviewer accepts a major stage against the original outcome and the
+8. A separate reviewer accepts a major stage against the original outcome and the
    required package gates. Nothing is done until proven end to end.
 
 No permanent auditor per worker. No mandatory fan-out for tiny edits. No new reviewer
@@ -147,7 +154,7 @@ a completed migration. Changelog lines describe user-observable behavior only.
 
 | | Codex (`CODEX_HOME`, default `~/.codex`) | Claude Code (`~/.claude`) |
 | --- | --- | --- |
-| Roles | `agents/workforce_*.toml` | `agents/workforce-*.md` |
+| Roles (worker, probe, auditor, reviewer) | `agents/workforce_*.toml` | `agents/workforce-*.md` |
 | Skills | `skills/workforce-*/` linked into `~/.agents/skills` | `skills/workforce-*/` |
 | Launch layers | `workforce-standard.config.toml`, `workforce-enhanced.config.toml` | none |
 | Policy and manifest | `codex-workforce/profiles.json`, `manifest.json` | `claude-workforce/profiles.json`, `manifest.json` |

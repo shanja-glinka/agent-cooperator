@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Add the auditor role to both editions: `workforce-auditor` (Claude Code,
+  `haiku` at `effort: xhigh`, read-only, 25 turns) and `workforce_auditor`
+  (Codex, GPT-6 Luna at xhigh, read-only), with the `workforce-audit` skill.
+  After a worker reports READY_FOR_INTEGRATION, the orchestrator runs two or
+  three auditors in parallel, one lens each (docs against code, task against
+  scope, conventions against project rules), bundles in-scope findings to the
+  worker, and hands the packets to the reviewer as evidence so the expensive
+  review spends its turns on correctness.
+- Update model resolution: Claude `sonnet` and `haiku` now resolve to Sonnet 5.5
+  and Haiku 5.5 (Haiku 5.5 supports effort up to `xhigh`); Codex moves from
+  GPT-6 Sol to GPT-6.1 Sol at the same price (policy 1.5.0). Checked 2026-10-08.
+
 ## 1.2.0 — 2026-09-24
 
 - Move the Codex edition to the GPT-6 family (policy 1.4.0): GPT-6 Sol replaces

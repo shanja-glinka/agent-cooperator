@@ -38,10 +38,12 @@ then `~/.codex`. The command does not rewrite environment variables or shell pro
 CODEX_HOME/
   agents/workforce_probe.toml
   agents/workforce_worker.toml
+  agents/workforce_auditor.toml
   agents/workforce_reviewer.toml
   skills/workforce-orchestrate/...
   skills/workforce-worker/...
   skills/workforce-probe/...
+  skills/workforce-audit/...
   skills/workforce-review/...
   skills/workforce-smoke/...
   workforce-standard.config.toml
@@ -78,10 +80,12 @@ that directory, so there is no discovery link and `--skills-dir` is rejected.
 CLAUDE_HOME/
   agents/workforce-worker.md
   agents/workforce-probe.md
+  agents/workforce-auditor.md
   agents/workforce-reviewer.md
   skills/workforce-orchestrate/...
   skills/workforce-worker/...
   skills/workforce-probe/...
+  skills/workforce-audit/...
   skills/workforce-review/...
   skills/workforce-smoke/...
   claude-workforce/profiles.json
@@ -136,7 +140,7 @@ tool_output_token_limit = 4000
 model_auto_compact_token_limit = 200000
 # Safety net if a spawn omits an explicit model: use the cheap default, not the root model
 [agents]
-default_subagent_model = "gpt-6-sol"
+default_subagent_model = "gpt-6.1-sol"
 default_subagent_reasoning_effort = "medium"
 max_concurrent_threads_per_session = 3
 ```
@@ -147,7 +151,7 @@ config reference. `/usage` in Codex shows actual token totals per session.
 ## Loading and verification
 
 Start a fresh Codex or Claude Code session after installing or updating. In Claude
-Code, `/agents` lists the three roles and `/workforce-orchestrate` appears in the
+Code, `/agents` lists the four roles and `/workforce-orchestrate` appears in the
 skill menu; `/workforce-smoke` runs the live routing check on explicit request. Current Codex automatically
 discovers named TOML agents; this kit does not add legacy agent registration tables
 or change `[agents]` settings. If your configuration disables subagents, installation
@@ -181,7 +185,7 @@ when needed. A text instruction cannot switch an already-running root model.
 Project-local roles and instructions may take precedence; skills with the same name
 can also appear more than once. The global installer does not recursively modify
 your repositories. Inspect the project's managed workflow block and update it to
-route to `workforce-orchestrate` and the three `workforce_*` roles when migrating.
+route to `workforce-orchestrate` and the four `workforce_*` roles when migrating.
 Retire obsolete local copies only after existing tasks no longer depend on them.
 
 The old `astra_*`/`astra-*` names are not installed by this package. Existing copies

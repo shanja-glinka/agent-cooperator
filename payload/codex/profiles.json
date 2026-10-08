@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.4.0",
+  "policyVersion": "1.5.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
       "orchestrator": {
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "effort": "high",
         "note": "Cost choice: Sol is Codex's recommended default and about 5x cheaper per token than Astra; Astra keeps stage acceptance and Enhanced."
       },
@@ -14,18 +14,18 @@
         "effort": "medium",
         "scope": "read-only lookups: symbols, consumers, contracts",
         "escalateTo": {
-          "model": "gpt-6-sol",
+          "model": "gpt-6.1-sol",
           "effort": "medium",
           "when": "the question needs judgment, not search"
         }
       },
       "worker": {
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "effort": "high",
         "effortRule": "medium for blocks with a settled contract and clear shape; high for debugging, unclear failures, and non-trivial implementation"
       },
       "blockReviewer": {
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "effort": "high"
       },
       "stageReviewer": {
@@ -36,6 +36,17 @@
         "model": "gpt-6-astra",
         "effort": "high",
         "scope": "targeted-assistance"
+      },
+      "auditor": {
+        "model": "gpt-6-luna",
+        "effort": "xhigh",
+        "lenses": [
+          "docs",
+          "task",
+          "conventions"
+        ],
+        "parallel": 3,
+        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never for tiny inline changes"
       }
     },
     "enhanced": {
@@ -47,18 +58,18 @@
         "model": "gpt-6-luna",
         "effort": "medium",
         "escalateTo": {
-          "model": "gpt-6-sol",
+          "model": "gpt-6.1-sol",
           "effort": "medium",
           "when": "the question needs judgment, not search"
         }
       },
       "worker": {
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "effort": "high",
         "effortRule": "medium for blocks with a settled contract and clear shape; high for debugging, unclear failures, and non-trivial implementation"
       },
       "blockReviewer": {
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "effort": "high"
       },
       "stageReviewer": {
@@ -69,6 +80,17 @@
         "model": "gpt-6-astra",
         "effort": "high",
         "scope": "bounded-open-design"
+      },
+      "auditor": {
+        "model": "gpt-6-luna",
+        "effort": "xhigh",
+        "lenses": [
+          "docs",
+          "task",
+          "conventions"
+        ],
+        "parallel": 3,
+        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never for tiny inline changes"
       }
     }
   },
@@ -96,7 +118,7 @@
     "changelog": "User-observable behavior only, one line per change, no process narration."
   },
   "modelResolution": {
-    "checkedOn": "2026-09-24",
+    "checkedOn": "2026-10-08",
     "models": {
       "gpt-6-astra": {
         "priceInOutPerMTok": [
@@ -105,27 +127,35 @@
         ],
         "role": "most capable; stage acceptance, Enhanced brain, bounded open design"
       },
+      "gpt-6.1-sol": {
+        "priceInOutPerMTok": [
+          2,
+          10
+        ],
+        "role": "near-Astra for complex work at Sol price; Standard brain, implementation, block review",
+        "succeeds": "gpt-6-sol"
+      },
       "gpt-6-sol": {
         "priceInOutPerMTok": [
           2,
           10
         ],
-        "role": "Codex recommended default; Standard brain, implementation, block review",
-        "succeeds": "gpt-5.6-terra"
+        "status": "still served; superseded by gpt-6.1-sol in this policy"
       },
       "gpt-6-luna": {
         "priceInOutPerMTok": [
           0.1,
           0.5
         ],
-        "role": "read-only lookups and mechanical checks; Codex suggests it when rate limits are hit"
+        "role": "read-only lookups, mechanical checks, audit lenses at xhigh",
+        "effortUpTo": "xhigh (max on the API; no ultra)"
       },
       "gpt-5.6-terra": {
         "priceInOutPerMTok": [
           2,
           12
         ],
-        "status": "still served; superseded by gpt-6-sol in this policy"
+        "status": "still served; superseded"
       },
       "gpt-5.5": {
         "status": "retiring 2026-10-14; not used"

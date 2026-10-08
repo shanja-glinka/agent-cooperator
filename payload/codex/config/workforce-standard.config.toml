@@ -1,6 +1,6 @@
 # Optional native launch: codex -p workforce-standard
 # Applies to this launch; it does not rewrite the base config.toml.
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 The user explicitly launched the workforce-standard config profile.

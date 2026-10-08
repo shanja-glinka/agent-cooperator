@@ -18,17 +18,19 @@ runtime settings.
 
 | Responsibility | Standard | Enhanced |
 | --- | --- | --- |
-| User-facing orchestrator | `gpt-6-sol`, `high` | `gpt-6-astra`, `high` |
-| Bounded research (`workforce_probe`) | `gpt-6-luna`, `medium`; `gpt-6-sol` when judgment is needed | same |
-| Main implementation (`workforce_worker`) | `gpt-6-sol`, `high` (`medium` for settled blocks) | same |
+| User-facing orchestrator | `gpt-6.1-sol`, `high` | `gpt-6-astra`, `high` |
+| Bounded research (`workforce_probe`) | `gpt-6-luna`, `medium`; `gpt-6.1-sol` when judgment is needed | same |
+| Main implementation (`workforce_worker`) | `gpt-6.1-sol`, `high` (`medium` for settled blocks) | same |
 | Unresolved design/algorithm | Targeted Astra assistance when needed | Bounded Astra `high` block |
-| Completed block (`workforce_reviewer`, `MODE=block`) | `gpt-6-sol`, `high` | same |
+| Audit lenses (`workforce_auditor`, 2-3 in parallel) | `gpt-6-luna`, `xhigh` | same |
+| Completed block (`workforce_reviewer`, `MODE=block`) | `gpt-6.1-sol`, `high` | same |
 | Major stage (`workforce_reviewer`, `MODE=stage`) | `gpt-6-astra`, `high` | `gpt-6-astra`, `high` |
 
-Prices and roles as checked on 2026-09-24 (see `profiles.json`, `modelResolution`):
-Astra $10/$50 per MTok in/out, Sol $2/$10, Luna $0.1/$0.5. Sol is the model Codex
-itself recommends by default and succeeds GPT-5.6 Terra at the same input price
-with cheaper output; Luna is what Codex suggests when rate limits are hit. Standard
+Prices and roles as checked on 2026-10-08 (see `profiles.json`, `modelResolution`):
+Astra $10/$50 per MTok in/out, GPT-6.1 Sol $2/$10, Luna $0.1/$0.5. GPT-6.1 Sol
+succeeds GPT-6 Sol at the same price and is described by OpenAI as near-Astra
+performance for complex work; Luna is what Codex suggests when rate limits are
+hit and supports effort up to `xhigh`, which is what the auditor role uses. Standard
 puts the orchestrator on Sol deliberately: the orchestrator holds the longest
 context, and Astra costs about five times more per token. Astra keeps stage
 acceptance, the Enhanced brain, and bounded open-design blocks, where its
@@ -37,9 +39,12 @@ reasoning changes the outcome. GPT-5.5 retires on 2026-10-14 and is not used.
 ## Tier and effort guidance
 
 - `gpt-6-luna`: read-only lookups (where a symbol lives, who imports it, what a
-  contract says), mechanical checks, smoke probes. Not for judgment calls; when a
-  probe question needs an assessment rather than a search, use Sol.
-- `gpt-6-sol`: orchestration in Standard, implementation with a decided shape,
+  contract says), mechanical checks, smoke probes, and audit lenses at `xhigh`.
+  Two or three parallel Luna auditors at `xhigh` cost a small fraction of one Sol
+  review round and catch documentation drift, scope misses, and convention
+  violations before the reviewer runs. Not for judgment calls; when a probe
+  question needs an assessment rather than a search, use Sol.
+- `gpt-6.1-sol`: orchestration in Standard, implementation with a decided shape,
   block review, ordinary debugging. Effort `medium` for a block whose contract is
   settled and shape is clear; `high` for debugging, unclear failures, and
   non-trivial implementation. Sol's own default is `medium`, so set effort
@@ -154,6 +159,7 @@ DEPENDENCIES: ready inputs and handoff conditions
 CHECKS: relevant commands with cwd and required behavior
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer only)
+LENS: docs | task | conventions (auditor only)
 REVIEW_INSTRUCTIONS: exact applicable sources, or not_applicable
 ```
 

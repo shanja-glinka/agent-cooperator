@@ -21,6 +21,7 @@ finished boundaries only.
 | Bounded research (`workforce-probe`) | `haiku`, `medium`; `sonnet` if the question needs judgment | `sonnet`, `medium` |
 | Main implementation (`workforce-worker`) | `sonnet`, `high` | `sonnet`, `high`; `opus` for non-trivial blocks |
 | Unresolved design or algorithm | Targeted `opus high` assistance when needed | Bounded `fable high` block (fallback `opus xhigh`) |
+| Audit lenses (`workforce-auditor`, 2-3 in parallel) | `haiku`, `xhigh` | `haiku`, `xhigh` |
 | Completed block (`workforce-reviewer`, MODE=block) | `opus`, `high` | `opus`, `high` |
 | Major stage (`workforce-reviewer`, MODE=stage) | `opus`, `high` | `fable`, `high` (fallback `opus xhigh`) |
 
@@ -29,19 +30,19 @@ the Agent tool: `haiku`, `sonnet`, `opus`, `fable`, `best`, `inherit`, or a full
 model id. The kit uses aliases so that a model release does not require a kit
 release; what an alias runs is decided by Claude Code and the provider:
 
-| Alias | Resolves to (Claude API provider, checked 2026-09-24) | Price in/out per MTok | Default effort |
+| Alias | Resolves to (Claude API provider, checked 2026-10-08) | Price in/out per MTok | Default effort |
 | --- | --- | --- | --- |
 | `fable` | Claude Fable 5.1 (`claude-fable-5-1`) | $10 / $50 | `high` |
 | `opus` | Claude Opus 5.5 (`claude-opus-5-5`) | $4 / $20 | `medium` |
-| `sonnet` | Claude Sonnet 5 (`claude-sonnet-5`) | $2 / $10 | `high` |
-| `haiku` | Claude Haiku 4.5 (`claude-haiku-4-5`) | $1 / $5 | not supported |
+| `sonnet` | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | $2 / $10 | `high` |
+| `haiku` | Claude Haiku 5.5 (`claude-haiku-5-5`) | from $0.10 / $0.50 | `medium` |
 | `best` | `fable` where available, else `opus` | | |
 
-Other providers differ: on Bedrock and Vertex `sonnet` currently means Sonnet 4.5,
-on Microsoft Foundry `opus` means Opus 4.6. Legacy models (Fable 5, Opus 5,
-Opus 4.8 and earlier) stay reachable only by full id. Haiku 4.5 has a retirement
-commitment no sooner than 2026-10-15; if `haiku` stops resolving, run probes on
-`sonnet` and say so.
+Other providers differ: on Bedrock and Vertex `sonnet` means Sonnet 4.5 and
+`haiku` means Haiku 4.5, on Microsoft Foundry `opus` means Opus 4.6. Legacy
+models (Fable 5, Opus 5, Sonnet 5, Haiku 4.5, Opus 4.8 and earlier) stay
+reachable only by full id. Haiku 5.5 supports effort up to `xhigh`, which is
+what makes the auditor role possible on it.
 
 The role files use `model: inherit` on purpose so that the explicit model on each
 Agent call is what runs. Effort values are `low`, `medium`, `high`, `xhigh`, `max`.
@@ -55,7 +56,11 @@ pins `high` explicitly; a brain session on `opus` runs at `medium` unless you se
 
 ## Tier guidance
 
-- `haiku`: mechanical edits, renames, lookups, single-file checks, smoke probes.
+- `haiku`: mechanical edits, renames, lookups, single-file checks, smoke probes,
+  and audit lenses at `xhigh`. Two or three parallel Haiku auditors at `xhigh`
+  cost a small fraction of one `opus` review round and catch the cheap classes
+  of defect (documentation drift, scope misses, convention violations) before
+  the reviewer runs.
 - `sonnet`: implementation with a decided shape, focused multi-file work, clear
   refactors, ordinary bug fixes. The default worker in both presets.
 - `opus`: planning, review loops, architecture, debugging, non-trivial
@@ -127,7 +132,8 @@ findings and the same WRITE_SET. Record the escalation and its reason in the tas
 state.
 
 Budgets (defaults in `profiles.json`, overridable by the user): at most three
-parallel workers, worker `maxTurns` 60, probe 20, reviewer 30. A worker that runs
+parallel workers, worker `maxTurns` 60, probe 20, reviewer 30, auditor 25, and at
+most three auditors per block. A worker that runs
 out of turns reports its state; the brain decides whether to continue it or
 re-brief. Report usage evidence from the actual session (`/cost`, `/usage`) when
 asked; do not invent token measurements or promise savings.
@@ -157,6 +163,7 @@ DEPENDENCIES: ready inputs and handoff conditions
 CHECKS: relevant commands with cwd and required behavior
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer only)
+LENS: docs | task | conventions (auditor only)
 REVIEW_INSTRUCTIONS: exact applicable sources, or not_applicable
 ```
 
