@@ -3,7 +3,7 @@ name: workforce-auditor
 description: Audits a submitted block through one lens (docs, task, or conventions) and reports every violation with file:line evidence. Read-only; the cooperator runs it in rounds and judges the findings.
 model: inherit
 effort: xhigh
-maxTurns: 25
+maxTurns: 50
 skills:
   - workforce-audit
 tools: Read, Grep, Glob, Bash

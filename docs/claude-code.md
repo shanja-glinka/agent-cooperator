@@ -157,7 +157,7 @@ out-of-scope ones are rejected.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance
   line, and reproduces.
-- Turn limits per run: worker 60, probe 20, auditor 25, reviewer 30.
+- Turn limits per run: worker 60, probe 20, auditor 50, reviewer 30.
 
 ### Roles
 
@@ -165,7 +165,7 @@ out-of-scope ones are rejected.
 | --- | --- | --- | --- | --- |
 | `workforce-worker` | inherit | all except Agent | 60 | `workforce-worker` |
 | `workforce-probe` | inherit | Read, Grep, Glob, Bash, WebFetch; no Agent/Edit/Write | 20 | `workforce-probe` |
-| `workforce-auditor` | inherit (`haiku` on the call), `effort: xhigh` | Read, Grep, Glob, Bash; no Agent/Edit/Write | 25 | `workforce-audit` |
+| `workforce-auditor` | inherit (`haiku` on the call), `effort: xhigh` | Read, Grep, Glob, Bash; no Agent/Edit/Write | 50 | `workforce-audit` |
 | `workforce-reviewer` | inherit | all except Agent/Edit/Write/NotebookEdit | 30 | `workforce-review` |
 
 Roles do not spawn children. Only the user-facing session asks questions.

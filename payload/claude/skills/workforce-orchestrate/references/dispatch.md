@@ -50,7 +50,7 @@ evidence. State the question and the expected benefit first. When a worker
 loops, re-brief or move it one tier up with the bundled findings rather than
 sending the same correction again.
 
-Turn limits per run: worker 60, probe 20, auditor 25, reviewer 30; up to three
+Turn limits per run: worker 60, probe 20, auditor 50, reviewer 30; up to three
 workers in parallel; three audit rounds per block. A run that hits its limit
 reports its state and continues through SendMessage with a new budget. Report
 usage from `/cost` or `/usage` when asked.

@@ -117,7 +117,7 @@
     "maxParallelWorkers": 3,
     "workerMaxTurns": 60,
     "probeMaxTurns": 20,
-    "auditorMaxTurns": 25,
+    "auditorMaxTurns": 50,
     "reviewerMaxTurns": 30,
     "auditRounds": 3,
     "note": "Defaults for role frontmatter and packets. User limits and project rules override them."
