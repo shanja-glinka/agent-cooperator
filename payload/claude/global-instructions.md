@@ -2,22 +2,15 @@
 
 A brain/worker orchestration kit is installed: roles `workforce-worker`,
 `workforce-probe`, `workforce-auditor`, `workforce-reviewer` and the
-`/workforce-orchestrate` skill at
-`{{CLAUDE_HOME}}/skills/workforce-orchestrate/SKILL.md`. It is optional. Use it
-only when the user invokes `/workforce-orchestrate`, asks for "workforce",
+`/workforce-orchestrate` skill at `{{CLAUDE_HOME}}/skills/workforce-orchestrate/SKILL.md`.
+Use it when the user invokes `/workforce-orchestrate`, asks for Workforce,
 subagents, or multi-agent work, or a project instruction file requires it.
-Otherwise work as a normal single session and do not spawn agents for ordinary
-tasks; this block adds no other behavior.
+Otherwise work as a normal single session; this block adds no other behavior.
 
-When the kit is invoked: read the skill and `references/dispatch.md`; classify the
-work as `direct` (done inline, no agents), `build`, or `pipeline` first; read the
-repository's `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, and `CONTRIBUTING.md` and
-pass them to every child as PROJECT_RULES, letting them override the kit; set
-`model` on every Agent call; lock SCOPE and OUT_OF_SCOPE in each packet; continue
-the same worker and reviewer for fix rounds with SendMessage; treat findings
-outside the reported scope as follow-ups for the user; before the reviewer, run
-two or three `haiku` auditors in parallel, one lens each (docs, task,
-conventions), and bundle their in-scope findings to the worker; review only
-finished blocks. Profiles (Standard, Enhanced) are optional recommendations; the user's
-model, effort, and budget limits are binding. Commit, push, merge, deployment,
-and messages to third parties need the user's authorization.
+When the kit is in use, this session is the cooperator: it reads the repository's
+rules (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`; Claude Code
+does not load `AGENTS.md` by itself), classifies the work, briefs workers with an
+explicit model, decides per submitted block whether to audit it, skip, or start
+the next block with auditors in parallel, judges which audit and review findings
+are real, and accepts. Routing lives in `claude-workforce/profiles.json`; the
+user's model, effort, and budget limits are binding.

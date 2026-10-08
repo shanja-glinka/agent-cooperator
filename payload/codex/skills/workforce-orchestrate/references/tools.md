@@ -1,63 +1,42 @@
-# Runtime tools, not an invented API
+# Tools in Codex
 
-Read the actual tool schema in the receiving session. These are examples of tool
-arguments, not shell commands. Model availability and accepted fields vary by runtime.
-Use [dispatch](dispatch.md) for the chosen hybrid profile and complete assignment.
+Read the real tool schema in the session; fields vary by runtime. Roles installed
+by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
+`workforce_reviewer`.
 
 ## V2: task_name, fork_turns, followup_task
 
-Typical bounded implementation in either profile:
-
 ```json
-{
-  "task_name": "consumer_cutover",
-  "agent_type": "workforce_worker",
-  "model": "gpt-6.1-sol",
-  "reasoning_effort": "high",
-  "fork_turns": "none",
-  "message": "<complete assignment including PROFILE>"
-}
+{ "task_name": "consumer_cutover", "agent_type": "workforce_worker",
+  "model": "gpt-6.1-sol", "reasoning_effort": "high",
+  "fork_turns": "none", "message": "<work packet>" }
 ```
 
-For a bounded Enhanced design block, use the same appropriate role with
-`gpt-6-astra` and `high`, explicitly assigning that open decision. A read-only design
-investigation uses `workforce_probe`; an implementation uses `workforce_worker`.
-A read-only lookup uses `workforce_probe` with `gpt-6-luna` and `medium`; a probe
-that needs judgment uses `gpt-6.1-sol`. Before block review, spawn two or three
-`workforce_auditor` tasks in one turn with `gpt-6-luna` and `xhigh`, one LENS each
-(`docs`, `task`, `conventions`), the same frozen snapshot, and PROJECT_RULES; they
-are read-only and return findings packets in parallel. Block review uses `workforce_reviewer`, GPT-6.1 Sol
-high, MODE=block. Major stage acceptance
-uses a separate `workforce_reviewer`, Astra high, MODE=stage. Do not reuse the author as
-its independent reviewer.
+```json
+{ "task_name": "audit_conventions", "agent_type": "workforce_auditor",
+  "model": "gpt-6-luna", "reasoning_effort": "xhigh",
+  "fork_turns": "none", "message": "<packet with LENS, SNAPSHOT, SCOPE, PROJECT_RULES, prior rounds>" }
+```
 
-Keep the returned canonical task name. In a runtime exposing these exact fields:
-
-- `send_message({"target":"<task>","message":"<clarification>"})` delivers a message
-  but does not restart an idle agent.
-- `followup_task({"target":"<task>","message":"<bundled corrections>"})` continues
-  that agent, including an idle one. It does not take model/effort overrides.
-- `interrupt_agent({"target":"<task>"})` interrupts a turn; it does not imply permanent
-  deletion or a freed slot.
-- `list_agents({})` reads status. Do not poll without a need.
-- `wait_agent({})` waits for notifications; consume actual delivered child results.
-
-If V2 has no close tool, do not invent one from V1. Reuse suitable idle workers; do
-not leave active children unhandled. A full-history fork may disallow model overrides;
-use an empty fork with explicit context instead.
+- `followup_task({"target":"<task>","message":"<findings or next round>"})`
+  continues an agent, including an idle one, with its context: the same worker
+  for fixes, the same auditors for the next round, the same reviewer for the
+  delta. It does not take model or effort overrides; for a different model,
+  spawn a fresh task.
+- `send_message` delivers a message without restarting an idle agent.
+  `interrupt_agent` interrupts a turn. `wait_agent` waits for notifications;
+  `list_agents` reads status without polling loops.
+- Use an empty fork with an explicit packet; a full-history fork may disallow
+  model overrides. The reviewer is never the author.
 
 ## V1: fork_context and send_input
 
-Only if the actual schema exposes these fields, spawn with `agent_type`, `model`,
-`reasoning_effort`, `fork_context: false`, and a complete `message`. Keep its returned
-agent id. Use the runtime's documented send/wait/close fields; do not send V2 fields
-or guess names. Some builds have `send_input` and `close_agent`, others differ.
+If the schema exposes these instead, spawn with `agent_type`, `model`,
+`reasoning_effort`, `fork_context: false`, and the packet as `message`, and use
+the runtime's own send, wait, and close fields.
 
 ## Missing capability
 
-If model/effort overrides, required custom roles, or required models are unavailable,
-report the exact missing capability (for example DYNAMIC_ROUTING_UNAVAILABLE). Do
-not emulate model selection in text, silently substitute a model, or install a new
-runtime. A runtime-accepted request proves the submitted parameters; if actual model
-telemetry is absent, mark effective routing unverified. Self-reported model names
-are not runtime evidence. Ask the user about a materially different fallback.
+If model or effort overrides, custom roles, or a required model are unavailable,
+report the exact missing capability and fall back as dispatch describes. Never
+emulate routing in text; a child's self-reported model name is not evidence.

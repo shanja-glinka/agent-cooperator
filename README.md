@@ -78,7 +78,7 @@ codex -p workforce-enhanced
 | Bounded research | Luna medium, Sol when judgment is needed | same |
 | Main implementation | Sol high, medium for settled blocks | same |
 | Unresolved design/algorithm | Targeted Astra assistance as needed | Bounded Astra high work |
-| Audit lenses (2-3 parallel) | Luna xhigh | Luna xhigh |
+| Auditor (3 rounds) | Luna xhigh | Luna xhigh |
 | Completed block review | Sol high | Sol high |
 | Major stage acceptance | Astra high | Astra high |
 
@@ -115,7 +115,7 @@ workers with disjoint write sets, block reviews, and a stage review.
 | Bounded research | `haiku` medium | `sonnet` medium |
 | Implementation | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
 | Unresolved design | targeted `opus` high | bounded `fable` high (fallback `opus` xhigh) |
-| Audit lenses (2-3 parallel) | `haiku` xhigh | `haiku` xhigh |
+| Auditor (3 rounds) | `haiku` xhigh | `haiku` xhigh |
 | Block review | `opus` high | `opus` high |
 | Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) |
 
@@ -127,28 +127,40 @@ a fresh agent is for independence, a different tier, or a polluted context.
 
 ## How work flows (both editions)
 
-1. Read the repository's own rules (`AGENTS.md`, `CLAUDE.md`, `.claude/rules/`,
-   `CONTRIBUTING.md`) and pass them to every child as PROJECT_RULES; they override
-   the kit.
-2. Resolve the profile once for the task; classify the work before spawning anyone.
-3. Agree the actual outcome and a concrete acceptance example. "Analyze" stays analysis.
-4. Assign complete blocks with clear ownership, exact sources, a locked SCOPE and
-   OUT_OF_SCOPE. Design decisions are made before the brief, not delegated inside it.
-5. Workers implement, connect consumers, self-review their whole result, and list
-   out-of-scope observations as follow-ups instead of implementing them.
-6. Before the reviewer, run two or three cheap auditors in parallel at `xhigh`
-   (Haiku 5.5 or GPT-6 Luna), one lens each: docs, task, conventions. Their
-   in-scope findings go to the worker as one bundle; their packets go to the
-   reviewer as evidence.
-7. Independently review each completed substantial block on its diff. Findings are
-   tagged in-scope, follow-up, or behavior-change; only in-scope findings go back to
-   the same worker, and rejecting previously accepted input needs the user's decision.
-8. A separate reviewer accepts a major stage against the original outcome and the
-   required package gates. Nothing is done until proven end to end.
+The user-facing session is the cooperator: the orchestrator that cooperates
+agents so that they do the work.
 
-No permanent auditor per worker. No mandatory fan-out for tiny edits. No new reviewer
-after every correction. An inventory, a generated shell, or a green typecheck is not
-a completed migration. Changelog lines describe user-observable behavior only.
+1. Read the repository's own rules (`AGENTS.md`, `CLAUDE.md`, `.claude/rules/`,
+   `CONTRIBUTING.md`) and pass them to every agent as PROJECT_RULES; they
+   override the kit.
+2. Classify the work: `direct` is done inline, `build` is one block, `pipeline`
+   is a plan of blocks. Pick the profile once.
+3. Brief each block with the outcome, an acceptance example, SCOPE and
+   OUT_OF_SCOPE, WRITE_SET, and CHECKS.
+4. When a worker submits a block, the cooperator chooses:
+
+```text
+Worker submits a block
+  │
+  ▼
+Cooperator (the orchestrator) chooses:
+  a) audit this block              → auditors, 3 rounds
+  b) no audit                      → next work to the worker
+  c) next block to the worker      → and auditors in parallel on
+                                     1, 2, 3 or N submitted blocks
+
+Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
+they find through one lens each: docs, task, conventions.
+Real findings in a round → auditors won, the same worker fixes, next round.
+Nothing real in a round  → auditors lost, the block passes the audit.
+The cooperator takes only real findings; theoretical, hypothetical, and
+out-of-scope ones are rejected.
+```
+
+5. An independent reviewer reads the diff with the audit log; real findings go
+   back to the same worker, the same reviewer re-checks the delta.
+6. In a pipeline, a separate reviewer accepts the stage against the original
+   outcome and the project's required gates.
 
 ## What gets installed
 

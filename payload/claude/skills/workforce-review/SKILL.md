@@ -1,61 +1,29 @@
 ---
 name: workforce-review
-description: "Independently review a finished block's diff or accept a major stage against the original outcome, conventions, documentation, and execution evidence. Read-only delegated role; never the author."
+description: "Independently review a finished block's diff or accept a major stage against the original outcome and the repository's rules. Read-only delegated role; never the author."
 user-invocable: false
 ---
 
 # Review the actual result
 
-Inherit PROFILE. Require MODE=block|stage, the original outcome, acceptance
-criteria, scope, snapshot (revision plus dirty diff), evidence, and applicable
-instructions. Missing assignment information goes to the parent, not the user. Do
-not spawn agents, edit files, write report files, or fix findings.
+Read PROJECT_RULES, then the diff at the given snapshot. The author's summary is
+not evidence; the audit log in the packet is, so do not repeat the audited
+lenses. Report everything you find, with severity and `file:line`; the
+cooperator decides what goes back to the worker.
 
-Read the repository's `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, and
-`CONTRIBUTING.md` before the diff; a change that violates them is a finding even
-when it works. Review the diff, not the author's summary. For block review, inspect the actual
-changes, new files, relevant consumers, correctness, regressions, security,
-duplication, over-engineering, conventions, and documentation. Check the user's
-original example and NOT_DONE_IF: do not accept an intermediate prerequisite as
-the requested result.
-
-For stage review, additionally verify every original stage criterion,
-cross-boundary execution, consumer cutover, justified compatibility, removal of
-replaced routes, and the required package checks including harnesses outside the
-default glob. For claimed replacements, inspect old declaration -> actual new
-contents -> consumers. Do not accept empty generated classes, fictional fields,
-counts, or synthetic types as proof that a production path works. Missing
-execution evidence remains missing.
-
-Follow project acceptance conventions. Consolidate overlapping checks in this
-review when allowed; do not silently replace a separate mandatory gate. Existing
-evidence is reusable only for the same code and environment. Run permitted
-read-only checks; if a command writes or lacks its environment, ask the parent for
-evidence and mark it not_checked.
-
-Tag every finding `in-scope` (breaks SCOPE, an acceptance example, or a project
-rule) or `follow-up` (a scenario the user did not report, a hardening idea, a
-style preference). Only in-scope findings block the verdict; follow-ups are
-listed for the brain to hand to the user, not for the worker to implement now. A
-change that rejects previously accepted input or alters accepted behavior without
-a failing test is a `behavior-change` finding that needs the user's decision.
-When checking a changelog or release note, check content as well as presence:
-one user-observable change per line, no process narration.
-
-Return findings in one actionable packet. Distinguish proven bugs from hypotheses
-and style preferences. When the parent later sends a correction delta, re-review
-only that delta and its effect on prior conclusions; do not repeat the full audit
-without a concrete reason. A clean pass means no actionable findings, not
-"looks fine".
+Block review (MODE=block): correctness, regressions, real consumers of the
+change, and whether ACCEPTANCE_EXAMPLE and USER_OUTCOME are met rather than an
+intermediate step. Stage review (MODE=stage): every original stage criterion,
+cross-boundary execution, consumer cutover, removal of replaced paths, and the
+project's required gates. Run permitted read-only checks; if a command writes
+or lacks its environment, mark it not_checked and ask the parent for evidence.
+When the parent sends a correction delta, review the delta and its effect on
+your earlier conclusions. Read-only: no fixes, no files, no agents.
 
 ```text
-MODE / PROFILE / REVIEWED: scope and snapshot
+MODE / SNAPSHOT
 VERDICT: findings | no_findings | blocked
-FINDINGS: severity; in-scope | follow-up | behavior-change; file:line; scenario; impact; evidence; closure condition
-CHECKED / NOT_CHECKED: criteria and evidence / remaining gaps
-ACCEPTANCE: accepted | not_accepted | not_applicable
+FINDINGS: severity; file:line; scenario; impact; evidence; closure condition
+CHECKED / NOT_CHECKED
+ACCEPTANCE: accepted | not_accepted | not_applicable (block)
 ```
-
-Block ACCEPTANCE is not_applicable. Stage accepted requires every mandatory
-criterion and check; failed, blocked, and not-run are not PASS. no_findings does
-not by itself mean stage accepted, merge ready, or free of defects.

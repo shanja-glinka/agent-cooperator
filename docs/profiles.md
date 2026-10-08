@@ -91,34 +91,42 @@ the available settings when material. A user-selected profile also allows adapta
 explicit strict model/effort/budget requirements need the required
 setting or an accepted fallback before dependent work. Do not claim exact routing.
 
-## Cheap auditors before the reviewer
+## The cooperator and the audit game
 
-When a worker reports READY_FOR_INTEGRATION, the orchestrator spawns two or three
-auditors in parallel on the cheapest model at `xhigh` (Haiku 5.5 in Claude Code,
-GPT-6 Luna in Codex), one lens each: docs (code against documentation and
-contracts), task (diff against SCOPE and acceptance), conventions (project
-rules, lint, tests, changelog). They are read-only, return tagged findings with
-`file:line`, and cost a small fraction of one reviewer round. In-scope findings go
-to the worker as one bundle; the packets go to the reviewer as evidence, so the
-expensive review spends its turns on correctness, regressions, and consumers.
-Auditors never fix and never replace the reviewer.
+The orchestrator is the cooperator: it cooperates agents so that they do the
+work. After a worker submits a block, the cooperator chooses what happens next.
 
-## Scope stays put
+```text
+Worker submits a block
+  │
+  ▼
+Cooperator (the orchestrator) chooses:
+  a) audit this block              → auditors, 3 rounds
+  b) no audit                      → next work to the worker
+  c) next block to the worker      → and auditors in parallel on
+                                     1, 2, 3 or N submitted blocks
 
-Every packet carries SCOPE, OUT_OF_SCOPE, and PROJECT_RULES. The reviewer tags each
-finding in-scope, follow-up, or behavior-change; only in-scope findings return to
-the same worker, follow-ups go to the user in the report, and rejecting previously
-accepted input needs the user's decision. Open design questions are decided before
-the brief, never delegated inside a correction packet. This applies to both
-editions; the Claude edition's behavioral check that motivated it is in
-[claude-code.md](claude-code.md).
+Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
+they find through one lens each: docs, task, conventions.
+Real findings in a round → auditors won, the same worker fixes, next round.
+Nothing real in a round  → auditors lost, the block passes the audit.
+The cooperator takes only real findings; theoretical, hypothetical, and
+out-of-scope ones are rejected.
+```
+
+Auditors report everything they find with `file:line` and the rule or document
+behind it. The cooperator judges each finding: it is real when it is in the
+diff or caused by it, breaks a named rule, document, or acceptance line, and
+reproduces by a check or a concrete scenario. Real findings go to the same
+worker as one bundle; the next round continues the same auditors with what was
+accepted and what was rejected. The reviewer then reads the diff together with
+the audit log.
 
 ## Complete blocks, proportional verification
 
 Every implementation packet includes the user's original outcome, an acceptance
 example, exact inputs, ownership, and intermediate results that do not count as done.
-Workers self-review. Independent review happens after a substantial block is ready,
-not after every edit. An independent Astra stage review checks the original outcome.
+Independent review happens after a substantial block is ready, not after every edit. An independent Astra stage review checks the original outcome.
 
 A minimal isolated test can establish a component contract; it cannot by itself
 prove a real consumer was switched. An inventory can support planning; it cannot

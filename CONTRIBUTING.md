@@ -37,7 +37,7 @@ requires an explicit request because it starts real agents and consumes quota.
 For installer changes, test the actual CLI and installed consumer paths, including
 update/removal and preservation of unrelated files. For instruction changes, check
 the whole assignment/worker/reviewer relationship rather than adding keyword-only
-tests for each sentence. Self-review one complete block before independent review.
+tests for each sentence. 
 
 ## Model and policy releases
 

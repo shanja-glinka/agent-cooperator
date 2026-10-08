@@ -93,7 +93,7 @@ multi-stage work with substantial unresolved design where nothing already applie
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium |
 | Implementation (`workforce-worker`) | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` xhigh) |
-| Audit lenses (`workforce-auditor`, 2-3 in parallel) | `haiku` xhigh | `haiku` xhigh |
+| Auditor (`workforce-auditor`, 3 rounds) | `haiku` xhigh | `haiku` xhigh |
 | Block review (`workforce-reviewer`, MODE=block) | `opus` high | `opus` high |
 | Stage acceptance (`workforce-reviewer`, MODE=stage) | `opus` high | `fable` high (fallback `opus` xhigh) |
 
@@ -124,42 +124,40 @@ it, the fallback is `opus` at `xhigh`.
 
 ### Rules that hold in every profile
 
-- The brain does not write product code in `build` or `pipeline` work.
-- Every Agent call sets `model` explicitly. Nothing relies on inheritance.
-- A worker gets a complete packet: outcome, acceptance example, `NOT_DONE_IF`,
-  exact inputs, `WRITE_SET`, `DO_NOT_TOUCH`, `CHECKS`. It edits only its write set.
-- Fix rounds continue the same worker with SendMessage. Re-checks continue the same
-  reviewer. A round costs the delta, not a cold start. Rounds 1-3 stay; from round 4
-  or on a loop without new evidence, a fresh worker one tier up gets the bundle.
-- A fresh agent is for independence (the reviewer is never the author; stage review
-  is a separate agent), a different tier, or a polluted context.
-- Before the reviewer, two or three `haiku` auditors at `xhigh` run in parallel,
-  one lens each: docs (code against documentation and contracts), task (diff
-  against SCOPE and acceptance), conventions (project rules, lint, tests,
-  changelog). Their in-scope findings go to the worker as one bundle; their
-  packets go to the reviewer as evidence, so the `opus` round spends its turns on
-  correctness. Auditors never fix, never run in `direct` work, and never replace
-  the reviewer.
-- Review happens on finished boundaries: a substantial block, a refactor, security
-  or money paths, performance-sensitive code. Not after every edit.
-- Plans, briefs, decisions, and summaries live in files or git; context does not
-  survive compaction.
-- Budgets: at most three parallel workers and three auditors per block,
-  `maxTurns` 60/20/25/30 for worker/probe/auditor/reviewer. User limits override
-  these.
-- Nothing is done until it is proven end to end. Green tests are necessary, not
-  sufficient. Failed, blocked, and not-run are not PASS.
-- The repository's own rules come first. The brain reads `CLAUDE.md`, `AGENTS.md`,
-  `.claude/rules/`, and `CONTRIBUTING.md` (Claude Code loads `CLAUDE.md` by
-  itself but not `AGENTS.md`), lists them as `PROJECT_RULES` in every packet, and
-  every role reads them before touching code. Where they conflict with the kit,
-  the project wins.
-- Scope is locked in the packet (`SCOPE`, `OUT_OF_SCOPE`). The reviewer tags each
-  finding `in-scope`, `follow-up`, or `behavior-change`; only in-scope findings
-  enter a fix round, follow-ups go to the user in the report, and rejecting
-  previously accepted input needs the user's decision. The brain decides open
-  design questions before briefing instead of writing "decide and document" into
-  a fix packet. Changelog lines describe user-observable behavior only.
+- The session is the cooperator: it plans, briefs, judges, and accepts; agents
+  do the work. In `direct` work it simply does the work.
+- The repository's own rules come first: `CLAUDE.md`, `AGENTS.md`,
+  `.claude/rules/`, `CONTRIBUTING.md` (Claude Code does not load `AGENTS.md` by
+  itself). They go to every agent as PROJECT_RULES.
+- Every Agent call sets `model`. Effort comes from the role frontmatter.
+- A worker gets a complete packet with SCOPE, OUT_OF_SCOPE, WRITE_SET, and
+  CHECKS, and edits only its write set.
+- Fixes go back to the same worker, the next audit round to the same auditors,
+  the delta to the same reviewer, all through SendMessage.
+- Audits run at the cooperator's choice:
+
+```text
+Worker submits a block
+  │
+  ▼
+Cooperator (the orchestrator) chooses:
+  a) audit this block              → auditors, 3 rounds
+  b) no audit                      → next work to the worker
+  c) next block to the worker      → and auditors in parallel on
+                                     1, 2, 3 or N submitted blocks
+
+Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
+they find through one lens each: docs, task, conventions.
+Real findings in a round → auditors won, the same worker fixes, next round.
+Nothing real in a round  → auditors lost, the block passes the audit.
+The cooperator takes only real findings; theoretical, hypothetical, and
+out-of-scope ones are rejected.
+```
+
+- Auditors and reviewers report everything; the cooperator decides what is real:
+  in the diff or caused by it, breaks a named rule, document, or acceptance
+  line, and reproduces.
+- Turn limits per run: worker 60, probe 20, auditor 25, reviewer 30.
 
 ### Roles
 
@@ -197,8 +195,8 @@ parser change regressed `.50` for one round, and the changelog grew to ten lines
 | Child tokens (worker + reviewer) | ~462k | ~114k |
 | Previously valid inputs rejected | fractional `qty`, `1e2` | none |
 
-The post-mortem answers from that session produced the scope-lock, follow-up
-tagging, behavior-change, design-decision, and changelog rules above. Run 2 on a
+The post-mortem answers from that session led to locking SCOPE in the packet and
+to the cooperator judging which findings are real. Run 2 on a
 reset fixture with the updated instructions produced the table's second column
 and listed the unreported inputs as candidate follow-ups for the user instead of
 implementing them. One run each; treat the numbers as an illustration of the

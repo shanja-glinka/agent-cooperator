@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.5.0",
+  "policyVersion": "1.6.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -45,8 +45,8 @@
           "task",
           "conventions"
         ],
-        "parallel": 3,
-        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never for tiny inline changes"
+        "rounds": 3,
+        "game": "Auditors report everything; the cooperator takes only real findings. Real findings in a round: auditors won, same worker fixes, next round. Nothing real: auditors lost, block passes."
       }
     },
     "enhanced": {
@@ -89,8 +89,8 @@
           "task",
           "conventions"
         ],
-        "parallel": 3,
-        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never for tiny inline changes"
+        "rounds": 3,
+        "game": "Auditors report everything; the cooperator takes only real findings. Real findings in a round: auditors won, same worker fixes, next round. Nothing real: auditors lost, block passes."
       }
     }
   },
@@ -110,13 +110,6 @@
     "runtimeMismatch": "Adapt to available settings even for a user-selected preset without a new approval gate. Report material actual routing honestly; separately explicit strict model/effort/budget requirements remain binding."
   },
   "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
-  "scopeGuard": {
-    "packet": "SCOPE, OUT_OF_SCOPE, and PROJECT_RULES are required packet fields.",
-    "findings": "Reviewer tags findings in-scope | follow-up | behavior-change; only in-scope findings enter a correction round.",
-    "behaviorChange": "Rejecting previously accepted input, altering accepted behavior without a failing test, or tightening a parser needs the user's decision and a check against currently accepted inputs.",
-    "designDecisions": "The orchestrator decides or asks before briefing; a packet never delegates 'decide and document' for a behavior change.",
-    "changelog": "User-observable behavior only, one line per change, no process narration."
-  },
   "modelResolution": {
     "checkedOn": "2026-10-08",
     "models": {
@@ -162,5 +155,16 @@
       }
     },
     "note": "Codex efforts: Astra light by default; Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra."
-  }
+  },
+  "workClasses": {
+    "direct": "Question, analysis, config or doc edit, trivial fix. The cooperator does it inline; no agents.",
+    "build": "Bug fix or feature with a known shape. One worker block; audit and review at the cooperator's choice.",
+    "pipeline": "Multi-stage or design-open work. Plan of N blocks with disjoint write sets; stage acceptance at the end."
+  },
+  "judging": {
+    "real": "In the diff or caused by it; breaks a named rule, document, or acceptance line; reproduces by a check or a concrete scenario.",
+    "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding.",
+    "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
+  },
+  "continuity": "Fixes go back to the same worker, the next audit round to the same auditors, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model."
 }

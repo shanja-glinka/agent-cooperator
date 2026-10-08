@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.2.0",
+  "policyVersion": "1.3.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
-    "direct": "Question, status, analysis-only, config or doc edit, trivial or single-file fix. Answer or edit inline; no subagents, no review agent.",
-    "build": "Bug fix or ordinary feature with a known shape, typically one to five files. Brain plans; one worker per complete block; independent block review on the finished diff.",
-    "pipeline": "Multi-stage, cross-cutting, or design-open work. Brain plans and accepts; parallel workers with disjoint write sets; block review per block; stage review before closing."
+    "direct": "Question, analysis, config or doc edit, trivial fix. The cooperator does it inline; no agents.",
+    "build": "Bug fix or feature with a known shape. One worker block; audit and review at the cooperator's choice.",
+    "pipeline": "Multi-stage or design-open work. Plan of N blocks with disjoint write sets; stage acceptance at the end."
   },
   "profiles": {
     "standard": {
@@ -48,8 +48,8 @@
           "task",
           "conventions"
         ],
-        "parallel": 3,
-        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never in direct work"
+        "rounds": 3,
+        "game": "Auditors report everything; the cooperator takes only real findings. Real findings in a round: auditors won, same worker fixes, next round. Nothing real: auditors lost, block passes."
       }
     },
     "enhanced": {
@@ -99,8 +99,8 @@
           "task",
           "conventions"
         ],
-        "parallel": 3,
-        "runs": "after READY_FOR_INTEGRATION, before the block reviewer; never in direct work"
+        "rounds": 3,
+        "game": "Auditors report everything; the cooperator takes only real findings. Real findings in a round: auditors won, same worker fixes, next round. Nothing real: auditors lost, block passes."
       }
     }
   },
@@ -117,34 +117,18 @@
     "maxParallelWorkers": 3,
     "workerMaxTurns": 60,
     "probeMaxTurns": 20,
-    "reviewerMaxTurns": 30,
-    "fixRoundsBeforeEscalation": 3,
-    "note": "Defaults for assignments and role frontmatter. User limits and project rules override them. A second review round in build work needs a stated in-scope reason.",
-    "reviewRoundsPerBuildBlock": 1,
     "auditorMaxTurns": 25,
-    "auditorsPerBlock": 3
+    "reviewerMaxTurns": 30,
+    "auditRounds": 3,
+    "note": "Defaults for role frontmatter and packets. User limits and project rules override them."
   },
   "selectionRules": {
     "default": "standard",
-    "classifyFirst": "Decide direct | build | pipeline before choosing any profile or spawning any agent. Direct work never spawns agents.",
+    "classifyFirst": "Decide direct | build | pipeline before choosing a profile or spawning an agent.",
     "reuse": "Explicit task choice, active task context, or an applicable standing preference.",
-    "autonomous": "Choose Standard for a clear solution or Enhanced for substantial unresolved design; proceed without asking. Applies to unattended and headless execution.",
-    "askOnly": "Long-running multi-stage work with substantial unresolved solution choices and material approach or resource impact, with no applicable choice or delegated selection.",
-    "runtimeMismatch": "Model and effort are set per Agent call and per role frontmatter; the running session model is set by the user. Report material deviations honestly; explicit strict model, effort, and budget requirements remain binding."
-  },
-  "continuity": {
-    "sameOwnerForFixes": "Bundle findings back to the same worker via SendMessage; do not spawn a fresh worker per correction.",
-    "sameReviewerForRecheck": "Re-review the correction delta with the same reviewer via SendMessage.",
-    "freshWhen": "Independence is required (adversarial or stage review), a different model tier is needed, or the agent's context is polluted or exhausted.",
-    "stateInFiles": "Plans, briefs, decisions, and summaries live in files or git, not only in context; context does not survive compaction."
-  },
-  "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
-  "scopeGuard": {
-    "packet": "SCOPE and OUT_OF_SCOPE are required packet fields.",
-    "findings": "Reviewer tags findings in-scope | follow-up | behavior-change; only in-scope findings enter a fix round.",
-    "behaviorChange": "Rejecting previously accepted input, altering accepted behavior without a failing test, or tightening a parser needs the user's decision and a check against currently accepted inputs.",
-    "designDecisions": "The brain decides or asks before briefing; a packet never delegates 'decide and document' for a behavior change.",
-    "changelog": "User-observable behavior only, one line per change, no process narration."
+    "autonomous": "Standard for a described solution, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended runs.",
+    "askOnly": "Long multi-stage work where the choice materially changes the approach and nothing applies.",
+    "runtimeMismatch": "Model is set per Agent call; effort per role frontmatter or session. Report material deviations; explicit strict model, effort, and budget requirements remain binding."
   },
   "activation": {
     "mode": "opt-in",
@@ -205,5 +189,11 @@
       "claude-fable-5"
     ],
     "note": "Aliases are what the kit routes on; Claude Code and the provider decide the concrete model. A model release updates this record, not the workflow."
-  }
+  },
+  "judging": {
+    "real": "In the diff or caused by it; breaks a named rule, document, or acceptance line; reproduces by a check or a concrete scenario.",
+    "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding.",
+    "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
+  },
+  "continuity": "Fixes go back to the same worker, the next audit round to the same auditors, the delta to the same reviewer, all through SendMessage. A fresh agent is for independence or a different model tier."
 }

@@ -201,18 +201,6 @@
       "expected": "That is the Standard recommendation; no mismatch to report. Stage acceptance still goes to a separate gpt-6-astra reviewer."
     },
     {
-      "id": "audit-before-review",
-      "runtime": "both",
-      "input": "Worker returns READY_FOR_INTEGRATION on a build block that touched docs and src.",
-      "expected": "Spawn up to three auditors in one message (haiku / gpt-6-luna at xhigh), lenses docs, task, conventions, same frozen snapshot and PROJECT_RULES. Bundle in-scope findings to the same worker; pass the packets to the reviewer as evidence. No auditors for direct work."
-    },
-    {
-      "id": "auditor-stays-in-lens",
-      "runtime": "both",
-      "input": "Conventions auditor notices a probable logic bug outside its lens.",
-      "expected": "Report it as a follow-up with file:line, do not expand into correctness review, do not fix. The reviewer owns correctness."
-    },
-    {
       "id": "claude-haiku-55",
       "runtime": "claude-code",
       "input": "Brain spawns a probe or auditor on haiku.",
@@ -223,6 +211,24 @@
       "runtime": "codex",
       "input": "Standard profile implementation block.",
       "expected": "gpt-6.1-sol high (medium for settled blocks); gpt-6-sol is served but superseded in this policy."
+    },
+    {
+      "id": "cooperator-choice",
+      "runtime": "both",
+      "input": "Worker submits block A of a four-block pipeline; block B's inputs are ready.",
+      "expected": "Cooperator may start block B with the worker and audit A in parallel, or audit A alone, or skip the audit; the choice is the cooperator's, stated in the report."
+    },
+    {
+      "id": "audit-game",
+      "runtime": "both",
+      "input": "Round 1: auditors report 5 findings, 2 break a named project rule in the diff, 3 are hardening ideas for inputs nobody reported.",
+      "expected": "Cooperator takes the 2 real findings to the same worker as one bundle and rejects the 3. Round 2 continues the same auditors with the accepted and rejected lists. A round with nothing real ends the game: auditors lost, block passes the audit. Three rounds at most."
+    },
+    {
+      "id": "auditors-report-everything",
+      "runtime": "both",
+      "input": "Auditor or reviewer packet.",
+      "expected": "Reports every finding with file:line and the rule or document behind it, without self-filtering for severity; the cooperator judges what is real."
     }
   ]
 }

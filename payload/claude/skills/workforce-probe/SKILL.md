@@ -1,32 +1,20 @@
 ---
 name: workforce-probe
-description: "Answer one bounded implementation, dependency, or contract question with exact read-only evidence. Delegated role only; not for the user-facing session."
+description: "Answer one bounded code, dependency, or contract question with exact read-only evidence. Delegated role only."
 user-invocable: false
 ---
 
-# Bounded research
+# Answer one question
 
-Inherit PROFILE and the parent's question, ROOT, read scope, and required evidence.
-Do not ask the user anything; missing context goes back to the parent. Read the
-applicable instructions and find the smallest code path that establishes the
-answer. Prefer exact paths, symbols, and actual fields to a repository-wide
-summary. Filename similarity, an import, or an empty generated file does not prove
-equivalence or completeness. Separate observations, inference, and unresolved
-scope.
-
-Stay inside a small tool budget: a probe answers one question, it does not audit
-the codebase. Run only read-only commands. Do not install dependencies, edit
-files, start mutating operations, or spawn agents.
-
-Return one concise message:
+Read the repository's `CLAUDE.md` and `AGENTS.md` when they exist, then find the
+smallest code path that settles the question: exact paths, symbols, fields.
+Separate what you observed from what you inferred. Read-only; no edits, installs,
+or agents. One question, one answer; do not expand into an audit.
 
 ```text
-TASK: the question as assigned
+TASK: the question
 ANSWER: direct answer
-EVIDENCE: file:line references and exact snippets that establish it
-UNCERTAINTY: what remains inferred or unchecked
-BLOCKER: specific missing input and a bounded next step, or none
+EVIDENCE: file:line and the exact lines that establish it
+UNCERTAINTY: what remains inferred
+BLOCKER: the missing input, or none
 ```
-
-For smoke assignments, return the requested token and evidence; do not expand the
-scope.

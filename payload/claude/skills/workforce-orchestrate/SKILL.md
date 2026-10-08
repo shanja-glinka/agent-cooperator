@@ -1,186 +1,114 @@
 ---
 name: workforce-orchestrate
-description: "Opt-in brain/worker orchestration. Use ONLY when the user invokes /workforce-orchestrate or explicitly asks for Workforce, subagents, or multi-agent work; never for ordinary tasks. Classifies work first, keeps the brain out of the code, briefs workers with explicit model and write set, reuses the same worker and reviewer for fix rounds, reviews only finished blocks."
+description: "Opt-in brain/worker orchestration for Claude Code. Use when the user invokes /workforce-orchestrate or asks for Workforce, subagents, or multi-agent work. The cooperator (this session) plans, briefs workers, runs auditors and reviewers, and accepts; the agents do the work."
 argument-hint: "[task description or plan path]"
 ---
 
-This skill is optional. If the user did not ask for Workforce or multi-agent work
-and no project rule requires it, do not use it: work as a normal single session.
+# Workforce orchestration
 
-# Workforce: deliver the requested result
+You are the cooperator: the orchestrator in the user's session. You cooperate
+agents so that they do the work. You plan, brief, judge what comes back, and
+accept. Product code is written by workers, except in `direct` work.
 
-You are the brain of this task. Use one plan and the task's existing state. Do not
-create a second workflow engine, parallel journal, or reporting system. User and
-project restrictions take precedence over every default here.
+Routing (models, efforts, turn limits) is recorded in
+`{{CLAUDE_HOME}}/claude-workforce/profiles.json`; [dispatch](references/dispatch.md)
+explains it and holds the work packet template; [tools](references/tools.md) shows
+the real Agent and SendMessage calls. The repository's own rules (`CLAUDE.md`,
+`AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`) override this kit. Claude Code
+does not load `AGENTS.md` on its own, so read it and pass every applicable file to
+each agent as PROJECT_RULES. If `$ARGUMENTS` is present, it is the task or a plan
+path.
 
-If `$ARGUMENTS` is present, it is the task or the path to a plan; otherwise use the
-conversation's current request.
+## Flow
 
-## 1. Classify before you orchestrate
+```text
+Task
+  │
+  ▼
+Cooperator: read repository rules, classify, pick profile
+  direct   → do it yourself, no agents
+  build    → one block
+  pipeline → plan of N blocks with disjoint WRITE_SETs
+  │
+  ▼
+┌─ per block ──────────────────────────────────────────────────────┐
+│ probe (when a fact is missing)  →  worker (block)  →  submitted   │
+│                                                                   │
+│ cooperator chooses:                                               │
+│   a) audit this block            → auditors, 3 rounds             │
+│   b) no audit                    → next work to the worker        │
+│   c) next block to the worker    → and auditors in parallel on    │
+│                                    1, 2, 3 or N submitted blocks  │
+│                                                                   │
+│ audit game (per block): auditors report everything they find;    │
+│   cooperator takes only the real findings → same worker fixes    │
+│   real findings in a round → auditors won the round, next round  │
+│   nothing real in a round  → auditors lost, block passes          │
+│                                                                   │
+│ review (diff + audit log) → real findings → same worker           │
+└───────────────────────────────────────────────────────────────────┘
+  │
+  ▼
+Stage acceptance (pipeline only) → report
+```
 
-Decide the WORK_CLASS first. Most usage waste in multi-agent setups comes from
-running a pipeline on work that did not need one.
+## Steps
 
-| WORK_CLASS | Looks like | Do |
-| --- | --- | --- |
-| `direct` | question, status, analysis-only, config or doc edit, trivial or single-file fix | Answer or edit inline. No agents, no review agent. |
-| `build` | bug fix or ordinary feature with a known shape, roughly one to five files | Brief one worker per complete block; independent block review of the finished diff. |
-| `pipeline` | multi-stage, cross-cutting, or design-open work | Plan, parallel workers with disjoint write sets, block review per block, stage review before closing. |
+1. **Classify.** `direct` is a question, analysis, config or doc edit, or a
+   trivial fix: do it inline. `build` is a bug fix or feature with a known
+   shape. `pipeline` is multi-stage or design-open work. Most wasted usage
+   comes from running a pipeline on work that did not need one.
+2. **Profile.** Reuse an explicit choice or standing preference; otherwise
+   Standard for a described solution, Enhanced for substantial unresolved
+   design. Ask only when the choice materially changes a long multi-stage task
+   and nothing applies. Analysis-only requests end with analysis.
+3. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
+   SCOPE and OUT_OF_SCOPE, exact inputs, WRITE_SET, CHECKS with cwd,
+   PROJECT_RULES. Decide open design questions before briefing. Set `model`
+   on every Agent call. Independent blocks launch in one message.
+4. **Choose what happens next** when a block is submitted (a, b, or c above).
+   Audit what is worth auditing: substantial blocks, refactors, money and
+   security paths, blocks that touched documentation or conventions.
+5. **Run the audit game.** Auditors (`haiku`, xhigh) get one lens each, the
+   frozen snapshot, and PROJECT_RULES, and report everything they find with
+   `file:line` and the rule or document behind it. Judge each finding yourself:
+   it is real when it is in the diff or caused by it, breaks a named rule,
+   document, or acceptance line, and reproduces by a check or a concrete
+   scenario. Theoretical risks, hypothetical inputs, work outside SCOPE, and
+   taste without a rule are not taken. Real findings go to the same worker
+   as one bundle; the next round continues the same auditors with what was
+   accepted and what was rejected. Three rounds at most.
+6. **Review.** An independent reviewer (`opus`) reads the diff with the audit
+   log and reports everything; you take the real findings to the same worker
+   and re-review the delta with the same reviewer. Follow-ups go to the report.
+7. **Accept the stage** (pipeline only): a separate reviewer checks the
+   original outcome, cross-boundary paths, and the project's required gates.
+8. **Report**: submitted → block reviewed → stage accepted, audit score per
+   block, what was rejected as not real, follow-ups, actual routing when it
+   differed from the plan. Commit, push, merge, deploy, and messages to third
+   parties need the user's authorization.
 
-Deep review is not the default. Use an independent reviewer for a finished
-substantial block, a refactor, security- or money-path code, or performance-
-sensitive paths. A one-line fix does not get a reviewer agent.
+## Examples
 
-For analysis-only requests, deliver analysis and stop. A request to consider
-improvements is not permission to edit.
+**direct.** "Fix the typo in the README badge." You edit the README. No agents.
 
-## 2. Resolve the profile proportionally
+**build.** "`--total` double-counts tax." One worker on `sonnet` with
+WRITE_SET `src/cart.js, test/cart.spec.js, CHANGELOG.md`. Submitted. You choose
+(a): three auditors on `haiku`. Round 1: 5 findings, 2 real (missing changelog
+line, test file misnamed against rule 3), 3 not real (hardening of an input the
+report never mentioned). Worker fixes the 2. Round 2: nothing real, auditors
+lost. Reviewer on `opus` reads the diff and the audit log: no findings. Done.
 
-Read [dispatch](references/dispatch.md). Standard and Enhanced are optional starting
-recommendations, not binding model schedules. Reuse an explicit choice, active task
-choice, or standing preference. Concrete, sufficiently specified work uses Standard
-without a question. "Work autonomously", "choose yourself", and unattended or
-headless execution delegate the choice: Standard for a clear solution, Enhanced for
-substantial unresolved design. Ask only for long-running, multi-stage work where the
-choice materially changes approach or resource use and nothing already applies.
-Never stop routine or autonomous work with a profile question.
+**pipeline.** "Move the resolver to the generated DTO and switch consumers."
+Plan of four blocks. Workers A and B run in parallel; when A is submitted you
+start block C with A's worker and audit A and B together while C runs. Stage
+acceptance on `opus` after the last block.
 
-Keep PROFILE, PROFILE_SOURCE, and WORK_CLASS in the task state (plan file, task
-list, or brief). Children inherit them and never ask the user.
+## Why
 
-## 3. Keep the brain out of the code
-
-In `build` and `pipeline` work the brain plans, briefs, integrates, reviews the
-diff, and accepts. It does not implement. Small integration edits after resolving
-ownership are allowed; product code belongs to workers. In `direct` work the brain
-simply does the work.
-
-Before planning, find the repository's own rules and treat them as binding for
-you and every child: `CLAUDE.md` (root, `.claude/`, and subdirectories),
-`AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`, and lint or test configuration
-that encodes conventions. Claude Code loads `CLAUDE.md` automatically but not
-`AGENTS.md`; read it yourself and list every applicable file in the packet's
-PROJECT_RULES line so children read them too. Where a project rule conflicts with
-this kit, the project rule wins. Read entry points and the dirty tree next.
-Define the requested result, concrete acceptance examples, ownership, dependencies,
-and the real checks with cwd. Find the actual package checks, including harnesses
-outside the default glob. Preserve the user's branch and excluded directories.
-
-Plan complete paths: source -> produced artifact -> real consumer -> execution ->
-removal of the replaced path where applicable. Counts, generated shells, and a green
-typecheck do not prove the requested behavior. Baseline failures stay separate.
-
-## 4. Brief workers with complete owned blocks
-
-Use the [work packet](references/dispatch.md#self-contained-work-packet) and the
-actual [tool surface](references/tools.md). Every Agent call names the model
-explicitly; do not rely on inheritance. Effort comes from role frontmatter or the
-session, so state the intended effort in the packet rather than on the call. Each block states REQUEST_KIND,
-USER_OUTCOME, ACCEPTANCE_EXAMPLE, NOT_DONE_IF, WRITE_SET, DO_NOT_TOUCH, CHECKS.
-
-Assign substantial independent blocks with disjoint WRITE_SETs, not a task per
-file. Shared contracts and lockfiles have one owner. Launch independent workers in
-one message so they run concurrently; use background runs for long work and keep
-at most the configured parallel limit busy with useful work. Children do not spawn
-children.
-
-A worker's fresh context is the point: give it exact sources, not your history.
-Save the brief and decisions to files the worker can read; context does not
-survive compaction.
-
-Lock the scope in the packet. SCOPE lists the reported scenarios and the
-acceptance examples; OUT_OF_SCOPE names what the block must not do even if it
-looks related. Make design decisions yourself before briefing, or ask the user;
-never hand a worker "decide and document" inside a fix packet. Any change that
-rejects previously accepted input, alters accepted behavior without a failing
-test, or tightens a parser is a behavior change: it needs the user's decision, an
-explicit line in the report, and a CHECK against the currently accepted inputs.
-
-## 5. Reuse the same agents for fix rounds
-
-Do not spawn a new cold agent for every correction. Bundle review findings into
-one message and continue the same worker with SendMessage; it already holds the
-files and the investigation, so a round costs only the delta. Continue the same
-reviewer the same way to re-check only the correction delta.
-
-A fix round carries only in-scope findings: defects that break SCOPE, the
-acceptance examples, or a project rule. A finding about a scenario the user did
-not report is a candidate follow-up, not a correction. Do not route it into the
-same worker; list it for the user in the final report, or, when the user has
-delegated execution, note it and continue only if it blocks the reported outcome.
-A review round that returns only out-of-scope findings ends the loop with a clean
-verdict on the scope. A fix round never widens WRITE_SET or changes accepted
-behavior; if it would, stop and get the user's decision. In build work, one
-review round is the norm; a second needs a stated in-scope reason.
-
-Spawn a fresh agent only when independence matters (the reviewer is never the
-author; stage review is a separate agent), a different model tier is needed, or
-the agent's context is polluted or exhausted. Fix rounds 1-3 stay with the same
-worker; from round 4, or when attempts repeat without new evidence, escalate one
-tier up with the bundled findings as described in dispatch. Identify whether the
-cause is the assignment, a missing contract, the environment, or unresolved
-reasoning, and fix that cause rather than relaunching the project.
-
-## 6. Audit the finished block cheaply
-
-When a worker returns READY_FOR_INTEGRATION in `build` or `pipeline` work, freeze
-the snapshot and, in one message, spawn two or three `workforce-auditor` agents
-on `haiku` with one LENS each: `docs` (code against documentation and
-contracts), `task` (diff against SCOPE, acceptance example, OUT_OF_SCOPE), and
-`conventions` (PROJECT_RULES, lint, tests, changelog). Each gets the same
-snapshot, the packet, and PROJECT_RULES; each is read-only and returns a tagged
-findings packet. Skip a lens that cannot apply (no documentation touched, no
-project rules found); never run more than three.
-
-Deduplicate their findings, drop what you can disprove, and send the in-scope
-ones to the same worker as one bundle before any reviewer runs. The auditors
-cost a small fraction of one `opus` round and catch the cheap defect classes, so
-the reviewer gets a block that is already documented, in scope, and conventional
-and can spend its turns on correctness, regressions, and consumers. Pass the
-auditors' packets to the reviewer as evidence; the reviewer does not repeat those
-lenses. Auditors never replace the reviewer for correctness and never run in
-`direct` work.
-
-## 7. Integrate the real change
-
-READY_FOR_INTEGRATION requires a complete block, self-review, relevant checks, and
-stable contracts. Inspect the actual diff, including new files and real consumers;
-a worker's report is not evidence. For each claimed replacement, identify the old
-declaration, the actual new contents, the switched consumers, and any justified
-remaining compatibility.
-
-Start dependent work when its inputs are ready. If a shared contract changes,
-pause affected work, update dependent briefs, and invalidate stale evidence.
-
-## 8. Review on finished boundaries
-
-Block review: an independent `workforce-reviewer` on the finished diff of a
-substantial block, MODE=block. Stage review: a separate reviewer before closing a
-major stage, MODE=stage. Do not call each edit a stage. Freeze the reviewed scope
-and identify its revision plus dirty diff.
-
-Block review checks bugs, regressions, and consumer integration within SCOPE,
-takes the auditors' docs, task, and conventions packets as evidence rather than
-repeating them, and tags anything else as a candidate follow-up.
-Stage review checks the original outcome, cross-boundary behavior, removed old
-paths, compatibility, and the required package gates. Honor project-specific
-acceptance requirements; fold them into stage review when allowed rather than
-duplicating the audit.
-
-Run the full required gates on the stable stage result. After corrections, repeat
-checks and review for the affected delta and its impact. Tests must reach the
-claimed consumer; isolated mocks prove only that scope. Before calling anything
-done, prove it end to end: run the command, hit the endpoint, use the feature. If
-that is impossible, say so. Failed, blocked, and not-run are not PASS.
-
-## 9. Report honestly
-
-Distinguish submitted -> block reviewed -> stage accepted -> merge ready. Report
-achieved behavior, verification, review findings, candidate follow-ups the review
-surfaced but the block did not implement, behavior changes if any, and the actual
-routing used when it deviated from the plan. Changelog and release notes describe
-user-observable behavior only, one line per change, never the rounds, reviewers,
-or regressions fixed along the way. Progress is accepted outcomes, not tool
-calls or files touched. Do not finish with unhandled running children. Commit,
-push, merge, deployment, and messages to third parties need the user's
-authorization; this skill grants none. Avoid duplicated logs and report files.
+Agents hold fresh context and exact scope, which is cheaper and more reliable
+than your history. The same worker and auditors continue across rounds because
+a round then costs only the delta. Auditors report everything because a
+reporter told to be selective reports less; the filtering is your job, and it
+is what keeps the expensive review and the worker from chasing invented
+problems.

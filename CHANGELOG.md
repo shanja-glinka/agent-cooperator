@@ -5,13 +5,17 @@
 - Reject AI co-author trailers in commit messages: CI job plus a versioned
   `commit-msg` hook in `.githooks/` (enable with `git config core.hooksPath .githooks`).
 - Add the auditor role to both editions: `workforce-auditor` (Claude Code,
-  `haiku` at `effort: xhigh`, read-only, 25 turns) and `workforce_auditor`
-  (Codex, GPT-6 Luna at xhigh, read-only), with the `workforce-audit` skill.
-  After a worker reports READY_FOR_INTEGRATION, the orchestrator runs two or
-  three auditors in parallel, one lens each (docs against code, task against
-  scope, conventions against project rules), bundles in-scope findings to the
-  worker, and hands the packets to the reviewer as evidence so the expensive
-  review spends its turns on correctness.
+  `haiku` at effort xhigh) and `workforce_auditor` (Codex, GPT-6 Luna at xhigh),
+  read-only, with the `workforce-audit` skill. After a worker submits a block,
+  the cooperator (the orchestrator) chooses to audit it, skip, or start the next
+  block with auditors running in parallel on one or more submitted blocks.
+  Auditors play up to three rounds per block, report everything through one
+  lens (docs, task, conventions), and the cooperator takes only real findings to
+  the same worker.
+- Rewrite the orchestration skills, dispatch, tools, roles, and global blocks of
+  both editions around the cooperator flow: one routing record per edition, no
+  duplicated rules, no instructed self-verification, reporters report
+  everything and the cooperator judges.
 - Update model resolution: Claude `sonnet` and `haiku` now resolve to Sonnet 5.5
   and Haiku 5.5 (Haiku 5.5 supports effort up to `xhigh`); Codex moves from
   GPT-6 Sol to GPT-6.1 Sol at the same price (policy 1.5.0). Checked 2026-10-08.
