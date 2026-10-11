@@ -47,7 +47,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 
 `update` replaces the kit's previous files and removes stale owned files; `status`
 reports drift; `uninstall` removes only what the kit owns. For a reproducible
-version, replace the package spec with `github:shanja-glinka/codex-workforce#v1.3.0`
+version, replace the package spec with `github:shanja-glinka/codex-workforce#v1.3.1`
 or a reviewed commit SHA. `npx --yes` accepts npm's download prompt; it does not
 answer the agent's Standard/Enhanced question or grant publishing rights. Start a
 fresh Codex or Claude Code session after installing or updating. Both kits can live
@@ -78,7 +78,7 @@ codex -p workforce-enhanced
 | Bounded research | Luna medium, Sol when judgment is needed | same |
 | Main implementation | Sol high, medium for settled blocks | same |
 | Unresolved design/algorithm | Targeted Astra assistance as needed | Bounded Astra high work |
-| Auditor (3 rounds) | Luna xhigh | Luna xhigh |
+| Auditor (up to 3 rounds) | Luna xhigh | Luna xhigh |
 | Completed block review | Sol high | Sol high |
 | Major stage acceptance | Astra high | Astra high |
 
@@ -109,15 +109,22 @@ work is classified first: `direct` is done inline with no agents, `build` gets o
 worker and one review of the finished diff, `pipeline` gets a plan, parallel
 workers with disjoint write sets, block reviews, and a stage review.
 
-| Responsibility | Standard | Enhanced |
-| --- | --- | --- |
-| Brain (your session) | `opus` medium | `opus` high |
-| Bounded research | `haiku` medium | `sonnet` medium |
-| Implementation | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
-| Unresolved design | targeted `opus` high | bounded `fable` high (fallback `opus` xhigh) |
-| Auditor (3 rounds) | `haiku` xhigh | `haiku` xhigh |
-| Block review | `opus` high | `opus` high |
-| Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) |
+| Responsibility | Standard | Enhanced | Hybrid |
+| --- | --- | --- | --- |
+| Brain (your session) | `opus` medium | `opus` high | `opus` high |
+| Bounded research | `haiku` medium | `sonnet` medium | `haiku` medium |
+| Implementation | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks | `haiku` high, `sonnet` when it loops |
+| Unresolved design | targeted `opus` high | bounded `fable` high (fallback `opus` xhigh) | the brain decides before briefing |
+| Auditor (up to 3 rounds) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
+| Block review | `opus` high | `opus` high | Codex GPT-6.1 Sol xhigh |
+| Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) | Codex GPT-6.1 Sol xhigh |
+
+Hybrid is the economy preset: `opus` thinks and judges, `haiku` types, and cheap
+Codex models audit and review at xhigh. It runs only when you choose it ("Use
+Hybrid") or set it as a standing preference, and needs a logged-in `codex` CLI.
+Codex calls go through the `codex-run.mjs` wrapper, which always exits on its own
+(watchdog for silence, input requests, and total time), so the brain cannot sleep
+on a Codex run that waits for input. See the [Claude Code edition](docs/claude-code.md).
 
 Aliases currently resolve to Fable 5.1, Opus 5.5, Sonnet 5.5, and Haiku 5.5 on the
 Claude API (checked 2026-10-08; see `docs/claude-code.md`). Every Agent call sets
@@ -144,15 +151,18 @@ Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, 3 rounds
+  a) audit this block              → auditors, up to 3 rounds
   b) no audit                      → next work to the worker
   c) next block to the worker      → and auditors in parallel on
                                      1, 2, 3 or N submitted blocks
 
 Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
 they find through one lens each: docs, task, conventions.
-Real findings in a round → auditors won, the same worker fixes, next round.
-Nothing real in a round  → auditors lost, the block passes the audit.
+Round 1 runs every lens. Then each lens plays on its own:
+real findings → that lens won, the same worker fixes, only winners
+                play the next round;
+nothing real  → that lens lost and is retired for this block.
+Every lens lost (or round 3 done) → the block passes the audit.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
 ```

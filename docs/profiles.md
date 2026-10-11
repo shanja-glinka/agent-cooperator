@@ -101,15 +101,18 @@ Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, 3 rounds
+  a) audit this block              → auditors, up to 3 rounds
   b) no audit                      → next work to the worker
   c) next block to the worker      → and auditors in parallel on
                                      1, 2, 3 or N submitted blocks
 
 Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
 they find through one lens each: docs, task, conventions.
-Real findings in a round → auditors won, the same worker fixes, next round.
-Nothing real in a round  → auditors lost, the block passes the audit.
+Round 1 runs every lens. Then each lens plays on its own:
+real findings → that lens won, the same worker fixes, only winners
+                play the next round;
+nothing real  → that lens lost and is retired for this block.
+Every lens lost (or round 3 done) → the block passes the audit.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
 ```
@@ -118,8 +121,9 @@ Auditors report everything they find with `file:line` and the rule or document
 behind it. The cooperator judges each finding: it is real when it is in the
 diff or caused by it, breaks a named rule, document, or acceptance line, and
 reproduces by a check or a concrete scenario. Real findings go to the same
-worker as one bundle; the next round continues the same auditors with what was
-accepted and what was rejected. The reviewer then reads the diff together with
+worker as one bundle. Only the lenses that won a round play the next one, with
+what was accepted and what was rejected; a lens that found nothing real is
+retired for that block. The reviewer then reads the diff together with
 the audit log.
 
 ## Complete blocks, proportional verification

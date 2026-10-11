@@ -13,7 +13,7 @@ accept. Product code is written by workers, except in `direct` work.
 Routing (models, efforts, turn limits) is recorded in
 `{{CLAUDE_HOME}}/claude-workforce/profiles.json`; [dispatch](references/dispatch.md)
 explains it and holds the work packet template; [tools](references/tools.md) shows
-the real Agent and SendMessage calls. The repository's own rules (`CLAUDE.md`,
+the real Agent and SendMessage calls and, for the Hybrid profile, the Codex runs. The repository's own rules (`CLAUDE.md`,
 `AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`) override this kit. Claude Code
 does not load `AGENTS.md` on its own, so read it and pass every applicable file to
 each agent as PROJECT_RULES. If `$ARGUMENTS` is present, it is the task or a plan
@@ -35,15 +35,16 @@ Cooperator: read repository rules, classify, pick profile
 │ probe (when a fact is missing)  →  worker (block)  →  submitted   │
 │                                                                   │
 │ cooperator chooses:                                               │
-│   a) audit this block            → auditors, 3 rounds             │
+│   a) audit this block            → auditors, up to 3 rounds       │
 │   b) no audit                    → next work to the worker        │
 │   c) next block to the worker    → and auditors in parallel on    │
 │                                    1, 2, 3 or N submitted blocks  │
 │                                                                   │
-│ audit game (per block): auditors report everything they find;    │
-│   cooperator takes only the real findings → same worker fixes    │
-│   real findings in a round → auditors won the round, next round  │
-│   nothing real in a round  → auditors lost, block passes          │
+│ audit game (per lens): round 1 runs every lens; auditors report   │
+│   everything; cooperator takes only real findings → same worker  │
+│   real findings → that lens won, only winners play the next round │
+│   nothing real  → that lens lost, retired for this block          │
+│   every lens lost (or round 3) → block passes                     │
 │                                                                   │
 │ review (diff + audit log) → real findings → same worker           │
 └───────────────────────────────────────────────────────────────────┘
@@ -60,7 +61,8 @@ Stage acceptance (pipeline only) → report
    comes from running a pipeline on work that did not need one.
 2. **Profile.** Reuse an explicit choice or standing preference; otherwise
    Standard for a described solution, Enhanced for substantial unresolved
-   design. Ask only when the choice materially changes a long multi-stage task
+   design. Hybrid (Haiku workers, Codex auditors and reviewers) runs only when
+   the user chose it; it is never picked automatically. Ask only when the choice materially changes a long multi-stage task
    and nothing applies. Analysis-only requests end with analysis.
 3. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
    SCOPE and OUT_OF_SCOPE, exact inputs, WRITE_SET, CHECKS with cwd,
@@ -69,16 +71,25 @@ Stage acceptance (pipeline only) → report
 4. **Choose what happens next** when a block is submitted (a, b, or c above).
    Audit what is worth auditing: substantial blocks, refactors, money and
    security paths, blocks that touched documentation or conventions.
-5. **Run the audit game.** Auditors (`haiku`, xhigh) get one lens each, the
-   frozen snapshot, and PROJECT_RULES, and report everything they find with
+5. **Run the audit game.** Auditors (per profile: `haiku` xhigh through Agent,
+   or Codex GPT-6 Luna xhigh in Hybrid) get one lens each, the frozen
+   snapshot, and PROJECT_RULES, and report everything they find with
    `file:line` and the rule or document behind it. Judge each finding yourself:
    it is real when it is in the diff or caused by it, breaks a named rule,
    document, or acceptance line, and reproduces by a check or a concrete
    scenario. Theoretical risks, hypothetical inputs, work outside SCOPE, and
    taste without a rule are not taken. Real findings go to the same worker
-   as one bundle; the next round continues the same auditors with what was
-   accepted and what was rejected. Three rounds at most.
-6. **Review.** An independent reviewer (`opus`) reads the diff with the audit
+   as one bundle. Round 1 runs every chosen lens; after that only winners
+   play: a lens with at least one real finding continues to the next round
+   with what was accepted and rejected, and a lens with nothing real has
+   lost and is retired for this block, even while other lenses play on. Do
+   not re-run a retired lens to double-check; the reviewer reads the whole
+   diff, fixes included. The block passes when every lens has lost, or
+   after round 3. In Hybrid every Codex run, audit or review, goes through
+   `codex-run.mjs` in the background as [tools](references/tools.md) shows;
+   act on its `result.json`, never on bare `codex` or `codex exec`.
+6. **Review.** An independent reviewer (per profile: `opus` through Agent,
+   or Codex GPT-6.1 Sol xhigh in Hybrid) reads the diff with the audit
    log and reports everything; you take the real findings to the same worker
    and re-review the delta with the same reviewer. Follow-ups go to the report.
 7. **Accept the stage** (pipeline only): a separate reviewer checks the
@@ -94,21 +105,30 @@ Stage acceptance (pipeline only) → report
 
 **build.** "`--total` double-counts tax." One worker on `sonnet` with
 WRITE_SET `src/cart.js, test/cart.spec.js, CHANGELOG.md`. Submitted. You choose
-(a): three auditors on `haiku`. Round 1: 5 findings, 2 real (missing changelog
-line, test file misnamed against rule 3), 3 not real (hardening of an input the
-report never mentioned). Worker fixes the 2. Round 2: nothing real, auditors
-lost. Reviewer on `opus` reads the diff and the audit log: no findings. Done.
+(a): three auditors on `haiku`. Round 1: 5 findings, 2 real (docs: missing
+changelog line; conventions: test file misnamed against rule 3), 3 not real
+(task: hardening of an input the report never mentioned). The task lens lost
+and is retired. Worker fixes the 2. Round 2 runs only docs and conventions:
+nothing real, both lost. Reviewer on `opus` reads the diff and the audit log: no findings. Done.
 
 **pipeline.** "Move the resolver to the generated DTO and switch consumers."
 Plan of four blocks. Workers A and B run in parallel; when A is submitted you
 start block C with A's worker and audit A and B together while C runs. Stage
 acceptance on `opus` after the last block.
 
+**hybrid.** "Use Hybrid: add pagination to the export." You run on `opus` at
+high effort. Worker on `haiku`; on submit you launch three Codex auditors on
+Luna in the background through `codex-run.mjs`, read each `result.json`, and
+continue only the lenses that won with `--resume`. Review by Codex on Sol
+xhigh.
+
 ## Why
 
 Agents hold fresh context and exact scope, which is cheaper and more reliable
 than your history. The same worker and auditors continue across rounds because
-a round then costs only the delta. Auditors report everything because a
+a round then costs only the delta, and only winning lenses continue because a
+lens that found nothing real on a block rarely finds something real in the
+fix that answers other lenses. Auditors report everything because a
 reporter told to be selective reports less; the filtering is your job, and it
 is what keeps the expensive review and the worker from chasing invented
 problems.

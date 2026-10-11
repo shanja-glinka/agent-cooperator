@@ -32,15 +32,16 @@ Cooperator: read repository rules, classify, pick profile
 │ probe (when a fact is missing)  →  worker (block)  →  submitted   │
 │                                                                   │
 │ cooperator chooses:                                               │
-│   a) audit this block            → auditors, 3 rounds             │
+│   a) audit this block            → auditors, up to 3 rounds       │
 │   b) no audit                    → next work to the worker        │
 │   c) next block to the worker    → and auditors in parallel on    │
 │                                    1, 2, 3 or N submitted blocks  │
 │                                                                   │
-│ audit game (per block): auditors report everything they find;    │
-│   cooperator takes only the real findings → same worker fixes    │
-│   real findings in a round → auditors won the round, next round  │
-│   nothing real in a round  → auditors lost, block passes          │
+│ audit game (per lens): round 1 runs every lens; auditors report   │
+│   everything; cooperator takes only real findings → same worker  │
+│   real findings → that lens won, only winners play the next round │
+│   nothing real  → that lens lost, retired for this block          │
+│   every lens lost (or round 3) → block passes                     │
 │                                                                   │
 │ review (diff + audit log) → real findings → same worker           │
 └───────────────────────────────────────────────────────────────────┘
@@ -73,8 +74,12 @@ Stage acceptance (pipeline only) → report
    document, or acceptance line, and reproduces by a check or a concrete
    scenario. Theoretical risks, hypothetical inputs, work outside SCOPE, and
    taste without a rule are not taken. Real findings go to the same worker as
-   one bundle; the next round continues the same auditors with what was
-   accepted and what was rejected. Three rounds at most.
+   one bundle. Round 1 runs every chosen lens; after that only winners play:
+   a lens with at least one real finding continues to the next round with
+   what was accepted and rejected, and a lens with nothing real has lost and
+   is retired for this block, even while other lenses play on. Do not re-run
+   a retired lens to double-check; the reviewer reads the whole diff, fixes
+   included. The block passes when every lens has lost, or after round 3.
 6. **Review.** An independent reviewer (GPT-6.1 Sol, high) reads the diff with
    the audit log and reports everything; you take the real findings to the same
    worker and re-review the delta with the same reviewer. Follow-ups go to the
@@ -94,10 +99,11 @@ Stage acceptance (pipeline only) → report
 
 **build.** "`--total` double-counts tax." One worker on GPT-6.1 Sol with
 WRITE_SET `src/cart.js, test/cart.spec.js, CHANGELOG.md`. Submitted. You choose
-(a): three auditors on Luna. Round 1: 5 findings, 2 real (missing changelog
-line, test file misnamed against a project rule), 3 not real (hardening of an
-input the report never mentioned). Worker fixes the 2. Round 2: nothing real,
-auditors lost. Reviewer on Sol reads the diff and the audit log: no findings.
+(a): three auditors on Luna. Round 1: 5 findings, 2 real (docs: missing
+changelog line; conventions: test file misnamed against a project rule), 3 not
+real (task: hardening of an input the report never mentioned). The task lens
+lost and is retired. Worker fixes the 2. Round 2 runs only docs and
+conventions: nothing real, both lost. Reviewer on Sol reads the diff and the audit log: no findings.
 
 **pipeline.** "Move the resolver to the generated DTO and switch consumers."
 Plan of four blocks. Workers A and B run in parallel; when A is submitted you
@@ -108,6 +114,8 @@ acceptance on Astra after the last block.
 
 Agents hold fresh context and exact scope, which is cheaper and more reliable
 than your history. The same worker and auditors continue across rounds because
-a round then costs only the delta. Auditors report everything because a
+a round then costs only the delta, and only winning lenses continue because a
+lens that found nothing real on a block rarely finds something real in the
+fix that answers other lenses. Auditors report everything because a
 reporter told to be selective reports less; the filtering is your job, and it
 keeps the expensive review and the worker from chasing invented problems.

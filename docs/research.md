@@ -118,3 +118,19 @@ Source: https://fresh-worktree.ghost.io/are-better-models-replacing-superpowers/
 9. **Cost honesty.** The evidence says orchestration is a cost multiplier that
    only pays for itself when the task warrants it. The kit does not promise
    savings and asks for `/cost` or `/usage` evidence instead.
+10. **Only winning audit lenses play again (2026-10-11).** Running every lens
+    every round re-audited clean areas: in live use a lens that had already
+    found nothing real kept being re-run on fixes made for another lens. Round
+    1 runs every lens; after that a lens continues only while it finds
+    something real, and the reviewer covers the whole diff afterwards.
+11. **Hybrid runs Codex through a wrapper that always exits (2026-10-11).** In
+    live use a cooperator started Codex in the background and waited hours for
+    the completion notification while Codex waited for input. `codex exec`
+    (codex-cli 0.162.0, checked 2026-10-11) reads stdin until end of input when
+    stdin is piped, and the user's config can enable MCP tools that ask for
+    approval. The wrapper feeds stdin from a file, sets
+    `approval_policy="never"`, a read-only sandbox, and `--ignore-user-config`,
+    and ends silent, input-requesting, or overlong runs, so the background job
+    always reports back. `codex exec resume` has no `-s` or `-C` flag: the
+    sandbox is set through `-c sandbox_mode=...`, and the run starts in the
+    project root because resume filters sessions by working directory.

@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.3.1 — 2026-10-11
+
+- Audit game, both editions: round 1 runs every lens, after that only the
+  lenses that won the last round (found something real) play again. A lens
+  that found nothing real is retired for that block and is not re-run to
+  double-check; the reviewer still reads the whole diff. Policy: Claude 1.4.0,
+  Codex 1.6.1.
+- Claude Code: add the opt-in Hybrid profile. `opus` at high effort is the
+  brain, `haiku` workers implement (`sonnet` when a worker loops), Codex GPT-6
+  Luna xhigh audits and Codex GPT-6.1 Sol xhigh reviews blocks and stages,
+  read-only. Chosen only explicitly or by standing preference; falls back to
+  Agent roles when Codex is unavailable.
+- Claude Code: add `skills/workforce-orchestrate/scripts/codex-run.mjs`, the only
+  way the cooperator starts Codex. It feeds the packet on stdin from a file,
+  turns approvals off, ignores the user's Codex config, and ends runs that go
+  silent, ask for input, or run too long, so a background Codex run always
+  reports back. Fixes a cooperator waiting hours on a Codex run that was
+  waiting for input.
+
 ## 1.3.0 — 2026-10-08
 
 - Reject AI co-author trailers in commit messages: CI job plus a versioned

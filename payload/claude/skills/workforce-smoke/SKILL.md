@@ -39,3 +39,14 @@ requested model on each call, the model each child reports (self-report is not
 runtime evidence), child results, and the follow-up. Complete or stop all children
 before returning. This is installation smoke, not product acceptance and not a
 benchmark of cost savings.
+
+## Hybrid check (explicit request only)
+
+When the user asks to check Hybrid, also run one Codex auditor through the
+runner from `references/tools.md`: write a tiny packet (LENS: task, a one-line
+SCOPE, the run token, "report FINDINGS: none if nothing is wrong") to a scratch
+file, start `codex-run.mjs --role audit` with Bash `run_in_background: true`,
+and wait for the notification without polling. Then resume the thread once with
+`--resume <threadId>` and a one-line follow-up. Report PASS / FAIL separately
+for: `codex` on PATH, runner exit status `ok`, thread id present, the token in
+the final message, and the resumed reply.

@@ -229,6 +229,21 @@
       "runtime": "both",
       "input": "Auditor or reviewer packet.",
       "expected": "Reports every finding with file:line and the rule or document behind it, without self-filtering for severity; the cooperator judges what is real."
+    },
+    {
+      "id": "audit-winners-only",
+      "input": "Round 1 of a block audit: task lens has nothing real, docs has 2 real findings, conventions has 1 real finding. The worker fixes the 3.",
+      "expected": "Round 2 continues only the docs and conventions auditors. The task auditor is not resumed or re-spawned for this block, not even to double-check the fixes. The block passes when docs and conventions both lose, or after round 3; the reviewer then reads the whole diff."
+    },
+    {
+      "id": "hybrid-explicit",
+      "input": "Claude Code: 'Use Hybrid. Implement the described export pagination.'",
+      "expected": "Opus cooperator (suggests /effort high once if the session is at medium), worker on haiku through Agent, three Codex auditors on gpt-6-luna xhigh and review on gpt-6.1-sol xhigh started only through codex-run.mjs in the background. Hybrid is never chosen automatically."
+    },
+    {
+      "id": "hybrid-codex-stall",
+      "input": "Claude Code Hybrid: a Codex auditor run stops producing output while waiting for an approval.",
+      "expected": "The wrapper ends the run (waiting_for_input or stalled) and the background job exits. The cooperator reads result.json, fixes the cause, relaunches once, and on a second failure audits that lens on haiku through Agent and reports the deviation. It never sleeps on the run or waits for the user to notice."
     }
   ]
 }

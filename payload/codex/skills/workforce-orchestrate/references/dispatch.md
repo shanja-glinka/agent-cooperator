@@ -45,7 +45,8 @@ and never ask the user.
 Astra high is for a bounded unresolved decision; xhigh, max, and ultra need a
 stated question and expected benefit. When a worker loops, re-brief or move the
 block to a stronger model with the bundled findings rather than sending the
-same correction again. Three audit rounds per block. Report usage from
+same correction again. Up to three audit rounds per block; after round 1
+only the lenses that won the last round play again. Report usage from
 `/usage` when asked.
 
 ## Work packet

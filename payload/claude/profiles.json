@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.3.0",
+  "policyVersion": "1.4.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
@@ -49,7 +49,8 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Auditors report everything; the cooperator takes only real findings. Real findings in a round: auditors won, same worker fixes, next round. Nothing real: auditors lost, block passes."
+        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "rerun": "winners-only"
       }
     },
     "enhanced": {
@@ -100,8 +101,72 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Auditors report everything; the cooperator takes only real findings. Real findings in a round: auditors won, same worker fixes, next round. Nothing real: auditors lost, block passes."
+        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "rerun": "winners-only"
       }
+    },
+    "hybrid": {
+      "selection": "Only on the user's explicit choice or standing preference; never chosen automatically.",
+      "requires": "codex CLI on PATH and logged in. The Codex edition of the kit is not required.",
+      "orchestrator": {
+        "model": "opus",
+        "effort": "high",
+        "role": "brain: plan, brief, judge, accept; decides open design before briefing"
+      },
+      "probe": {
+        "model": "haiku",
+        "effort": "medium",
+        "escalateTo": {
+          "model": "sonnet",
+          "effort": "medium"
+        }
+      },
+      "worker": {
+        "model": "haiku",
+        "effort": "high",
+        "escalateTo": {
+          "model": "sonnet",
+          "effort": "high"
+        }
+      },
+      "blockReviewer": {
+        "runtime": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "sandbox": "read-only"
+      },
+      "stageReviewer": {
+        "runtime": "codex-cli",
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "sandbox": "read-only"
+      },
+      "design": {
+        "model": "opus",
+        "effort": "high",
+        "scope": "the cooperator itself"
+      },
+      "auditor": {
+        "runtime": "codex-cli",
+        "model": "gpt-6-luna",
+        "effort": "xhigh",
+        "sandbox": "read-only",
+        "lenses": [
+          "docs",
+          "task",
+          "conventions"
+        ],
+        "rounds": 3,
+        "rerun": "winners-only",
+        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round."
+      },
+      "codexRunner": {
+        "script": "{{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs",
+        "idleMinutes": 15,
+        "timeoutMinutes": 60,
+        "rule": "Run every Codex call through the script with Bash run_in_background; never bare codex or codex exec. The script always exits: stdin from a file, approvals off, user config ignored, watchdog for silence, input requests, and total time. Read <name>.result.json; only status ok is a result."
+      },
+      "fallback": "Codex unavailable or failing twice: auditor haiku xhigh and reviewers opus high through Agent; report the deviation once."
     }
   },
   "escalation": {
@@ -128,7 +193,8 @@
     "reuse": "Explicit task choice, active task context, or an applicable standing preference.",
     "autonomous": "Standard for a described solution, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended runs.",
     "askOnly": "Long multi-stage work where the choice materially changes the approach and nothing applies.",
-    "runtimeMismatch": "Model is set per Agent call; effort per role frontmatter or session. Report material deviations; explicit strict model, effort, and budget requirements remain binding."
+    "runtimeMismatch": "Model is set per Agent call; effort per role frontmatter or session. Report material deviations; explicit strict model, effort, and budget requirements remain binding.",
+    "hybrid": "Only on the user's explicit choice or standing preference."
   },
   "activation": {
     "mode": "opt-in",
@@ -195,5 +261,5 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round to the same auditors, the delta to the same reviewer, all through SendMessage. A fresh agent is for independence or a different model tier."
+  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, all through SendMessage. A fresh agent is for independence or a different model tier."
 }

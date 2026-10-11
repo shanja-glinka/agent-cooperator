@@ -19,7 +19,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
 `-p` selects the package; `claude-workforce` is its second binary. Pin a release
-with `github:shanja-glinka/codex-workforce#v1.3.0`. Start a new Claude Code session
+with `github:shanja-glinka/codex-workforce#v1.3.1`. Start a new Claude Code session
 after installing or updating. Options: `--claude-home PATH` (precedence: option,
 `CLAUDE_CONFIG_DIR`, `~/.claude`), `--dry-run`, `--force`, `--json`. There is no
 `--skills-dir`: Claude Code discovers skills inside its home directory.
@@ -33,6 +33,7 @@ after installing or updating. Options: `--claude-home PATH` (precedence: option,
   skills/workforce-orchestrate/SKILL.md          /workforce-orchestrate
   skills/workforce-orchestrate/references/dispatch.md
   skills/workforce-orchestrate/references/tools.md
+  skills/workforce-orchestrate/scripts/codex-run.mjs   Codex runner (Hybrid)
   skills/workforce-worker/SKILL.md               preloaded into workforce-worker
   skills/workforce-probe/SKILL.md                preloaded into workforce-probe
   skills/workforce-audit/SKILL.md                preloaded into workforce-auditor
@@ -87,15 +88,15 @@ Selection is contextual: concrete work proceeds with Standard, autonomous or
 unattended runs choose automatically, and a question is asked only for long
 multi-stage work with substantial unresolved design where nothing already applies.
 
-| Responsibility | Standard | Enhanced |
-| --- | --- | --- |
-| Brain (this session) | `opus` medium | `opus` high |
-| Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium |
-| Implementation (`workforce-worker`) | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks |
-| Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` xhigh) |
-| Auditor (`workforce-auditor`, 3 rounds) | `haiku` xhigh | `haiku` xhigh |
-| Block review (`workforce-reviewer`, MODE=block) | `opus` high | `opus` high |
-| Stage acceptance (`workforce-reviewer`, MODE=stage) | `opus` high | `fable` high (fallback `opus` xhigh) |
+| Responsibility | Standard | Enhanced | Hybrid |
+| --- | --- | --- | --- |
+| Brain (this session) | `opus` medium | `opus` high | `opus` high |
+| Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium | `haiku` medium |
+| Implementation (`workforce-worker`) | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks | `haiku` high, `sonnet` when it loops |
+| Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` xhigh) | the brain decides before briefing |
+| Auditor (up to 3 rounds) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
+| Block review (MODE=block) | `opus` high (`workforce-reviewer`) | `opus` high (`workforce-reviewer`) | Codex GPT-6.1 Sol xhigh |
+| Stage acceptance (MODE=stage) | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` xhigh) | Codex GPT-6.1 Sol xhigh |
 
 The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
@@ -122,6 +123,40 @@ declare `model: inherit` so that the `model` passed on each Agent call is what r
 `fable` is a reserve tier that needs a stated reason; when the account cannot use
 it, the fallback is `opus` at `xhigh`.
 
+### Hybrid: Claude thinks, Codex checks
+
+Hybrid is the economy preset. `opus` at high effort is the brain: it plans,
+decides design questions before briefing, judges every finding, and accepts.
+`haiku` workers implement (one tier up to `sonnet` when a worker loops).
+Auditors run on Codex GPT-6 Luna at xhigh, and block and stage review on Codex
+GPT-6.1 Sol at xhigh, both read-only. Luna costs $0.1/$0.5 and Sol $2/$10 per
+MTok (checked 2026-10-08), so the expensive model only thinks.
+
+It runs only when you choose it (`/workforce-orchestrate Use Hybrid. ...`) or
+record it as a standing preference; automatic selection never picks it. It
+needs the `codex` CLI on PATH and logged in; the Codex edition of the kit is not
+required. If Codex is unavailable or a run fails twice, that role falls back to
+`haiku` xhigh auditors and `opus` high review through Agent, and the report
+says so. If the session runs at medium effort, the brain says so once and
+suggests `/effort high`.
+
+Codex calls go through `skills/workforce-orchestrate/scripts/codex-run.mjs`,
+never through bare `codex` or a hand-written `codex exec`. The wrapper exists
+because of a real incident: a cooperator started Codex in the background and
+waited for the completion notification for hours while Codex sat waiting for
+input. The wrapper makes that impossible:
+
+- the packet goes in on stdin from a file, so Codex always sees end of input;
+- `approval_policy="never"`, a read-only sandbox, and `--ignore-user-config`
+  (no MCP servers from the user's config that ask for approval);
+- a watchdog ends the run when it goes silent for 15 minutes (`stalled`), shows
+  an approval or input request (`waiting_for_input`), or passes 60 minutes
+  (`timeout`), so the background job always exits and the notification always
+  arrives;
+- it writes `<name>.result.json` with the status, the Codex thread id, and the
+  path of the final message. The next round of a winning lens, or the delta for
+  the same reviewer, resumes that thread with `--resume <threadId>`.
+
 ### Rules that hold in every profile
 
 - The session is the cooperator: it plans, briefs, judges, and accepts; agents
@@ -132,8 +167,9 @@ it, the fallback is `opus` at `xhigh`.
 - Every Agent call sets `model`. Effort comes from the role frontmatter.
 - A worker gets a complete packet with SCOPE, OUT_OF_SCOPE, WRITE_SET, and
   CHECKS, and edits only its write set.
-- Fixes go back to the same worker, the next audit round to the same auditors,
-  the delta to the same reviewer, all through SendMessage.
+- Fixes go back to the same worker, the next audit round only to the auditors
+  whose lens won the last round, the delta to the same reviewer, all through
+  SendMessage (in Hybrid, the Codex thread is resumed instead).
 - Audits run at the cooperator's choice:
 
 ```text
@@ -141,15 +177,18 @@ Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, 3 rounds
+  a) audit this block              → auditors, up to 3 rounds
   b) no audit                      → next work to the worker
   c) next block to the worker      → and auditors in parallel on
                                      1, 2, 3 or N submitted blocks
 
 Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
 they find through one lens each: docs, task, conventions.
-Real findings in a round → auditors won, the same worker fixes, next round.
-Nothing real in a round  → auditors lost, the block passes the audit.
+Round 1 runs every lens. Then each lens plays on its own:
+real findings → that lens won, the same worker fixes, only winners
+                play the next round;
+nothing real  → that lens lost and is retired for this block.
+Every lens lost (or round 3 done) → the block passes the audit.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
 ```
