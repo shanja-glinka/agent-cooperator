@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.3.2 — 2026-10-12
+
+- Audit coverage, both editions: the auditor gets its assigned FILES and a
+  BUDGET (Claude: 40 tool calls, 80% of the 50-turn limit), and returns
+  `STATUS: complete | partial` with NOT_REACHED. A partial pass is never
+  presented as the whole.
+- An auditor that returns `partial` or hits its turn limit is continued with
+  SendMessage / `followup_task` (Hybrid: `codex-run.mjs --resume`) on its
+  NOT_REACHED files, never replaced by a fresh auditor that rereads everything.
+  A round ends only when every lens is complete; nothing goes to the worker
+  before that.
+- Only findings that quote a rule, document line, or acceptance line at a line
+  that really violates it count; the cooperator opens both before accepting.
+  Everything else is NOTES, which never go to the worker and never win a round.
+  Policy: Claude 1.4.1, Codex 1.6.2.
+
 ## 1.3.1 — 2026-10-11
 
 - Audit game, both editions: round 1 runs every lens, after that only the

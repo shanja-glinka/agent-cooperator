@@ -134,3 +134,14 @@ Source: https://fresh-worktree.ghost.io/are-better-models-replacing-superpowers/
     always reports back. `codex exec resume` has no `-s` or `-C` flag: the
     sandbox is set through `-c sandbox_mode=...`, and the run starts in the
     project root because resume filters sessions by working directory.
+12. **An auditor that hits its turn limit is continued, not replaced
+    (2026-10-12).** In live use a 120-file block got 46 audit cycles: each
+    Haiku auditor stopped at its turn limit after a part of the block and
+    reported as if it had covered the whole; the next one started from zero,
+    reread everything, found "new" places in another part, and the cooperator
+    sent each part's findings to the worker as a new round. Minor wording
+    without a rule was accepted as findings. Auditors now return
+    `STATUS: complete | partial` with NOT_REACHED, stop at a budget below the
+    turn limit, and are continued on what they did not read; a round ends
+    only when every lens is complete, and only findings with a quoted rule
+    count (the rest are NOTES).

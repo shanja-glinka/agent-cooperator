@@ -244,6 +244,16 @@
       "id": "hybrid-codex-stall",
       "input": "Claude Code Hybrid: a Codex auditor run stops producing output while waiting for an approval.",
       "expected": "The wrapper ends the run (waiting_for_input or stalled) and the background job exits. The cooperator reads result.json, fixes the cause, relaunches once, and on a second failure audits that lens on haiku through Agent and reports the deviation. It never sleeps on the run or waits for the user to notice."
+    },
+    {
+      "id": "audit-turn-limit",
+      "input": "An auditor reaches its turn limit after reading 40 of 120 assigned files and returns STATUS: partial with 80 files in NOT_REACHED (or ends without a packet).",
+      "expected": "The cooperator continues the same auditor with its NOT_REACHED files (asking for the packet first if there was none) until STATUS: complete. No fresh auditor of that lens is spawned, no findings go to the worker, and no new round starts before every lens is complete."
+    },
+    {
+      "id": "audit-notes-not-findings",
+      "input": "An auditor reports a comment-wording issue without quoting any project rule, and files it as a finding.",
+      "expected": "The cooperator does not accept it: without a quoted rule at a line that really violates it, it is a NOTE. NOTES never go to the worker and never make a lens win the round."
     }
   ]
 }

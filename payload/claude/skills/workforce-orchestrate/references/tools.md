@@ -30,9 +30,10 @@ ones. Roles installed by this kit: `workforce-worker`, `workforce-probe`,
 { "to": "<agent name or id>", "message": "<bundled findings or next round>" }
 ```
 
-Continues an agent with its context intact: the same worker for fixes, only the
-auditors whose lens won the last round for the next round, the same reviewer for
-the delta. A message does not change the agent's model or effort; for a different
+Continues an agent with its context intact: the same worker for fixes, an auditor
+that returned `STATUS: partial` or hit its turn limit (with its NOT_REACHED
+files), only the auditors whose lens won the last round for the next round, the
+same reviewer for the delta. A message does not change the agent's model or effort; for a different
 tier, spawn a fresh agent. Wait for the completion notification instead of
 polling.
 
@@ -62,8 +63,13 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   review instead of waiting without one.
 - On the notification read `<out>/<name>.result.json`: `status`, `threadId`,
   and `lastMessage` (the auditor's or reviewer's packet). Only `ok` counts as a
-  result. On any other status read `stderrTail` and the end of the `.jsonl`,
-  fix the cause, and relaunch once; if it fails again, run that lens on the
+  result, and an `ok` packet with `STATUS: partial` is not finished: resume
+  the thread with "continue with NOT_REACHED". On `timeout` or `stalled` with
+  a `threadId`, resume the same thread with "return your packet and
+  NOT_REACHED, then continue"; do not start a fresh run that rereads
+  everything. Only when there is no thread, or on `failed` and
+  `waiting_for_input`, read `stderrTail` and the end of the `.jsonl`, fix the
+  cause, and relaunch once; if it fails again, run that lens on the
   Agent fallback from dispatch and say so in the report.
 - Next round for a winning lens, or the delta for the same reviewer: same
   command with a new `--name`, the round packet, and `--resume <threadId>`.

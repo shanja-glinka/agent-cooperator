@@ -64,8 +64,10 @@ worker is `sonnet`.
 Turn limits per run: worker 60, probe 20, auditor 50, reviewer 30; up to three
 workers in parallel; up to three audit rounds per block, and after round 1
 only lenses that won the last round play again. Codex runs are bounded by the
-wrapper's idle and total time limits instead of turns. A run that hits its limit
-reports its state and continues through SendMessage with a new budget. Report
+wrapper's idle and total time limits instead of turns. Auditor BUDGET is 40 tool
+calls (80% of 50) unless the role's limit differs. A run that hits its limit is
+continued, never replaced: the same agent through SendMessage with a new budget,
+an auditor with its NOT_REACHED files. Report
 usage from `/cost` or `/usage` when asked.
 
 ## Work packet
@@ -86,6 +88,7 @@ WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
+FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 ```
 
 Agents share the checkout; use `isolation: "worktree"` only for a concrete write

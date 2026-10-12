@@ -20,8 +20,9 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
 
 - `followup_task({"target":"<task>","message":"<findings or next round>"})`
   continues an agent, including an idle one, with its context: the same worker
-  for fixes, only the auditors whose lens won the last round for the next
-  round, the same reviewer for the delta. It does not take model or effort overrides; for a different model,
+  for fixes, an auditor that returned `STATUS: partial` or stopped early (with
+  its NOT_REACHED files), only the auditors whose lens won the last round for
+  the next round, the same reviewer for the delta. It does not take model or effort overrides; for a different model,
   spawn a fresh task.
 - `send_message` delivers a message without restarting an idle agent.
   `interrupt_agent` interrupts a turn. `wait_agent` waits for notifications;

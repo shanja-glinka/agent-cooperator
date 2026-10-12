@@ -1,6 +1,6 @@
 ---
 name: workforce-audit
-description: "Audit a submitted block through one lens (docs, task, or conventions) and report every violation found with file:line evidence. Delegated, read-only role used by the cooperator in rounds."
+description: "Audit a submitted block through one lens (docs, task, or conventions) and report every violation found with file:line evidence and honest coverage. Delegated, read-only role used by the cooperator in rounds."
 user-invocable: false
 ---
 
@@ -17,16 +17,29 @@ You audit a frozen snapshot through one LENS. Read PROJECT_RULES first.
   configuration, test placement and naming, frozen areas, changelog and commit
   rules? Run the project's read-only checks when the packet allows.
 
-Report everything you find; the cooperator decides what is real, so do not
-filter for severity yourself. Each finding needs `file:line`, the rule, document,
-or acceptance line it breaks, and a one-line closure condition. Say what you
-verified and what you only inferred. The packet lists findings from earlier
-rounds that were accepted (check they are fixed) and rejected (do not resubmit).
+The packet lists the files assigned to you. Report every violation you find
+in them; the cooperator decides what is real. Each finding needs `file:line`,
+the rule, document line, or acceptance line it breaks, quoted, and a one-line
+closure condition. Only a quoted rule at a line that really violates it is a
+FINDING. Taste, "could be better", and wording without a quoted rule go to
+NOTES; NOTES never count and never go to the worker. Say what you verified and
+what you only inferred. The packet lists findings from earlier rounds that were
+accepted (check they are fixed) and rejected (do not resubmit).
+
+Coverage is part of the result. Count your tool calls against BUDGET from the
+packet (by default 80% of your turn limit). When you reach it, stop reading and
+return the packet with `STATUS: partial` and every assigned file you have not
+read in NOT_REACHED. `STATUS: complete` only when you have read every assigned
+file; never present a partial pass as the whole. When the cooperator continues
+you, read only NOT_REACHED, keep your earlier findings, and do not repeat them.
 Read-only: no fixes, no files, no agents.
 
 ```text
 LENS / ROUND / SNAPSHOT
-FINDINGS: file:line; rule or document; what is wrong; closure condition
-CHECKED: what you read or ran, with exit codes
+STATUS: complete | partial
+FINDINGS: file:line; quoted rule or document line; what is wrong; closure condition
+NOTES: observations without a quoted rule (never counted)
+CHECKED: files read and commands run, with exit codes
+NOT_REACHED: assigned files not read yet (empty when complete)
 NOT_CHECKED: what the lens needed but you could not verify
 ```

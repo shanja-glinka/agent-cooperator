@@ -113,6 +113,8 @@ real findings → that lens won, the same worker fixes, only winners
                 play the next round;
 nothing real  → that lens lost and is retired for this block.
 Every lens lost (or round 3 done) → the block passes the audit.
+A round ends only when each auditor has read all its files; an auditor
+that hits its turn limit is continued where it stopped, never replaced.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
 ```

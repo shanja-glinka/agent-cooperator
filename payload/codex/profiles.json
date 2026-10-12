@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.6.1",
+  "policyVersion": "1.6.2",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -47,7 +47,8 @@
         ],
         "rounds": 3,
         "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
-        "rerun": "winners-only"
+        "rerun": "winners-only",
+        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
       }
     },
     "enhanced": {
@@ -92,7 +93,8 @@
         ],
         "rounds": 3,
         "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
-        "rerun": "winners-only"
+        "rerun": "winners-only",
+        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
       }
     }
   },
@@ -164,8 +166,8 @@
     "pipeline": "Multi-stage or design-open work. Plan of N blocks with disjoint write sets; stage acceptance at the end."
   },
   "judging": {
-    "real": "In the diff or caused by it; breaks a named rule, document, or acceptance line; reproduces by a check or a concrete scenario.",
-    "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding.",
+    "real": "In the diff or caused by it; breaks a quoted rule, document line, or acceptance line at a line that really violates it (the cooperator opens both); reproduces by a check or a concrete scenario.",
+    "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
   "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model."

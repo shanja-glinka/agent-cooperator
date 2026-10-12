@@ -32,22 +32,23 @@ Cooperator: read repository rules, classify, pick profile
   │
   ▼
 ┌─ per block ──────────────────────────────────────────────────────┐
-│ probe (when a fact is missing)  →  worker (block)  →  submitted   │
-│                                                                   │
-│ cooperator chooses:                                               │
-│   a) audit this block            → auditors, up to 3 rounds       │
-│   b) no audit                    → next work to the worker        │
-│   c) next block to the worker    → and auditors in parallel on    │
-│                                    1, 2, 3 or N submitted blocks  │
-│                                                                   │
-│ audit game (per lens): round 1 runs every lens; auditors report   │
-│   everything; cooperator takes only real findings → same worker  │
-│   real findings → that lens won, only winners play the next round │
-│   nothing real  → that lens lost, retired for this block          │
-│   every lens lost (or round 3) → block passes                     │
-│                                                                   │
-│ review (diff + audit log) → real findings → same worker           │
-└───────────────────────────────────────────────────────────────────┘
+│ probe (when a fact is missing)  →  worker (block)  →  submitted  │
+│                                                                  │
+│ cooperator chooses:                                              │
+│   a) audit this block            → auditors, up to 3 rounds      │
+│   b) no audit                    → next work to the worker       │
+│   c) next block to the worker    → and auditors in parallel on   │
+│                                    1, 2, 3 or N submitted blocks │
+│                                                                  │
+│ audit game (per lens): round 1 runs every lens; a round ends     │
+│   only on STATUS: complete; partial → continue the same auditor  │
+│   cooperator takes only real findings → same worker              │
+│   real findings → that lens won, only winners play the next round│
+│   nothing real  → that lens lost, retired for this block         │
+│   every lens lost (or round 3) → block passes                    │
+│                                                                  │
+│ review (diff + audit log) → real findings → same worker          │
+└──────────────────────────────────────────────────────────────────┘
   │
   ▼
 Stage acceptance (pipeline only) → report
@@ -73,13 +74,22 @@ Stage acceptance (pipeline only) → report
    security paths, blocks that touched documentation or conventions.
 5. **Run the audit game.** Auditors (per profile: `haiku` xhigh through Agent,
    or Codex GPT-6 Luna xhigh in Hybrid) get one lens each, the frozen
-   snapshot, and PROJECT_RULES, and report everything they find with
-   `file:line` and the rule or document behind it. Judge each finding yourself:
-   it is real when it is in the diff or caused by it, breaks a named rule,
-   document, or acceptance line, and reproduces by a check or a concrete
+   snapshot, the list of assigned FILES, a BUDGET, and PROJECT_RULES, and
+   report FINDINGS with `file:line` and the quoted rule or document line,
+   NOTES, and their coverage. A lens's round is done only when its auditor
+   returns `STATUS: complete`. On `STATUS: partial`, or a run that ended at
+   its turn limit without a packet, continue the same auditor with
+   SendMessage: first "return your packet and NOT_REACHED" if there was
+   none, then "continue with NOT_REACHED". Never spawn a fresh auditor of
+   that lens for the block while the old one can be continued, and send
+   nothing to the worker until every lens in the round is complete. Judge
+   only FINDINGS; NOTES never go to the worker. Before accepting a finding,
+   open the quoted rule and the cited line yourself:
+   it is real when it is in the diff or caused by it, breaks the quoted
+   rule, document line, or acceptance line at that line, and reproduces by a check or a concrete
    scenario. Theoretical risks, hypothetical inputs, work outside SCOPE, and
-   taste without a rule are not taken. Real findings go to the same worker
-   as one bundle. Round 1 runs every chosen lens; after that only winners
+   taste without a quoted rule are not taken. Real findings go to the same
+   worker as one bundle. Round 1 runs every chosen lens; after that only winners
    play: a lens with at least one real finding continues to the next round
    with what was accepted and rejected, and a lens with nothing real has
    lost and is retired for this block, even while other lenses play on. Do

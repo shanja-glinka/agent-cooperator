@@ -19,7 +19,7 @@ npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
 ```
 
 `-p` selects the package; `claude-workforce` is its second binary. Pin a release
-with `github:shanja-glinka/codex-workforce#v1.3.1`. Start a new Claude Code session
+with `github:shanja-glinka/codex-workforce#v1.3.2`. Start a new Claude Code session
 after installing or updating. Options: `--claude-home PATH` (precedence: option,
 `CLAUDE_CONFIG_DIR`, `~/.claude`), `--dry-run`, `--force`, `--json`. There is no
 `--skills-dir`: Claude Code discovers skills inside its home directory.
@@ -189,6 +189,8 @@ real findings → that lens won, the same worker fixes, only winners
                 play the next round;
 nothing real  → that lens lost and is retired for this block.
 Every lens lost (or round 3 done) → the block passes the audit.
+A round ends only when each auditor has read all its files; an auditor
+that hits its turn limit is continued where it stopped, never replaced.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
 ```

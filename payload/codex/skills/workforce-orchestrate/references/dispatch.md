@@ -46,7 +46,9 @@ Astra high is for a bounded unresolved decision; xhigh, max, and ultra need a
 stated question and expected benefit. When a worker loops, re-brief or move the
 block to a stronger model with the bundled findings rather than sending the
 same correction again. Up to three audit rounds per block; after round 1
-only the lenses that won the last round play again. Report usage from
+only the lenses that won the last round play again. An auditor that returns
+`STATUS: partial` or stops early is continued with `followup_task` on its
+NOT_REACHED files, never replaced by a fresh one. Report usage from
 `/usage` when asked.
 
 ## Work packet
@@ -67,6 +69,7 @@ WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
+FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 ```
 
 Agents share the checkout; use worktrees only for a concrete write conflict.
