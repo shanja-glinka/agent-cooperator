@@ -69,7 +69,7 @@ if [[ -z ${DRY:-} ]]; then
     [[ -d $KIT ]] && PROMPT="/workforce-orchestrate $PROMPT"
     SID=$(uuidgen | tr A-Z a-z); echo $SID > $LOG/session-id.txt
     env $CLEAN CLAUDE_CONFIG_DIR=$CLAUDE_DIR claude -p "$PROMPT" --session-id $SID --model opus --effort medium \
-      --setting-sources project,local --dangerously-skip-permissions --output-format stream-json --verbose \
+      --setting-sources project,local --dangerously-skip-permissions --strict-mcp-config --output-format stream-json --verbose \
       --forward-subagent-text --max-budget-usd 60 < /dev/null > $LOG/claude.stream.jsonl 2> $LOG/claude.stderr &
   else
     PROFILE=(); [[ -d $KIT ]] && PROFILE=(-p workforce-standard)

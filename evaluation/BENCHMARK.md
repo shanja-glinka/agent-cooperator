@@ -20,10 +20,11 @@ suite has run.
 4. **Same conditions.** A fresh repository per cell outside the home directory,
    holding only the task's base commit and its history (no other branches, no
    remote, no results of other cells); the kit installed only into that cell; no
-   user skills, agents, MCP servers, or private instruction files; the user's own
-   `maxTurns` limits applied to the kit roles; the same task text for every
-   variant. Within each repeat, the variants of one task and model run side by
-   side, so they share the same load and time of day.
+   user skills, agents, MCP servers (Claude Code runs with `--strict-mcp-config`,
+   which also keeps out the account's claude.ai connectors), or private
+   instruction files; the user's own `maxTurns` limits applied to the kit roles;
+   the same task text for every variant. Within each repeat, the variants of one
+   task and model run side by side, so they share the same load and time of day.
 5. **Repeats.** At least two repeats per cell when a decision depends on the
    result; single runs vary by up to about 60% in time and 40% in input.
    A difference smaller than the spread between repeats is not a result.
