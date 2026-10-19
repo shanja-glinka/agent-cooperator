@@ -56,31 +56,28 @@ per block; a block that exhausts it moves to Sol xhigh, then to Astra.
 
 ## Worker ladder and handoff
 
-| Tier | Tool-call budget/run | Implementation runs/block | Token ceiling/tier/block | Next tier |
+| Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
-| Luna | 600 tool calls | 3 | 400k | Sol xhigh |
-| Sol | no kit cap | 3 | 500k | Astra high |
-| Astra | no kit cap | 3 | none | the cooperator re-plans or asks you |
+| Luna | 600 per run, 1800 per block | 3 | 400k | Sol xhigh |
+| Sol | no cap | 3 | 500k | Astra high |
+| Astra | no cap | 3 | none | the cooperator re-plans or asks you |
 
-Count each implementation start or continuation, including fixes after submission,
-against the same tier and block. A request only to return HANDOFF is not another
-implementation run, but its known usage still counts. Blockage, submission, handoff,
-or work on a new block does not erase earlier counters or open obligations. A
-submitted result can proceed to verification at the limit; further implementation
-needs remaining budget or the permitted handoff.
+Only a run that ends without a result spends an attempt: the worker hit its
+BUDGET, returned `STATUS: handoff`, or its fix left the finding open. A
+submitted block, or a fix that closes its finding, spends none, but its tool
+calls and tokens count. Tokens are the new tokens the worker's thread has
+processed (input minus cached input, plus output), all its runs together; a
+continued Codex thread keeps counting from its previous total. These budgets
+are instructions; Codex does not enforce them.
 
-Use confirmed usage with a known run scope. Partial usage is a measured lower
-bound, and unknown usage is not zero; session totals need a valid baseline before
-they can represent one run. When complete usage is unavailable, retain run counts
-and disclose that exact token-ceiling compliance cannot be established. Token and
-tool-call budgets are instruction-level limits, separate from native runtime limits.
-
-An exhausted tier returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED, OPEN, and
-NEXT. The cooperator diagnoses the cause, restores any missing prerequisite, and
-chooses the APPROACH before starting a permitted successor with the original packet,
-APPROACH, and HANDOFF only. Earlier reports, audit rounds, and transcripts stay with
-the cooperator. The [dispatch reference](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
-defines the detailed budget and auditor handoff rules.
+A worker at its limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED,
+OPEN, and NEXT. The cooperator treats an exhausted tier as evidence the block is
+hard: it reads the handoff, finds the cause, decides the APPROACH (same path
+with more effort, a different route, or a split or re-scoped block), and spawns
+the next tier fresh with the original packet, APPROACH, and HANDOFF only.
+Earlier reports, audit rounds, and transcripts stay with the cooperator. The
+[dispatch reference](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
+has the details, including the auditor handoff at 400k.
 
 ## Selection contract
 
@@ -139,25 +136,41 @@ setting or an accepted fallback before dependent work. Do not claim exact routin
 The orchestrator is the cooperator: it cooperates agents so that they do the
 work. After a worker submits a block, the cooperator chooses what happens next.
 
-It can audit the submitted block, proceed without an optional audit, or audit
-submitted blocks while workers continue compatible work. The orchestration skill
-sets the snapshot and dependency conditions for parallel work.
+```text
+Worker submits a block
+  │
+  ▼
+Cooperator (the orchestrator) chooses:
+  a) audit this block              → auditors, up to 3 rounds
+  b) no audit                      → next work to the worker
+  c) next block to the worker      → and auditors in parallel on
+                                     1, 2, 3 or N submitted blocks
+                                     (only if that block changes nothing
+                                     the audit reads; else a snapshot)
+
+Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
+they find through one lens each: docs, task, conventions.
+Round 1 runs every lens. Then each lens plays on its own:
+real findings → that lens won, the same worker fixes, only winners
+                play the next round;
+nothing real  → that lens lost and is retired for this block.
+Every lens lost, or round 3 done → the audit is over; real findings
+not yet fixed still go to the worker, and the review reads the fix.
+A round ends only when each auditor has read all its files; an auditor
+that hits its limit is continued where it stopped, never replaced.
+The cooperator takes only real findings; theoretical, hypothetical, and
+out-of-scope ones are rejected.
+```
 
 Auditors report everything they find with `file:line` and the rule or document
 behind it. The cooperator judges each finding: it is real when it is in the
 diff or caused by it, breaks a named rule, document, or acceptance line, and
-reproduces by a check or a concrete scenario. Real findings go to the responsible
-worker as one bundle, reusing the same worker within budget. Only the lenses that
-won a round play the next one, with what was accepted and what was rejected;
-a lens that found nothing real is
-retired for that block. The reviewer then reads the diff together with
-the audit log.
-
-A round completes only after every assigned lens has read all its files. Continue
-partial coverage with the same auditor within budget; the token-ceiling handoff is
-an explicit exception. Three rounds end the audit game, not unresolved findings,
-required checks, or other task obligations. The block is ready for acceptance only
-when those obligations have evidence of closure.
+reproduces by a check or a concrete scenario. Real findings go to the same
+worker as one bundle. Only the lenses that won a round play the next one, with
+what was accepted and what was rejected; a lens that found nothing real is
+retired for that block. The reviewer then reads the whole diff, fixes included,
+together with the audit log. Checks the project requires always run, and a
+reviewer's "accepted" does not replace one that has not passed.
 
 ## Complete blocks, proportional verification
 
@@ -168,7 +181,7 @@ Independent review happens after a substantial block is ready, not after every e
 A minimal isolated test can establish a component contract; it cannot by itself
 prove a real consumer was switched. An inventory can support planning; it cannot
 stand in for implementation. Review reports state the scope they actually prove.
-Findings return to the same owner within budget, followed by affected checks and
+Findings return to the same owner as one packet, followed by affected checks and
 review of the correction's impact. Required project acceptance gates still apply.
 
 ## What the research does and does not establish

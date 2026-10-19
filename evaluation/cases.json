@@ -49,8 +49,8 @@
     },
     {
       "id": "small-correction",
-      "input": "Completed block review finds a small defect; the original worker has remaining block/tier budget.",
-      "expected": "Return the bundle to the same owner within budget; run affected checks and delta review. Keep the block's prior run/usage counters. No full project re-audit without a changed premise."
+      "input": "Completed block review finds a small defect; the original worker still has budget.",
+      "expected": "Return the bundle to the same owner. A fix that closes the finding spends no attempt; its tool calls and tokens count. Run affected checks and delta review. No full project re-audit without a changed premise."
     },
     {
       "id": "runtime-mismatch",
@@ -132,13 +132,13 @@
     {
       "id": "claude-fix-round-continuity",
       "runtime": "claude-code",
-      "input": "Kit active. Block review returned four findings; the worker has remaining block/tier budget.",
-      "expected": "Bundle findings into one SendMessage to the same worker, counting the implementation continuation; then re-review the delta with the same reviewer. No fresh cold agent per finding."
+      "input": "Kit active. Block review returned four findings; the worker still has budget.",
+      "expected": "Bundle findings into one SendMessage to the same worker; fixes that close their findings spend no attempt. Then re-review the delta with the same reviewer. No fresh cold agent per finding."
     },
     {
       "id": "claude-escalation-ladder",
       "runtime": "claude-code",
-      "input": "Kit active. Sonnet ends its third implementation run without submission; necessary work remains.",
+      "input": "Kit active. Sonnet spends its third attempt without submission; necessary work remains.",
       "expected": "Read HANDOFF, diagnose the cause and choose APPROACH. Restore missing prerequisites before a fresh Opus high worker with the original assignment/current snapshot, APPROACH and HANDOFF carrying OPEN obligations. No fourth Sonnet run or reset of spent budget."
     },
     {
@@ -222,7 +222,7 @@
       "id": "audit-game",
       "runtime": "both",
       "input": "Round 1: auditors report 5 findings, 2 break a named project rule in the diff, 3 are hardening ideas for inputs nobody reported.",
-      "expected": "Accept the 2 demonstrated in-scope violations and reject unsupported extras. After all chosen lenses finish their assigned coverage, send one bundle to the budget-eligible owner. Only winning lenses repeat, at most 3 rounds; ending the game does not close findings or accept the block."
+      "expected": "Accept the 2 demonstrated in-scope violations and reject unsupported extras. After all chosen lenses finish their assigned coverage, send one bundle to the same worker while its budget lasts. Only winning lenses repeat, at most 3 rounds; ending the game does not close findings or accept the block."
     },
     {
       "id": "auditors-report-everything",
@@ -301,7 +301,7 @@
       "id": "audit-cap-open-findings",
       "runtime": "both",
       "input": "All chosen lenses complete round 3; the cooperator accepts 2 real findings and neither is fixed.",
-      "expected": "Record that the audit game ended while the block remains unaccepted. Fix both with a budget-eligible owner, run affected checks and review the corrected diff. No fourth audit round or automatic closure of findings."
+      "expected": "Record that the audit game ended while the block remains unaccepted. Fix both with the same worker while its budget lasts, run affected checks and review the corrected diff. No fourth audit round or automatic closure of findings."
     },
     {
       "id": "stage-accepted-missing-gate",
@@ -313,7 +313,7 @@
       "id": "retired-lens-new-regression",
       "runtime": "both",
       "input": "Task lens retired in round 1. A later docs correction changes behavior and a concrete regression violates the original acceptance example.",
-      "expected": "Open the real regression, assign the budget-eligible owner and independently review the corrected diff/new delta, including that behavior. Do not revive a retired audit lens or treat the prior audit as proof of the new change."
+      "expected": "Open the real regression, assign the same worker while its budget lasts and independently review the corrected diff/new delta, including that behavior. Do not revive a retired audit lens or treat the prior audit as proof of the new change."
     },
     {
       "id": "snapshot-shared-dependency",
@@ -354,20 +354,20 @@
     {
       "id": "handoff-only-run-count",
       "runtime": "both",
-      "input": "After its third implementation run, the worker returns without a complete HANDOFF. The cooperator requests only a packet from its existing context.",
-      "expected": "Ask for the packet without implementation. This is not a fourth work run; any known usage still belongs to the original block/tier. New implementation requires the next allowed tier or re-plan."
+      "input": "After its third attempt, the worker returns without a complete HANDOFF. The cooperator requests only a packet from its existing context.",
+      "expected": "Ask for the packet without implementation. This is not a new run; its usage still counts for the block. New implementation goes to the next tier or a re-plan."
     },
     {
       "id": "usage-unknown",
       "runtime": "both",
       "input": "The wrapper reports task status ok and tokens.status unknown, tokens.total null; the prior block ledger contains 2 work runs.",
-      "expected": "Keep usage unknown and preserve the 2 runs. Do not convert null to zero or promise exact token-ceiling compliance. Use only confirmed attributable usage for totals."
+      "expected": "Keep usage unknown and preserve the attempt and tool-call counts. Do not convert null to zero or promise exact token-ceiling compliance; go by attempts and tool calls and say so."
     },
     {
       "id": "usage-resumed-thread",
       "runtime": "both",
-      "input": "A resumed wrapper run has tokens.status unknown, tokens.total null, threadTotal.total 275000, reason resume_baseline_missing.",
-      "expected": "Do not add 275000 as new run usage or a lower bound for that run. Preserve the observed thread total separately and disclose the missing baseline."
+      "input": "A resumed wrapper run without --baseline has tokens.status unknown, tokens.total null, threadTotal.total 275000, reason resume_baseline_missing.",
+      "expected": "Do not add 275000 as new run usage. The thread total is that agent's running total: compare threadTotal.uncached with the ceiling. Pass --baseline <previous result.json> on the next resume to get the run's own usage."
     },
     {
       "id": "verified-before-delivery",
@@ -404,6 +404,42 @@
       "runtime": "both",
       "input": "Claude auditor maxTurns is 50; its packet tool-call BUDGET is 40. One agent turn may contain several tool calls.",
       "expected": "Track the 40-call packet boundary separately from 50 agent turns and return a packet before either prevents reporting. Never derive a call count as 80% of maxTurns."
+    },
+    {
+      "id": "fix-closes-no-attempt",
+      "runtime": "both",
+      "input": "A sonnet worker submits its block. Audit round 1, round 2 and the review each return real findings, and each fix closes them.",
+      "expected": "No attempt is spent: the worker stays on the block through all three fixes. Its tool calls and tokens are counted. No escalation to opus."
+    },
+    {
+      "id": "fix-fails-spends-attempt",
+      "runtime": "both",
+      "input": "Same block, but the review finding is still real after the worker's fix.",
+      "expected": "That run spends an attempt. The finding goes back to the same worker while attempts remain; after the third attempt without a result, or when the volume is spent, the block moves up with a HANDOFF and the cooperator's APPROACH."
+    },
+    {
+      "id": "claude-token-count-not-summed",
+      "runtime": "claude-code",
+      "input": "A sonnet worker's completion reports 180k tokens; after one SendMessage continuation it reports 260k.",
+      "expected": "Compare the latest count, 260k, with the 500k ceiling. Do not add 180k and 260k: the count is the agent's context size, not its spend. Report real spend from /cost."
+    },
+    {
+      "id": "codex-thread-running-total",
+      "runtime": "claude-code",
+      "input": "Hybrid Codex Sol worker: run 1 result has threadTotal.uncached 220k; the resumed run 2 with --baseline reports tokens.uncached 90k and threadTotal.uncached 310k.",
+      "expected": "Compare 310k with the 500k ceiling; run 2's own usage is 90k. No escalation on tokens yet."
+    },
+    {
+      "id": "claude-agents-md-with-claude-md",
+      "runtime": "claude-code",
+      "input": "Kit active in a project that has both CLAUDE.md and AGENTS.md.",
+      "expected": "Read AGENTS.md yourself, since Claude Code loads it only when there is no CLAUDE.md, and pass both files to every agent as PROJECT_RULES."
+    },
+    {
+      "id": "parallel-audit-independent",
+      "runtime": "both",
+      "input": "Block A is submitted. Block C writes only files that neither A nor anything A imports touches.",
+      "expected": "Start C and audit A in parallel on the shared checkout; no snapshot is needed. Paired with snapshot-shared-dependency, where the next block changes an import of A."
     }
   ]
 }

@@ -5,12 +5,9 @@ description: "Audit a submitted block through one lens (docs, task, or conventio
 
 # Audit one lens
 
-You audit a frozen snapshot through one LENS. Read PROJECT_RULES first.
-Use the stable checkout or copied tree identified by SNAPSHOT, including relevant
-dirty/new files and read dependencies. A revision label or disjoint WRITE_SETs
-alone do not freeze reads. If relevant inputs change during the audit, record the
-affected evidence under NOT_CHECKED and ask the parent to provide a stable view
-or serialize the writer; do not claim coherent coverage across changing views.
+You audit a frozen snapshot through one LENS. Read PROJECT_RULES first, then
+read only the tree at SNAPSHOT. If SNAPSHOT is missing, or its files change
+while you read, say so under NOT_CHECKED.
 
 - `docs`: does the code match what the repository's documentation, contracts,
   API descriptions, and docstrings promise, and does the documentation still
@@ -30,26 +27,21 @@ NOTES; NOTES never count and never go to the worker. Say what you verified and
 what you only inferred. The packet lists findings from earlier rounds that were
 accepted (check they are fixed) and rejected (do not resubmit).
 
-Coverage is part of the result. Count tool calls against the packet's BUDGET;
-native turn limits are a separate boundary.
-Return a packet before a limit prevents reporting, with `STATUS: partial` and
-unread assigned files in NOT_REACHED. Use `STATUS: complete` only after every
-assigned file is read on the agreed stable snapshot; it is a coverage status,
-not task acceptance or closure of findings.
-
-Within budget, continue the same auditor on NOT_REACHED and retain earlier
-findings. At the token ceiling, return the packet for the parent's permitted
-handoff: retain the same snapshot, lens and round, completed coverage and findings;
-the successor receives only the remaining assigned files. Do not restart the lens
-or close obligations because its agent changes. Read-only: no fixes, no files,
-no agents.
+Coverage is part of the result. Count your tool calls against BUDGET from the
+packet; your turn limit is separate, so return the packet before
+either one ends your run. At BUDGET, stop reading and return `STATUS: partial`
+with every assigned file you have not read in NOT_REACHED. `STATUS: complete`
+only when you have read every assigned file; it says what you covered, not that
+the block is accepted. When the cooperator continues you, or hands your lens to
+a stronger auditor, read only NOT_REACHED, keep the earlier findings, and do
+not repeat them. Read-only: no fixes, no files, no agents.
 
 ```text
 LENS / ROUND / SNAPSHOT
 STATUS: complete | partial
 FINDINGS: file:line; quoted rule or document line; what is wrong; closure condition
 NOTES: observations without a quoted rule (never counted)
-CHECKED: files read; commands, exit codes and snapshot/dependency evidence
+CHECKED: files read and commands run, with exit codes
 NOT_REACHED: assigned files not read yet (empty when complete)
 NOT_CHECKED: what the lens needed but you could not verify
 ```

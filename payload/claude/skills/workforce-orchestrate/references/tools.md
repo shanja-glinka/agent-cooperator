@@ -2,9 +2,8 @@
 
 Read the real tool schema in the session; field names below are the documented
 ones. Roles installed by this kit: `workforce-worker`, `workforce-worker-lite`
-(for `haiku`, a packet budget of 120 tool calls per run), `workforce-probe`, `workforce-auditor`,
+(for `haiku`, 120 tool calls per run), `workforce-probe`, `workforce-auditor`,
 `workforce-reviewer`.
-Native `maxTurns` limits turns independently; do not derive call budgets from it.
 
 ## Agent
 
@@ -37,19 +36,28 @@ Native `maxTurns` limits turns independently; do not derive call budgets from it
 { "to": "<agent name or id>", "message": "<bundled findings or next round>" }
 ```
 
-Continues an agent with its context intact within remaining budget: the same
-worker for fixes, an auditor that returned `STATUS: partial` or hit its turn limit (with its NOT_REACHED
-files), only the auditors whose lens won the last round for the next round, the
-same reviewer for the delta. The auditor token-ceiling handoff is an exception;
-preserve its snapshot, lens, round and covered files as dispatch describes. After a
-worker exhausts its budget, request only a missing HANDOFF, without implementation;
-its known usage still counts. A message does not change model or effort: a different
-tier needs a fresh agent. Wait for the completion notification instead of polling.
+Continues an agent with its context intact: the same worker for fixes, an
+auditor that returned `STATUS: partial` or hit its turn limit (with its
+NOT_REACHED files), only the auditors whose lens won the last round for the
+next round, the same reviewer for the delta. After a worker's budget is spent,
+ask it only for a missing HANDOFF, no more work. A message does not change the
+agent's model or effort; for a different tier, spawn a fresh agent. Wait for
+the completion notification instead of polling.
 
-Queue findings for A while its worker owns B. Switch at a safe boundary with A's
-packet, WRITE_SET and budget restored. For parallel audit/review, use the actual
-stable checkout or copied tree identified in SNAPSHOT, including dirty/new files
-and relevant read dependencies; pause writers to materialize it or serialize them.
+## Snapshot for a parallel audit
+
+When the next block may change what an audit reads, give the auditors a frozen
+copy and point SNAPSHOT at it:
+
+```sh
+sha=$(git stash create)        # tracked changes as a commit; empty when clean
+git worktree add --detach "$SCRATCH/snap-blk1" "${sha:-HEAD}"
+# copy the block's new, untracked files from its WRITE_SET into the copy
+git worktree remove --force "$SCRATCH/snap-blk1"   # after the round
+```
+
+The copy has no installed dependencies: run checks that need them in the main
+checkout once the writer is done.
 
 ## Codex CLI (Hybrid profile)
 
@@ -70,50 +78,43 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   approval). Defaults: `audit` → `gpt-6-luna`, `review` → `gpt-6.1-sol`, effort
   `xhigh`.
 - Run each call with Bash `run_in_background: true`; the three lenses go in one
-  message. Wait for completion. The wrapper ends a run that goes silent for 15 minutes
+  message. Do not sleep or poll: the completion notification arrives, because
+  the wrapper ends the run when it finishes, goes silent for 15 minutes
   (`stalled`), shows an approval or input request (`waiting_for_input`), or
-  passes 60 minutes (`timeout`). Set `--timeout-minutes` for a large stage
-  review only within the applicable time budget.
+  passes 60 minutes (`timeout`). Raise `--timeout-minutes` for a large stage
+  review instead of waiting without one.
 - On the notification read `<out>/<name>.result.json`: `status`, `threadId`,
-  and `lastMessage` (the auditor's or reviewer's packet). `ok` is an execution
-  result, not acceptance. For an `ok` partial audit, resume NOT_REACHED within
-  budget or use the permitted token-ceiling handoff. On `timeout` or `stalled`,
-  inspect the cause and remaining budget; use a known thread to recover only a
-  missing packet before deciding whether continuation is useful. Do not repeat
-  an unchanged blocked operation. Without a usable thread, or on `failed` or
-  `waiting_for_input`, inspect `stderrTail` and the end of `.jsonl`, fix the cause
-  and relaunch at most once within budget. If it fails again, use dispatch's
-  permitted Agent fallback and report it; retain spent runs and usage.
+  and `lastMessage` (the auditor's or reviewer's packet). Only `ok` counts as a
+  result, and an `ok` packet with `STATUS: partial` is not finished: resume
+  the thread with "continue with NOT_REACHED". On `timeout` or `stalled` with
+  a `threadId`, resume the same thread with "return your packet and
+  NOT_REACHED"; do not start a fresh run that rereads everything. Only when
+  there is no thread, or on `failed` and `waiting_for_input`, read
+  `stderrTail` and the end of the `.jsonl`, fix the cause, and relaunch once;
+  if it fails again, run that lens on the Agent fallback from dispatch and say
+  so in the report.
 - A Hybrid block escalated from `haiku` runs as a Codex worker: the same
   command with `--role work` (defaults: `gpt-6.1-sol`, effort `xhigh`, sandbox
   `workspace-write`, the `workforce-worker` skill prepended) and the escalation
-  packet. Apply the usage rules below. Continue with `--resume <threadId>` only
-  while implementation budget remains; a packet-only HANDOFF request asks for
-  no further implementation.
+  packet. Continue the same worker with `--resume <threadId>` and
+  `--baseline <previous result.json>` while its budget lasts.
 - Next round for a winning lens, or the delta for the same reviewer: same
-  command with a new `--name`, the round packet, and `--resume <threadId>`.
-  Continue within budget; a lens that lost is not resumed.
+  command with a new `--name`, the round packet, `--resume <threadId>`, and
+  `--baseline <previous result.json>`. A lens that lost is not resumed.
 - Never hand Codex a task that needs a reply mid-run. If a result says Codex
   needed something, answer it in the next round's packet.
 
 ### Usage in result.json
 
-`tokens.scope` is `run`; `tokens.status` is `known`, `partial`, or `unknown`.
-Use nullable `input`, `cachedInput`, `output`, and `total` only in that scope.
-`total = input + output`; cachedInput is already included in input. `source`
-records provenance and `reason` explains incomplete or unusable observations.
-Known usage is the observed complete run total; partial usage is only its measured
-portion and may have null fields. Unknown usage is null, never a zero-cost run.
-`model` and `effort` record requested CLI settings. `tokens.status: known` establishes
-counter completeness, not the actual model or billing; do not calculate money from
-these fields. A requested-tier ledger records policy history with actual routing
-unverified unless separate evidence establishes it.
-
-`tokens.threadTotal` preserves a cumulative observation for inspection. Never add
-it as a new run charge or use a resumed thread total as a run lower bound. This
-runner has no resume baseline, so resumed cumulative usage remains `unknown`;
-`resume_baseline_missing` identifies that limitation. Retain run counts and disclose incomplete
-token accounting; do not promise exact token-ceiling enforcement when usage is missing.
+`tokens.total` is the run's own usage (`input + output`; `cachedInput` is part of
+`input`), and `tokens.uncached` is `input - cachedInput + output`: the new tokens
+the run processed. `tokens.status` says how far to trust them: `known`,
+`partial` (a lower bound), or `unknown` (`null`, never zero). `tokens.threadTotal`
+is the thread's running total: a resumed thread keeps counting from its previous
+total (checked 2026-10-19), so the latest `threadTotal` covers every run of that
+agent. Pass the previous run's file as `--baseline` when you resume, and the
+runner reports the resumed run's own usage; without it that run is `unknown`.
+`model` and `effort` are what was requested, not proof of what ran.
 
 ## Missing capability
 

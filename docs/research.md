@@ -61,8 +61,10 @@ checks, failed attempts, recovery and necessary human work. One script call can
 still contain many costly operations. Money, elapsed time and human effort can
 conflict; no universal weights are supplied. The policy therefore does not run
 an elaborate route search before each routine read. The executable instructions
-and transition table live in [Route Decision in Codex](../payload/codex/skills/workforce-orchestrate/SKILL.md#route-decision)
-and [Route Decision in Claude](../payload/claude/skills/workforce-orchestrate/SKILL.md#route-decision).
+and situation table live under "Choosing the next move" in the
+[Codex](../payload/codex/skills/workforce-orchestrate/SKILL.md#choosing-the-next-move) and
+[Claude](../payload/claude/skills/workforce-orchestrate/SKILL.md#choosing-the-next-move)
+orchestration skills; the skills state the rule in words, without the formula.
 
 ### Primary research and the limited inference used here
 
@@ -92,14 +94,28 @@ usage was captured. A completion label alone does not establish a per-run delta,
 and a zero report alone does not prove that no resources were spent.
 
 The Hybrid wrapper consequently replaces cumulative snapshots instead of summing
-them and exposes `tokens.status`, nullable run fields, source and scope. A resumed
-thread without a baseline has unknown run usage; `tokens.threadTotal` is retained
-only as an observed thread snapshot. Cached input is included in input and is
-not added again. Incomplete run evidence is marked partial; incremental-only
-events without reliable identity are not summed. The internal raw `token_count`
-adapter is exercised by synthetic fixtures and is not claimed to be a public
-exec stdout event. This is source inspection and fake-CLI regression coverage,
-not validation against a live Codex installation or independent billing data.
+them and exposes `tokens.status`, nullable run fields, source and scope. Cached
+input is included in input and is not added again. Incomplete run evidence is
+marked partial; incremental-only events without reliable identity are not
+summed. The internal raw `token_count` adapter is exercised by synthetic
+fixtures and is not claimed to be a public exec stdout event.
+
+Live measurements on 2026-10-19 (codex-cli 0.163.0, Claude Code 2.1.303):
+
+- A Codex thread keeps counting across `codex exec resume`. A Luna audit run
+  reported 79,504 input (69,888 cached) and 406 output tokens; a one-word reply
+  on the resumed thread reported 95,762 input and 411 output, that is +16,258
+  input and +5 output. The latest `threadTotal` is therefore the running total
+  of that agent, and the wrapper's `--baseline <previous result.json>` gives a
+  resumed run's own usage by subtraction.
+- The token count Claude Code reports for a subagent (`totalTokens`) equals the
+  usage of its last request: a `sonnet` worker reported 39,483 (2 input, 537
+  cache creation, 37,228 cache read, 1,716 output), while the session's
+  `modelUsage` for `sonnet` was 298,092 cache read, 37,765 cache creation and
+  9,856 output. The count is the agent's context size, not its spend; ceilings
+  compare the latest count and never add counts across continuations.
+- Claude Code reads `AGENTS.md` only when the project has no `CLAUDE.md`
+  (checked with marker files in both arrangements).
 
 Behavior cases compare decisions from states that differ in one material fact,
 such as current versus stale evidence or completed versus missing required work.

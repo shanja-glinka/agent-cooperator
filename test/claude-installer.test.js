@@ -157,7 +157,7 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.equal(policy.workerBudgets.haiku.tokenCeiling, 400000);
   assert.equal(policy.workerBudgets.sonnet.tokenCeiling, 500000);
   const lite = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-worker-lite.md'), 'utf8');
-  assert.match(lite, /\nmaxTurns: 120\n/);
+  assert.match(lite, /\nmaxTurns: 130\n/);
   assert.equal(policy.profiles.standard.auditor.model, 'haiku');
   assert.equal(policy.profiles.standard.auditor.effort, 'xhigh');
   assert.equal(policy.profiles.standard.auditor.rerun, 'winners-only');

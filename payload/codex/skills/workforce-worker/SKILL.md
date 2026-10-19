@@ -18,16 +18,12 @@ Make routine decisions yourself; bring cross-owner contract questions to the
 parent with evidence and a proposal. Do not ask the user, spawn agents, switch
 branches, push, or commit unless the packet assigns a commit.
 
-Run CHECKS and report their exit codes against the current snapshot and relevant
-environment/dependencies. Report missing or stale required evidence. Fix findings
-in this context only while the parent assigns this block and budget remains.
-If findings for A arrive while you own B, leave them queued with the parent;
-switch only at a safe boundary after A's packet, WRITE_SET and budget are restored.
-Re-run affected checks after fixes.
+Run CHECKS and report each exit code. If a required check could not run, say
+so and why: a check you did not run is not a pass. When the parent sends
+findings, fix them in this same context and re-run the affected checks.
 
-When the packet gives a BUDGET (tool calls per run), stop at it. Native turn
-limits and timeouts are separate boundaries; do not convert turns into tool calls.
-Use only the remaining budget assigned to this block. Stop also when
+When the packet gives a BUDGET (tool calls per run), stop at it; your turn
+limit is separate, so leave room to write the packet. Stop also when
 you notice you are repeating an approach that already failed. Then return
 `STATUS: handoff` with a HANDOFF instead of pushing on: the parent decides the
 next move, and a stronger agent may continue from your handoff without seeing
@@ -38,24 +34,21 @@ nothing more.
 When your packet carries a HANDOFF from an earlier worker, read it and the
 working tree before acting, and follow the parent's APPROACH: continue that
 path with more care, or take the different route the parent chose. Do not
-redo what DONE lists while its evidence still applies to the tree and relevant
-environment/dependencies. Carry inherited, applicable obligations forward in
-HANDOFF.OPEN until evidence closes them or a sourced reason makes them inapplicable;
-state their owner or dependency and the evidence needed for closure. The cooperator
-updates the task record; submission or handoff does not close these obligations.
+redo what DONE lists unless the tree shows it is wrong. Keep everything still
+open in your own HANDOFF.OPEN: handing work over does not close it.
 
 ```text
-TASK / SNAPSHOT: assignment version and task-record location; tree/diff identity
+TASK / SNAPSHOT: assignment version; revision and dirty diff identity
 STATUS: submitted | handoff | blocked
 RESULT: what the acceptance example shows now
 CHANGED: files; old -> new -> consumer where something was replaced
-CHECKS: command; cwd; exit code; snapshot and relevant conditions; missing evidence
+CHECKS: command; cwd; exit code; required checks not run, and why
 FOLLOW_UPS: observations outside SCOPE, not implemented
 BLOCKER: what stops completion and why, or none
 HANDOFF (STATUS: handoff only):
-  DONE: verified results with files, check evidence, snapshot and validity conditions
+  DONE: what is finished and verified, with files and check results
   STOPPED_AT: where you stopped and the state of the working tree
   TRIED: approaches tried and why each did not work
-  OPEN: applicable unclosed obligations; owner/dependency; required closure evidence
+  OPEN: what is left, and how to check that it is done
   NEXT: the step you would take next, and what makes this block hard
 ```

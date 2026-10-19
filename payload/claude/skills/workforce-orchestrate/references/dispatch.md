@@ -18,9 +18,7 @@ explains it. A model release updates the record, not the workflow.
 
 Presets are starting recommendations. A named profile is an approach preference;
 the user's explicit model, effort, and budget limits are binding. If `fable` is
-unavailable, the existing reviewer/design role uses `opus` at high; say so.
-A separately explicit model/effort requirement still needs a matching capability
-or an accepted deviation.
+unavailable, use `opus` at high and say so.
 
 Hybrid is the economy preset: `opus` thinks and judges, `haiku` types, and
 cheap Codex models audit and review at xhigh (GPT-6 Luna $0.1/$0.5 and
@@ -59,69 +57,59 @@ and never ask the user.
 
 Worker budgets per block, counted by the cooperator:
 
-| Tier | Per run | Runs | Token ceiling | Next tier |
+| Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
-| `haiku` (`workforce-worker-lite`) | 120 tool calls | 3 (360) | 400k | Hybrid: Codex `gpt-6.1-sol` xhigh; otherwise `sonnet` |
-| `sonnet` | role limit | 3 | 500k | `opus` |
+| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Hybrid: Codex `gpt-6.1-sol` xhigh; otherwise `sonnet` |
+| `sonnet` | role turn limit | 3 | 500k | `opus` |
 | Codex `gpt-6.1-sol` (Hybrid) | runner time limits | 3 | 500k | `opus` |
-| `opus` | role limit | 3 | none | the cooperator re-plans or asks the user |
+| `opus` | role turn limit | 3 | none | the cooperator re-plans or asks the user |
 
-Count each implementation start or continuation, including post-submit fixes,
-as one run under the same block and tier. A HANDOFF-only request asks for no
-implementation and adds no work run, but its known usage still counts. Keep
-counters when blocked, submitted, handed off or switched to another block.
-Queue late findings under their original block; restore its packet and counters
-before the worker returns to it.
+An attempt is spent only by a run that ends without a result: the worker hit
+its BUDGET or turn limit, returned `STATUS: handoff`, or its fix left the
+finding open. A submitted block, or a fix that closes its finding, spends no
+attempt. Tool calls and tokens count for every run on the block, fixes
+included. Asking a stopped worker only for its HANDOFF is not a new run. The
+counters stay with the block when it is blocked, submitted, handed off, or put
+aside for another block.
 
-Sum only confirmed, non-overlapping usage attributable to this block/tier/run.
-Partial usage is a measured lower bound; unavailable usage is unknown, not zero.
-Cumulative session totals need a valid starting baseline before they can be used
-as run totals. Retain run counts when usage is unavailable and disclose that
-exact token-ceiling compliance cannot be established. Token and tool-call
-budgets here are instructions, not runtime guards.
+Tokens (measured 2026-10-19). The token count Claude Code reports for an agent
+(`totalTokens` on completion) is the size of its last request, that is, its
+context, not its spend: a `sonnet` worker reported 39,483 while its requests
+processed about 346k. A continued agent carries its context, so compare the
+agent's latest count with the ceiling and never add counts across its runs.
+For a Codex run in Hybrid, compare `tokens.threadTotal.uncached` from the
+latest `result.json` (new tokens the thread has processed, all its runs
+included; see [tools](tools.md)). The real spend is in `/cost`. When a count is
+missing, go by attempts and tool calls and say so in the report. These budgets
+are instructions; neither Claude Code nor the runner enforces them.
 
-At exhaustion, preserve and verify an already submitted result. If implementation
-remains, diagnose the cause, restore prerequisites and launch the next allowed
-tier with the original assignment, current snapshot, APPROACH and HANDOFF only.
-The cooperator retains earlier transcripts, findings and accounting; current
-unclosed obligations and their closure conditions must survive in HANDOFF.
-Re-planning does not reset spent budget or drop the original outcome.
-
-For native Agent notifications, establish whether reported `subagent_tokens`
-is a run increment or a cumulative total before adding it. Do not guess its
-scope from the field name. For the Hybrid runner, use `tokens.status` and the
-nullable run counters; never add `threadTotal` as new run usage. A resumed Codex
-thread without a starting baseline reports unknown run usage. See
-[tools](tools.md) for the result contract.
-
-An auditor on `haiku` at 400k transfers NOT_REACHED to a fresh `sonnet` auditor
-using the xhigh auditor role. Hybrid's Codex Luna transfers to Codex Sol xhigh.
-Preserve the same snapshot, lens, round, completed coverage and findings. If
+The next tier gets a fresh packet: the original block packet, the current
+snapshot, the cooperator's APPROACH, and the worker's HANDOFF; nothing else from
+earlier runs. Re-planning does not reset spent budget or drop the outcome. If
 Codex is unavailable in Hybrid, the `haiku` worker's next tier is `sonnet`.
-Ordinary partial audits continue the same agent; the token-ceiling handoff is
-an exception. The audit game has up to three rounds; only winning lenses repeat,
-and ending it does not close findings or accept the block.
 
-Use `fable` high for a stated unresolved design question with an expected benefit.
-The installed high-effort roles fall back to `opus` high. Custom effort routing
-must use a runtime capability that actually exists; an Agent model field alone
-does not change role effort.
+Auditors: the packet BUDGET is 40 tool calls per run, separate from the role's
+50-turn limit. An auditor on `haiku` (Codex Luna in Hybrid) whose count reaches
+400k hands its lens to `sonnet` in the auditor role (Codex Sol xhigh) on the
+same snapshot and round, with its NOT_REACHED files; its findings stay with the
+cooperator. Up to three audit rounds per block; after round 1 only lenses that
+won the last round play again.
 
-Native maxTurns per run: worker 60, light worker 120, probe 20, auditor 50,
-reviewer 30; up to three workers in parallel. Turns and tool calls are different
-units: the default auditor packet BUDGET is independently 40 tool calls, and the
-light worker has a 120-call instruction budget alongside maxTurns: 120. Return
-a packet before either boundary prevents reporting. Codex runs instead have
-runner idle/total time limits. Continue through SendMessage or a resumed Codex
-thread only within the remaining block/tier budget. For competing transitions,
-use the orchestration skill's coinciding-conditions table. Report available
-`/cost` or `/usage` data without claiming it proves exact per-block usage.
+`fable` high is for a stated unresolved design question and its expected
+benefit: architecture, a money or auth path, a security boundary. When the
+account cannot use `fable`, the high-effort roles run on `opus` high; say so.
+The Agent tool has no per-call effort: effort comes from the role.
+
+Turn limits per run: worker 60, light worker 130, probe 20, auditor 50,
+reviewer 30; up to three workers in parallel. Codex runs are bounded by the
+runner's idle and total time limits instead. Report usage from `/cost` or
+`/usage` when asked.
 
 ## Work packet
 
 ```text
-TASK: identifier, assignment version and durable task-state location
-TIER / RUN: worker model and run number on this block (worker)
+TASK: identifier and assignment version; task state file (pipeline)
+TIER / RUN: worker model; run number and attempts spent on this block (worker)
 WORK_CLASS: build | pipeline
 PROFILE / PROFILE_SOURCE: standard | enhanced | hybrid | custom; explicit | preference | automatic
 REQUEST_KIND: analysis | implementation
@@ -131,7 +119,7 @@ GOAL: the complete result this block owns
 ACCEPTANCE_EXAMPLE: concrete before/after
 SCOPE / OUT_OF_SCOPE: what this block covers; what it must not do
 PROJECT_RULES: repository instruction files to read first
-INPUTS / SNAPSHOT: exact sources, contracts, stable read root, revision and relevant dirty/new files
+INPUTS / SNAPSHOT: exact sources, contracts, revision, relevant dirty diff; the tree to read
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
@@ -141,8 +129,6 @@ BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
 
-Agents may share a checkout when writes and relevant reads stay stable. Before
-parallel auditing, materialize a stable view including read dependencies or
-serialize the writer. A revision label or disjoint WRITE_SETs alone are
-insufficient. If using a worktree, verify its actual base and include relevant
-dirty/new inputs; later integration needs its own affected checks.
+Agents share the checkout; use `isolation: "worktree"` only for a concrete write
+conflict, and merge the result back. An audit beside a running writer follows
+step 5 of the skill.

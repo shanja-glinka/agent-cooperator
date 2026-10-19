@@ -1,31 +1,46 @@
 # Changelog
 
-## Unreleased — 1.4.0 draft
+## Unreleased
 
-- Route Decision for both editions: choose the next allowed action by expected
-  full cost to the agreed, verified and delivered outcome. Maintain a durable
-  task record with OPEN obligations, evidence, ownership and per-block/tier
-  budgets. Handoff, submission, blockers and audit limits preserve that state.
-- Clarify coinciding transitions: verify an already submitted result at the
-  budget limit, restore missing prerequisites before a permitted successor,
-  retain findings after the audit cap, require current mandatory checks before
-  acceptance, and freeze read dependencies for parallel audits. Repeat only
-  affected verification when its premises change.
-- Correct the distinction between native agent turns, tool-call budgets and
-  implementation runs. Within-budget continuity and budget handoffs use the
-  same counters, including fixes after submission; environmental blockage does
-  not erase spent runs or usage.
-- Hybrid usage accounting: cumulative thread snapshots replace earlier values;
-  cached input and repeated/incremental events are not added again. JSON
-  consumers must read `tokens.status` (`known`, `partial`, `unknown`): existing
-  count fields can now be `null`, and partial totals are run lower bounds only.
-  `tokens.threadTotal` preserves the observed thread snapshot separately;
-  resume without a baseline and potentially default zero reports do not claim
-  known run usage. Handle a final JSONL event without a trailing newline.
-- Claude Enhanced design and stage fallback now uses `opus` high, matching the
-  installed roles. Draft policies: Claude 1.6.0 and Codex 1.8.0. Align behavior
-  cases with role effort and the Route Decision boundaries; document dated
-  primary research without claiming measured cost savings.
+- Choosing the next move, both editions: the cooperator takes the move that
+  gets the task to a verified, delivered result at the lowest total cost, with
+  the user's limits, permissions, and required project rules first. It keeps an
+  OPEN list of the outcome, required checks, and accepted findings; an item
+  closes only with evidence, never by a handoff, a new worker, a submitted
+  block, round 3, or a blocker. A short table covers situations that meet
+  (submitted at the limit, unchanged blocker, auditor at its ceiling, reviewer
+  accepting without a required check, findings for a block whose worker moved
+  on, a parallel audit over changing files). DONE, BLOCKED, and BUDGET_STOP
+  are the ends.
+- Worker attempts: only a run that ends without a result spends one of the
+  three attempts (limit hit, handoff, or a fix that left its finding open); a
+  submitted block or a fix that lands spends none, while its tool calls and
+  tokens still count. `profiles.json` records `attempts` and tool calls per
+  block (`haiku` 360, Luna 1800).
+- Token ceilings are measurable (checked live on 2026-10-19). Claude Code's
+  per-agent token count is the agent's context size at its last request, so the
+  latest count is compared and never summed. A Codex thread keeps counting
+  across resume, so `codex-run.mjs` takes `--baseline <previous result.json>`
+  to report a resumed run's own usage, and `result.json` adds `tokens.uncached`
+  (input minus cached input, plus output). `tokens.status` (`known`, `partial`,
+  `unknown`) says how far the counters can be trusted: unknown is `null`, never
+  zero, and cumulative snapshots are no longer summed. A final JSONL event
+  without a trailing newline is parsed.
+- The cooperator scheme, examples, and reasons are back in both orchestration
+  skills, the READMEs, and the docs. Round 3 ends the audit, and real findings
+  not yet fixed still go to the worker. Option (c) audits in parallel only when
+  the next block changes nothing the audit reads, or on a snapshot made with
+  `git stash create` and a detached worktree.
+- Worker, auditor, and reviewer skills: a required check that did not run is
+  not a pass; the reviewer reads the whole diff, fixes and earlier audited
+  areas included; HANDOFF.OPEN keeps everything still open.
+- The always-loaded instruction blocks keep their previous text, with one
+  correction: Claude Code reads `AGENTS.md` only when there is no `CLAUDE.md`.
+- Claude `workforce-worker-lite` turn limit 130, so the handoff fits after its
+  120-call budget. Enhanced design and stage fallback is `opus` high, matching
+  the installed roles. Codex escalation rules no longer contradict the Sol and
+  Luna xhigh roles. Behavior cases cover these transitions in pairs. Policy:
+  Claude 1.6.0, Codex 1.8.0.
 
 - Rename the project to Agent Cooperator (`shanja-glinka/agent-cooperator`).
   New entry command `agent-cooperator claude|codex <install|update|status|uninstall>`;
@@ -34,8 +49,8 @@
   in place.
 - Worker ladder with handoff, both editions. The cooperator holds a budget per
   worker tier and block: Claude `haiku` 120 tool calls per run (new role
-  `workforce-worker-lite`), 3 runs, 400k tokens; `sonnet` 3 runs, 500k; Codex
-  Luna 600 tool calls per run, 3 runs, 400k; Sol 3 runs, 500k. A worker at its
+  `workforce-worker-lite`), 3 attempts, 400k tokens; `sonnet` 3 attempts, 500k;
+  Codex Luna 600 tool calls per run, 3 attempts, 400k; Sol 3 attempts, 500k. A worker at its
   limit returns `STATUS: handoff` (DONE, STOPPED_AT, TRIED, OPEN, NEXT); a block
   that exhausts a tier moves up (Claude: `sonnet` → `opus`, Hybrid `haiku` →
   Codex GPT-6.1 Sol xhigh → `opus`; Codex: Luna → Sol → Astra) as a fresh

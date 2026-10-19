@@ -165,86 +165,98 @@ input. The wrapper sets these execution boundaries:
   an approval or input request (`waiting_for_input`), or passes 60 minutes
   (`timeout`); the cooperator reads the result status before using the output;
 - it writes `<name>.result.json` with the status, the Codex thread id, the
-  observed usage and its provenance, and the path of the final message. The next
-  round of a winning lens, or the delta for the same reviewer, resumes that thread
-  with `--resume <threadId>` while within budget.
+  token usage, and the path of the final message. The next round of a winning
+  lens, or the delta for the same reviewer, resumes that thread with
+  `--resume <threadId>` and `--baseline <previous result.json>`.
 
-`tokens.status` is `known`, `partial`, or `unknown`. The nullable token fields
-describe the current run: `total = input + output`, with `cachedInput` already
-included in `input`. A partial total is only the measured portion of that run;
-unknown usage is `null`, not zero. A cumulative session total without a valid
-baseline cannot establish the cost of a resumed run. See the dispatch reference
-for accounting; `status: ok` alone does not establish complete usage or task success.
-`model` and `effort` record requested CLI settings. Known counters do not prove the
-actual model or billing; keep requested-tier history distinct from verified routing
-and do not calculate monetary cost from those fields.
+Usage in `result.json`: `tokens.total` is the run's own `input + output`
+(`cachedInput` is part of `input`), `tokens.uncached` is `input - cachedInput +
+output`, and `tokens.status` is `known`, `partial` (a lower bound), or `unknown`
+(`null`, never zero). `tokens.threadTotal` is the thread's running total: a
+resumed Codex thread keeps counting from its previous total (checked
+2026-10-19: a one-word reply on a resumed thread added 16,258 input and 5 output
+tokens to a total of 79,910), so the latest `threadTotal` covers every run of
+that agent. Without `--baseline`, a resumed run's own usage is `unknown`.
+`model` and `effort` are what was requested, not proof of what ran.
 
 ### Worker ladder and handoff
 
-The cooperator tracks each tier's budget per block. Further implementation after
-exhaustion follows the permitted worker ladder:
+The cooperator holds each worker's budget per block and moves a block that
+exhausts it to a stronger model:
 
-| Tier | Tool-call budget/run | Implementation runs/block | Token ceiling/tier/block | Next tier |
+| Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
-| `haiku` (`workforce-worker-lite`) | 120 tool calls | 3 | 400k | Hybrid: Codex GPT-6.1 Sol xhigh; otherwise `sonnet` |
-| `sonnet` | no kit cap | 3 | 500k | `opus` |
-| Codex GPT-6.1 Sol (Hybrid) | no kit cap | 3 | 500k | `opus` |
-| `opus` | no kit cap | 3 | none | the cooperator re-plans or asks you |
+| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Hybrid: Codex GPT-6.1 Sol xhigh; otherwise `sonnet` |
+| `sonnet` | role turn limit | 3 | 500k | `opus` |
+| Codex GPT-6.1 Sol (Hybrid) | runner time limits | 3 | 500k | `opus` |
+| `opus` | role turn limit | 3 | none | the cooperator re-plans or asks you |
 
-Native role turn limits and runner timeouts apply independently of this table.
-`maxTurns` counts agent turns, not tool calls. For example, the auditor's packet
-budget is 40 tool calls and its role limit is 50 turns; either can end its work.
-These token and tool-call budgets rely on instruction-level accounting,
-not automatic runtime enforcement.
+Only a run that ends without a result spends an attempt: the worker hit its
+limit, returned `STATUS: handoff`, or its fix left the finding open. A
+submitted block, or a fix that closes its finding, spends none, but its tool
+calls and tokens count. The token count Claude Code shows for an agent is its
+context size at its last request, not its spend (measured 2026-10-19: a
+`sonnet` worker showed 39,483 tokens while processing about 346k), so the
+cooperator compares the agent's latest count with the ceiling instead of adding
+counts across runs; the real spend is in `/cost`. These budgets are
+instructions, not runtime guards, and `maxTurns` counts turns, not tool calls.
 
-Count each implementation start or continuation, including fixes after submission,
-against the same tier and block. A request only to return HANDOFF is not another
-implementation run, but its known usage still counts. Blockage, submission, handoff,
-or work on a new block does not erase earlier counters or open obligations. A
-submitted result can proceed to verification at the limit; further implementation
-needs remaining budget or the permitted handoff.
-
-Use confirmed usage with a known run scope, including completion-notification fields
-only after establishing their meaning. Do not blindly sum a `subagent_tokens` value
-across continuations if its incremental or cumulative meaning is unknown. Partial
-usage is a measured lower bound. When complete usage is unavailable, retain run
-counts and disclose that exact token-ceiling compliance cannot be established.
-
-A worker at its limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED, OPEN,
-and NEXT. The cooperator diagnoses the cause, restores any missing prerequisite,
-and chooses the APPROACH before starting a permitted successor with the original
-packet, APPROACH, and HANDOFF only. Earlier reports, audit rounds, and transcripts
-stay with the cooperator. Auditors on `haiku` (Luna in Hybrid) retain the 400k
-ceiling and hand their lens to `sonnet` (Sol) with the assigned snapshot and remaining
-files; that transition does not complete the lens or close its findings.
+A worker at its limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED,
+OPEN, and NEXT. The cooperator reads it, finds the cause, decides the APPROACH
+(same path with more effort, a different route, or a split or re-scoped block),
+and starts the next tier with the original packet, APPROACH, and HANDOFF only;
+earlier reports, audit rounds, and transcripts stay with the cooperator. The
+[dispatch reference](../payload/claude/skills/workforce-orchestrate/references/dispatch.md)
+has the details, including the auditor handoff at 400k.
 
 ### Rules that hold in every profile
 
 - The session is the cooperator: it plans, briefs, judges, and accepts; agents
   do the work. In `direct` work it simply does the work.
 - The repository's own rules come first: `CLAUDE.md`, `AGENTS.md`,
-  `.claude/rules/`, `CONTRIBUTING.md` (Claude Code does not load `AGENTS.md` by
-  itself). They go to every agent as PROJECT_RULES.
+  `.claude/rules/`, `CONTRIBUTING.md` (Claude Code reads `AGENTS.md` only when the
+  project has no `CLAUDE.md`). They go to every agent as PROJECT_RULES.
 - Every Agent call sets `model`. Effort comes from the role frontmatter.
 - A worker gets a complete packet with SCOPE, OUT_OF_SCOPE, WRITE_SET, and
   CHECKS, and edits only its write set.
-- Within remaining budgets, fixes go back to the same worker, the next audit round
-  only to the auditors whose lens won the last round, the delta to the same reviewer, all through
-  SendMessage (in Hybrid, the Codex thread is resumed instead). Budget handoffs
-  override continuity.
-- Audits run at the cooperator's choice, subject to required project gates. It
-  may audit submitted blocks alongside compatible work under the orchestration
-  skill's snapshot and dependency conditions.
-- All lenses run in round 1; only lenses with accepted real findings repeat.
-  A lens with no real findings retires. Every assigned lens must finish its
-  files before the round is complete; continue partial coverage with the same
-  auditor within budget, except for the documented token-ceiling handoff.
-- Three rounds end the audit game, not unresolved findings, required checks,
-  or task obligations. Acceptance still requires evidence of their closure.
+- Fixes go back to the same worker, the next audit round only to the auditors
+  whose lens won the last round, the delta to the same reviewer, all through
+  SendMessage (in Hybrid, the Codex thread is resumed instead).
+- Audits run at the cooperator's choice; checks the project requires always run:
+
+```text
+Worker submits a block
+  │
+  ▼
+Cooperator (the orchestrator) chooses:
+  a) audit this block              → auditors, up to 3 rounds
+  b) no audit                      → next work to the worker
+  c) next block to the worker      → and auditors in parallel on
+                                     1, 2, 3 or N submitted blocks
+                                     (only if that block changes nothing
+                                     the audit reads; else a snapshot)
+
+Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
+they find through one lens each: docs, task, conventions.
+Round 1 runs every lens. Then each lens plays on its own:
+real findings → that lens won, the same worker fixes, only winners
+                play the next round;
+nothing real  → that lens lost and is retired for this block.
+Every lens lost, or round 3 done → the audit is over; real findings
+not yet fixed still go to the worker, and the review reads the fix.
+A round ends only when each auditor has read all its files; an auditor
+that hits its limit is continued where it stopped, never replaced.
+The cooperator takes only real findings; theoretical, hypothetical, and
+out-of-scope ones are rejected.
+```
+
+- Nothing closes without evidence: a handoff, a new worker, a submitted block,
+  or the third audit round leaves required checks and accepted findings open
+  until they are done.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance
   line, and reproduces.
-- Turn limits per run: worker 60, light worker 120, probe 20, auditor 50,
+- Turn limits per run: worker 60, light worker 130, probe 20, auditor 50,
   reviewer 30.
 
 ### Roles
@@ -252,7 +264,7 @@ files; that transition does not complete the lens or close its findings.
 | Role | Model field | Tools | Turns | Preloaded skill |
 | --- | --- | --- | --- | --- |
 | `workforce-worker` | inherit | all except Agent | 60 | `workforce-worker` |
-| `workforce-worker-lite` | inherit (`haiku` on the call) | all except Agent | 120 | `workforce-worker` |
+| `workforce-worker-lite` | inherit (`haiku` on the call) | all except Agent | 130 | `workforce-worker` |
 | `workforce-probe` | inherit | Read, Grep, Glob, Bash, WebFetch; no Agent/Edit/Write | 20 | `workforce-probe` |
 | `workforce-auditor` | inherit (`haiku` on the call), `effort: xhigh` | Read, Grep, Glob, Bash; no Agent/Edit/Write | 50 | `workforce-audit` |
 | `workforce-reviewer` | inherit | all except Agent/Edit/Write/NotebookEdit | 30 | `workforce-review` |

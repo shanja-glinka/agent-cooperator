@@ -9,7 +9,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const USAGE = `usage: codex-run.mjs --role audit|review|work --name NAME --packet FILE --cd ROOT --out DIR
-  [--model M] [--effort E] [--resume THREAD_ID] [--idle-minutes 15] [--timeout-minutes 60]
+  [--model M] [--effort E] [--resume THREAD_ID [--baseline PREVIOUS_RESULT_JSON]]
+  [--idle-minutes 15] [--timeout-minutes 60]
   [--keep-user-config] [--codex-bin PATH]`;
 
 const DEFAULT_MODEL = { audit: 'gpt-6-luna', review: 'gpt-6.1-sol', work: 'gpt-6.1-sol' };
@@ -23,6 +24,7 @@ function parseArgs(argv) {
   const names = {
     '--role': 'role', '--name': 'name', '--packet': 'packet', '--cd': 'cd', '--out': 'out',
     '--model': 'model', '--effort': 'effort', '--resume': 'resume', '--codex-bin': 'codexBin',
+    '--baseline': 'baseline',
     '--idle-minutes': 'idleMinutes', '--timeout-minutes': 'timeoutMinutes',
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -43,6 +45,7 @@ function parseArgs(argv) {
   }
   if (!SKILL[options.role]) fail(`--role must be audit, review, or work`);
   if (!/^[\w.-]+$/.test(options.name)) fail('--name may contain letters, digits, dot, dash, underscore');
+  if (options.baseline && !options.resume) fail('--baseline needs --resume');
   options.model ??= DEFAULT_MODEL[options.role];
   options.out = path.resolve(options.out);
   options.cd = path.resolve(options.cd);
@@ -83,7 +86,7 @@ function codexArgs(options, lastMessage) {
   return ['exec', ...common, '-s', SANDBOX[options.role], '-C', options.cd, '-'];
 }
 
-const EMPTY_TOKENS = { input: null, cachedInput: null, output: null, total: null };
+const EMPTY_TOKENS = { input: null, cachedInput: null, output: null, total: null, uncached: null };
 
 function readUsage(usage) {
   if (!usage || typeof usage !== 'object' || Array.isArray(usage)) return null;
@@ -93,11 +96,40 @@ function readUsage(usage) {
   let cachedInput = count(usage.cached_input_tokens);
   if (input !== null && cachedInput > input) cachedInput = null;
   // Cached input is a subset of input; reasoning output is a subset of output.
-  const total = input !== null && output !== null ? count(input + output) : null;
-  return { input, cachedInput, output, total };
+  return withTotals({ input, cachedInput, output });
 }
 
-function createUsageTracker(resumed) {
+function withTotals({ input, cachedInput, output }) {
+  const total = input !== null && output !== null ? input + output : null;
+  const uncached = total !== null && cachedInput !== null ? total - cachedInput : null;
+  return { input, cachedInput, output, total, uncached };
+}
+
+// A resumed thread keeps counting from its previous total (checked 2026-10-19),
+// so the run's own usage is the snapshot minus the previous run's threadTotal.
+function readBaseline(file, threadId) {
+  try {
+    const previous = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const base = previous?.tokens?.threadTotal;
+    if (previous?.threadId !== threadId || !base) return { error: 'baseline_mismatch' };
+    return { tokens: base };
+  } catch {
+    return { error: 'baseline_unreadable' };
+  }
+}
+
+function subtract(snapshot, base) {
+  const fields = ['input', 'cachedInput', 'output'];
+  const diff = {};
+  for (const key of fields) {
+    if (snapshot[key] === null || !Number.isSafeInteger(base[key])) diff[key] = null;
+    else if (snapshot[key] < base[key]) return null;
+    else diff[key] = snapshot[key] - base[key];
+  }
+  return withTotals(diff);
+}
+
+function createUsageTracker(resumed, baseline) {
   let snapshot = null;
   let source = null;
   let finalSnapshot = null;
@@ -153,21 +185,23 @@ function createUsageTracker(resumed) {
       let reason = null;
       let status = 'unknown';
       let values = { ...EMPTY_TOKENS };
+      const run = resumed && snapshot && baseline?.tokens ? subtract(snapshot, baseline.tokens) : snapshot;
       if (threads.size > 1) reason = 'multiple_threads';
-      else if (resumed && snapshot) reason = 'resume_baseline_missing';
+      else if (resumed && snapshot && !baseline) reason = 'resume_baseline_missing';
+      else if (resumed && snapshot && baseline.error) reason = baseline.error;
+      else if (resumed && snapshot && !run) reason = 'baseline_mismatch';
       else if (regressed) reason = 'cumulative_counter_regressed';
       else if (!snapshot) reason = incrementalOnly ? 'increment_identity_unavailable' : 'usage_unavailable';
       else if (snapshot.total === 0 && !explicitSnapshot) reason = 'zero_may_be_upstream_default';
       else {
-        values = snapshot;
-        const complete = fields.every((key) => snapshot[key] !== null) && snapshot.total !== null;
+        values = run;
+        const complete = fields.every((key) => run[key] !== null) && run.total !== null;
         status = complete && equal(snapshot, finalSnapshot) && !malformed ? 'known' : 'partial';
         if (status === 'partial') reason = !complete ? 'incomplete_fields' : malformed ? 'malformed_stream' : 'final_usage_unavailable';
       }
       return {
         ...values, status, source, scope: 'run', reason,
-        // Preserve observations for inspection; this is not an extra run charge.
-        // In particular, a resumed thread's total is NOT a run lower bound.
+        // The thread's running total: every run of this agent, the current one included.
         threadTotal: snapshot,
       };
     },
@@ -206,7 +240,8 @@ function main() {
   let lastActivity = Date.now();
   let stderrTail = '';
   let buffered = '';
-  const usageTracker = createUsageTracker(Boolean(options.resume));
+  const baseline = options.baseline ? readBaseline(options.baseline, options.resume) : null;
+  const usageTracker = createUsageTracker(Boolean(options.resume), baseline);
 
   const stop = (reason) => {
     if (status) return;

@@ -3,7 +3,7 @@ name: workforce-worker-lite
 description: Implements one owned block on a light model (haiku) with a hard per-run limit and returns an evidence packet or a handoff. Delegated by the cooperator, which sets the model.
 model: inherit
 effort: high
-maxTurns: 120
+maxTurns: 130
 skills:
   - workforce-worker
 disallowedTools: Agent

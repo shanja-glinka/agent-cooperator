@@ -68,9 +68,9 @@ test('codex-run feeds the skill and packet on stdin and runs read-only without a
   assert.equal(recorded.args.at(-1), '-');
   assert.equal(await fs.realpath(recorded.cwd), await fs.realpath(temp));
   assert.deepEqual(summary.tokens, {
-    input: 1200, cachedInput: 800, output: 300, total: 1500,
+    input: 1200, cachedInput: 800, output: 300, total: 1500, uncached: 700,
     status: 'known', source: 'turn.completed.usage', scope: 'run', reason: null,
-    threadTotal: { input: 1200, cachedInput: 800, output: 300, total: 1500 },
+    threadTotal: { input: 1200, cachedInput: 800, output: 300, total: 1500, uncached: 700 },
   });
 });
 
@@ -117,7 +117,7 @@ test('codex-run leaves absent usage unknown even when the task succeeded', async
   const { summary } = await runFake(t, 'events', [], 'audit', [{ type: 'turn.started' }, completed(undefined)]);
   assert.equal(summary.status, 'ok');
   assert.deepEqual(summary.tokens, {
-    input: null, cachedInput: null, output: null, total: null,
+    input: null, cachedInput: null, output: null, total: null, uncached: null,
     status: 'unknown', source: null, scope: 'run', reason: 'usage_unavailable', threadTotal: null,
   });
 });
@@ -226,4 +226,45 @@ test('codex-run parses a final usage event without a trailing newline', async (t
   const { summary } = await runFake(t, 'no-newline', [], 'audit', [completed(finalUsage)]);
   assert.equal(summary.tokens.status, 'known');
   assert.equal(summary.tokens.total, 275);
+});
+
+async function writeBaseline(t, threadId, threadTotal) {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codex-run-baseline-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const file = path.join(dir, 'previous.result.json');
+  await fs.writeFile(file, JSON.stringify({ threadId, tokens: { threadTotal } }));
+  return file;
+}
+
+test('codex-run reports a resumed run as the thread total minus the previous run', async (t) => {
+  const baseline = await writeBaseline(t, 'thread-123', { input: 100, cachedInput: 50, output: 10, total: 110 });
+  const { summary } = await runFake(t, 'events', ['--resume', 'thread-123', '--baseline', baseline], 'audit', [
+    completed(finalUsage),
+  ]);
+  assert.equal(summary.tokens.status, 'known');
+  assert.equal(summary.tokens.input, 150);
+  assert.equal(summary.tokens.cachedInput, 50);
+  assert.equal(summary.tokens.output, 15);
+  assert.equal(summary.tokens.total, 165);
+  assert.equal(summary.tokens.uncached, 115);
+  assert.equal(summary.tokens.threadTotal.total, 275);
+});
+
+test('codex-run refuses a baseline from another thread', async (t) => {
+  const baseline = await writeBaseline(t, 'thread-999', { input: 100, cachedInput: 50, output: 10, total: 110 });
+  const { summary } = await runFake(t, 'events', ['--resume', 'thread-123', '--baseline', baseline], 'audit', [
+    completed(finalUsage),
+  ]);
+  assert.equal(summary.tokens.status, 'unknown');
+  assert.equal(summary.tokens.total, null);
+  assert.equal(summary.tokens.reason, 'baseline_mismatch');
+});
+
+test('codex-run refuses a baseline larger than the thread total', async (t) => {
+  const baseline = await writeBaseline(t, 'thread-123', { input: 900, cachedInput: 50, output: 10, total: 910 });
+  const { summary } = await runFake(t, 'events', ['--resume', 'thread-123', '--baseline', baseline], 'audit', [
+    completed(finalUsage),
+  ]);
+  assert.equal(summary.tokens.status, 'unknown');
+  assert.equal(summary.tokens.reason, 'baseline_mismatch');
 });

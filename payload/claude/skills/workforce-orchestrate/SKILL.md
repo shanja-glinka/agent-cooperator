@@ -1,124 +1,232 @@
 ---
 name: workforce-orchestrate
-description: "Opt-in cooperator-led work for Claude Code. Use when the user invokes /workforce-orchestrate, asks for Workforce, subagents or multi-agent work, or project instructions require it. Route by open obligations and accept the verified result."
+description: "Opt-in brain/worker orchestration for Claude Code. Use when the user invokes /workforce-orchestrate, asks for Workforce, subagents, or multi-agent work, or a project instruction file requires it. The cooperator (this session) plans, briefs workers, runs auditors and reviewers, and accepts the verified result; the agents do the work."
 argument-hint: "[task description or plan path]"
 ---
 
 # Workforce orchestration
 
-You are the cooperator in the user's session: decide the approach, brief agents,
-judge evidence, integrate and accept. Workers write product code except in
-`direct` work. Read applicable repository instructions; they override this kit.
-Give each agent the applicable PROJECT_RULES and use the real calls in
-[tools](references/tools.md). [Dispatch](references/dispatch.md) holds model
-routing, budgets and the packet.
+You are the cooperator: the orchestrator in the user's session and the brain of
+the task. Agents do the work; you think about it. You plan, brief, read what
+comes back, judge it, decide the next move, re-plan when a block turns out
+harder than briefed, and accept. Forwarding results from one agent to the next
+is not orchestration. Product code is written by workers, except in `direct`
+work.
 
-## Route Decision
+Routing (models, efforts, turn limits, budgets) is recorded in
+`{{CLAUDE_HOME}}/claude-workforce/profiles.json`; [dispatch](references/dispatch.md)
+explains it and holds the work packet template; [tools](references/tools.md) shows
+the real Agent and SendMessage calls and, for the Hybrid profile, the Codex runs.
+The repository's own rules (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`,
+`CONTRIBUTING.md`) override this kit. Claude Code reads `AGENTS.md` only when the
+project has no `CLAUDE.md`, so read it yourself and pass every applicable file to
+each agent as PROJECT_RULES. If `$ARGUMENTS` is present, it is the task or a plan
+path.
 
-At classification and after a result, finding, blocker or budget event, choose
-the allowed next action with the lowest expected total cost of reaching the
-agreed, verified and delivered outcome:
+## Flow
 
-`a* = argmin(a in A_allowed(s)) [C_step(s, a) + E(V*(s_next) | s, a)]`
+```text
+Task
+  │
+  ▼
+Cooperator: read repository rules, classify, pick profile
+  direct   → do it yourself, no agents
+  build    → one block
+  pipeline → plan of N blocks with disjoint WRITE_SETs
+  │
+  ▼
+┌─ per block ──────────────────────────────────────────────────────┐
+│ probe (when a fact is missing)  →  worker (block)  →  submitted  │
+│                                                                  │
+│ worker stuck (3 attempts without a result, or volume spent)      │
+│   → HANDOFF → you find the cause and decide the approach →       │
+│   next tier gets packet + APPROACH + HANDOFF only (dispatch)     │
+│                                                                  │
+│ cooperator chooses:                                              │
+│   a) audit this block            → auditors, up to 3 rounds      │
+│   b) no audit                    → next work to the worker       │
+│   c) next block to the worker    → and auditors in parallel on   │
+│                                    1, 2, 3 or N submitted blocks │
+│                                                                  │
+│ audit game (per lens): round 1 runs every lens; a round ends     │
+│   only on STATUS: complete; partial → continue the same auditor  │
+│   cooperator takes only real findings → same worker              │
+│   real findings → that lens won, only winners play the next round│
+│   nothing real  → that lens lost, retired for this block         │
+│   every lens lost, or round 3 → audit over; real findings not    │
+│   yet fixed still go to the worker                               │
+│                                                                  │
+│ review (whole diff + audit log) → real findings → same worker    │
+└──────────────────────────────────────────────────────────────────┘
+  │
+  ▼
+Stage acceptance (pipeline only) → required checks passed → report
+```
 
-Include routing, all agents, checks, handoffs and recovery. Use grounded qualitative comparisons; do not invent
-probabilities, token counts or a numeric continuation cost.
-Apply permissions, explicit user constraints and applicable mandatory rules
-first; then check what remains to finish; then compare useful continuations.
-An optional skill is a candidate; a required skill remains a requirement.
-Reuse current evidence; read or repeat a check when its answer can change the
-next action, verification or delivery. New dependencies may add obligations.
+## Choosing the next move
 
-For build/pipeline work, keep one durable task record in the existing task
-state file/store; otherwise choose a permitted file outside tracked project
-files and record its location in TASK. The cooperator alone updates it at
-decision boundaries and reloads it after resume or compaction. Keep the outcome,
-current snapshot and evidence, OPEN obligations with owner and closure evidence,
-next action with its reason, and budgets/queued work by block and tier.
-An obligation closes only with evidence of completion or a sourced reason it
-does not apply. Handoff, a new worker, submission, an audit cap or a blocker
-never closes it. Reuse evidence only while its source, scope and relevant
-environment/dependencies remain applicable; invalidate only affected conclusions.
+At every decision (classification, a result, a finding, a blocker, a budget
+limit) take the move that gets the task to a verified and delivered result at
+the lowest total cost. Count everything it sets off: agents, checks, handoffs,
+and redone work, not only the next step. Compare in words; do not invent
+numbers. Routine steps need no deliberation.
 
-### Coinciding conditions
+What is not allowed comes first: the user's explicit limits, permissions, and
+required project rules. Then what is still open. Then the cheapest useful move.
+An optional skill is a candidate, not a duty; a skill or check the project
+requires stays required.
 
-| Observed state | Next move |
+Keep the OPEN list: the outcome, every required check and gate, every accepted
+finding. An item closes only with evidence that it is done, or a reason it does
+not apply. A handoff, a new worker, a submitted block, round 3 of the audit, or
+a blocker closes nothing. In a pipeline, keep the list in the task state file
+and reread it after compaction. A check that passed stays valid until something
+it depends on changes; then repeat only what that change affects.
+
+| Situation | Next move |
 | --- | --- |
-| Block submitted; worker budget exhausted | Preserve the result and verify it. New implementation/fixes require an allowed next tier or re-plan, not reimplementation just to escalate. |
-| Necessary work remains; worker budget exhausted | Obtain HANDOFF, diagnose the cause and choose APPROACH; restore missing prerequisites before launching the next tier. Preserve spent runs and usage. |
-| Known external blocker unchanged | Do bounded permitted recovery or obtain the missing prerequisite. If external intervention is needed, record BLOCKED and the exact next external action; do not repeat the same blocked operation. |
-| Auditor partial; its token ceiling reached | Transfer only NOT_REACHED to the next audit tier on the same snapshot/lens/round; retain findings and completed coverage. Ordinary partial runs continue the same auditor. |
-| All lenses retired, or round 3 ended | End the audit game. Keep real findings open for fixes and review; the round cap is not acceptance. |
-| Reviewer accepts but a mandatory check is missing or stale | Keep acceptance pending; obtain the affected evidence and return it to the same reviewer. |
-| Findings for A arrive while its worker owns B | Queue them under A; switch at a safe boundary with A's packet, WRITE_SET and budget. Never give one worker simultaneous conflicting write assignments. |
-| Parallel work may change an audit's read dependencies | Use an actual stable snapshot or serialize the writer. Disjoint WRITE_SETs alone do not freeze reads. |
-| Result and required obligations confirmed; delivery remains | Deliver the agreed result and limitations, then record DONE and stop. Reopen only for a new material fact. |
+| A block is submitted, but its worker's budget is spent | Verify it as it is. A later fix goes to the next tier; never redo the block only to change tiers. |
+| Work is left and the worker's budget is spent | Get the HANDOFF, find the cause, restore what is missing (a dependency, a database, a design decision), write APPROACH, then start the next tier. |
+| The same blocker is still there | Do not repeat the blocked step. Fix the cause if you can; otherwise stop as BLOCKED and name exactly what is needed. |
+| An auditor is partial and at its token ceiling | Hand only NOT_REACHED to the next audit tier on the same snapshot, lens, and round; keep its findings. |
+| Every lens lost, or round 3 is over | The audit game ends. Accepted findings not yet fixed stay open: the worker fixes them and the review covers the fix. |
+| The reviewer accepts, but a required check is missing or stale | Not accepted yet: get that check and send it to the same reviewer. |
+| Findings for block A arrive while A's worker is on block B | Keep them under A and send them when that worker finishes its current step, never as a second assignment at once. |
+| The next block may change what an audit reads | Audit a snapshot ([tools](references/tools.md)) or wait for the writer. Disjoint WRITE_SETs do not freeze imports. |
+| Everything is verified, only delivery is left | Deliver, report, stop. Reopen only for a new fact. |
 
-BLOCKED and BUDGET_STOP are unfinished task states, not successful delivery.
-If no allowed continuation fits the remaining budget, preserve OPEN and state
-BUDGET_STOP with the needed re-plan or budget decision. Do not weaken GOAL,
-discard obligations or reset accounting to create a cheaper completion.
+DONE is a delivered result with nothing OPEN. BLOCKED (something from outside is
+needed) and BUDGET_STOP (no allowed move fits the budget) are unfinished: report
+what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
 
-## Execute
+## Steps
 
-1. **Classify.** `direct`: question, analysis, config/doc edit or trivial fix;
-   do it inline without agents. `build`: one known-shape block.
-   `pipeline`: multiple stages or open design, with owned blocks.
-   Analysis-only work ends with analysis.
-2. **Select the profile.** Reuse an explicit choice or standing preference; otherwise
+1. **Classify.** `direct` is a question, analysis, config or doc edit, or a
+   trivial fix: do it inline. `build` is a bug fix or feature with a known
+   shape. `pipeline` is multi-stage or design-open work. Most wasted usage
+   comes from running a pipeline on work that did not need one.
+2. **Profile.** Reuse an explicit choice or standing preference; otherwise
    Standard for a described solution, Enhanced for substantial unresolved
-   design. Hybrid requires the user's choice. Ask only when an unresolved long
-   task has a material resource/approach choice and no applicable preference.
-   Explicit model, effort and budget constraints bind. This kit stays opt-in.
-3. **Brief.** Fill the dispatch packet with outcome, acceptance, scope, exact
-   inputs, PROJECT_RULES, WRITE_SET and CHECKS with cwd. Resolve cross-owner
-   design before assigning implementation. Set model on every Agent call; use the role's real effort.
-   Claude Code does not load AGENTS.md automatically: read applicable rules.
-   $ARGUMENTS, when present, is the task or plan path. In Hybrid, run Codex only
-   through the background wrapper and inspect its result.json, as tools describes.
-   Independent blocks may run together only with stable inputs and ownership.
-4. **Budget and handoff.** Follow dispatch's per-block/tier accounting.
-   Continue the same worker within budget, including fixes after submission.
-   At exhaustion, obtain HANDOFF; a packet-only recovery asks for no new work.
-   Read it and write APPROACH: continue, change technique, split or re-plan
-   while preserving the original obligations and spent budget. The fresh next
-   tier receives the original assignment, current snapshot, APPROACH and
-   HANDOFF only; keep old transcripts and audit history with you.
-5. **Choose verification.** On submission choose audit, skip audit, or begin
-   independent next work with audit in parallel. Audit substantial blocks,
-   refactors, sensitive paths and affected docs/conventions when warranted.
-   Honor required project checks; do not add every available procedure.
-   A frozen snapshot is a stable checkout or copied tree including relevant
-   dirty/new files and read dependencies, identified in the packet. Materialize
-   it while writers are paused and point readers at it, or serialize the work;
-   a revision label alone is insufficient. Check later integration separately.
-6. **Audit.** Give each auditor one lens, SNAPSHOT, FILES, BUDGET and
-   PROJECT_RULES. Each chosen lens's round ends only on `STATUS: complete`
-   with all assigned files read. On partial, recover the packet if necessary,
-   then continue NOT_REACHED with the same auditor unless its tier is exhausted.
-   Send one finding bundle only after every lens in that round is complete.
-   Judge FINDINGS, never NOTES: open the quoted rule and cited line yourself;
-   accept a diff-caused in-scope violation supported by a check or concrete
-   scenario. Reject unsupported risks, unrelated scope and taste without a rule.
-   Round 1 runs every chosen lens; only lenses with real findings continue,
-   at most three rounds. Retired lenses stay retired. Fix accepted findings
-   with the budget-eligible owner; independent review covers the corrected diff.
-7. **Review and accept.** Use an independent block reviewer for warranted or
-   required review; it reads the whole relevant diff, including new regressions
-   in previously audited areas. Same reviewer rechecks correction deltas.
-   Pipeline stage acceptance uses a separate reviewer against the original
-   outcome, cross-boundary paths and required gates. A report or `no_findings`
-   never substitutes for missing evidence or closes an OPEN obligation.
-8. **Deliver.** Report outcome, actual checks and gaps, block/stage status,
-   significant routing changes and their reasons, and the available usage.
-   Apply the delivery transition above. Commit, push, merge, deployment and
-   messages to third parties require the user's task authorization.
+   design. Hybrid (Haiku workers, Codex auditors and reviewers) runs only when
+   the user chose it; it is never picked automatically. Ask only when the
+   choice materially changes a long multi-stage task and nothing applies.
+   Analysis-only requests end with analysis.
+3. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
+   SCOPE and OUT_OF_SCOPE, exact inputs, WRITE_SET, CHECKS with cwd,
+   PROJECT_RULES. Decide open design questions before briefing. Set `model`
+   on every Agent call. Independent blocks launch in one message.
+4. **Hold the budget and escalate with a handoff.** Each worker tier has a
+   budget per block in dispatch: three attempts and a volume (tool calls,
+   tokens). An attempt is spent only by a run that ends without a result: the
+   worker hit its BUDGET or turn limit, returned `STATUS: handoff`, or its fix
+   left the finding open. A submitted block, or a fix that closes its finding,
+   spends no attempt; its tool calls and tokens still count. Within budget,
+   continuations and fixes go to the same worker. If a run stops without a
+   packet, ask it for its HANDOFF and nothing else. When the third attempt is
+   spent or the volume runs out, the block moves up the ladder. Treat that as
+   evidence that the block is hard, not as a reason to push the same worker
+   again: read the HANDOFF, find the cause, then decide whether the next tier
+   continues the same path with more effort, takes a different route, or
+   whether the block itself is wrong and needs splitting, re-scoping, or a
+   design decision you had not made. Write that as APPROACH. The stronger
+   agent gets the original packet, APPROACH, and the HANDOFF only; earlier
+   reports, audit rounds, and transcripts stay with you. At the top of the
+   ladder the next move is yours: re-plan or ask the user.
+5. **Choose what happens next** when a block is submitted (a, b, or c above).
+   Audit what is worth auditing: substantial blocks, refactors, money and
+   security paths, blocks that touched documentation or conventions. Checks
+   the project requires always run. In (c), audit in parallel only when the
+   next block does not change what the audit reads: the audited block's files
+   and what they import. The WRITE_SETs tell you; otherwise audit a snapshot
+   or wait.
+6. **Run the audit game.** Auditors (per profile: `haiku` xhigh through Agent,
+   or Codex GPT-6 Luna xhigh in Hybrid) get one lens each, the frozen
+   snapshot, the list of assigned FILES, a BUDGET, and PROJECT_RULES, and
+   report FINDINGS with `file:line` and the quoted rule or document line,
+   NOTES, and their coverage. A lens's round is done only when its auditor
+   returns `STATUS: complete`. On `STATUS: partial`, or a run that ended at
+   its limit without a packet, continue the same auditor with SendMessage:
+   first "return your packet and NOT_REACHED" if there was none, then
+   "continue with NOT_REACHED". Never spawn a fresh auditor of that lens for
+   the block while the old one can be continued, and send nothing to the
+   worker until every lens in the round is complete. Judge only FINDINGS;
+   NOTES never go to the worker. Before accepting a finding, open the quoted
+   rule and the cited line yourself: it is real when it is in the diff or
+   caused by it, breaks the quoted rule, document line, or acceptance line at
+   that line, and reproduces by a check or a concrete scenario. Theoretical
+   risks, hypothetical inputs, work outside SCOPE, and taste without a quoted
+   rule are not taken. Real findings go to the same worker as one bundle.
+   Round 1 runs every chosen lens; after that only winners play: a lens with
+   at least one real finding continues to the next round with what was
+   accepted and rejected, and a lens with nothing real has lost and is
+   retired for this block, even while other lenses play on. Do not re-run a
+   retired lens to double-check; the reviewer reads the whole diff, fixes
+   included. The audit ends when every lens has lost, or after round 3; real
+   findings not yet fixed still go to the worker. In Hybrid every Codex run,
+   audit or review, goes through `codex-run.mjs` in the background as
+   [tools](references/tools.md) shows; act on its `result.json`, never on bare
+   `codex` or `codex exec`.
+7. **Review.** An independent reviewer (per profile: `opus` through Agent,
+   or Codex GPT-6.1 Sol xhigh in Hybrid) reads the whole diff, fixes
+   included, with the audit log and reports everything; you take the real
+   findings to the same worker and re-review the delta with the same
+   reviewer. A reviewer's "accepted" does not replace a required check that
+   has not passed.
+8. **Accept the stage** (pipeline only): a separate reviewer checks the
+   original outcome, cross-boundary paths, and the project's required gates.
+9. **Report**: submitted → block reviewed → stage accepted, audit score per
+   block, escalations with their reason, what was rejected as not real,
+   follow-ups, actual routing when it differed from the plan, the usage you
+   know, and what you could not measure. Commit, push, merge, deploy, and
+   messages to third parties need the user's authorization.
 
 ## Examples
 
-- **Direct:** fix a README typo inline; no team or separate state file.
-- **Build:** one owned bug fix, affected checks, then warranted independent
-  verification. A passed check is reused until a relevant premise changes.
-- **Pipeline:** independent A/B blocks may run together; audit their stable
-  snapshots while C runs. Queue any A fixes under A and restore its assignment
-  before its worker switches back; accept the integrated stage after its gates.
+**direct.** "Fix the typo in the README badge." You edit the README. No agents.
+
+**build.** "`--total` double-counts tax." One worker on `sonnet` with
+WRITE_SET `src/cart.js, test/cart.spec.js, CHANGELOG.md`. Submitted. You choose
+(a): three auditors on `haiku`. Round 1: 5 findings, 2 real (docs: missing
+changelog line; conventions: test file misnamed against rule 3), 3 not real
+(task: hardening of an input the report never mentioned). The task lens lost
+and is retired. The worker fixes the 2 (no attempt spent: both closed). Round 2
+runs only docs and conventions: nothing real, both lost. Reviewer on `opus`
+reads the diff and the audit log: no findings. The project's test command
+passes. Done.
+
+**pipeline.** "Move the resolver to the generated DTO and switch consumers."
+Plan of four blocks. Workers A and B run in parallel; when A is submitted you
+start block C with A's worker and audit A and B together while C runs, because
+C writes nothing A or B import. Stage acceptance on `opus` after the last block.
+
+**escalation.** Hybrid, block "rewrite the date parser". The `haiku` worker
+stops at its 120-call BUDGET twice with `STATUS: handoff` (two attempts), and
+its third run ends without a submitted block (the third). Its HANDOFF says the
+parser passes 14 of 19 cases, regex-based, and the remaining five are mixed time
+zones. You decide the regex route is the problem, write APPROACH: "replace the
+regex with a token scanner; keep the 14 passing tests green", and hand the
+block to Codex GPT-6.1 Sol with the original packet, APPROACH, and the HANDOFF.
+
+**hybrid.** "Use Hybrid: add pagination to the export." You run on `opus` at
+high effort. Worker on `haiku`; on submit you launch three Codex auditors on
+Luna in the background through `codex-run.mjs`, read each `result.json`, and
+continue only the lenses that won with `--resume`. Review by Codex on Sol
+xhigh.
+
+## Why
+
+Agents hold fresh context and exact scope, which is cheaper and more reliable
+than your history. The same worker and auditors continue across rounds because
+a round then costs only the delta, and only winning lenses continue because a
+lens that found nothing real on a block rarely finds something real in the
+fix that answers other lenses. Auditors report everything because a
+reporter told to be selective reports less; the filtering is your job, and it
+is what keeps the expensive review and the worker from chasing invented
+problems. A block that exhausts a tier is a signal about the block, so the
+next tier gets your analysis and a handoff instead of a pile of transcripts:
+a stronger model starting from a clear account of what is done and what failed
+finds another route, while one handed every earlier attempt tends to repeat it.
+Only a run that fails spends an attempt, because a fix that lands is progress,
+not a sign the block is too hard. Nothing closes without evidence, because a
+handoff, a new model, or a round limit changes who works on a problem, not
+whether it is solved.

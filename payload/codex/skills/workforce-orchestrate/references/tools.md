@@ -19,27 +19,34 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
 ```
 
 - `followup_task({"target":"<task>","message":"<findings or next round>"})`
-  continues an agent, including an idle one, with its context within remaining
-  budget: the same worker for fixes, an auditor that returned `STATUS: partial` or stopped early (with
+  continues an agent, including an idle one, with its context: the same worker
+  for fixes, an auditor that returned `STATUS: partial` or stopped early (with
   its NOT_REACHED files), only the auditors whose lens won the last round for
-  the next round, the same reviewer for the delta. At the auditor token ceiling,
-  follow dispatch's handoff on the same snapshot/lens/round. The call does not take
-  model or effort overrides; for a different model, spawn a fresh task.
+  the next round, the same reviewer for the delta. It does not take model or
+  effort overrides; for a different model, spawn a fresh task.
 - Escalation is a fresh spawn on the next tier (`"model": "gpt-6.1-sol"` after
-  Luna, `"gpt-6-astra"` after Sol) with the escalation packet. After exhaustion,
-  request only a missing HANDOFF from the old worker, with no implementation;
-  its known usage still counts. Further implementation requires the permitted
-  continuation from dispatch.
-- Queue findings for A if the worker currently owns B. At a safe boundary,
-  restore A's packet, WRITE_SET and budget before requesting its fixes.
-- Point auditors and reviewers at the packet's actual stable checkout or copied
-  tree, including relevant dirty/new files and read dependencies. Materialize it
-  with writers paused or serialize them; disjoint WRITE_SETs do not freeze reads.
+  Luna, `"gpt-6-astra"` after Sol) with the escalation packet; once a worker's
+  budget is spent, ask it only for a missing HANDOFF, never for more work.
 - `send_message` delivers a message without restarting an idle agent.
   `interrupt_agent` interrupts a turn. `wait_agent` waits for notifications;
   `list_agents` reads status without polling loops.
 - Use an empty fork with an explicit packet; a full-history fork may disallow
   model overrides. The reviewer is never the author.
+
+## Snapshot for a parallel audit
+
+When the next block may change what an audit reads, give the auditors a frozen
+copy and point SNAPSHOT at it:
+
+```sh
+sha=$(git stash create)        # tracked changes as a commit; empty when clean
+git worktree add --detach "$SCRATCH/snap-blk1" "${sha:-HEAD}"
+# copy the block's new, untracked files from its WRITE_SET into the copy
+git worktree remove --force "$SCRATCH/snap-blk1"   # after the round
+```
+
+The copy has no installed dependencies: run checks that need them in the main
+checkout once the writer is done.
 
 ## V1: fork_context and send_input
 
