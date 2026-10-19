@@ -458,6 +458,24 @@
       "runtime": "codex",
       "input": "Codex cooperator has a worker and a reviewer running and nothing else to do.",
       "expected": "Call wait_agent and act on the next report. No sleep loop."
+    },
+    {
+      "id": "known-large-change-direct",
+      "runtime": "both",
+      "input": "Kit active. 178 lint warnings across 49 files in four directories; the safe rewrite for each kind is known; the project's CI is the gate.",
+      "expected": "direct: the cooperator makes the change itself and runs CI. No workers, auditors, reviewer or stage acceptance; size and disjoint directories are not reasons to delegate."
+    },
+    {
+      "id": "unknown-cause-small-build",
+      "runtime": "both",
+      "input": "Kit active. One handler intermittently returns 500; the cause is unknown.",
+      "expected": "build: a worker (or a probe first) finds the cause. Paired with known-large-change-direct: what is unknown decides, not the file count."
+    },
+    {
+      "id": "review-needs-reason",
+      "runtime": "both",
+      "input": "A worker submits a delegated block that touches no money, security, data or irreversible path; no project rule requires independent review; the cooperator read the diff and the required checks pass.",
+      "expected": "No separate reviewer; the report says why. Paired with a block on a payment path, where the independent reviewer is added and the reason is stated."
     }
   ]
 }

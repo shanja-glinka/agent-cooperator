@@ -4,9 +4,9 @@
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
-    "direct": "Question, analysis, config or doc edit, trivial fix, or a mechanical change the cooperator can describe exactly, even across many files. The cooperator does it inline and runs the project's checks; no agents.",
-    "build": "Fix or feature whose change still has to be found out, or a mechanical change too large for the cooperator's context. One worker block; audit and review at the cooperator's choice.",
-    "pipeline": "Multi-stage or design-open work. Plan of N blocks with disjoint write sets; stage acceptance at the end."
+    "direct": "Question, analysis, config or doc edit, or any change the cooperator can already describe exactly, however many files it touches. The cooperator does it inline and runs the project's checks; no agents.",
+    "build": "Fix or feature whose change still has to be found out. One worker block; each audit or review needs its own reason.",
+    "pipeline": "Several unknowns or an open design decision. Plan of blocks with disjoint write sets; stage acceptance only when blocks interact in ways no block review saw."
   },
   "profiles": {
     "standard": {

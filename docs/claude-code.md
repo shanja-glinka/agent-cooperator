@@ -77,7 +77,7 @@ defines the model, effort, and budget policy for those actions.
 
 | Class | Looks like | What happens |
 | --- | --- | --- |
-| `direct` | question, status, analysis-only, config/doc edit, trivial fix, or a mechanical change the brain can describe exactly | Done inline, project checks run by the brain. No agents. |
+| `direct` | question, status, analysis-only, config/doc edit, or any change the brain can describe exactly, however many files | Done inline, project checks run by the brain. No agents. |
 | `build` | bug fix or ordinary feature with a known shape | One worker per complete block; the cooperator chooses audit and review subject to required project gates. |
 | `pipeline` | multi-stage, cross-cutting, or design-open work | Plan, parallel workers with disjoint write sets, block review per block, stage review before closing. |
 

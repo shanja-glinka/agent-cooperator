@@ -76,6 +76,14 @@ required project rules. Then what is still open. Then the cheapest useful move.
 An optional skill is a candidate, not a duty; a skill or check the project
 requires stays required.
 
+Doing the next step yourself, in this session, is always one of the moves.
+Add an agent or a round of checks only when you can name what it gives that
+you cannot get yourself: a cause or design still to be found out, work that
+will not fit in your context, independence that a project rule or the risk
+(money, security, data, irreversible operations) requires, or a model the user
+asked for. Size is not a reason: a known change stays yours however many files
+it touches, and disjoint files make parallel work possible, not cheaper.
+
 Keep the OPEN list: the outcome, every required check and gate, every accepted
 finding. An item closes only with evidence that it is done, or a reason it does
 not apply. A handoff, a new worker, a submitted block, round 3 of the audit, or
@@ -101,16 +109,15 @@ what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
 
 ## Steps
 
-1. **Classify** before anything else; invoking this skill does not oblige you
-   to spawn agents. `direct` is a question, analysis, config or doc edit, a
-   trivial fix, or a mechanical change you can already describe exactly, even
-   across many files (lint fixes, a rename, wrapping calls in a known helper):
-   do it inline and run the project's checks yourself. A packet for such a
-   change costs as much as making it, and every agent adds its own context on
-   top. `build` is a fix or feature whose change still has to be found out, or
-   a mechanical change too large to hold in your context. `pipeline` is
-   multi-stage or design-open work. Most wasted usage comes from agents on
-   work that did not need them.
+1. **Classify** by what is still unknown, not by size; invoking this skill does
+   not oblige you to spawn agents. `direct`: a question, analysis, config or
+   doc edit, or any change you can already describe exactly, however many
+   files it touches (lint fixes, a rename, wrapping calls in a known helper):
+   do it yourself and run the project's checks. A packet for such a change
+   costs as much as making it, and every agent rebuilds its own context on top.
+   `build`: a fix or feature whose change still has to be found out.
+   `pipeline`: several such unknowns, or an open design decision. Most wasted
+   usage comes from agents on work that did not need them.
 2. **Profile.** Reuse an explicit choice or standing preference; otherwise
    Standard for a described solution, Enhanced for substantial unresolved
    design. Hybrid (Haiku workers, Codex auditors and reviewers) runs only when
@@ -139,9 +146,10 @@ what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
    reports, audit rounds, and transcripts stay with you. At the top of the
    ladder the next move is yours: re-plan or ask the user.
 5. **Choose what happens next** when a block is submitted (a, b, or c above).
-   Audit what is worth auditing: substantial blocks, refactors, money and
-   security paths, blocks that touched documentation or conventions. Checks
-   the project requires always run. In (c), audit in parallel only when the
+   Each check needs its own reason, not the work class: audit a lens when the
+   change can break that lens's rules and you have not checked them yourself,
+   or the path carries money, security, data, or irreversible operations.
+   Checks the project requires always run. In (c), audit in parallel only when the
    next block does not change what the audit reads: the audited block's files
    and what they import. The WRITE_SETs tell you; otherwise audit a snapshot
    or wait.
@@ -172,16 +180,21 @@ what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
    audit or review, goes through `codex-run.mjs` in the background as
    [tools](references/tools.md) shows; act on its `result.json`, never on bare
    `codex` or `codex exec`.
-7. **Review.** An independent reviewer (per profile: `opus` through Agent,
-   or Codex GPT-6.1 Sol xhigh in Hybrid) reads the whole diff, fixes
+7. **Review.** Read the diff of delegated work yourself. Add an independent
+   reviewer (per profile: `opus` through Agent, or Codex GPT-6.1 Sol xhigh in
+   Hybrid) when independence is needed: a project rule requires it, the change
+   touches money, security, data, or irreversible operations, or you could not
+   verify the work yourself. The reviewer reads the whole diff, fixes
    included, with the audit log and reports everything; you take the real
    findings to the same worker and re-review the delta with the same
    reviewer. A reviewer's "accepted" does not replace a required check that
    has not passed.
-8. **Accept the stage** (pipeline only): a separate reviewer checks the
-   original outcome, cross-boundary paths, and the project's required gates.
-9. **Report**: submitted → block reviewed → stage accepted, audit score per
-   block, escalations with their reason, what was rejected as not real,
+8. **Accept the stage** (pipeline only, when blocks interact in ways no block
+   review saw): a separate reviewer checks the original outcome,
+   cross-boundary paths, and the project's required gates.
+9. **Report**: submitted → block reviewed → stage accepted, the reason for
+   each agent and check round you added, audit score per block, escalations
+   with their reason, what was rejected as not real,
    follow-ups, actual routing when it differed from the plan, the usage you
    know, and what you could not measure. Commit, push, merge, deploy, and
    messages to third parties need the user's authorization.
@@ -237,6 +250,9 @@ next tier gets your analysis and a handoff instead of a pile of transcripts:
 a stronger model starting from a clear account of what is done and what failed
 finds another route, while one handed every earlier attempt tends to repeat it.
 Only a run that fails spends an attempt, because a fix that lands is progress,
-not a sign the block is too hard. Nothing closes without evidence, because a
+not a sign the block is too hard. A team is not free: on a known 49-file change
+(2026-10-19) a team made two to four times the model requests of one session
+for the same result, because every agent rebuilds context and every check
+round adds its own requests. Nothing closes without evidence, because a
 handoff, a new model, or a round limit changes who works on a problem, not
 whether it is solved.

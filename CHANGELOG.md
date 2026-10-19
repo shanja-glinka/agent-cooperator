@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Doing the next step itself is always one of the cooperator's moves. Work is
+  classified by what is still unknown, not by size: any change the cooperator
+  can describe exactly is `direct`, however many files. Each agent, audit,
+  review, and stage acceptance needs a named reason (an unknown to find out,
+  work beyond its context, required independence, risk, or the user's model
+  choice); the report states it. Measured on a known 49-file change: a team
+  made two to four times the model requests of one session for the same
+  result.
 - Mechanical work goes `direct`: a change the cooperator can already describe
   exactly, even across many files, is made inline with the project's checks; the
   skill being invoked does not oblige it to spawn agents. Codex cooperators wait

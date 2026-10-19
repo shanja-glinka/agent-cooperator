@@ -70,7 +70,9 @@ stage acceptance (pipeline) → required checks passed → report
 **Choosing the next move.** At every decision the cooperator takes the move
 that gets the task to a verified, delivered result at the lowest total cost,
 counting every agent, check, and redo it sets off. The user's limits,
-permissions, and required project rules come first. It keeps an OPEN list (the
+permissions, and required project rules come first. Doing the step itself is
+always one of the moves: work is classified by what is still unknown, not by
+size, and every agent or check round needs a named reason. It keeps an OPEN list (the
 outcome, required checks, accepted findings); an item closes only with evidence,
 never because work changed hands or a round limit was reached.
 

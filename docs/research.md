@@ -124,6 +124,16 @@ Live measurements on 2026-10-19 (codex-cli 0.163.0, Claude Code 2.1.303):
   `0d1e02f`, 7:10 and about $1.59 at `4232092`. Both cooperators had
   classified the work as `build`. This is why mechanical changes are now
   `direct`.
+- A known 49-file change (178 warnings of two behavior-sensitive lint rules,
+  same requirements, one run each): Opus 5.5 alone made 87 tool calls and 88
+  model requests in 11:12; with the kit, a cooperator, three workers, and a
+  reviewer made 179 calls and 181 requests in 17:32. GPT-6.1 Sol alone made 45
+  calls and 41 requests in 8:44; with the kit, 228 calls and 166 requests in
+  12:05 (three Sol xhigh workers, a Sol reviewer, and Astra stage acceptance).
+  The mean input per request fell with the team (Opus 99.6k to 53.8k, Sol
+  79.3k to 70.5k) but the number of requests rose two to four times. No
+  worker hit its budget, so the ladder was not exercised. This is why size no
+  longer justifies a team and every agent needs a named reason.
 
 Behavior cases compare decisions from states that differ in one material fact,
 such as current versus stale evidence or completed versus missing required work.
