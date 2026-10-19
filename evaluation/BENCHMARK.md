@@ -44,8 +44,13 @@ The run directory `evaluation/runs/<date>-<label>/` gets:
 - `COMPARISON.md` — the conclusion table, also printed at the end of the run;
 - `METRICS.md` — every metric for every variant;
 - `metrics.json` — full data per cell, per agent, and per tool;
+- `BASELINE.md`, `baseline.json` — the no-kit result per task and model: what
+  the model did by itself, at what cost, and how it worked;
+- `ROUTES.md` — whom each cooperator started, with which role and model, the
+  reason it gave just before, what the agent returned, and the final report;
 - `cells/<task>-<variant>-<model>-r<n>/` — logs, Claude transcripts or Codex
-  rollouts, the quality check, what the agent committed, and the diff.
+  rollouts, `timeline.md`, the quality check, what the agent committed, and the
+  diff.
 
 Each cell leaves its result on a branch `bench/<run>/<cell>` in the target
 repository (a local push from the cell's repository).
@@ -70,6 +75,10 @@ Claude numbers come from the session transcripts. Codex numbers come from the
 rollout files; Codex does not report cache writes.
 
 ## The conclusion
+
+The no-kit cells are the factual result: what the model does by itself. A kit
+version is judged by its difference from them, first in what was done, then in
+cost.
 
 For each task and model, one table:
 

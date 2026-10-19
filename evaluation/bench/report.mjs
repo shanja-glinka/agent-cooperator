@@ -11,8 +11,8 @@ const names = data.variants.map((v) => v.split('=')[0]);
 const kits = names.filter((n) => n !== 'nokit');
 const [prev, next] = [kits.at(-2), kits.at(-1)];
 const label = (n) => (n === 'nokit' ? 'Без кита' : n);
-const k = (n) => (n == null || Number.isNaN(n) ? '—' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(Math.round(n)));
-const tm = (s) => (s == null || Number.isNaN(s) ? '—' : `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`);
+const k = (n) => (n == null || Number.isNaN(n) ? '—' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : Number.isInteger(n) || n >= 100 ? String(Math.round(n)) : n.toFixed(1));
+const tm = (s) => (s == null || Number.isNaN(s) ? '—' : `${Math.floor(Math.round(s) / 60)}:${String(Math.round(s) % 60).padStart(2, '0')}`);
 const ROWS = [
   ['Время', (c) => c.wallSeconds, tm], ['Агентов', (c) => c.totals.agents, k],
   ['Вызовы инструментов: кооператор', (c) => c.totals.toolCallsCooperator, k], ['Вызовы инструментов: агенты', (c) => c.totals.toolCallsAgents, k],
@@ -41,7 +41,9 @@ const delta = (a, b) => {
 const qualityRows = (cs) => [...new Set(cs.flatMap((c) => Object.keys(c.quality ?? {})))];
 const cell = (v) => String(v).replace(/\|/g, '\\|');
 const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.map(cell).join(' | ')} |`)].join('\n');
-const tasks = [...new Set(data.cells.map((c) => c.task))];
+// Tasks in the suite's order, as bench.sh recorded it.
+const order = fs.existsSync(path.join(out, 'tasks.txt')) ? fs.readFileSync(path.join(out, 'tasks.txt'), 'utf8').split('\n').filter(Boolean) : [];
+const tasks = [...new Set(data.cells.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
 const models = [...new Set(data.cells.map((c) => c.model))];
 const modelName = (m) => (m === 'opus' ? 'Opus 5.5' : m === 'sol' ? 'GPT-6.1 Sol' : m);
 

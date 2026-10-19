@@ -48,4 +48,6 @@ done
 git -C $KIT_REPO worktree prune
 [[ -n ${DRY:-} ]] && { echo "dry run: set up and cleaned up ${#cells[@]} cells"; exit 0; }
 node $BENCH/metrics.mjs $OUT
+node $BENCH/baseline.mjs $OUT
+node $BENCH/routes.mjs $OUT
 node $BENCH/report.mjs $OUT
