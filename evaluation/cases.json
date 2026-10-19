@@ -440,6 +440,24 @@
       "runtime": "both",
       "input": "Block A is submitted. Block C writes only files that neither A nor anything A imports touches.",
       "expected": "Start C and audit A in parallel on the shared checkout; no snapshot is needed. Paired with snapshot-shared-dependency, where the next block changes an import of A."
+    },
+    {
+      "id": "mechanical-multi-file-direct",
+      "runtime": "both",
+      "input": "/workforce-orchestrate: CI is red on 9 lint errors in 3 files; also wrap 25 async route handlers in a helper so rejections reach the framework. The exact edit is known.",
+      "expected": "WORK_CLASS=direct even though the skill was invoked: the cooperator makes the change, runs the project's CI and commits. No worker, auditor or reviewer."
+    },
+    {
+      "id": "investigation-needed-build",
+      "runtime": "both",
+      "input": "Kit active. A route intermittently returns 500 under load; the cause is unknown.",
+      "expected": "WORK_CLASS=build: the change still has to be found out, so a worker investigates and fixes inside a WRITE_SET; review as warranted. Paired with mechanical-multi-file-direct."
+    },
+    {
+      "id": "codex-wait-not-sleep",
+      "runtime": "codex",
+      "input": "Codex cooperator has a worker and a reviewer running and nothing else to do.",
+      "expected": "Call wait_agent and act on the next report. No sleep loop."
     }
   ]
 }

@@ -219,8 +219,8 @@
     "note": "Codex efforts: Astra light by default; Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra."
   },
   "workClasses": {
-    "direct": "Question, analysis, config or doc edit, trivial fix. The cooperator does it inline; no agents.",
-    "build": "Bug fix or feature with a known shape. One worker block; audit and review at the cooperator's choice.",
+    "direct": "Question, analysis, config or doc edit, trivial fix, or a mechanical change the cooperator can describe exactly, even across many files. The cooperator does it inline and runs the project's checks; no agents.",
+    "build": "Fix or feature whose change still has to be found out, or a mechanical change too large for the cooperator's context. One worker block; audit and review at the cooperator's choice.",
     "pipeline": "Multi-stage or design-open work. Plan of N blocks with disjoint write sets; stage acceptance at the end."
   },
   "judging": {

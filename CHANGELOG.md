@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Mechanical work goes `direct`: a change the cooperator can already describe
+  exactly, even across many files, is made inline with the project's checks; the
+  skill being invoked does not oblige it to spawn agents. Codex cooperators wait
+  for agents with `wait_agent`, never with `sleep`. Measured on a real 16-file
+  mechanical fix: with agents the same result cost 1.4–2.2× (Claude) and about
+  4× (Codex) more than a single session.
 - Choosing the next move, both editions: the cooperator takes the move that
   gets the task to a verified, delivered result at the lowest total cost, with
   the user's limits, permissions, and required project rules first. It keeps an

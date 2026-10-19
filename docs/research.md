@@ -116,6 +116,14 @@ Live measurements on 2026-10-19 (codex-cli 0.163.0, Claude Code 2.1.303):
   compare the latest count and never add counts across continuations.
 - Claude Code reads `AGENTS.md` only when the project has no `CLAUDE.md`
   (checked with marker files in both arrangements).
+- Kit versus a plain session on a real 16-file mechanical fix in a private
+  TypeScript service (9 lint errors plus 25 async route handlers), one run each,
+  same model and effort, all results green: Opus 5.5 took 4:42 and $0.68 alone,
+  6:18 and $0.98 with the kit at `0d1e02f`, 7:48 and $1.48 at `4232092`;
+  GPT-6.1 Sol took 3:33 and about $0.41 alone, 9:39 and about $1.76 at
+  `0d1e02f`, 7:10 and about $1.59 at `4232092`. Both cooperators had
+  classified the work as `build`. This is why mechanical changes are now
+  `direct`.
 
 Behavior cases compare decisions from states that differ in one material fact,
 such as current versus stale evidence or completed versus missing required work.

@@ -27,9 +27,11 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
 - Escalation is a fresh spawn on the next tier (`"model": "gpt-6.1-sol"` after
   Luna, `"gpt-6-astra"` after Sol) with the escalation packet; once a worker's
   budget is spent, ask it only for a missing HANDOFF, never for more work.
-- `send_message` delivers a message without restarting an idle agent.
-  `interrupt_agent` interrupts a turn. `wait_agent` waits for notifications;
-  `list_agents` reads status without polling loops.
+- To wait for agents, call `wait_agent`: it returns when one of them reports.
+  Never `sleep` in a loop: every wake-up rereads your whole context, which
+  made the cooperator the most expensive participant in a measured run.
+  `send_message` delivers a message without restarting an idle agent;
+  `interrupt_agent` interrupts a turn; `list_agents` reads status once.
 - Use an empty fork with an explicit packet; a full-history fork may disallow
   model overrides. The reviewer is never the author.
 

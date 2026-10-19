@@ -97,9 +97,16 @@ what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
 
 ## Steps
 
-1. **Classify.** `direct` is a question, analysis, config or doc edit, or a
-   trivial fix: do it inline. `build` is a bug fix or feature with a known
-   shape. `pipeline` is multi-stage or design-open work.
+1. **Classify** before anything else; invoking this skill does not oblige you
+   to spawn agents. `direct` is a question, analysis, config or doc edit, a
+   trivial fix, or a mechanical change you can already describe exactly, even
+   across many files (lint fixes, a rename, wrapping calls in a known helper):
+   do it inline and run the project's checks yourself. A packet for such a
+   change costs as much as making it, and every agent adds its own context on
+   top. `build` is a fix or feature whose change still has to be found out, or
+   a mechanical change too large to hold in your context. `pipeline` is
+   multi-stage or design-open work. Most wasted usage comes from agents on
+   work that did not need them.
 2. **Profile.** Reuse an explicit choice, native launch profile, or standing
    preference; otherwise Standard for a described solution, Enhanced for
    substantial unresolved design. Economy (Luna workers) runs only when the
@@ -109,7 +116,8 @@ what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
 3. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
    SCOPE and OUT_OF_SCOPE, exact inputs, WRITE_SET, CHECKS with cwd,
    PROJECT_RULES. Decide open design questions before briefing. Set model and
-   reasoning effort on every spawn. Independent blocks launch in one turn.
+   reasoning effort on every spawn. Independent blocks launch in one turn;
+   wait for agents with `wait_agent`, never with `sleep`.
 4. **Hold the budget and escalate with a handoff.** Each worker tier has a
    budget per block in dispatch: three attempts and a volume (tool calls,
    tokens). An attempt is spent only by a run that ends without a result: the
@@ -176,6 +184,10 @@ what is OPEN and what would unblock it. Never shrink the goal to finish cheaper.
 ## Examples
 
 **direct.** "Fix the typo in the README badge." You edit the README. No agents.
+
+**direct, mechanical.** "CI is red on nine lint errors; also wrap the 25 async
+route handlers so their rejections reach the framework." You already know the
+exact change: you make it, run the project's CI, and commit. No agents.
 
 **build.** "`--total` double-counts tax." One worker on GPT-6.1 Sol xhigh with
 WRITE_SET `src/cart.js, test/cart.spec.js, CHANGELOG.md`. Submitted. You choose
