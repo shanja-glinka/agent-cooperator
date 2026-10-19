@@ -13,6 +13,15 @@ changes and regressions everywhere, also in areas audited before. Report
 everything you find, with severity and `file:line`; the cooperator decides
 what goes back to the worker.
 
+INDEPENDENCE says why you were added; without it, review as `required`.
+`required`: review the whole diff as below. `optional`: answer QUESTION first,
+with evidence (a check you ran, or a concrete scenario traced through the
+cited code), then report any other real defect you meet on the way. Do not
+re-run a check whose result the packet gives unless the sources changed after
+it ran, its result is not trustworthy, or it does not cover the scenario. A
+defect the packet lists as already fixed is not a new finding unless the diff
+brings it back.
+
 Block review (MODE=block): correctness, regressions, real consumers of the
 change, and whether ACCEPTANCE_EXAMPLE and USER_OUTCOME are met rather than an
 intermediate step. Stage review (MODE=stage): every original stage criterion,
@@ -25,7 +34,8 @@ delta, review the delta and its effect on your earlier conclusions. Read-only:
 no fixes, no files, no agents.
 
 ```text
-MODE / SNAPSHOT
+MODE / SNAPSHOT / INDEPENDENCE
+ANSWER: the answer to QUESTION and its evidence (optional review)
 VERDICT: findings | no_findings | blocked
 FINDINGS: severity; file:line; scenario; impact; evidence; closure condition
 CHECKED / NOT_CHECKED

@@ -1,11 +1,56 @@
 # Research and routing rationale
 
-The Route Decision synthesis below was prepared on 2026-10-19 for both editions.
+The v5 section below was prepared on 2026-10-20 and the Route Decision synthesis on
+2026-10-19, both for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v5 — 2026-10-20: start yourself, one independence rule, a short default path
+
+Claude policy 1.7.0, Codex policy 1.9.0. Three changes, motivated by a local
+benchmark of v4 against no kit on 2026-10-19 (private suite; the numbers below
+are observations from that run, not a measurement of v5):
+
+- **An unknown cause is not a reason for an agent.** The cooperator looks first
+  and adds an agent only for a need it can name. On a bug known only by its
+  symptom, the Codex cooperator handed the investigation to a worker and added
+  a reviewer in two of three repeats: 51 and 61 model requests against 16–17
+  without the kit, for the same result; its repeat without agents took 19.
+- **One independence rule for own and delegated work.** Required review runs
+  whatever it costs; the kit itself requires only that the cooperator read every
+  delegated diff; an optional reviewer or audit lens needs a named open question.
+  The Codex cooperator had added a reviewer under "money, security, data" in 7
+  of 12 runs although the project had no review rule; those reviewers received
+  diffs that were already fixed, so their value was not measured.
+- **A short default path.** The orchestration skill keeps what every task
+  needs; the delegation procedure moved to `references/delegation.md`, read in
+  full before the first agent; the routing record is read only when a model is
+  chosen. The Codex cooperator had read the 12k-character routing record in 12
+  of 12 runs, including runs without agents. In its runs without agents the
+  extra input over no kit (+12–18%) is of the order of the kit text times the
+  number of requests; that is an estimate, not a measurement.
+
+| Source | What it reports, as read | Use here and its boundary |
+| --- | --- | --- |
+| [Towards a Science of Scaling Agent Systems](https://arxiv.org/html/2512.08296) (v3; journal version in *Nature Machine Intelligence*, 2026-07-24, not read) | 260 runs on six benchmarks: when one agent already succeeds on about 45% or more, more agents lowered results; on SWE-bench Verified every multi-agent design was worse (−2% to −15%); token overhead +58% to +515% | Start yourself; add agents for a named need. Older models; no threshold is transferred. |
+| [Evaluating AGENTS.md](https://arxiv.org/html/2602.11988) (2026-02) | Context files: success change not significant, cost +20–23%; tools named in the file get used (1.6 against under 0.01 per task); no dependence on file length | Procedures named on the default path get used, so delegation moves off it instead of only getting shorter. |
+| [SWE-CC](https://arxiv.org/html/2610.06193v1) (2026-10) | Functionally correct runs violated 43% of applicable mandatory policies; half of the violations happen in intermediate steps | Required independence stays required and is tracked on the OPEN list. |
+| [ParanoiaEval](https://arxiv.org/html/2610.08662) (2026-10) | Excess defensive work in 11–59% of runs; the evidence that makes it unnecessary halves it (24% against 48%); validation owned by CI or maintainer review was repeated regardless; native-harness comparisons only | An optional review needs an open question; validation the project already owns is not repeated. |
+| [MCR-Bench](https://arxiv.org/html/2608.27442v1) (2026-08) | Reviewers flag resolved defects as new (38% of state errors) | The reviewer packet says what is already fixed and which checks ran. |
+| [Sentry](https://arxiv.org/html/2610.02994v1) (2026-10) | A lesson collection kept in context lowered scores against the same lessons attached at the failure | The delegation procedure is attached at the fork, not loaded for every task. |
+| [SkillsBench](https://arxiv.org/html/2602.12670v1) (2026-02) | Curated skills +16 points on average, software engineering +4.5; two or three skills best; comprehensive documentation −2.9 on a small sample | A focused default path. |
+| [SkillReducer](https://arxiv.org/html/2603.29919v2) (2026) | In 600 skills: 38.5% rules, 40.7% background, 12.9% examples; moving non-rules to on-demand files cut bodies by 39% with quality not lower for 86% of skills; failures came from examples that act as requirements and rules hidden in examples | Rules stay in `SKILL.md`; procedures and rationale move to a reference; one example per concept, rules stated outside examples. |
+| [SkillZip Pro](https://arxiv.org/html/2608.30785) (2026-08) | Compression fails through lost reachability; contracts must stay verbatim | Each moved part has an explicit "read when" line; the packet template is unchanged. |
+| [Is Progressive Disclosure All You Need?](https://arxiv.org/html/2607.17598) (2026-07) | One flat level of disclosure helps; a second level hurts | References sit one level below `SKILL.md`. |
+| [Skill-use](https://arxiv.org/html/2608.04828) (2026-08) | Triggering a skill and following it fail separately; a partial procedure is worse than none | Delegation is read in full before the first agent. |
+| [Token Reduction Is Not Cost Reduction](https://arxiv.org/abs/2607.12161) (2026-07, abstract only); [instruction-compression trial](https://arxiv.org/html/2603.23525v1) (2026-03) | Token cuts did not track billed cost under prompt caching; moderate compression cut cost, aggressive compression did not | v5 is judged by cost per solved task and by requests, not by skill size; the trim is moderate. |
+
+These sources were read on 2026-10-20 through a page-extraction tool that
+covers the first 100,000 characters of each HTML version; later sections were
+not read. Their results do not establish performance for this kit.
 
 ## Route Decision — 2026-10-19
 
@@ -61,10 +106,11 @@ checks, failed attempts, recovery and necessary human work. One script call can
 still contain many costly operations. Money, elapsed time and human effort can
 conflict; no universal weights are supplied. The policy therefore does not run
 an elaborate route search before each routine read. The executable instructions
-and situation table live under "Choosing the next move" in the
+live under "Choosing the next move" in the
 [Codex](../payload/codex/skills/workforce-orchestrate/SKILL.md#choosing-the-next-move) and
 [Claude](../payload/claude/skills/workforce-orchestrate/SKILL.md#choosing-the-next-move)
-orchestration skills; the skills state the rule in words, without the formula.
+orchestration skills, and the situation table for delegated work in their
+`references/delegation.md`; the skills state the rule in words, without the formula.
 
 ### Primary research and the limited inference used here
 

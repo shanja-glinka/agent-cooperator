@@ -31,6 +31,7 @@ after installing or updating. Options: `--claude-home PATH` (precedence: option,
   agents/workforce-auditor.md
   agents/workforce-reviewer.md
   skills/workforce-orchestrate/SKILL.md          /workforce-orchestrate
+  skills/workforce-orchestrate/references/delegation.md   read before the first agent
   skills/workforce-orchestrate/references/dispatch.md
   skills/workforce-orchestrate/references/tools.md
   skills/workforce-orchestrate/scripts/codex-run.mjs   Codex runner (Hybrid)
@@ -62,12 +63,13 @@ Start a task with the kit explicitly:
 ```text
 /workforce-orchestrate Migrate the resolver to the generated DTO and switch its consumers.
 /workforce-orchestrate Use Enhanced. Resolve the ambiguous contract, then complete the migration.
-Use workforce: fix the described validation error.   (build, no question)
+Use workforce: fix the described validation error.   (direct, no question)
 Fix the described validation error.                  (no kit: normal session)
 ```
 
-The user-facing session is the brain. It classifies the work, resolves the profile,
-writes briefs, spawns roles with an explicit model, integrates the diff, and accepts.
+The user-facing session is the brain. It looks first and does the work itself; it
+adds a role only for a need it can name, and then resolves the profile, writes the
+brief, spawns the role with an explicit model, reads the diff, and accepts.
 The [orchestration skill](../payload/claude/skills/workforce-orchestrate/SKILL.md)
 defines action selection, open obligations, and completion; the
 [dispatch reference](../payload/claude/skills/workforce-orchestrate/references/dispatch.md)
@@ -77,13 +79,14 @@ defines the model, effort, and budget policy for those actions.
 
 | Class | Looks like | What happens |
 | --- | --- | --- |
-| `direct` | question, status, analysis-only, config/doc edit, or any change the brain can describe exactly, however many files | Done inline, project checks run by the brain. No agents. |
-| `build` | bug fix or ordinary feature with a known shape | One worker per complete block; the cooperator chooses audit and review subject to required project gates. |
-| `pipeline` | multi-stage, cross-cutting, or design-open work | Plan, parallel workers with disjoint write sets, block review per block, stage review before closing. |
+| `direct` | anything the brain can finish in its own session: a question, analysis, config/doc edit, a known change however many files, or a bug whose cause it finds itself | Done inline, project checks run by the brain. No agents. |
+| `build` | work where the brain's own look showed a need it can name: the rest will not fit its context, its hypotheses are exhausted, independence is required, or the user asked for agents | One worker per complete block; audit and review follow the independence rule and required project gates. |
+| `pipeline` | work that splits into parts that each need their own context, after design decisions are made | Plan, parallel workers with disjoint write sets, the brain reads every diff, stage review before closing. |
 
-Classification comes first because it is the single largest lever on usage: the
-public configurations that run well all refuse to run a pipeline on work that did
-not need one.
+The look comes before any agent because it is the single largest lever on usage:
+the public configurations that run well all refuse to run a pipeline on work that
+did not need one, and an unknown cause is the normal start of a fix, not a reason
+for an agent.
 
 ### Profiles
 
@@ -211,8 +214,13 @@ has the details, including the auditor handoff at 400k.
 
 ### Rules that hold in every profile
 
-- The session is the cooperator: it plans, briefs, judges, and accepts; agents
-  do the work. In `direct` work it simply does the work.
+- The session is the cooperator: it does the work itself unless an agent gives
+  something it can name; when agents work, it briefs, judges, and accepts.
+- Independence is one rule for its own and delegated work: a review required by
+  a project rule, the user, or the task always runs; the kit itself only requires
+  that the cooperator read every delegated diff; an optional reviewer or audit lens
+  needs a named open question (property, place, evidence so far, what it does not
+  answer) and does not repeat what the project's CI or reviewers already do.
 - The repository's own rules come first: `CLAUDE.md`, `AGENTS.md`,
   `.claude/rules/`, `CONTRIBUTING.md` (Claude Code reads `AGENTS.md` only when the
   project has no `CLAUDE.md`). They go to every agent as PROJECT_RULES.

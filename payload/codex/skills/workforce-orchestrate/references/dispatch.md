@@ -1,7 +1,8 @@
 # Routing and the work packet (Codex)
 
 `{{CODEX_HOME}}/codex-workforce/profiles.json` is the routing record; this file
-explains it. A model release updates the record, not the workflow.
+explains it. A model release updates the record, not the workflow. Read both
+when you choose a profile or a model for an agent, or fill a packet.
 
 ## Presets
 
@@ -101,10 +102,11 @@ WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
+INDEPENDENCE (reviewer, auditor): required (<rule or request>) | optional (QUESTION: property; place; evidence so far; what it does not answer); what is already fixed; checks already run
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
 
 Agents share the checkout; use worktrees only for a concrete write conflict. An
-audit beside a running writer follows step 5 of the skill.
+audit beside a running writer follows step 4 of [delegation](delegation.md).

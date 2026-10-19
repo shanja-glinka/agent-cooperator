@@ -1,6 +1,6 @@
 # Agent Cooperator
 
-**The session is the brain. Agents do the work. Hard blocks climb a ladder with a handoff.**
+**The session thinks and does the work. Agents join for a need it can name. Hard blocks climb a ladder with a handoff.**
 
 [Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
@@ -9,9 +9,11 @@ profiles for agentic development in **Claude Code** and **Codex**, shipped as
 one package with one installer.
 
 The user-facing session is the **cooperator**: it reads the repository's rules,
-plans, briefs workers, judges what comes back, re-plans when a block is harder
-than it looked, and accepts. Agents implement, look things up, audit, and
-review. The cooperator is meant to think, not to forward results.
+looks first, and does the work itself. It adds an agent only for a need it can
+name (work that will not fit its context, exhausted hypotheses, required
+independence, or the user's request); then it briefs, judges what comes back,
+re-plans when a block is harder than it looked, and accepts. The cooperator is
+meant to think, not to forward results.
 
 No API proxy, background service, or task-management engine: an instruction
 pack with a Node.js installer. Routing and token budgets are instruction policy,
@@ -46,8 +48,9 @@ commands `claude-workforce` and `codex-workforce` still work.
 Task
   │
   ▼
-Cooperator: read the repository's rules, classify, pick a profile
-  direct   → it does the work itself, no agents
+Cooperator: read the repository's rules, look first, do the work itself
+  direct   → it finishes the task, no agents
+  an agent only for a need it can name → read delegation, pick a profile
   build    → one block
   pipeline → a plan of blocks with disjoint write sets
   │
@@ -61,7 +64,7 @@ per block:
      a) audit this block             → auditors, up to 3 rounds
      b) no audit                     → next work to the worker
      c) next block to the worker     → and auditors in parallel on 1..N blocks
-  review (whole diff + audit log) → real findings → the same worker
+  review (independence rule) → real findings → the same worker
   │
   ▼
 stage acceptance (pipeline) → required checks passed → report
@@ -70,9 +73,13 @@ stage acceptance (pipeline) → required checks passed → report
 **Choosing the next move.** At every decision the cooperator takes the move
 that gets the task to a verified, delivered result at the lowest total cost,
 counting every agent, check, and redo it sets off. The user's limits,
-permissions, and required project rules come first. Doing the step itself is
-always one of the moves: work is classified by what is still unknown, not by
-size, and every agent or check round needs a named reason. It keeps an OPEN list (the
+permissions, and required project rules come first. The cooperator starts
+itself: an unknown cause is the normal start of a fix, not a reason for an
+agent, and size is not a reason either. An agent or a check round needs a need
+the cooperator can name, and the report states the open question it closed.
+One independence rule covers its own and delegated work: a review that a
+project rule, the user, or the task requires always runs; an optional one needs
+a named open question that the checks do not answer. It keeps an OPEN list (the
 outcome, required checks, accepted findings); an item closes only with evidence,
 never because work changed hands or a round limit was reached.
 

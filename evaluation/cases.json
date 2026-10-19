@@ -126,8 +126,8 @@
     {
       "id": "claude-build-class",
       "runtime": "claude-code",
-      "input": "/workforce-orchestrate: fix a validation bug with a known cause across three files.",
-      "expected": "WORK_CLASS=build: one workforce-worker with explicit model sonnet, role effort high and WRITE_SET. Cooperator owns routing; independent block review is used when warranted or required."
+      "input": "/workforce-orchestrate, and the user says \"use a worker for this\": fix a validation bug with a known cause across three files.",
+      "expected": "WORK_CLASS=build because the user asked for an agent: one workforce-worker with explicit model sonnet, role effort high and a WRITE_SET; the cooperator reads the diff. No reviewer unless independence is required or a named open question remains."
     },
     {
       "id": "claude-fix-round-continuity",
@@ -163,7 +163,7 @@
       "id": "claude-review-not-default",
       "runtime": "claude-code",
       "input": "Two-line change in a helper with an existing test.",
-      "expected": "No reviewer agent; worker (or brain in direct class) runs the test and reports. Deep review is for substantial blocks, refactors, security/money/performance paths."
+      "expected": "No reviewer agent; the cooperator (or the worker on a delegated block) runs the test and reports. A reviewer is added when independence is required, or for a named open question the checks do not answer."
     },
     {
       "id": "claude-scope-lock",
@@ -450,8 +450,8 @@
     {
       "id": "investigation-needed-build",
       "runtime": "both",
-      "input": "Kit active. A route intermittently returns 500 under load; the cause is unknown.",
-      "expected": "WORK_CLASS=build: the change still has to be found out, so a worker investigates and fixes inside a WRITE_SET; review as warranted. Paired with mechanical-multi-file-direct."
+      "input": "Kit active. A route intermittently returns 500 under load. The cooperator's first look (handler, logs, a local reproduction) shows the failure comes from one of 14 storage adapters, each with its own fixtures and long traces.",
+      "expected": "WORK_CLASS=build after the look: tracing every adapter will not fit in the cooperator's context, so one worker gets the sweep with what was found, after the cooperator reads references/delegation.md. The report names that need. Paired with unknown-cause-found-direct, where the first look finds the cause."
     },
     {
       "id": "codex-wait-not-sleep",
@@ -466,16 +466,58 @@
       "expected": "direct: the cooperator makes the change itself and runs CI. No workers, auditors, reviewer or stage acceptance; size and disjoint directories are not reasons to delegate."
     },
     {
-      "id": "unknown-cause-small-build",
+      "id": "unknown-cause-found-direct",
       "runtime": "both",
-      "input": "Kit active. One handler intermittently returns 500; the cause is unknown.",
-      "expected": "build: a worker (or a probe first) finds the cause. Paired with known-large-change-direct: what is unknown decides, not the file count."
+      "input": "Kit active. One handler intermittently returns 500; the cause is unknown. Reading the handler and running its test shows a missing await on a shared client.",
+      "expected": "direct: the cooperator finds the cause itself, fixes it and runs the checks. An unknown cause is the normal start of a fix, not a reason for a worker or a probe. Paired with investigation-needed-build: the look decides, not the unknown."
     },
     {
       "id": "review-needs-reason",
       "runtime": "both",
       "input": "A worker submits a delegated block that touches no money, security, data or irreversible path; no project rule requires independent review; the cooperator read the diff and the required checks pass.",
-      "expected": "No separate reviewer; the report says why. Paired with a block on a payment path, where the independent reviewer is added and the reason is stated."
+      "expected": "No separate reviewer; the report says why. Paired with risk-property-covered and risk-property-open-question, where a risky path gets a reviewer only for a question the checks do not answer."
+    },
+    {
+      "id": "required-independence-own-change",
+      "runtime": "both",
+      "input": "The project's CONTRIBUTING requires an independent review for every change under billing/. The cooperator fixed a rounding bug in billing/ itself; the tests pass.",
+      "expected": "An independent reviewer reads the whole diff (INDEPENDENCE=required, citing the rule), exactly as for delegated work: who wrote the change does not change the rule, and cost does not cancel it. Paired with required-independence-delegated."
+    },
+    {
+      "id": "required-independence-delegated",
+      "runtime": "both",
+      "input": "Same rule; a worker fixed the rounding bug in billing/ and the tests pass.",
+      "expected": "The cooperator reads the delegated diff and adds the independent reviewer on the whole diff. Same decision as required-independence-own-change."
+    },
+    {
+      "id": "risk-property-covered",
+      "runtime": "both",
+      "input": "The cooperator changed how a delete endpoint checks its confirmation token and added tests for an empty, a wrong and the correct token. No project rule requires review.",
+      "expected": "No reviewer: the property at risk (an irreversible deletion) is covered by the new tests, and 'security-related' is not an open question. The report says so. Paired with risk-property-open-question."
+    },
+    {
+      "id": "risk-property-open-question",
+      "runtime": "both",
+      "input": "Same change, but the endpoint is also reachable through a batch API that the tests do not exercise.",
+      "expected": "An optional reviewer with INDEPENDENCE=optional and a QUESTION naming the property (confirmation on the batch path), the place, the tests so far and the uncovered path. The reviewer answers it first and does not re-run checks the packet already gives."
+    },
+    {
+      "id": "project-owned-review-not-duplicated",
+      "runtime": "both",
+      "input": "A delegated block passes the project's CI; the project merges only after maintainer review. No rule asks the kit for its own review.",
+      "expected": "No extra reviewer to repeat what CI and the maintainers' review already do; the cooperator reads the delegated diff and reports the evidence."
+    },
+    {
+      "id": "delegation-read-before-first-agent",
+      "runtime": "both",
+      "input": "After its own look the cooperator decides one worker is needed.",
+      "expected": "Before the first spawn it reads references/delegation.md in full, and dispatch with the routing record for the model; it does not run a partial procedure from memory."
+    },
+    {
+      "id": "routing-record-on-demand",
+      "runtime": "both",
+      "input": "Kit active. A known rename across 40 files.",
+      "expected": "The cooperator makes the change and runs the checks without reading profiles.json, dispatch or delegation: no agent and no model is being chosen."
     }
   ]
 }

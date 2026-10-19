@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- The cooperator starts itself. An unknown cause is the normal start of a fix,
+  not a reason for an agent; workers no longer write every non-`direct` change
+  by rule. An agent is added only when the cooperator's own look shows a need it
+  can name: the rest will not fit its context, a broad search with a short
+  answer (a probe), exhausted hypotheses, required independence, or the user's
+  request. The report states the open question each agent or check round
+  closed. The work class records the route taken after the look.
+- One independence rule for own and delegated work. A review that a project
+  rule, the user, or the task requires runs whatever it costs; the kit itself
+  only requires the cooperator to read every delegated diff; an optional
+  reviewer or audit lens needs a named open question (property at risk, place,
+  evidence so far, what it does not answer) and does not repeat what the
+  project's CI or reviewers already do. "Money, security, data" alone is no
+  longer a trigger. Packets carry `INDEPENDENCE`; on an optional review the
+  reviewer answers the question first and repeats a check only when its sources
+  changed, its result is not trustworthy, or the scenario is not covered.
+- A short default path. The orchestration skills keep only what every task
+  needs (Claude 17.0k → about 6k characters); the delegation procedure moved
+  without changes of meaning into `references/delegation.md`, read in full
+  before the first agent; dispatch and the routing record are read only when a
+  model is chosen. The examples no longer copy a benchmark task. Motivation
+  (2026-10-19, v4 against no kit): the Codex cooperator read the routing record
+  in 12 of 12 runs, also without agents, and on a bug known only by its symptom
+  delegating the investigation took 51 and 61 model requests against 16–17
+  without the kit for the same result. v5 itself is not measured yet. Policy:
+  Claude 1.7.0, Codex 1.9.0.
+
 - Doing the next step itself is always one of the cooperator's moves. Work is
   classified by what is still unknown, not by size: any change the cooperator
   can describe exactly is `direct`, however many files. Each agent, audit,
