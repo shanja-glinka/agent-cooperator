@@ -39,6 +39,15 @@ update/removal and preservation of unrelated files. For instruction changes, che
 the whole assignment/worker/reviewer relationship rather than adding keyword-only
 tests for each sentence. 
 
+## Measure every kit version
+
+A change to roles, skills, or routing policy is a new version, and a new version is
+measured before it is called done, released, or installed: commit it, run the full
+suite with `evaluation/bench/bench.sh` against no kit and the previous version on
+both runtimes, then read the comparison it prints. Partial runs and gap-filling
+afterwards are not a measurement. The procedure, metrics, and conclusion format are
+in [BENCHMARK.md](evaluation/BENCHMARK.md).
+
 ## Model and policy releases
 
 Keep product, role, and skill names stable. Update `payload/profiles.json`, native
