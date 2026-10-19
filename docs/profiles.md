@@ -7,8 +7,8 @@ profile table and [research.md](research.md) for the evidence behind it. Future
 releases can update model policy without changing the install command or renaming
 your agents.
 
-[`payload/profiles.json`](../payload/profiles.json) is the machine-readable routing
-policy. [`dispatch.md`](../payload/skills/workforce-orchestrate/references/dispatch.md)
+[`payload/codex/profiles.json`](../payload/codex/profiles.json) is the machine-readable routing
+policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
 explains its use and the contextual selection rules. Both ship with the release.
 This is configuration and agent guidance, not a scheduler that intercepts tool calls.
 
@@ -23,9 +23,8 @@ make those settings mandatory. Keep review independence and verification require
 
 Use when the requirements and solution are sufficiently described. GPT-6.1 Sol high
 owns orchestration, GPT-6 Luna owns read-only lookups (Sol when judgment is needed),
-Sol implements at `medium` for settled blocks and `high` for debugging and
-non-trivial work, Sol high independently reviews complete blocks, and Astra high
-accepts major stages. A bounded open decision can still receive Astra high
+Sol implements at xhigh, Sol high independently reviews complete blocks, and Astra
+high accepts major stages. A bounded open decision can still receive Astra high
 assistance. The Sol orchestrator is a deliberate cost choice: it holds the longest
 context and costs about five times less per token than Astra; the places where
 Astra's reasoning changes the outcome keep Astra.
@@ -39,6 +38,30 @@ stated unresolved question and expected benefit, respecting the user's limits.
 
 The distinction is solution uncertainty. Many lines of code, a long runtime, or a
 sophisticated algorithm do not automatically require Enhanced.
+
+## Economy
+
+The cheapest preset, chosen only by the user (explicitly, with
+`codex -p workforce-economy`, or as a standing preference). Sol high is the
+cooperator, Luna xhigh implements, and auditors and reviewers stay as in
+Standard. A Luna worker has 600 tool calls per run, three runs, and 400k tokens
+per block; a block that exhausts it moves to Sol xhigh, then to Astra.
+
+## Worker ladder and handoff
+
+| Tier | Per run (BUDGET) | Runs | Token ceiling | Next tier |
+| --- | --- | --- | --- | --- |
+| Luna | 600 tool calls | 3 | 400k | Sol xhigh |
+| Sol | none | 3 | 500k | Astra high |
+| Astra | none | 3 | none | the cooperator re-plans or asks you |
+
+Tokens are summed over one worker's runs on one block; the ceiling applies even
+when runs are left. A worker at its limit returns `STATUS: handoff` with DONE,
+STOPPED_AT, TRIED, OPEN, and NEXT. The cooperator treats an exhausted tier as
+evidence the block is hard: it reads the handoff, decides the APPROACH (same
+path with more effort, a different route, or a split or re-scoped block), and
+spawns the next tier fresh with the original packet, APPROACH, and HANDOFF only.
+Earlier reports, audit rounds, and transcripts stay with the cooperator.
 
 ## Selection contract
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.4.1",
+  "policyVersion": "1.5.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
@@ -53,7 +53,11 @@
         "rerun": "winners-only",
         "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete.",
         "budget": "40 tool calls (80% of maxTurns 50), then STATUS: partial"
-      }
+      },
+      "workerLadder": [
+        "sonnet",
+        "opus"
+      ]
     },
     "enhanced": {
       "orchestrator": {
@@ -107,7 +111,11 @@
         "rerun": "winners-only",
         "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete.",
         "budget": "40 tool calls (80% of maxTurns 50), then STATUS: partial"
-      }
+      },
+      "workerLadder": [
+        "sonnet",
+        "opus"
+      ]
     },
     "hybrid": {
       "selection": "Only on the user's explicit choice or standing preference; never chosen automatically.",
@@ -128,10 +136,7 @@
       "worker": {
         "model": "haiku",
         "effort": "high",
-        "escalateTo": {
-          "model": "sonnet",
-          "effort": "high"
-        }
+        "role": "workforce-worker-lite"
       },
       "blockReviewer": {
         "runtime": "codex-cli",
@@ -171,7 +176,12 @@
         "timeoutMinutes": 60,
         "rule": "Run every Codex call through the script with Bash run_in_background; never bare codex or codex exec. The script always exits: stdin from a file, approvals off, user config ignored, watchdog for silence, input requests, and total time. Read <name>.result.json; only status ok is a result."
       },
-      "fallback": "Codex unavailable or failing twice: auditor haiku xhigh and reviewers opus high through Agent; report the deviation once."
+      "fallback": "Codex unavailable or failing twice: auditor haiku xhigh and reviewers opus high through Agent; report the deviation once.",
+      "workerLadder": [
+        "haiku",
+        "codex:gpt-6.1-sol",
+        "opus"
+      ]
     }
   },
   "escalation": {
@@ -180,8 +190,7 @@
       "high",
       "xhigh"
     ],
-    "requires": "A stated unresolved reasoning problem (architecture, money path, security boundary, repeated failed attempts) and the expected benefit. Respect user effort caps and budget. Fall back to opus xhigh when fable is unavailable.",
-    "workerLadder": "Fix rounds 1-3 continue the same worker; from round 4, or when the worker loops without new evidence, spawn a fresh worker one tier up with the bundled findings."
+    "requires": "A stated unresolved reasoning problem (architecture, money path, security boundary, repeated failed attempts) and the expected benefit. Respect user effort caps and budget. Fall back to opus xhigh when fable is unavailable."
   },
   "budgets": {
     "maxParallelWorkers": 3,
@@ -190,7 +199,8 @@
     "auditorMaxTurns": 50,
     "reviewerMaxTurns": 30,
     "auditRounds": 3,
-    "note": "Defaults for role frontmatter and packets. User limits and project rules override them."
+    "note": "Defaults for role frontmatter and packets. User limits and project rules override them.",
+    "liteWorkerMaxTurns": 120
   },
   "selectionRules": {
     "default": "standard",
@@ -266,5 +276,30 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, all through SendMessage. A fresh agent is for independence or a different model tier."
+  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, all through SendMessage. A fresh agent is for independence or a different model tier.",
+  "workerBudgets": {
+    "haiku": {
+      "role": "workforce-worker-lite",
+      "toolCallsPerRun": 120,
+      "runs": 3,
+      "tokenCeiling": 400000
+    },
+    "sonnet": {
+      "runs": 3,
+      "tokenCeiling": 500000
+    },
+    "codex:gpt-6.1-sol": {
+      "effort": "xhigh",
+      "runs": 3,
+      "tokenCeiling": 500000,
+      "runner": "codex-run.mjs --role work"
+    },
+    "opus": {
+      "runs": 3,
+      "tokenCeiling": null,
+      "then": "the cooperator re-plans or asks the user"
+    },
+    "rule": "Tokens are summed over one worker's runs on one block. Reaching the third run without a submitted block, or the token ceiling with runs left, moves the block to the next tier of the profile's workerLadder. The next tier gets the original packet, the cooperator's APPROACH, and the worker's HANDOFF only.",
+    "auditors": "An auditor on haiku (Codex Luna in Hybrid) that reaches 400k tokens on one block hands its lens to sonnet (Codex Sol) with its NOT_REACHED files; its findings stay with the cooperator."
+  }
 }

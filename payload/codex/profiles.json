@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.6.2",
+  "policyVersion": "1.7.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -21,8 +21,7 @@
       },
       "worker": {
         "model": "gpt-6.1-sol",
-        "effort": "high",
-        "effortRule": "medium for blocks with a settled contract and clear shape; high for debugging, unclear failures, and non-trivial implementation"
+        "effort": "xhigh"
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
@@ -49,7 +48,11 @@
         "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
         "rerun": "winners-only",
         "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
-      }
+      },
+      "workerLadder": [
+        "gpt-6.1-sol",
+        "gpt-6-astra"
+      ]
     },
     "enhanced": {
       "orchestrator": {
@@ -67,8 +70,7 @@
       },
       "worker": {
         "model": "gpt-6.1-sol",
-        "effort": "high",
-        "effortRule": "medium for blocks with a settled contract and clear shape; high for debugging, unclear failures, and non-trivial implementation"
+        "effort": "xhigh"
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
@@ -95,7 +97,63 @@
         "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
         "rerun": "winners-only",
         "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
-      }
+      },
+      "workerLadder": [
+        "gpt-6.1-sol",
+        "gpt-6-astra"
+      ]
+    },
+    "economy": {
+      "orchestrator": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "probe": {
+        "model": "gpt-6-luna",
+        "effort": "medium",
+        "scope": "read-only lookups: symbols, consumers, contracts",
+        "escalateTo": {
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "when": "the question needs judgment, not search"
+        }
+      },
+      "worker": {
+        "model": "gpt-6-luna",
+        "effort": "xhigh"
+      },
+      "blockReviewer": {
+        "model": "gpt-6.1-sol",
+        "effort": "high"
+      },
+      "stageReviewer": {
+        "model": "gpt-6-astra",
+        "effort": "high"
+      },
+      "design": {
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "scope": "the cooperator decides before briefing"
+      },
+      "auditor": {
+        "model": "gpt-6-luna",
+        "effort": "xhigh",
+        "lenses": [
+          "docs",
+          "task",
+          "conventions"
+        ],
+        "rounds": 3,
+        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "rerun": "winners-only",
+        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
+      },
+      "workerLadder": [
+        "gpt-6-luna",
+        "gpt-6.1-sol",
+        "gpt-6-astra"
+      ],
+      "selection": "Only on the user's explicit choice, launch layer, or standing preference; never chosen automatically."
     }
   },
   "escalation": {
@@ -170,5 +228,25 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model."
+  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model.",
+  "workerBudgets": {
+    "gpt-6-luna": {
+      "toolCallsPerRun": 600,
+      "runs": 3,
+      "tokenCeiling": 400000
+    },
+    "gpt-6.1-sol": {
+      "effort": "xhigh",
+      "runs": 3,
+      "tokenCeiling": 500000
+    },
+    "gpt-6-astra": {
+      "effort": "high",
+      "runs": 3,
+      "tokenCeiling": null,
+      "then": "the cooperator re-plans or asks the user"
+    },
+    "rule": "Tokens are summed over one worker's runs on one block. Reaching the third run without a submitted block, or the token ceiling with runs left, moves the block to the next tier of the profile's workerLadder as a fresh spawn with the original packet, the cooperator's APPROACH, and the worker's HANDOFF only.",
+    "auditors": "An auditor on Luna that reaches 400k tokens on one block hands its lens to Sol with its NOT_REACHED files; its findings stay with the cooperator."
+  }
 }

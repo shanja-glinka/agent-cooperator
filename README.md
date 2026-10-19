@@ -1,208 +1,150 @@
-# Codex Workforce and Claude Workforce
+# Agent Cooperator
 
-**Complete work blocks. Reviews when the work is ready. Scope that stays put.**
+**The session is the brain. Agents do the work. Hard blocks climb a ladder with a handoff.**
 
 [Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
-A small, inspectable set of agents and skills for agentic development, shipped for
-two runtimes from one package and one installer:
+Agent Cooperator is a small, inspectable set of roles, skills, and routing
+profiles for agentic development in **Claude Code** and **Codex**, shipped as
+one package with one installer.
 
-- **Codex Workforce** runs on the **GPT-6 family**: Sol orchestrates in Standard and
-  does the bulk of implementation and review, Luna answers lookups, Astra accepts
-  stages and orchestrates in Enhanced.
-- **Claude Workforce** applies the same roles to **Claude Code**: an `opus` brain,
-  `sonnet` workers, `haiku` probes and auditors, `opus` reviewers, `fable` as a
-  reserve tier.
+The user-facing session is the **cooperator**: it reads the repository's rules,
+plans, briefs workers, judges what comes back, re-plans when a block is harder
+than it looked, and accepts. Agents implement, look things up, audit, and
+review. The cooperator is meant to think, not to forward results.
 
-Both editions share one workflow: the orchestrator reads the repository's own rules
-first, briefs workers with complete owned blocks and a locked scope, reuses the same
-worker and reviewer for correction rounds, reviews only finished blocks, and hands
-findings outside the reported scope to the user as follow-ups instead of new work.
-Choose Standard for a sufficiently described solution, or Enhanced when the solution
-itself still needs to be found.
-
-No API proxy, background service, GSD dependency, or new task management engine.
-This is an instruction pack with a Node.js installer, not a guarantee of model
-behavior or lower cost. Independent community project; not affiliated with OpenAI
-or Anthropic.
+No API proxy, background service, or task-management engine: an instruction
+pack with a Node.js installer. It does not guarantee model behavior or lower
+cost. Independent community project; not affiliated with Anthropic or OpenAI.
 
 ## Install
 
-Requires Node.js 22+, npm, and Git. The package runs directly from GitHub; an npm
-registry publication is not required. It ships two binaries.
+Requires Node.js 22+, npm, and Git. The package runs directly from GitHub.
 
 ```sh
-# Codex (default binary, same name as the package)
-npx --yes github:shanja-glinka/codex-workforce install
-npx --yes github:shanja-glinka/codex-workforce update
-npx --yes github:shanja-glinka/codex-workforce status
-npx --yes github:shanja-glinka/codex-workforce uninstall
-
-# Claude Code (second binary, selected with -p)
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce update
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
+npx --yes github:shanja-glinka/agent-cooperator claude install
+npx --yes github:shanja-glinka/agent-cooperator codex install
 ```
 
-`update` replaces the kit's previous files and removes stale owned files; `status`
-reports drift; `uninstall` removes only what the kit owns. For a reproducible
-version, replace the package spec with `github:shanja-glinka/codex-workforce#v1.3.2`
-or a reviewed commit SHA. `npx --yes` accepts npm's download prompt; it does not
-answer the agent's Standard/Enhanced question or grant publishing rights. Start a
-fresh Codex or Claude Code session after installing or updating. Both kits can live
-on one machine; each owns its own files, state directory, and instruction markers.
+The same commands take `update`, `status`, and `uninstall`. `update` replaces
+the kit's files and removes stale ones, `status` reports drift, `uninstall`
+removes only what the kit owns. Pin a version with
+`github:shanja-glinka/agent-cooperator#<tag>` or a reviewed commit SHA. Start a
+fresh session after installing or updating.
 
-Options shared by both binaries: `--dry-run`, `--force` (back up and replace edited
-owned files), `--json`. Codex: `--codex-home PATH` (precedence: option, `CODEX_HOME`,
-`~/.codex`) and `--skills-dir PATH` for the `~/.agents/skills` discovery links.
-Claude Code: `--claude-home PATH` (precedence: option, `CLAUDE_CONFIG_DIR`,
-`~/.claude`); skills are discovered inside that directory, so there is no
-`--skills-dir`. The installer never touches `config.toml`, `settings.json`, model
-defaults, or permissions.
+Options: `--dry-run`, `--force` (back up and replace edited owned files),
+`--json`. Claude Code: `--claude-home PATH` (option, then `CLAUDE_CONFIG_DIR`,
+then `~/.claude`). Codex: `--codex-home PATH` (option, then `CODEX_HOME`, then
+`~/.codex`) and `--skills-dir PATH`. The installer never touches
+`settings.json`, `config.toml`, model defaults, or permissions. The older
+commands `claude-workforce` and `codex-workforce` still work.
 
-## Codex edition
-
-Roles `workforce_probe`, `workforce_worker`, `workforce_reviewer` (model-neutral
-TOML), five skills, two optional native launch layers, and a managed block in the
-effective global `AGENTS.md`:
-
-```sh
-codex -p workforce-standard
-codex -p workforce-enhanced
-```
-
-| Responsibility | Standard | Enhanced |
-| --- | --- | --- |
-| Orchestrator | Sol high | Astra high |
-| Bounded research | Luna medium, Sol when judgment is needed | same |
-| Main implementation | Sol high, medium for settled blocks | same |
-| Unresolved design/algorithm | Targeted Astra assistance as needed | Bounded Astra high work |
-| Auditor (up to 3 rounds) | Luna xhigh | Luna xhigh |
-| Completed block review | Sol high | Sol high |
-| Major stage acceptance | Astra high | Astra high |
-
-Concrete tasks proceed without a profile question. Autonomous instructions let the
-agent choose; existing choices and standing preferences are reused. The question is
-reserved for long-running, multi-stage work with substantial unresolved design where
-the choice matters and has not been delegated. You can still write **"Use
-Enhanced"**; workers inherit the resolved choice. See [selection rules](docs/profiles.md).
-
-The presets are optional starting points; custom setups are allowed even after
-choosing a profile. Only separately explicit model, effort, and budget constraints
-make exact settings mandatory. **Instructions cannot change the already running
-orchestrator's model.** Set Astra and the effort in your client; the agent must
-disclose a mismatch instead of pretending it changed settings.
-
-## Claude Code edition
-
-Subagents `workforce-worker`, `workforce-probe`, `workforce-reviewer` (Markdown
-roles with `model: inherit`, `effort`, `maxTurns`, no child spawning), the
-`/workforce-orchestrate` skill with dispatch and tool references, worker, probe,
-review, and smoke skills, a routing policy, and a managed block in the user
-`CLAUDE.md`. See the [Claude Code edition](docs/claude-code.md).
-
-The kit is opt-in. Ordinary sessions spawn nothing; it runs only on
-`/workforce-orchestrate`, an explicit request for Workforce, subagents, or
-multi-agent work, or a project instruction file that requires it. Inside the kit,
-work is classified first: `direct` is done inline with no agents, `build` gets one
-worker and one review of the finished diff, `pipeline` gets a plan, parallel
-workers with disjoint write sets, block reviews, and a stage review.
-
-| Responsibility | Standard | Enhanced | Hybrid |
-| --- | --- | --- | --- |
-| Brain (your session) | `opus` medium | `opus` high | `opus` high |
-| Bounded research | `haiku` medium | `sonnet` medium | `haiku` medium |
-| Implementation | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks | `haiku` high, `sonnet` when it loops |
-| Unresolved design | targeted `opus` high | bounded `fable` high (fallback `opus` xhigh) | the brain decides before briefing |
-| Auditor (up to 3 rounds) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
-| Block review | `opus` high | `opus` high | Codex GPT-6.1 Sol xhigh |
-| Stage acceptance | `opus` high | `fable` high (fallback `opus` xhigh) | Codex GPT-6.1 Sol xhigh |
-
-Hybrid is the economy preset: `opus` thinks and judges, `haiku` types, and cheap
-Codex models audit and review at xhigh. It runs only when you choose it ("Use
-Hybrid") or set it as a standing preference, and needs a logged-in `codex` CLI.
-Codex calls go through the `codex-run.mjs` wrapper, which always exits on its own
-(watchdog for silence, input requests, and total time), so the brain cannot sleep
-on a Codex run that waits for input. See the [Claude Code edition](docs/claude-code.md).
-
-Aliases currently resolve to Fable 5.1, Opus 5.5, Sonnet 5.5, and Haiku 5.5 on the
-Claude API (checked 2026-10-08; see `docs/claude-code.md`). Every Agent call sets
-`model` explicitly; effort comes from role frontmatter or the session, and note
-that Opus 5.5 defaults to `medium` effort. Correction rounds continue the same worker and reviewer with SendMessage;
-a fresh agent is for independence, a different tier, or a polluted context.
-
-## How work flows (both editions)
-
-The user-facing session is the cooperator: the orchestrator that cooperates
-agents so that they do the work.
-
-1. Read the repository's own rules (`AGENTS.md`, `CLAUDE.md`, `.claude/rules/`,
-   `CONTRIBUTING.md`) and pass them to every agent as PROJECT_RULES; they
-   override the kit.
-2. Classify the work: `direct` is done inline, `build` is one block, `pipeline`
-   is a plan of blocks. Pick the profile once.
-3. Brief each block with the outcome, an acceptance example, SCOPE and
-   OUT_OF_SCOPE, WRITE_SET, and CHECKS.
-4. When a worker submits a block, the cooperator chooses:
+## How work flows
 
 ```text
-Worker submits a block
+Task
   │
   ▼
-Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, up to 3 rounds
-  b) no audit                      → next work to the worker
-  c) next block to the worker      → and auditors in parallel on
-                                     1, 2, 3 or N submitted blocks
-
-Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
-they find through one lens each: docs, task, conventions.
-Round 1 runs every lens. Then each lens plays on its own:
-real findings → that lens won, the same worker fixes, only winners
-                play the next round;
-nothing real  → that lens lost and is retired for this block.
-Every lens lost (or round 3 done) → the block passes the audit.
-A round ends only when each auditor has read all its files; an auditor
-that hits its turn limit is continued where it stopped, never replaced.
-The cooperator takes only real findings; theoretical, hypothetical, and
-out-of-scope ones are rejected.
+Cooperator: read the repository's rules, classify, pick a profile
+  direct   → it does the work itself, no agents
+  build    → one block
+  pipeline → a plan of blocks with disjoint write sets
+  │
+  ▼
+per block:
+  probe (when a fact is missing) → worker → submitted
+  worker exhausts its budget (3 runs or the token ceiling)
+     → HANDOFF → cooperator analyzes it and decides the approach
+     → next tier starts fresh with packet + APPROACH + HANDOFF only
+  after submission the cooperator chooses:
+     a) audit this block             → auditors, up to 3 rounds
+     b) no audit                     → next work to the worker
+     c) next block to the worker     → and auditors in parallel on 1..N blocks
+  review (diff + audit log) → real findings → the same worker
+  │
+  ▼
+stage acceptance (pipeline) → report
 ```
 
-5. An independent reviewer reads the diff with the audit log; real findings go
-   back to the same worker, the same reviewer re-checks the delta.
-6. In a pipeline, a separate reviewer accepts the stage against the original
-   outcome and the project's required gates.
+**Audit game.** Auditors on a cheap model at xhigh effort read a block
+through one lens each: docs, task, conventions. They report everything; the
+cooperator keeps only real findings (in the diff, breaking a quoted rule or
+document line, reproducible). A lens with real findings wins the round and
+plays again; a lens with nothing real loses and is retired for that block.
+
+**Worker ladder.** A worker that uses up three runs, or its token ceiling
+even with runs left, has shown the block is hard. It returns a HANDOFF (done,
+where it stopped, what it tried, what is open, what it would do next). The
+cooperator reads it, decides whether to continue the same path with more
+effort, take another route, or split and re-scope the block, and gives the
+next tier a fresh packet with that APPROACH and the HANDOFF. Earlier reports,
+audit rounds, and transcripts stay with the cooperator.
+
+## Claude Code
+
+| Role | Standard | Enhanced | Hybrid |
+| --- | --- | --- | --- |
+| Cooperator (your session) | `opus` medium | `opus` high | `opus` high |
+| Probe | `haiku`, `sonnet` for judgment | `sonnet` | `haiku` |
+| Worker | `sonnet` high | `sonnet`, `opus` for non-trivial blocks | `haiku` high |
+| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
+| Auditor (up to 3 rounds) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
+| Block review | `opus` high | `opus` high | Codex GPT-6.1 Sol xhigh |
+| Stage acceptance | `opus` high | `fable` high | Codex GPT-6.1 Sol xhigh |
+
+Worker budgets per block: `haiku` 120 tool calls per run, 3 runs (360), 400k
+tokens; `sonnet` and Codex Sol 3 runs, 500k tokens; `opus` 3 runs, then the
+cooperator re-plans or asks you. Aliases resolve to Fable 5.1, Opus 5.5,
+Sonnet 5.5, and Haiku 5.5 on the Claude API (checked 2026-10-08). Hybrid runs
+only when you choose it and needs the `codex` CLI; Codex runs go through the
+bundled `codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns
+nothing. Details: [docs/claude-code.md](docs/claude-code.md).
+
+## Codex
+
+| Role | Standard | Enhanced | Economy |
+| --- | --- | --- | --- |
+| Cooperator (your session) | GPT-6.1 Sol high | GPT-6 Astra high | GPT-6.1 Sol high |
+| Probe | Luna medium, Sol for judgment | same | same |
+| Worker | Sol xhigh | Sol xhigh | Luna xhigh |
+| Worker ladder | Sol → Astra | Sol → Astra | Luna → Sol → Astra |
+| Auditor (up to 3 rounds) | Luna xhigh | same | same |
+| Block review | Sol high | same | same |
+| Stage acceptance | Astra high | same | same |
+
+Worker budgets per block: Luna 600 tool calls per run, 3 runs, 400k tokens; Sol
+3 runs, 500k tokens; Astra 3 runs, then the cooperator re-plans or asks you.
+Native launch layers: `codex -p workforce-standard`, `workforce-enhanced`,
+`workforce-economy`. Economy runs only when you choose it. A prompt never
+changes the running model. Details: [docs/profiles.md](docs/profiles.md).
 
 ## What gets installed
 
-| | Codex (`CODEX_HOME`, default `~/.codex`) | Claude Code (`~/.claude`) |
+| | Claude Code (`~/.claude`) | Codex (`~/.codex`) |
 | --- | --- | --- |
-| Roles (worker, probe, auditor, reviewer) | `agents/workforce_*.toml` | `agents/workforce-*.md` |
-| Skills | `skills/workforce-*/` linked into `~/.agents/skills` | `skills/workforce-*/` |
-| Launch layers | `workforce-standard.config.toml`, `workforce-enhanced.config.toml` | none |
-| Policy and manifest | `codex-workforce/profiles.json`, `manifest.json` | `claude-workforce/profiles.json`, `manifest.json` |
-| Instructions | marked block in `AGENTS.md` (or active `AGENTS.override.md`) | marked block in `CLAUDE.md` |
+| Roles | `agents/workforce-{worker,worker-lite,probe,auditor,reviewer}.md` | `agents/workforce_{worker,probe,auditor,reviewer}.toml` |
+| Skills | `skills/workforce-*/` | `skills/workforce-*/`, linked into `~/.agents/skills` |
+| Launch layers | none | `workforce-{standard,enhanced,economy}.config.toml` |
+| Policy and manifest | `claude-workforce/profiles.json`, `manifest.json` | `codex-workforce/profiles.json`, `manifest.json` |
+| Instructions | marked block in `CLAUDE.md` | marked block in `AGENTS.md` (or `AGENTS.override.md`) |
 
-Existing project-local agents, skills, and instruction files may take precedence;
-see [installation details](docs/installation.md).
+Role, state, and marker names keep their `workforce` prefix so existing
+installations update in place. Project-local agents, skills, and instruction
+files may take precedence; see [installation details](docs/installation.md).
 
 ## Develop
 
 ```sh
-git clone https://github.com/shanja-glinka/codex-workforce.git
-cd codex-workforce
+git clone https://github.com/shanja-glinka/agent-cooperator.git
+cd agent-cooperator
 npm test
-node bin/codex-workforce.js --help
-node bin/claude-workforce.js --help
+node bin/agent-cooperator.js claude --help
 ```
 
-Payloads live in `payload/codex` and `payload/claude`; `lib/targets.js` describes
-each runtime and `lib/installer.js` serves both. Tests use disposable homes and do
-not invoke paid models or mutate your actual installations. The Claude edition was
-also exercised behaviorally on a fixture repository; the runs are documented in
-[docs/claude-code.md](docs/claude-code.md). See [contributing](CONTRIBUTING.md).
+Payloads live in `payload/claude` and `payload/codex`; `lib/targets.js`
+describes each runtime and `lib/installer.js` serves both. Tests use
+disposable homes and never call paid models. See [contributing](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE). Contributions and reproducible bug reports are welcome.
+[MIT](LICENSE).

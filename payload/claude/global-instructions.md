@@ -1,7 +1,8 @@
 ## Claude Workforce (opt-in)
 
 A brain/worker orchestration kit is installed: roles `workforce-worker`,
-`workforce-probe`, `workforce-auditor`, `workforce-reviewer` and the
+`workforce-worker-lite`, `workforce-probe`, `workforce-auditor`,
+`workforce-reviewer` and the
 `/workforce-orchestrate` skill at `{{CLAUDE_HOME}}/skills/workforce-orchestrate/SKILL.md`.
 Use it when the user invokes `/workforce-orchestrate`, asks for Workforce,
 subagents, or multi-agent work, or a project instruction file requires it.
@@ -12,5 +13,6 @@ rules (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`; Claude Cod
 does not load `AGENTS.md` by itself), classifies the work, briefs workers with an
 explicit model, decides per submitted block whether to audit it, skip, or start
 the next block with auditors in parallel, judges which audit and review findings
-are real, and accepts. Routing lives in `claude-workforce/profiles.json`; the
+are real, moves a block that exhausts its worker's budget to a stronger model
+with a handoff and its own analysis, and accepts. Routing lives in `claude-workforce/profiles.json`; the
 user's model, effort, and budget limits are binding.

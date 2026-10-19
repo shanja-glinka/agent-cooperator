@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+- Rename the project to Agent Cooperator (`shanja-glinka/agent-cooperator`).
+  New entry command `agent-cooperator claude|codex <install|update|status|uninstall>`;
+  the `claude-workforce` and `codex-workforce` binaries, role names, state
+  directories, and instruction markers are unchanged, so installations update
+  in place.
+- Worker ladder with handoff, both editions. The cooperator holds a budget per
+  worker tier and block: Claude `haiku` 120 tool calls per run (new role
+  `workforce-worker-lite`), 3 runs, 400k tokens; `sonnet` 3 runs, 500k; Codex
+  Luna 600 tool calls per run, 3 runs, 400k; Sol 3 runs, 500k. A worker at its
+  limit returns `STATUS: handoff` (DONE, STOPPED_AT, TRIED, OPEN, NEXT); a block
+  that exhausts a tier moves up (Claude: `sonnet` → `opus`, Hybrid `haiku` →
+  Codex GPT-6.1 Sol xhigh → `opus`; Codex: Luna → Sol → Astra) as a fresh
+  agent with the original packet, the cooperator's APPROACH, and the handoff
+  only. Auditors on `haiku` or Luna follow the same 400k ceiling.
+- The orchestration skills now describe the cooperator as the brain of the
+  task: it analyzes handoffs and decides whether to continue, change approach,
+  or split and re-scope a block.
+- Codex: Standard workers run GPT-6.1 Sol at xhigh; new Economy profile with
+  Luna xhigh workers and the `workforce-economy` launch layer. Policy: Claude
+  1.5.0, Codex 1.7.0.
+- Claude Hybrid: `codex-run.mjs --role work` runs an escalated worker on Sol
+  with a writable workspace, and every `result.json` reports token usage.
+
 ## 1.3.2 — 2026-10-12
 
 - Audit coverage, both editions: the auditor gets its assigned FILES and a

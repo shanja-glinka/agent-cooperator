@@ -254,6 +254,30 @@
       "id": "audit-notes-not-findings",
       "input": "An auditor reports a comment-wording issue without quoting any project rule, and files it as a finding.",
       "expected": "The cooperator does not accept it: without a quoted rule at a line that really violates it, it is a NOTE. NOTES never go to the worker and never make a lens win the round."
+    },
+    {
+      "id": "worker-ladder-runs",
+      "runtime": "both",
+      "input": "A haiku (Claude Hybrid) or Luna (Codex Economy) worker ends its third run on a block without submitting it.",
+      "expected": "The cooperator asks for the HANDOFF if it is missing, reads it, decides an APPROACH, and starts the next tier (Hybrid: Codex GPT-6.1 Sol xhigh; Economy: Sol xhigh) as a fresh worker with the original packet, APPROACH, and HANDOFF only. No fourth run on the same tier."
+    },
+    {
+      "id": "worker-ladder-tokens",
+      "runtime": "both",
+      "input": "A sonnet worker reaches 500k tokens on one block during its second run.",
+      "expected": "The block moves to opus (Codex: Sol at 500k moves to Astra) even though a run is left; earlier reports and audit rounds stay with the cooperator."
+    },
+    {
+      "id": "handoff-not-history",
+      "runtime": "both",
+      "input": "Escalation packet for the next tier.",
+      "expected": "Contains the original block packet, the cooperator's APPROACH, and the previous worker's HANDOFF; does not contain earlier worker reports, audit findings history, or transcripts."
+    },
+    {
+      "id": "codex-standard-workers",
+      "runtime": "codex",
+      "input": "Codex Standard, implementation block.",
+      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers unchanged (Sol high block, Astra high stage)."
     }
   ]
 }

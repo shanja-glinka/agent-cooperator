@@ -1,6 +1,6 @@
-# Claude Workforce: agentic development in Claude Code
+# Agent Cooperator in Claude Code
 
-This is the Claude Code edition of the kit. It installs four subagent roles, six
+This is the Claude Code edition of the kit. It installs five subagent roles, six
 skills, a routing policy, and a managed block in the user `CLAUDE.md`. The workflow
 is the same brain/worker pattern the [research](research.md) found in live public
 configurations; the roles and skill names match the Codex edition so both can be
@@ -12,14 +12,13 @@ Requires Node.js 22+, npm, Git, and Claude Code with custom subagents, skills, a
 the `model` field on Agent calls (any current release).
 
 ```sh
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce update
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
+npx --yes github:shanja-glinka/agent-cooperator claude install
+npx --yes github:shanja-glinka/agent-cooperator claude update
+npx --yes github:shanja-glinka/agent-cooperator claude status
+npx --yes github:shanja-glinka/agent-cooperator claude uninstall
 ```
 
-`-p` selects the package; `claude-workforce` is its second binary. Pin a release
-with `github:shanja-glinka/codex-workforce#v1.3.2`. Start a new Claude Code session
+Pin a release with `github:shanja-glinka/agent-cooperator#<tag>`. Start a new Claude Code session
 after installing or updating. Options: `--claude-home PATH` (precedence: option,
 `CLAUDE_CONFIG_DIR`, `~/.claude`), `--dry-run`, `--force`, `--json`. There is no
 `--skills-dir`: Claude Code discovers skills inside its home directory.
@@ -27,6 +26,7 @@ after installing or updating. Options: `--claude-home PATH` (precedence: option,
 ```text
 ~/.claude/
   agents/workforce-worker.md
+  agents/workforce-worker-lite.md
   agents/workforce-probe.md
   agents/workforce-auditor.md
   agents/workforce-reviewer.md
@@ -34,7 +34,7 @@ after installing or updating. Options: `--claude-home PATH` (precedence: option,
   skills/workforce-orchestrate/references/dispatch.md
   skills/workforce-orchestrate/references/tools.md
   skills/workforce-orchestrate/scripts/codex-run.mjs   Codex runner (Hybrid)
-  skills/workforce-worker/SKILL.md               preloaded into workforce-worker
+  skills/workforce-worker/SKILL.md               preloaded into both worker roles
   skills/workforce-probe/SKILL.md                preloaded into workforce-probe
   skills/workforce-audit/SKILL.md                preloaded into workforce-auditor
   skills/workforce-review/SKILL.md               preloaded into workforce-reviewer
@@ -92,7 +92,8 @@ multi-stage work with substantial unresolved design where nothing already applie
 | --- | --- | --- | --- |
 | Brain (this session) | `opus` medium | `opus` high | `opus` high |
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium | `haiku` medium |
-| Implementation (`workforce-worker`) | `sonnet` high | `sonnet` high, `opus` for non-trivial blocks | `haiku` high, `sonnet` when it loops |
+| Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` high (`workforce-worker-lite`) |
+| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` xhigh) | the brain decides before briefing |
 | Auditor (up to 3 rounds) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
 | Block review (MODE=block) | `opus` high (`workforce-reviewer`) | `opus` high (`workforce-reviewer`) | Codex GPT-6.1 Sol xhigh |
@@ -127,7 +128,8 @@ it, the fallback is `opus` at `xhigh`.
 
 Hybrid is the economy preset. `opus` at high effort is the brain: it plans,
 decides design questions before briefing, judges every finding, and accepts.
-`haiku` workers implement (one tier up to `sonnet` when a worker loops).
+`haiku` workers implement; a block that exhausts a `haiku` worker moves to a
+Codex GPT-6.1 Sol xhigh worker, then to `opus`.
 Auditors run on Codex GPT-6 Luna at xhigh, and block and stage review on Codex
 GPT-6.1 Sol at xhigh, both read-only. Luna costs $0.1/$0.5 and Sol $2/$10 per
 MTok (checked 2026-10-08), so the expensive model only thinks.
@@ -149,13 +151,37 @@ input. The wrapper makes that impossible:
 - the packet goes in on stdin from a file, so Codex always sees end of input;
 - `approval_policy="never"`, a read-only sandbox, and `--ignore-user-config`
   (no MCP servers from the user's config that ask for approval);
+- `--role work` runs an escalated worker on Sol with a writable workspace;
+  audits and reviews stay read-only;
 - a watchdog ends the run when it goes silent for 15 minutes (`stalled`), shows
   an approval or input request (`waiting_for_input`), or passes 60 minutes
   (`timeout`), so the background job always exits and the notification always
   arrives;
-- it writes `<name>.result.json` with the status, the Codex thread id, and the
-  path of the final message. The next round of a winning lens, or the delta for
+- it writes `<name>.result.json` with the status, the Codex thread id, the
+  token usage of the run, and the path of the final message. The next round of a winning lens, or the delta for
   the same reviewer, resumes that thread with `--resume <threadId>`.
+
+### Worker ladder and handoff
+
+The cooperator holds each worker's budget per block and moves a block that
+exhausts it to a stronger model:
+
+| Tier | Per run | Runs | Token ceiling | Next tier |
+| --- | --- | --- | --- | --- |
+| `haiku` (`workforce-worker-lite`) | 120 tool calls | 3 (360) | 400k | Hybrid: Codex GPT-6.1 Sol xhigh; otherwise `sonnet` |
+| `sonnet` | role limit | 3 | 500k | `opus` |
+| Codex GPT-6.1 Sol (Hybrid) | runner time limits | 3 | 500k | `opus` |
+| `opus` | role limit | 3 | none | the cooperator re-plans or asks you |
+
+Tokens are summed over one worker's runs on one block (`subagent_tokens` from
+the completion notifications, `tokens.total` from the Codex runner's
+`result.json`). The ceiling applies even when runs are left. A worker at its
+limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED, OPEN, and NEXT.
+The cooperator reads it, decides the APPROACH (same path with more effort, a
+different route, or a split or re-scoped block), and starts the next tier with
+the original packet, APPROACH, and HANDOFF only; earlier reports, audit rounds,
+and transcripts stay with the cooperator. Auditors on `haiku` (Luna in Hybrid)
+follow the same 400k ceiling and hand their lens to `sonnet` (Sol).
 
 ### Rules that hold in every profile
 
@@ -198,13 +224,15 @@ out-of-scope ones are rejected.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance
   line, and reproduces.
-- Turn limits per run: worker 60, probe 20, auditor 50, reviewer 30.
+- Turn limits per run: worker 60, light worker 120, probe 20, auditor 50,
+  reviewer 30.
 
 ### Roles
 
 | Role | Model field | Tools | Turns | Preloaded skill |
 | --- | --- | --- | --- | --- |
 | `workforce-worker` | inherit | all except Agent | 60 | `workforce-worker` |
+| `workforce-worker-lite` | inherit (`haiku` on the call) | all except Agent | 120 | `workforce-worker` |
 | `workforce-probe` | inherit | Read, Grep, Glob, Bash, WebFetch; no Agent/Edit/Write | 20 | `workforce-probe` |
 | `workforce-auditor` | inherit (`haiku` on the call), `effort: xhigh` | Read, Grep, Glob, Bash; no Agent/Edit/Write | 50 | `workforce-audit` |
 | `workforce-reviewer` | inherit | all except Agent/Edit/Write/NotebookEdit | 30 | `workforce-review` |

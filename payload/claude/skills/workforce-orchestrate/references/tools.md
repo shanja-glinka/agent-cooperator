@@ -1,14 +1,20 @@
 # Tools in Claude Code
 
 Read the real tool schema in the session; field names below are the documented
-ones. Roles installed by this kit: `workforce-worker`, `workforce-probe`,
-`workforce-auditor`, `workforce-reviewer`.
+ones. Roles installed by this kit: `workforce-worker`, `workforce-worker-lite`
+(for `haiku`, 120 tool calls per run), `workforce-probe`, `workforce-auditor`,
+`workforce-reviewer`.
 
 ## Agent
 
 ```json
 { "subagent_type": "workforce-worker", "model": "sonnet",
   "description": "Consumer cutover block", "prompt": "<work packet>" }
+```
+
+```json
+{ "subagent_type": "workforce-worker-lite", "model": "haiku",
+  "description": "Export pagination block", "prompt": "<work packet with BUDGET: 120>" }
 ```
 
 ```json
@@ -71,6 +77,11 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   `waiting_for_input`, read `stderrTail` and the end of the `.jsonl`, fix the
   cause, and relaunch once; if it fails again, run that lens on the
   Agent fallback from dispatch and say so in the report.
+- A Hybrid block escalated from `haiku` runs as a Codex worker: the same
+  command with `--role work` (defaults: `gpt-6.1-sol`, effort `xhigh`, sandbox
+  `workspace-write`, the `workforce-worker` skill prepended) and the escalation
+  packet. `result.json` reports `tokens.total` for the budget; continue the
+  same worker with `--resume <threadId>`.
 - Next round for a winning lens, or the delta for the same reviewer: same
   command with a new `--name`, the round packet, and `--resume <threadId>`.
   A lens that lost is not resumed.

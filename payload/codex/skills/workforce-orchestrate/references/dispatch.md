@@ -5,26 +5,29 @@ explains it. A model release updates the record, not the workflow.
 
 ## Presets
 
-| Role | Standard | Enhanced |
-| --- | --- | --- |
-| Cooperator (user-facing session) | `gpt-6.1-sol`, high | `gpt-6-astra`, high |
-| Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.1-sol` when judgment is needed | same |
-| Worker (`workforce_worker`) | `gpt-6.1-sol`, high; medium for settled blocks | same |
-| Auditor (`workforce_auditor`) | `gpt-6-luna`, xhigh | same |
-| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, high | same |
-| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6-astra`, high | same |
-| Unresolved design | targeted Astra help | bounded Astra high block |
+| Role | Standard | Enhanced | Economy |
+| --- | --- | --- | --- |
+| Cooperator (user-facing session) | `gpt-6.1-sol`, high | `gpt-6-astra`, high | `gpt-6.1-sol`, high |
+| Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.1-sol` when judgment is needed | same | same |
+| Worker (`workforce_worker`) | `gpt-6.1-sol`, xhigh | `gpt-6.1-sol`, xhigh | `gpt-6-luna`, xhigh |
+| Worker ladder | Sol → Astra | Sol → Astra | Luna → Sol → Astra |
+| Auditor (`workforce_auditor`) | `gpt-6-luna`, xhigh | same | same |
+| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, high | same | same |
+| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6-astra`, high | same | same |
+| Unresolved design | targeted Astra help | bounded Astra high block | the cooperator decides before briefing |
 
 Presets are starting recommendations. A named profile is an approach preference;
-the user's explicit model, effort, and budget limits are binding. The native
-launch layers `codex -p workforce-standard` and `codex -p workforce-enhanced` set
+the user's explicit model, effort, and budget limits are binding. Economy is
+chosen only by the user, explicitly or as a standing preference. The native
+launch layers `codex -p workforce-standard`, `codex -p workforce-enhanced`, and
+`codex -p workforce-economy` set
 the cooperator's model and effort for that launch; a prompt never changes the
 running model, so report a mismatch instead of claiming one.
 
 Models as checked on 2026-10-08: GPT-6 Astra $10/$50 per MTok in/out, GPT-6.1 Sol
 $2/$10 (near-Astra on complex work), GPT-6 Luna $0.1/$0.5 (effort up to xhigh).
 Role files omit model and effort on purpose: the spawn sets them. Sol and Luna
-default to medium, so set effort on every spawn.
+default to medium, so set effort on every spawn: workers run at xhigh.
 
 ## Selection
 
@@ -40,12 +43,25 @@ default to medium, so set effort on every spawn.
 Keep PROFILE, its source, and WORK_CLASS in the task state; agents inherit them
 and never ask the user.
 
-## Escalation
+## Escalation and budgets
 
-Astra high is for a bounded unresolved decision; xhigh, max, and ultra need a
-stated question and expected benefit. When a worker loops, re-brief or move the
-block to a stronger model with the bundled findings rather than sending the
-same correction again. Up to three audit rounds per block; after round 1
+Worker budgets per block, counted by the cooperator:
+
+| Tier | Per run (BUDGET) | Runs | Token ceiling | Next tier |
+| --- | --- | --- | --- | --- |
+| Luna | 600 tool calls | 3 | 400k | Sol xhigh |
+| Sol | none | 3 | 500k | Astra high |
+| Astra | none | 3 | none | the cooperator re-plans or asks the user |
+
+Tokens are the sum over the runs of one worker on one block, from the usage
+the runtime reports; the ceiling applies even when runs are left. Escalation is
+a fresh spawn with the original block packet, the cooperator's APPROACH, and
+the worker's HANDOFF; nothing else from earlier runs. The same ceilings apply
+to an auditor on Luna: at 400k on one block its lens moves to Sol with its
+NOT_REACHED files, and its findings stay with the cooperator.
+
+Astra high is also for a bounded unresolved decision; max and ultra need a
+stated question and expected benefit. Up to three audit rounds per block; after round 1
 only the lenses that won the last round play again. An auditor that returns
 `STATUS: partial` or stops early is continued with `followup_task` on its
 NOT_REACHED files, never replaced by a fresh one. Report usage from
@@ -55,8 +71,9 @@ NOT_REACHED files, never replaced by a fresh one. Report usage from
 
 ```text
 TASK: identifier and assignment version
+TIER / RUN: worker model and run number on this block (worker)
 WORK_CLASS: build | pipeline
-PROFILE / PROFILE_SOURCE: standard | enhanced | custom; explicit | inherited | preference | automatic
+PROFILE / PROFILE_SOURCE: standard | enhanced | economy | custom; explicit | inherited | preference | automatic
 REQUEST_KIND: analysis | implementation
 ROOT / BRANCH: absolute checkout and agreed branch
 USER_OUTCOME: what the user asked for
@@ -70,6 +87,8 @@ CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
+BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
+APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
 
 Agents share the checkout; use worktrees only for a concrete write conflict.

@@ -1,6 +1,6 @@
 ---
 name: workforce-worker
-description: "Implement one owned block inside its WRITE_SET, run the assigned checks, and return an evidence packet. Delegated role only."
+description: "Implement one owned block inside its WRITE_SET, run the assigned checks, and return an evidence packet or, at its budget, a handoff. Delegated role only."
 user-invocable: false
 ---
 
@@ -22,12 +22,31 @@ branches, push, or commit unless the packet assigns a commit.
 Run CHECKS and report their exit codes. When the parent sends findings, fix
 them in this same context and re-run the affected checks.
 
+When the packet gives a BUDGET (tool calls per run), stop at it. Stop also when
+you notice you are repeating an approach that already failed. Then return
+`STATUS: handoff` with a HANDOFF instead of pushing on: the parent decides the
+next move, and a stronger agent may continue from your handoff without seeing
+anything else you did, so write it to stand alone. If the parent asks for your
+HANDOFF after a run ended at its limit, return the packet with the HANDOFF and
+nothing more.
+
+When your packet carries a HANDOFF from an earlier worker, read it and the
+working tree before acting, and follow the parent's APPROACH: continue that
+path with more care, or take the different route the parent chose. Do not
+redo what DONE lists unless the tree shows it is wrong.
+
 ```text
 TASK / SNAPSHOT: assignment version; revision and dirty diff identity
-STATUS: submitted | blocked
+STATUS: submitted | handoff | blocked
 RESULT: what the acceptance example shows now
 CHANGED: files; old -> new -> consumer where something was replaced
 CHECKS: command; cwd; exit code
 FOLLOW_UPS: observations outside SCOPE, not implemented
 BLOCKER: what stops completion and why, or none
+HANDOFF (STATUS: handoff only):
+  DONE: what is finished and verified, with files and check results
+  STOPPED_AT: where you stopped and the state of the working tree
+  TRIED: approaches tried and why each did not work
+  OPEN: what still stands between the tree and GOAL
+  NEXT: the step you would take next, and what makes this block hard
 ```

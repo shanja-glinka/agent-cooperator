@@ -9,7 +9,8 @@ explains it. A model release updates the record, not the workflow.
 | --- | --- | --- | --- |
 | Cooperator (this session) | `opus`, medium | `opus`, high | `opus`, high |
 | Probe (`workforce-probe`) | `haiku`; `sonnet` when judgment is needed | `sonnet` | `haiku`; `sonnet` when judgment is needed |
-| Worker (`workforce-worker`) | `sonnet`, high | `sonnet`; `opus` for non-trivial blocks | `haiku`, high; `sonnet` when it loops |
+| Worker | `sonnet`, high (`workforce-worker`) | `sonnet`; `opus` for non-trivial blocks | `haiku`, high (`workforce-worker-lite`) |
+| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` |
 | Auditor | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) | Codex `gpt-6-luna`, xhigh |
 | Block reviewer (MODE=block) | `opus`, high (Agent) | `opus`, high (Agent) | Codex `gpt-6.1-sol`, xhigh |
 | Stage reviewer (MODE=stage) | `opus`, high (Agent) | `fable`, high (Agent) | Codex `gpt-6.1-sol`, xhigh |
@@ -54,15 +55,31 @@ and never ask the user.
 
 ## Escalation and budgets
 
-`fable` or `opus` xhigh is for a stated unresolved decision: architecture, a
-money or auth path, a security boundary, or attempts that repeat without new
-evidence. State the question and the expected benefit first. When a worker
-loops, re-brief or move it one tier up with the bundled findings rather than
-sending the same correction again. In Hybrid the next tier for a `haiku`
-worker is `sonnet`.
+Worker budgets per block, counted by the cooperator:
 
-Turn limits per run: worker 60, probe 20, auditor 50, reviewer 30; up to three
-workers in parallel; up to three audit rounds per block, and after round 1
+| Tier | Per run | Runs | Token ceiling | Next tier |
+| --- | --- | --- | --- | --- |
+| `haiku` (`workforce-worker-lite`) | 120 tool calls | 3 (360) | 400k | Hybrid: Codex `gpt-6.1-sol` xhigh; otherwise `sonnet` |
+| `sonnet` | role limit | 3 | 500k | `opus` |
+| Codex `gpt-6.1-sol` (Hybrid) | runner time limits | 3 | 500k | `opus` |
+| `opus` | role limit | 3 | none | the cooperator re-plans or asks the user |
+
+Tokens are the sum over the runs of one worker on one block: `subagent_tokens`
+from each completion notification, `tokens.total` from `result.json` for
+Codex. The token ceiling applies even when runs are left. Escalation hands the
+next tier a fresh packet: the original block packet, the cooperator's APPROACH,
+and the worker's HANDOFF; nothing else from earlier runs. The same ceilings
+apply to an auditor on `haiku` (or Codex Luna in Hybrid): at 400k on one block
+its lens moves to `sonnet` (Codex Sol) with its NOT_REACHED files, and its
+findings stay with the cooperator. If Codex is unavailable in Hybrid, the
+`haiku` worker escalates to `sonnet`.
+
+`fable` or `opus` xhigh is also for a stated unresolved decision: architecture,
+a money or auth path, a security boundary. State the question and the expected
+benefit first.
+
+Turn limits per run: worker 60, light worker 120, probe 20, auditor 50,
+reviewer 30; up to three workers in parallel; up to three audit rounds per block, and after round 1
 only lenses that won the last round play again. Codex runs are bounded by the
 wrapper's idle and total time limits instead of turns. Auditor BUDGET is 40 tool
 calls (80% of 50) unless the role's limit differs. A run that hits its limit is
@@ -74,6 +91,7 @@ usage from `/cost` or `/usage` when asked.
 
 ```text
 TASK: identifier and assignment version
+TIER / RUN: worker model and run number on this block (worker)
 WORK_CLASS: build | pipeline
 PROFILE / PROFILE_SOURCE: standard | enhanced | hybrid | custom; explicit | preference | automatic
 REQUEST_KIND: analysis | implementation
@@ -89,6 +107,8 @@ CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
+BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
+APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
 
 Agents share the checkout; use `isolation: "worktree"` only for a concrete write

@@ -2,30 +2,31 @@
 
 ## Distribution and commands
 
-Node.js 22+, npm, and Git are required for the GitHub package command. The package
-ships two binaries: `codex-workforce` (the default, same name as the package) and
-`claude-workforce` (selected with `npx -p`):
+Node.js 22+, npm, and Git are required for the GitHub package command. The
+`agent-cooperator` command takes the runtime first:
 
 ```sh
-npx --yes github:shanja-glinka/codex-workforce install
-npx --yes github:shanja-glinka/codex-workforce update
-npx --yes github:shanja-glinka/codex-workforce status
-npx --yes github:shanja-glinka/codex-workforce uninstall
+npx --yes github:shanja-glinka/agent-cooperator claude install
+npx --yes github:shanja-glinka/agent-cooperator claude update
+npx --yes github:shanja-glinka/agent-cooperator claude status
+npx --yes github:shanja-glinka/agent-cooperator claude uninstall
 
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce install
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce update
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status
-npx --yes -p github:shanja-glinka/codex-workforce claude-workforce uninstall
+npx --yes github:shanja-glinka/agent-cooperator codex install
+npx --yes github:shanja-glinka/agent-cooperator codex update
+npx --yes github:shanja-glinka/agent-cooperator codex status
+npx --yes github:shanja-glinka/agent-cooperator codex uninstall
 ```
 
-Use `github:shanja-glinka/codex-workforce#v1.3.2` to pin this release, or a reviewed
-commit SHA. Updating with a pinned spec installs that pinned version; choose a newer
-tag explicitly. `update` reads the payload in the invoked package. It does not run
-`git pull`, an npm updater, or an arbitrary remote install script inside the CLI.
+The package also keeps the older binaries `claude-workforce` and
+`codex-workforce` (`npx -p github:shanja-glinka/agent-cooperator claude-workforce
+status`). Pin a version with `github:shanja-glinka/agent-cooperator#<tag>` or a
+reviewed commit SHA; tags up to v1.3.2 predate the `agent-cooperator` command
+and use the older binaries. `update` reads the payload in the invoked package.
+It does not run `git pull`, an npm updater, or a remote install script.
 
 The package has no install/prepare lifecycle hooks. Downloading or packing it does
-not modify Codex. A mutation requires an explicit `install`, `update`, or `uninstall`
-command. A separate npm registry publication is unnecessary for this distribution.
+not modify anything. A mutation requires an explicit `install`, `update`, or
+`uninstall` command. A separate npm registry publication is unnecessary.
 
 ## Destinations
 
@@ -48,6 +49,7 @@ CODEX_HOME/
   skills/workforce-smoke/...
   workforce-standard.config.toml
   workforce-enhanced.config.toml
+  workforce-economy.config.toml
   codex-workforce/profiles.json
   codex-workforce/manifest.json
   AGENTS.md                         (or the active AGENTS.override.md)
@@ -61,9 +63,9 @@ is not automatically a Codex discovery root; use a directory your runtime scans.
 Both destinations must be isolated when testing:
 
 ```sh
-node bin/codex-workforce.js install --codex-home /tmp/workforce-demo/codex --skills-dir /tmp/workforce-demo/skills
-node bin/codex-workforce.js status --codex-home /tmp/workforce-demo/codex --skills-dir /tmp/workforce-demo/skills
-node bin/codex-workforce.js uninstall --codex-home /tmp/workforce-demo/codex --skills-dir /tmp/workforce-demo/skills
+node bin/agent-cooperator.js codex install --codex-home /tmp/workforce-demo/codex --skills-dir /tmp/workforce-demo/skills
+node bin/agent-cooperator.js codex status --codex-home /tmp/workforce-demo/codex --skills-dir /tmp/workforce-demo/skills
+node bin/agent-cooperator.js codex uninstall --codex-home /tmp/workforce-demo/codex --skills-dir /tmp/workforce-demo/skills
 ```
 
 For multiple Codex homes, the same global skill names cannot simultaneously link
@@ -79,6 +81,7 @@ that directory, so there is no discovery link and `--skills-dir` is rejected.
 ```text
 CLAUDE_HOME/
   agents/workforce-worker.md
+  agents/workforce-worker-lite.md
   agents/workforce-probe.md
   agents/workforce-auditor.md
   agents/workforce-reviewer.md
@@ -100,9 +103,9 @@ directory: each has its own manifest, state directory, and markers, so installin
 updating, or removing one leaves the other intact.
 
 ```sh
-node bin/claude-workforce.js install --claude-home /tmp/workforce-demo/claude
-node bin/claude-workforce.js status --claude-home /tmp/workforce-demo/claude
-node bin/claude-workforce.js uninstall --claude-home /tmp/workforce-demo/claude
+node bin/agent-cooperator.js claude install --claude-home /tmp/workforce-demo/claude
+node bin/agent-cooperator.js claude status --claude-home /tmp/workforce-demo/claude
+node bin/agent-cooperator.js claude uninstall --claude-home /tmp/workforce-demo/claude
 ```
 
 ## Preservation and ownership

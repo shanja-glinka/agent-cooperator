@@ -8,7 +8,7 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
 
 ```json
 { "task_name": "consumer_cutover", "agent_type": "workforce_worker",
-  "model": "gpt-6.1-sol", "reasoning_effort": "high",
+  "model": "gpt-6.1-sol", "reasoning_effort": "xhigh",
   "fork_turns": "none", "message": "<work packet>" }
 ```
 
@@ -24,6 +24,9 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
   its NOT_REACHED files), only the auditors whose lens won the last round for
   the next round, the same reviewer for the delta. It does not take model or effort overrides; for a different model,
   spawn a fresh task.
+- Escalation is a fresh spawn on the next tier (`"model": "gpt-6.1-sol"` after
+  Luna, `"gpt-6-astra"` after Sol) with the escalation packet; never continue
+  the old worker with `followup_task` once its budget is spent.
 - `send_message` delivers a message without restarting an idle agent.
   `interrupt_agent` interrupts a turn. `wait_agent` waits for notifications;
   `list_agents` reads status without polling loops.

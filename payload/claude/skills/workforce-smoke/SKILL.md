@@ -14,9 +14,9 @@ Read `{{CLAUDE_HOME}}/skills/workforce-orchestrate/references/dispatch.md` and
 ## Static check
 
 Run the installed package's `status` command as documented by its CLI
-(`npx --yes -p github:shanja-glinka/codex-workforce claude-workforce status` or
-the local `bin/claude-workforce.js status`). Report missing files, drift, and a missing
-or edited managed block in `CLAUDE.md`. Confirm the four roles appear in the
+(`npx --yes github:shanja-glinka/agent-cooperator claude status` or the local
+`bin/agent-cooperator.js claude status`). Report missing files, drift, and a missing
+or edited managed block in `CLAUDE.md`. Confirm the five roles appear in the
 session's available agent types and that `/workforce-orchestrate` is listed.
 
 ## Live check (explicit request only)

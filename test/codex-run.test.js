@@ -16,6 +16,7 @@ const stdin = fs.readFileSync(0, 'utf8');
 fs.writeFileSync(process.env.FAKE_RECORD, JSON.stringify({ args, stdin, cwd: process.cwd() }));
 console.log(JSON.stringify({ type: 'thread.started', thread_id: 'thread-123' }));
 if (mode === 'ok') {
+  console.log(JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 1200, cached_input_tokens: 800, output_tokens: 300 } }));
   fs.writeFileSync(args[args.indexOf('-o') + 1], 'FINDINGS: none');
   process.exit(0);
 }
@@ -23,7 +24,7 @@ if (mode === 'approval') console.log(JSON.stringify({ type: 'exec_approval_reque
 setInterval(() => {}, 1000);
 `;
 
-async function runFake(t, mode, extra = []) {
+async function runFake(t, mode, extra = [], role = 'audit') {
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'codex-run-test-'));
   t.after(() => fs.rm(temp, { recursive: true, force: true }));
   const fake = path.join(temp, 'fake-codex.mjs');
@@ -33,7 +34,7 @@ async function runFake(t, mode, extra = []) {
   await fs.writeFile(fake, FAKE_CODEX);
   await fs.writeFile(packet, 'LENS: task\nSCOPE: token-42\n');
   const result = spawnSync(process.execPath, [
-    RUNNER, '--role', 'audit', '--name', 'blk-task-r1', '--packet', packet, '--cd', temp,
+    RUNNER, '--role', role, '--name', 'blk-task-r1', '--packet', packet, '--cd', temp,
     '--out', out, '--codex-bin', fake, '--idle-minutes', '0.01', '--timeout-minutes', '1', ...extra,
   ], { env: { ...process.env, FAKE_MODE: mode, FAKE_RECORD: record }, encoding: 'utf8', timeout: 30_000 });
   const summary = JSON.parse(await fs.readFile(path.join(out, 'blk-task-r1.result.json'), 'utf8'));
@@ -56,6 +57,17 @@ test('codex-run feeds the skill and packet on stdin and runs read-only without a
   }
   assert.equal(recorded.args.at(-1), '-');
   assert.equal(await fs.realpath(recorded.cwd), await fs.realpath(temp));
+  assert.deepEqual(summary.tokens, { input: 1200, cachedInput: 800, output: 300, total: 1500 });
+});
+
+test('codex-run work role runs an escalated worker on Sol with a writable workspace', async (t) => {
+  const { result, summary, recorded } = await runFake(t, 'ok', [], 'work');
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(summary.role, 'work');
+  assert.equal(summary.model, 'gpt-6.1-sol');
+  assert.match(recorded.stdin, /# Complete the owned block/);
+  assert.ok(recorded.args.includes('workspace-write'));
+  assert.ok(!recorded.args.includes('read-only'));
 });
 
 test('codex-run resumes a thread with the packet only and the sandbox as config', async (t) => {

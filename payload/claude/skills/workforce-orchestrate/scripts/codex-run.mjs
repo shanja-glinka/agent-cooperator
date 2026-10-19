@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs one Codex auditor or reviewer turn for the Claude Workforce hybrid profile.
+// Runs one Codex auditor, reviewer, or escalated worker turn for the Claude Workforce hybrid profile.
 // The process always exits: stdin is a file (EOF guaranteed), approvals are off,
 // and a watchdog kills a run that goes silent, asks for input, or runs too long.
 // The cooperator launches it in the background and reads <name>.result.json.
@@ -8,12 +8,14 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const USAGE = `usage: codex-run.mjs --role audit|review --name NAME --packet FILE --cd ROOT --out DIR
+const USAGE = `usage: codex-run.mjs --role audit|review|work --name NAME --packet FILE --cd ROOT --out DIR
   [--model M] [--effort E] [--resume THREAD_ID] [--idle-minutes 15] [--timeout-minutes 60]
   [--keep-user-config] [--codex-bin PATH]`;
 
-const DEFAULT_MODEL = { audit: 'gpt-6-luna', review: 'gpt-6.1-sol' };
-const SKILL = { audit: 'workforce-audit', review: 'workforce-review' };
+const DEFAULT_MODEL = { audit: 'gpt-6-luna', review: 'gpt-6.1-sol', work: 'gpt-6.1-sol' };
+const SKILL = { audit: 'workforce-audit', review: 'workforce-review', work: 'workforce-worker' };
+// Auditors and reviewers only read; a worker escalated from haiku edits its WRITE_SET.
+const SANDBOX = { audit: 'read-only', review: 'read-only', work: 'workspace-write' };
 const INPUT_REQUEST = /approval|request_user_input|user_input|elicitation/i;
 
 function parseArgs(argv) {
@@ -39,7 +41,7 @@ function parseArgs(argv) {
   for (const key of ['role', 'name', 'packet', 'cd', 'out']) {
     if (!options[key]) fail(`missing --${key}`);
   }
-  if (!SKILL[options.role]) fail(`--role must be audit or review`);
+  if (!SKILL[options.role]) fail(`--role must be audit, review, or work`);
   if (!/^[\w.-]+$/.test(options.name)) fail('--name may contain letters, digits, dot, dash, underscore');
   options.model ??= DEFAULT_MODEL[options.role];
   options.out = path.resolve(options.out);
@@ -64,7 +66,7 @@ function buildPrompt(options) {
   const skillPath = path.resolve(import.meta.dirname, '..', '..', SKILL[options.role], 'SKILL.md');
   const skill = stripFrontmatter(fs.readFileSync(skillPath, 'utf8')).trim();
   return `${skill}\n\nYou run non-interactively: nobody will answer questions. Never wait for input; ` +
-    `if something blocks you, report it in NOT_CHECKED and finish.\n\n---\n\n${packet}`;
+    `if something blocks you, report it in your packet and finish.\n\n---\n\n${packet}`;
 }
 
 function codexArgs(options, lastMessage) {
@@ -76,9 +78,16 @@ function codexArgs(options, lastMessage) {
   ];
   if (!options.keepUserConfig) common.push('--ignore-user-config');
   if (options.resume) {
-    return ['exec', 'resume', options.resume, ...common, '-c', 'sandbox_mode="read-only"', '-'];
+    return ['exec', 'resume', options.resume, ...common, '-c', `sandbox_mode="${SANDBOX[options.role]}"`, '-'];
   }
-  return ['exec', ...common, '-s', 'read-only', '-C', options.cd, '-'];
+  return ['exec', ...common, '-s', SANDBOX[options.role], '-C', options.cd, '-'];
+}
+
+function addUsage(tokens, usage) {
+  if (!usage || typeof usage !== 'object') return;
+  tokens.input += Number(usage.input_tokens ?? 0);
+  tokens.cachedInput += Number(usage.cached_input_tokens ?? 0);
+  tokens.output += Number(usage.output_tokens ?? 0);
 }
 
 function findThreadId(event) {
@@ -113,6 +122,7 @@ function main() {
   let lastActivity = Date.now();
   let stderrTail = '';
   let buffered = '';
+  const tokens = { input: 0, cachedInput: 0, output: 0 };
 
   const stop = (reason) => {
     if (status) return;
@@ -135,6 +145,7 @@ function main() {
         continue;
       }
       threadId ??= findThreadId(event);
+      addUsage(tokens, event.usage ?? event.info?.total_token_usage ?? null);
       if (INPUT_REQUEST.test(String(event.type ?? '')) || INPUT_REQUEST.test(String(event.item?.type ?? ''))) {
         stop('waiting_for_input');
       }
@@ -169,6 +180,7 @@ function main() {
       exitCode: code,
       signal,
       durationSec: Math.round((Date.now() - started) / 1000),
+      tokens: { ...tokens, total: tokens.input + tokens.output },
       lastMessage: fs.existsSync(files.lastMessage) ? files.lastMessage : null,
       jsonl: files.jsonl,
       stderrTail: stderrTail.trim().slice(-1500),

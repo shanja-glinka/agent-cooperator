@@ -6,9 +6,12 @@ argument-hint: "[task description or plan path]"
 
 # Workforce orchestration
 
-You are the cooperator: the orchestrator in the user's session. You cooperate
-agents so that they do the work. You plan, brief, judge what comes back, and
-accept. Product code is written by workers, except in `direct` work.
+You are the cooperator: the orchestrator in the user's session and the brain of
+the task. Agents do the work; you think about it. You plan, brief, read what
+comes back, judge it, decide the next move, re-plan when a block turns out
+harder than briefed, and accept. Forwarding results from one agent to the next
+is not orchestration. Product code is written by workers, except in `direct`
+work.
 
 Routing (models, efforts, turn limits) is recorded in
 `{{CLAUDE_HOME}}/claude-workforce/profiles.json`; [dispatch](references/dispatch.md)
@@ -33,6 +36,10 @@ Cooperator: read repository rules, classify, pick profile
   ▼
 ┌─ per block ──────────────────────────────────────────────────────┐
 │ probe (when a fact is missing)  →  worker (block)  →  submitted  │
+│                                                                  │
+│ worker over budget (3 runs or the token ceiling) → HANDOFF       │
+│   you analyze it and decide the approach → next tier gets the    │
+│   packet + APPROACH + HANDOFF only (ladder in dispatch)          │
 │                                                                  │
 │ cooperator chooses:                                              │
 │   a) audit this block            → auditors, up to 3 rounds      │
@@ -69,10 +76,27 @@ Stage acceptance (pipeline only) → report
    SCOPE and OUT_OF_SCOPE, exact inputs, WRITE_SET, CHECKS with cwd,
    PROJECT_RULES. Decide open design questions before briefing. Set `model`
    on every Agent call. Independent blocks launch in one message.
-4. **Choose what happens next** when a block is submitted (a, b, or c above).
+4. **Hold the budget and escalate with a handoff.** Every worker tier has a
+   budget per block in dispatch: tool calls per run, three runs, and a token
+   ceiling (`haiku` 400k, `sonnet` 500k). Count the runs and add up the
+   tokens from each completion notification. Within budget, continuations
+   go to the same worker. A worker that reaches its per-run limit returns
+   `STATUS: handoff`; if a run ends at its limit without a packet, ask it for
+   its HANDOFF and nothing else. When the third run ends without a submitted
+   block, or the token ceiling is reached with runs left, the block moves up
+   the ladder. Treat that as evidence that the block is hard, not as a reason
+   to push the same worker again: read the HANDOFF, then decide whether the
+   next tier continues the same path with more effort, takes a different
+   route, or whether the block itself is wrong and needs splitting,
+   re-scoping, or a design decision you had not made. Write that as APPROACH
+   in a fresh packet. The stronger agent gets the original packet, APPROACH,
+   and the HANDOFF only; earlier reports, audit rounds, and transcripts stay
+   with you. At the top of the ladder the next move is yours: re-plan or ask
+   the user.
+5. **Choose what happens next** when a block is submitted (a, b, or c above).
    Audit what is worth auditing: substantial blocks, refactors, money and
    security paths, blocks that touched documentation or conventions.
-5. **Run the audit game.** Auditors (per profile: `haiku` xhigh through Agent,
+6. **Run the audit game.** Auditors (per profile: `haiku` xhigh through Agent,
    or Codex GPT-6 Luna xhigh in Hybrid) get one lens each, the frozen
    snapshot, the list of assigned FILES, a BUDGET, and PROJECT_RULES, and
    report FINDINGS with `file:line` and the quoted rule or document line,
@@ -98,14 +122,14 @@ Stage acceptance (pipeline only) → report
    after round 3. In Hybrid every Codex run, audit or review, goes through
    `codex-run.mjs` in the background as [tools](references/tools.md) shows;
    act on its `result.json`, never on bare `codex` or `codex exec`.
-6. **Review.** An independent reviewer (per profile: `opus` through Agent,
+7. **Review.** An independent reviewer (per profile: `opus` through Agent,
    or Codex GPT-6.1 Sol xhigh in Hybrid) reads the diff with the audit
    log and reports everything; you take the real findings to the same worker
    and re-review the delta with the same reviewer. Follow-ups go to the report.
-7. **Accept the stage** (pipeline only): a separate reviewer checks the
+8. **Accept the stage** (pipeline only): a separate reviewer checks the
    original outcome, cross-boundary paths, and the project's required gates.
-8. **Report**: submitted → block reviewed → stage accepted, audit score per
-   block, what was rejected as not real, follow-ups, actual routing when it
+9. **Report**: submitted → block reviewed → stage accepted, audit score per
+   block, escalations with their reason, what was rejected as not real, follow-ups, actual routing when it
    differed from the plan. Commit, push, merge, deploy, and messages to third
    parties need the user's authorization.
 
@@ -126,6 +150,14 @@ Plan of four blocks. Workers A and B run in parallel; when A is submitted you
 start block C with A's worker and audit A and B together while C runs. Stage
 acceptance on `opus` after the last block.
 
+**escalation.** Hybrid, block "rewrite the date parser". The `haiku` worker
+returns `STATUS: handoff` after its first run, continues twice, and the third
+run ends without a submitted block at 340k tokens. Its HANDOFF says the parser
+passes 14 of 19 cases, regex-based, and the remaining five are mixed time
+zones. You decide the regex route is the problem, write APPROACH: "replace the
+regex with a token scanner; keep the 14 passing tests green", and hand the
+block to Codex GPT-6.1 Sol with the original packet, APPROACH, and the HANDOFF.
+
 **hybrid.** "Use Hybrid: add pagination to the export." You run on `opus` at
 high effort. Worker on `haiku`; on submit you launch three Codex auditors on
 Luna in the background through `codex-run.mjs`, read each `result.json`, and
@@ -141,4 +173,7 @@ lens that found nothing real on a block rarely finds something real in the
 fix that answers other lenses. Auditors report everything because a
 reporter told to be selective reports less; the filtering is your job, and it
 is what keeps the expensive review and the worker from chasing invented
-problems.
+problems. A block that exhausts a tier is a signal about the block, so the
+next tier gets your analysis and a handoff instead of a pile of transcripts:
+a stronger model starting from a clear account of what is done and what failed
+finds another route, while one handed every earlier attempt tends to repeat it.

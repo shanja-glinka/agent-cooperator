@@ -132,7 +132,7 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.ok(actual.endsWith('\nUser additions after install\n'));
   assert.doesNotMatch(actual, /\{\{CLAUDE_HOME\}\}/);
 
-  for (const name of ['workforce-worker', 'workforce-probe', 'workforce-auditor', 'workforce-reviewer']) {
+  for (const name of ['workforce-worker', 'workforce-worker-lite', 'workforce-probe', 'workforce-auditor', 'workforce-reviewer']) {
     const agent = await fs.readFile(path.join(fixture.home, 'agents', `${name}.md`), 'utf8');
     assert.match(agent, new RegExp(`^---\\nname: ${name}\\n`));
     assert.match(agent, /\nmodel: inherit\n/);
@@ -153,6 +153,11 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.equal(policy.selectionRules.default, 'standard');
   assert.deepEqual(Object.keys(policy.workClasses), ['direct', 'build', 'pipeline']);
   assert.equal(policy.profiles.standard.worker.model, 'sonnet');
+  assert.deepEqual(policy.profiles.hybrid.workerLadder, ['haiku', 'codex:gpt-6.1-sol', 'opus']);
+  assert.equal(policy.workerBudgets.haiku.tokenCeiling, 400000);
+  assert.equal(policy.workerBudgets.sonnet.tokenCeiling, 500000);
+  const lite = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-worker-lite.md'), 'utf8');
+  assert.match(lite, /\nmaxTurns: 120\n/);
   assert.equal(policy.profiles.standard.auditor.model, 'haiku');
   assert.equal(policy.profiles.standard.auditor.effort, 'xhigh');
   assert.equal(policy.profiles.standard.auditor.rerun, 'winners-only');
