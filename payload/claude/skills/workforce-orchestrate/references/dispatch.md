@@ -18,7 +18,9 @@ explains it. A model release updates the record, not the workflow.
 
 Presets are starting recommendations. A named profile is an approach preference;
 the user's explicit model, effort, and budget limits are binding. If `fable` is
-unavailable, use `opus` at xhigh and say so.
+unavailable, the existing reviewer/design role uses `opus` at high; say so.
+A separately explicit model/effort requirement still needs a matching capability
+or an accepted deviation.
 
 Hybrid is the economy preset: `opus` thinks and judges, `haiku` types, and
 cheap Codex models audit and review at xhigh (GPT-6 Luna $0.1/$0.5 and
@@ -64,33 +66,61 @@ Worker budgets per block, counted by the cooperator:
 | Codex `gpt-6.1-sol` (Hybrid) | runner time limits | 3 | 500k | `opus` |
 | `opus` | role limit | 3 | none | the cooperator re-plans or asks the user |
 
-Tokens are the sum over the runs of one worker on one block: `subagent_tokens`
-from each completion notification, `tokens.total` from `result.json` for
-Codex. The token ceiling applies even when runs are left. Escalation hands the
-next tier a fresh packet: the original block packet, the cooperator's APPROACH,
-and the worker's HANDOFF; nothing else from earlier runs. The same ceilings
-apply to an auditor on `haiku` (or Codex Luna in Hybrid): at 400k on one block
-its lens moves to `sonnet` (Codex Sol) with its NOT_REACHED files, and its
-findings stay with the cooperator. If Codex is unavailable in Hybrid, the
-`haiku` worker escalates to `sonnet`.
+Count each implementation start or continuation, including post-submit fixes,
+as one run under the same block and tier. A HANDOFF-only request asks for no
+implementation and adds no work run, but its known usage still counts. Keep
+counters when blocked, submitted, handed off or switched to another block.
+Queue late findings under their original block; restore its packet and counters
+before the worker returns to it.
 
-`fable` or `opus` xhigh is also for a stated unresolved decision: architecture,
-a money or auth path, a security boundary. State the question and the expected
-benefit first.
+Sum only confirmed, non-overlapping usage attributable to this block/tier/run.
+Partial usage is a measured lower bound; unavailable usage is unknown, not zero.
+Cumulative session totals need a valid starting baseline before they can be used
+as run totals. Retain run counts when usage is unavailable and disclose that
+exact token-ceiling compliance cannot be established. Token and tool-call
+budgets here are instructions, not runtime guards.
 
-Turn limits per run: worker 60, light worker 120, probe 20, auditor 50,
-reviewer 30; up to three workers in parallel; up to three audit rounds per block, and after round 1
-only lenses that won the last round play again. Codex runs are bounded by the
-wrapper's idle and total time limits instead of turns. Auditor BUDGET is 40 tool
-calls (80% of 50) unless the role's limit differs. A run that hits its limit is
-continued, never replaced: the same agent through SendMessage with a new budget,
-an auditor with its NOT_REACHED files. Report
-usage from `/cost` or `/usage` when asked.
+At exhaustion, preserve and verify an already submitted result. If implementation
+remains, diagnose the cause, restore prerequisites and launch the next allowed
+tier with the original assignment, current snapshot, APPROACH and HANDOFF only.
+The cooperator retains earlier transcripts, findings and accounting; current
+unclosed obligations and their closure conditions must survive in HANDOFF.
+Re-planning does not reset spent budget or drop the original outcome.
+
+For native Agent notifications, establish whether reported `subagent_tokens`
+is a run increment or a cumulative total before adding it. Do not guess its
+scope from the field name. For the Hybrid runner, use `tokens.status` and the
+nullable run counters; never add `threadTotal` as new run usage. A resumed Codex
+thread without a starting baseline reports unknown run usage. See
+[tools](tools.md) for the result contract.
+
+An auditor on `haiku` at 400k transfers NOT_REACHED to a fresh `sonnet` auditor
+using the xhigh auditor role. Hybrid's Codex Luna transfers to Codex Sol xhigh.
+Preserve the same snapshot, lens, round, completed coverage and findings. If
+Codex is unavailable in Hybrid, the `haiku` worker's next tier is `sonnet`.
+Ordinary partial audits continue the same agent; the token-ceiling handoff is
+an exception. The audit game has up to three rounds; only winning lenses repeat,
+and ending it does not close findings or accept the block.
+
+Use `fable` high for a stated unresolved design question with an expected benefit.
+The installed high-effort roles fall back to `opus` high. Custom effort routing
+must use a runtime capability that actually exists; an Agent model field alone
+does not change role effort.
+
+Native maxTurns per run: worker 60, light worker 120, probe 20, auditor 50,
+reviewer 30; up to three workers in parallel. Turns and tool calls are different
+units: the default auditor packet BUDGET is independently 40 tool calls, and the
+light worker has a 120-call instruction budget alongside maxTurns: 120. Return
+a packet before either boundary prevents reporting. Codex runs instead have
+runner idle/total time limits. Continue through SendMessage or a resumed Codex
+thread only within the remaining block/tier budget. For competing transitions,
+use the orchestration skill's coinciding-conditions table. Report available
+`/cost` or `/usage` data without claiming it proves exact per-block usage.
 
 ## Work packet
 
 ```text
-TASK: identifier and assignment version
+TASK: identifier, assignment version and durable task-state location
 TIER / RUN: worker model and run number on this block (worker)
 WORK_CLASS: build | pipeline
 PROFILE / PROFILE_SOURCE: standard | enhanced | hybrid | custom; explicit | preference | automatic
@@ -101,7 +131,7 @@ GOAL: the complete result this block owns
 ACCEPTANCE_EXAMPLE: concrete before/after
 SCOPE / OUT_OF_SCOPE: what this block covers; what it must not do
 PROJECT_RULES: repository instruction files to read first
-INPUTS: exact sources, contracts, revision, relevant dirty diff
+INPUTS / SNAPSHOT: exact sources, contracts, stable read root, revision and relevant dirty/new files
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
@@ -111,5 +141,8 @@ BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
 
-Agents share the checkout; use `isolation: "worktree"` only for a concrete write
-conflict, and merge the result back.
+Agents may share a checkout when writes and relevant reads stay stable. Before
+parallel auditing, materialize a stable view including read dependencies or
+serialize the writer. A revision label or disjoint WRITE_SETs alone are
+insufficient. If using a worktree, verify its actual base and include relevant
+dirty/new inputs; later integration needs its own affected checks.

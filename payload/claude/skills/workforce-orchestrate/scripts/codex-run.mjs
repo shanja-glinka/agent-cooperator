@@ -83,11 +83,95 @@ function codexArgs(options, lastMessage) {
   return ['exec', ...common, '-s', SANDBOX[options.role], '-C', options.cd, '-'];
 }
 
-function addUsage(tokens, usage) {
-  if (!usage || typeof usage !== 'object') return;
-  tokens.input += Number(usage.input_tokens ?? 0);
-  tokens.cachedInput += Number(usage.cached_input_tokens ?? 0);
-  tokens.output += Number(usage.output_tokens ?? 0);
+const EMPTY_TOKENS = { input: null, cachedInput: null, output: null, total: null };
+
+function readUsage(usage) {
+  if (!usage || typeof usage !== 'object' || Array.isArray(usage)) return null;
+  const count = (value) => Number.isSafeInteger(value) && value >= 0 ? value : null;
+  const input = count(usage.input_tokens);
+  const output = count(usage.output_tokens);
+  let cachedInput = count(usage.cached_input_tokens);
+  if (input !== null && cachedInput > input) cachedInput = null;
+  // Cached input is a subset of input; reasoning output is a subset of output.
+  const total = input !== null && output !== null ? count(input + output) : null;
+  return { input, cachedInput, output, total };
+}
+
+function createUsageTracker(resumed) {
+  let snapshot = null;
+  let source = null;
+  let finalSnapshot = null;
+  let explicitSnapshot = false;
+  let regressed = false;
+  let malformed = false;
+  let incrementalOnly = false;
+  const threads = new Set();
+  const fields = ['input', 'cachedInput', 'output'];
+  const equal = (a, b) => a && b && fields.every((key) => a[key] === b[key]);
+
+  // Codex exec currently copies the THREAD total into turn.completed.usage,
+  // and emits default zeros when no usage was captured. Do not sum completions.
+  // Verified in openai/codex@1b89beea82ae60e0dbeacb38f1ad2eae9dfed377:
+  // codex-rs/exec/src/event_processor_with_jsonl_output.rs, usage_from_last_total.
+  return {
+    invalidLine() { malformed = true; },
+    observe(event) {
+      if (event.type === 'thread.started' && event.thread_id) threads.add(event.thread_id);
+      if (event.type === 'turn.started' || event.type === 'turn.failed') finalSnapshot = null;
+      let usage;
+      let nextSource;
+      if (event.type === 'turn.completed') {
+        usage = event.usage;
+        nextSource = 'turn.completed.usage';
+        finalSnapshot = readUsage(usage);
+      } else if (event.type === 'token_count') {
+        // Compatibility with raw token_count fixtures/adapters, not a claim that
+        // the public exec JSONL stream emits this internal event type.
+        usage = event.info?.total_token_usage;
+        nextSource = 'token_count.info.total_token_usage';
+        const reported = readUsage(usage);
+        explicitSnapshot ||= reported !== null && fields.every((key) => reported[key] !== null);
+        if (!usage && event.info?.last_token_usage) {
+          // last_token_usage is an increment, but may be repeated. Without an
+          // absolute snapshot or reliable event identity, summing is unsafe.
+          incrementalOnly = true;
+          source ??= 'token_count.info.last_token_usage';
+        }
+      } else {
+        // Generic usage fields can describe an item, request, or another scope.
+        return;
+      }
+      const next = readUsage(usage);
+      if (!next || fields.every((key) => next[key] === null)) return;
+      if (snapshot && fields.some((key) => snapshot[key] !== null && next[key] !== null && next[key] < snapshot[key])) {
+        regressed = true;
+      }
+      snapshot = next;
+      source = nextSource;
+    },
+    result() {
+      let reason = null;
+      let status = 'unknown';
+      let values = { ...EMPTY_TOKENS };
+      if (threads.size > 1) reason = 'multiple_threads';
+      else if (resumed && snapshot) reason = 'resume_baseline_missing';
+      else if (regressed) reason = 'cumulative_counter_regressed';
+      else if (!snapshot) reason = incrementalOnly ? 'increment_identity_unavailable' : 'usage_unavailable';
+      else if (snapshot.total === 0 && !explicitSnapshot) reason = 'zero_may_be_upstream_default';
+      else {
+        values = snapshot;
+        const complete = fields.every((key) => snapshot[key] !== null) && snapshot.total !== null;
+        status = complete && equal(snapshot, finalSnapshot) && !malformed ? 'known' : 'partial';
+        if (status === 'partial') reason = !complete ? 'incomplete_fields' : malformed ? 'malformed_stream' : 'final_usage_unavailable';
+      }
+      return {
+        ...values, status, source, scope: 'run', reason,
+        // Preserve observations for inspection; this is not an extra run charge.
+        // In particular, a resumed thread's total is NOT a run lower bound.
+        threadTotal: snapshot,
+      };
+    },
+  };
 }
 
 function findThreadId(event) {
@@ -122,7 +206,7 @@ function main() {
   let lastActivity = Date.now();
   let stderrTail = '';
   let buffered = '';
-  const tokens = { input: 0, cachedInput: 0, output: 0 };
+  const usageTracker = createUsageTracker(Boolean(options.resume));
 
   const stop = (reason) => {
     if (status) return;
@@ -131,25 +215,33 @@ function main() {
     setTimeout(() => child.kill('SIGKILL'), 10_000).unref();
   };
 
+  const readEvent = (line) => {
+    if (!line.trim()) return;
+    let event;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      usageTracker.invalidLine();
+      return;
+    }
+    if (!event || typeof event !== 'object' || Array.isArray(event)) {
+      usageTracker.invalidLine();
+      return;
+    }
+    threadId ??= findThreadId(event);
+    usageTracker.observe(event);
+    if (INPUT_REQUEST.test(String(event.type ?? '')) || INPUT_REQUEST.test(String(event.item?.type ?? ''))) {
+      stop('waiting_for_input');
+    }
+  };
+
   child.stdout.on('data', (chunk) => {
     lastActivity = Date.now();
     jsonl.write(chunk);
     buffered += chunk.toString('utf8');
     const lines = buffered.split('\n');
     buffered = lines.pop();
-    for (const line of lines) {
-      let event;
-      try {
-        event = JSON.parse(line);
-      } catch {
-        continue;
-      }
-      threadId ??= findThreadId(event);
-      addUsage(tokens, event.usage ?? event.info?.total_token_usage ?? null);
-      if (INPUT_REQUEST.test(String(event.type ?? '')) || INPUT_REQUEST.test(String(event.item?.type ?? ''))) {
-        stop('waiting_for_input');
-      }
-    }
+    for (const line of lines) readEvent(line);
   });
   child.stderr.on('data', (chunk) => {
     lastActivity = Date.now();
@@ -168,6 +260,7 @@ function main() {
   });
   child.on('close', (code, signal) => {
     clearInterval(watchdog);
+    readEvent(buffered);
     jsonl.end();
     if (!status) status = code === 0 && fs.existsSync(files.lastMessage) ? 'ok' : 'failed';
     const result = {
@@ -180,7 +273,7 @@ function main() {
       exitCode: code,
       signal,
       durationSec: Math.round((Date.now() - started) / 1000),
-      tokens: { ...tokens, total: tokens.input + tokens.output },
+      tokens: usageTracker.result(),
       lastMessage: fs.existsSync(files.lastMessage) ? files.lastMessage : null,
       jsonl: files.jsonl,
       stderrTail: stderrTail.trim().slice(-1500),

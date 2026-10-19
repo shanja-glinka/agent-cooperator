@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased
+## Unreleased — 1.4.0 draft
+
+- Route Decision for both editions: choose the next allowed action by expected
+  full cost to the agreed, verified and delivered outcome. Maintain a durable
+  task record with OPEN obligations, evidence, ownership and per-block/tier
+  budgets. Handoff, submission, blockers and audit limits preserve that state.
+- Clarify coinciding transitions: verify an already submitted result at the
+  budget limit, restore missing prerequisites before a permitted successor,
+  retain findings after the audit cap, require current mandatory checks before
+  acceptance, and freeze read dependencies for parallel audits. Repeat only
+  affected verification when its premises change.
+- Correct the distinction between native agent turns, tool-call budgets and
+  implementation runs. Within-budget continuity and budget handoffs use the
+  same counters, including fixes after submission; environmental blockage does
+  not erase spent runs or usage.
+- Hybrid usage accounting: cumulative thread snapshots replace earlier values;
+  cached input and repeated/incremental events are not added again. JSON
+  consumers must read `tokens.status` (`known`, `partial`, `unknown`): existing
+  count fields can now be `null`, and partial totals are run lower bounds only.
+  `tokens.threadTotal` preserves the observed thread snapshot separately;
+  resume without a baseline and potentially default zero reports do not claim
+  known run usage. Handle a final JSONL event without a trailing newline.
+- Claude Enhanced design and stage fallback now uses `opus` high, matching the
+  installed roles. Draft policies: Claude 1.6.0 and Codex 1.8.0. Align behavior
+  cases with role effort and the Route Decision boundaries; document dated
+  primary research without claiming measured cost savings.
 
 - Rename the project to Agent Cooperator (`shanja-glinka/agent-cooperator`).
   New entry command `agent-cooperator claude|codex <install|update|status|uninstall>`;
@@ -20,10 +45,10 @@
   task: it analyzes handoffs and decides whether to continue, change approach,
   or split and re-scope a block.
 - Codex: Standard workers run GPT-6.1 Sol at xhigh; new Economy profile with
-  Luna xhigh workers and the `workforce-economy` launch layer. Policy: Claude
-  1.5.0, Codex 1.7.0.
+  Luna xhigh workers and the `workforce-economy` launch layer.
 - Claude Hybrid: `codex-run.mjs --role work` runs an escalated worker on Sol
-  with a writable workspace, and every `result.json` reports token usage.
+  with a writable workspace; `result.json` includes observed usage and its
+  availability status.
 
 ## 1.3.2 — 2026-10-12
 

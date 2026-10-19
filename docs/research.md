@@ -1,10 +1,115 @@
-# Research: how people actually run agentic development in Claude Code
+# Research and routing rationale
 
-Sources were checked on 2026-09-17. This page records what the live configurations
-say and the conclusions the Claude edition of this kit draws from them. It is not a
-claim of measured performance for this kit.
+The Route Decision synthesis below was prepared on 2026-10-19 for both editions.
+The earlier Claude Code configuration survey was recorded on 2026-09-17; later
+project observations carry their own dates. Those historical reports are not
+current routing instructions or independently repeated benchmarks for this kit.
+The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
+and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
 
-## Live configurations
+## Route Decision — 2026-10-19
+
+The 1.4.0 draft (Codex policy 1.8.0, Claude policy 1.6.0) uses this objective:
+
+$$
+a^*(s)=\underset{a\in A_{\mathrm{allowed}}(s)}{\arg\min}
+\left[C_{\mathrm{step}}(s,a)+\mathbb{E}\!\left[V^*(S')\mid s,a\right]\right].
+$$
+
+Choose the next allowed action by the expected full cost of reaching the agreed,
+verified and delivered outcome. This is a design synthesis, not a formula copied
+from one paper or a claim that this instruction pack computes an optimal policy.
+`s` describes the available task knowledge; `S'` is the state after observing the
+action's result. `V*` denotes the best allowed continuation cost under an assumed
+model. That cost is unknown in ordinary use. The instructions use grounded
+qualitative comparisons, without invented probabilities or numerical scores.
+The [POMDP introduction](https://www.pomdp.org/talks/who-needs-pomdps/index.html)
+provides background on decisions under partial information; [metareasoning for
+planning](https://arxiv.org/abs/1505.00399) provides background on the cost of
+deliberation itself. Neither supplies a fitted transition model for this kit.
+
+### Practical interpretation
+
+Permissions, separately explicit user constraints and applicable mandatory
+project rules define admissibility before cost comparison. Recommendations do
+not become mandatory solely because a document or skill exists. Required skills
+remain required. An action that is already known to leave a necessary prerequisite
+unavailable is not made useful by choosing a more capable model.
+
+The working state covers the agreed outcome, observed work, current evidence,
+open obligations, permissions and remaining budgets: `(G, X, E, U, P, B)`. These
+are conceptual fields in the existing task record, not six required files. For
+build/pipeline work, the cooperator retains the record in the permitted task
+store and restores it after handoff or compaction. Direct work needs no separate
+state file. An obligation closes only with evidence of completion or a sourced
+reason it does not apply. Changing workers, reaching the audit cap, submission,
+environmental blockage and budget exhaustion preserve unresolved obligations.
+New task-relevant dependencies can add obligations; minimizing their count is
+not the objective.
+
+Evidence remains useful only for the source, scope and relevant conditions it
+actually covers. Reuse a passed check while those conditions hold; recheck
+affected conclusions after a relevant source, environment or dependency changes.
+Parallel audits require a stable view of their read dependencies, including
+relevant uncommitted work. Disjoint write sets alone do not establish that view.
+A reviewer verdict cannot replace a missing mandatory check. Once the outcome
+and requirements are confirmed, perform the agreed delivery and stop. BLOCKED
+and BUDGET_STOP retain unfinished work; they are not zero-cost successful ends.
+
+Cost comparison includes routing, all participating agents, context transfer,
+checks, failed attempts, recovery and necessary human work. One script call can
+still contain many costly operations. Money, elapsed time and human effort can
+conflict; no universal weights are supplied. The policy therefore does not run
+an elaborate route search before each routine read. The executable instructions
+and transition table live in [Route Decision in Codex](../payload/codex/skills/workforce-orchestrate/SKILL.md#route-decision)
+and [Route Decision in Claude](../payload/claude/skills/workforce-orchestrate/SKILL.md#route-decision).
+
+### Primary research and the limited inference used here
+
+The following September–October 2026 papers motivate parts of the design.
+Their results do not establish performance for Agent Cooperator.
+
+| Source | Relevant contribution and boundary of use |
+| --- | --- |
+| [Jev](https://arxiv.org/html/2610.13092v1) | Evaluates cost of delivered results, including auxiliary work and unsuccessful attempts. Motivates whole-execution accounting; supplies no savings estimate for this kit. |
+| [RepoNorm](https://arxiv.org/html/2610.07757v1) | Represents repository norms with scope, conditions and strength. Motivates applicability-aware obligations rather than promoting every convention to a hard constraint. |
+| [CaMeLoT](https://arxiv.org/html/2609.18674v1) | Examines action and execution-sequence constraints. Motivates checking necessary transition conditions; this Markdown policy does not reproduce its formal planning machinery. |
+| [SemNav](https://arxiv.org/html/2609.31176v1) | Builds task-relative context and connects reuse to repository state. Motivates targeted reading and explicit evidence scope. |
+| [SWE-CC](https://arxiv.org/html/2610.06193v1) | Separates functional results from compliance during execution. Motivates tracking process requirements alongside output correctness. |
+| [Sentry](https://arxiv.org/html/2610.02994v1) | Distinguishes invocation failures, lack of progress and unsupported actions. Motivates diagnosis before a retry or handoff. |
+| [CIPO](https://arxiv.org/html/2610.04991v1) | Learns choices between primitive tools and composed procedures using alternative continuations from a state. Motivates optional skill selection; installing a skill does not reproduce the learned policy. |
+| [HEXIS, v2](https://arxiv.org/html/2609.30123v2) | Separates model reasoning from state and transition control. Motivates retained state and explicit conditions; this kit does not add a runtime state machine. |
+| [StateWise](https://arxiv.org/html/2610.05241v1) | Examines the validity of stored premises used for continuation. Motivates revisiting affected evidence when its assumptions change. |
+| [ParanoiaEval](https://arxiv.org/html/2610.08662v1) | Uses controlled changes in evidence to examine unnecessary defensive work. Motivates paired behavior cases and stopping when task-local requirements are satisfied. |
+
+### Usage provenance and validation limits
+
+The [OpenAI Codex exec mapper at commit
+`1b89beea82ae60e0dbeacb38f1ad2eae9dfed377`](https://github.com/openai/codex/blob/1b89beea82ae60e0dbeacb38f1ad2eae9dfed377/codex-rs/exec/src/event_processor_with_jsonl_output.rs)
+was inspected on 2026-10-19. `usage_from_last_total()` copies the accumulated
+thread counters into `turn.completed.usage`; it returns default zeros when no
+usage was captured. A completion label alone does not establish a per-run delta,
+and a zero report alone does not prove that no resources were spent.
+
+The Hybrid wrapper consequently replaces cumulative snapshots instead of summing
+them and exposes `tokens.status`, nullable run fields, source and scope. A resumed
+thread without a baseline has unknown run usage; `tokens.threadTotal` is retained
+only as an observed thread snapshot. Cached input is included in input and is
+not added again. Incomplete run evidence is marked partial; incremental-only
+events without reliable identity are not summed. The internal raw `token_count`
+adapter is exercised by synthetic fixtures and is not claimed to be a public
+exec stdout event. This is source inspection and fake-CLI regression coverage,
+not validation against a live Codex installation or independent billing data.
+
+Behavior cases compare decisions from states that differ in one material fact,
+such as current versus stale evidence or completed versus missing required work.
+Installer tests establish installation behavior; runner tests establish parsing
+and process boundaries. Neither proves agent adherence, optimality, effective
+model availability, or reduced cost. Measuring a policy change requires matched
+tasks, outcome and obligation checks, actual usage from all participants,
+rework and elapsed time. No before/after savings result is claimed here.
+
+## Live configurations — historical survey, 2026-09-17
 
 ### LeanerCloud `dotclaude` (global CLAUDE.md)
 
@@ -90,19 +195,25 @@ Caveats from the author: plain Opus wrote zero unit tests; one benchmark on a
 greenfield task; brownfield results pending.
 Source: https://fresh-worktree.ghost.io/are-better-models-replacing-superpowers/
 
-## Conclusions encoded in the Claude edition
+## Historical policy rationale
 
-1. **Classify before orchestrating.** Every mature setup has a gate (PAIR/BUILD/
+Items 1–9 describe the 2026-09-17 design; items 10–12 record later project reports.
+They explain the evolution of the kit. Current budgets and transition rules in
+the orchestration skill supersede earlier round-based escalation and unconditional
+continuity statements here.
+
+1. **Classify before orchestrating.** The surveyed setups used a gate (PAIR/BUILD/
    PIPELINE, DIRECT/SINGLE/BATCH/EPIC). The kit uses `direct` / `build` /
    `pipeline`, and `direct` never spawns agents.
 2. **Brain/worker, not a tree of general-purpose agents.** An expensive brain
    plans, briefs, integrates, and accepts; cheaper workers implement in fresh
    contexts with explicit scope. The brain does not write product code outside
    `direct` work.
-3. **Agent continuity for fix rounds.** Findings go back to the same worker and
-   the same reviewer via SendMessage; a round costs the delta. Fresh agents are
-   for independence, a tier change, or polluted context. Rounds 1-3 stay, round 4
-   escalates one tier.
+3. **Agent continuity for fix rounds (2026-09-17).** The early design returned
+   findings to the same worker and reviewer via SendMessage, retaining context
+   for correction deltas. It kept rounds 1–3 and escalated on round 4. That
+   escalation rule is superseded: current continuity is subject to per-tier,
+   per-block budgets and the documented handoff, including fixes after submission.
 4. **Explicit model on every call.** Role files use `model: inherit` so the Agent
    call decides; the brief states the intended effort.
 5. **Complete owned blocks with a write set.** One owner per block, disjoint
@@ -115,9 +226,10 @@ Source: https://fresh-worktree.ghost.io/are-better-models-replacing-superpowers/
    git; context does not survive compaction.
 8. **Prove it end to end.** Green tests are necessary, not sufficient; failed,
    blocked, and not-run are not PASS.
-9. **Cost honesty.** The evidence says orchestration is a cost multiplier that
-   only pays for itself when the task warrants it. The kit does not promise
-   savings and asks for `/cost` or `/usage` evidence instead.
+9. **Cost honesty.** The reported experiment illustrates orchestration overhead
+   for its particular task and configurations. It does not establish a general
+   multiplier. The kit does not promise savings and asks for actual `/cost` or
+   `/usage` evidence instead.
 10. **Only winning audit lenses play again (2026-10-11).** Running every lens
     every round re-audited clean areas: in live use a lens that had already
     found nothing real kept being re-run on fixes made for another lens. Round
@@ -134,14 +246,16 @@ Source: https://fresh-worktree.ghost.io/are-better-models-replacing-superpowers/
     always reports back. `codex exec resume` has no `-s` or `-C` flag: the
     sandbox is set through `-c sandbox_mode=...`, and the run starts in the
     project root because resume filters sessions by working directory.
-12. **An auditor that hits its turn limit is continued, not replaced
-    (2026-10-12).** In live use a 120-file block got 46 audit cycles: each
+12. **Partial audit coverage (2026-10-12).** A project report described a
+    120-file block receiving 46 audit cycles: each
     Haiku auditor stopped at its turn limit after a part of the block and
     reported as if it had covered the whole; the next one started from zero,
     reread everything, found "new" places in another part, and the cooperator
     sent each part's findings to the worker as a new round. Minor wording
-    without a rule was accepted as findings. Auditors now return
-    `STATUS: complete | partial` with NOT_REACHED, stop at a budget below the
-    turn limit, and are continued on what they did not read; a round ends
-    only when every lens is complete, and only findings with a quoted rule
-    count (the rest are NOTES).
+    without a rule was accepted as findings. This motivated packets with
+    `STATUS: complete | partial`, NOT_REACHED, an explicit tool-call budget,
+    and continuation on unread files. Native turn limits are a separate counter.
+    Current policy
+    continues the same auditor within budget and permits a token-ceiling
+    handoff without restarting coverage. A round ends only when every lens is
+    complete, and only findings with a quoted rule count (the rest are NOTES).

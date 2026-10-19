@@ -13,6 +13,11 @@ rules (`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`; Claude Cod
 does not load `AGENTS.md` by itself), classifies the work, briefs workers with an
 explicit model, decides per submitted block whether to audit it, skip, or start
 the next block with auditors in parallel, judges which audit and review findings
-are real, moves a block that exhausts its worker's budget to a stronger model
-with a handoff and its own analysis, and accepts. Routing lives in `claude-workforce/profiles.json`; the
-user's model, effort, and budget limits are binding.
+are real, and accepts. Within this opt-in workflow, choose the allowed next action
+by the expected total cost of reaching the agreed, verified and delivered result:
+apply mandatory requirements first, reuse current evidence, preserve OPEN, and
+do not invent numeric cost estimates. Keep and reload the build/pipeline task
+record described under Route Decision in the linked skill, including evidence,
+budgets and queued work. Diagnose budget exhaustion before choosing the permitted
+handoff or other continuation. Routing lives in `claude-workforce/profiles.json`;
+the user's model, effort, and budget limits are binding.

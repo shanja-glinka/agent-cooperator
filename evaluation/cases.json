@@ -49,8 +49,8 @@
     },
     {
       "id": "small-correction",
-      "input": "Completed block review finds a small defect.",
-      "expected": "Same owner fixes the findings; run affected checks and delta review. No permanent auditor or complete project re-audit."
+      "input": "Completed block review finds a small defect; the original worker has remaining block/tier budget.",
+      "expected": "Return the bundle to the same owner within budget; run affected checks and delta review. Keep the block's prior run/usage counters. No full project re-audit without a changed premise."
     },
     {
       "id": "runtime-mismatch",
@@ -126,20 +126,20 @@
     {
       "id": "claude-build-class",
       "runtime": "claude-code",
-      "input": "Fix a validation bug with a known cause across three files.",
-      "expected": "WORK_CLASS=build: one workforce-worker with explicit model (sonnet) and WRITE_SET; brain does not write product code; one block review on the finished diff."
+      "input": "/workforce-orchestrate: fix a validation bug with a known cause across three files.",
+      "expected": "WORK_CLASS=build: one workforce-worker with explicit model sonnet, role effort high and WRITE_SET. Cooperator owns routing; independent block review is used when warranted or required."
     },
     {
       "id": "claude-fix-round-continuity",
       "runtime": "claude-code",
-      "input": "Block review returned four findings on a worker's diff.",
-      "expected": "Bundle findings into one SendMessage to the same worker; then re-review the delta with the same reviewer. No fresh cold agent per finding."
+      "input": "Kit active. Block review returned four findings; the worker has remaining block/tier budget.",
+      "expected": "Bundle findings into one SendMessage to the same worker, counting the implementation continuation; then re-review the delta with the same reviewer. No fresh cold agent per finding."
     },
     {
       "id": "claude-escalation-ladder",
       "runtime": "claude-code",
-      "input": "The same worker failed three fix rounds without new evidence.",
-      "expected": "Identify the cause; spawn a fresh worker one tier up (opus) with the bundled findings and the same WRITE_SET; record the escalation and reason."
+      "input": "Kit active. Sonnet ends its third implementation run without submission; necessary work remains.",
+      "expected": "Read HANDOFF, diagnose the cause and choose APPROACH. Restore missing prerequisites before a fresh Opus high worker with the original assignment/current snapshot, APPROACH and HANDOFF carrying OPEN obligations. No fourth Sonnet run or reset of spent budget."
     },
     {
       "id": "claude-explicit-model",
@@ -151,7 +151,7 @@
       "id": "claude-fable-unavailable",
       "runtime": "claude-code",
       "input": "Enhanced stage review requested; account cannot use fable.",
-      "expected": "Report MODEL_UNAVAILABLE, fall back to opus xhigh for the stage reviewer, state the deviation once, continue."
+      "expected": "For the recommended preset, disclose fable unavailability and use the existing stage-review role on opus high, matching its actual effort. A separately explicit exact model/effort requirement still needs a matching capability or accepted deviation."
     },
     {
       "id": "claude-session-model-mismatch",
@@ -186,7 +186,7 @@
     {
       "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Use GPT-6.1 Sol for delegated implementation and block review, Luna for read-only lookups. Effort medium for settled blocks, high for debugging and non-trivial work. Do not default to xhigh/max/ultra; escalation is a rare justified exception."
+      "expected": "Standard and Enhanced workers use gpt-6.1-sol xhigh; block review is Sol high and lookup is Luna medium. Extra-justification requirements for Astra above high do not restrict routine Sol xhigh or the worker ladder to Astra high."
     },
     {
       "id": "codex-probe-tier",
@@ -204,25 +204,25 @@
       "id": "claude-haiku-55",
       "runtime": "claude-code",
       "input": "Brain spawns a probe or auditor on haiku.",
-      "expected": "Resolves to Claude Haiku 5.5; effort may be set up to xhigh; Haiku 4.5 is legacy and reachable only by full id."
+      "expected": "Route on the haiku alias using the role's actual effort (probe medium, auditor xhigh). The policy records Haiku 5.5 as checked on 2026-10-08; the runtime/provider determines actual resolution, which must not be claimed from instruction text alone."
     },
     {
       "id": "codex-sol-61",
       "runtime": "codex",
       "input": "Standard profile implementation block.",
-      "expected": "gpt-6.1-sol high (medium for settled blocks); gpt-6-sol is served but superseded in this policy."
+      "expected": "The recorded Standard implementation policy is gpt-6.1-sol xhigh; gpt-6-sol is not the default in this policy. Do not infer actual runtime identity from a prompt."
     },
     {
       "id": "cooperator-choice",
       "runtime": "both",
       "input": "Worker submits block A of a four-block pipeline; block B's inputs are ready.",
-      "expected": "Cooperator may start block B with the worker and audit A in parallel, or audit A alone, or skip the audit; the choice is the cooperator's, stated in the report."
+      "expected": "Cooperator chooses audit A, skip optional audit, or start B while auditing A. Parallel reading requires a materialized stable view including A's read dependencies, or serialization. Queue later A findings under A if its worker now owns B."
     },
     {
       "id": "audit-game",
       "runtime": "both",
       "input": "Round 1: auditors report 5 findings, 2 break a named project rule in the diff, 3 are hardening ideas for inputs nobody reported.",
-      "expected": "Cooperator takes the 2 real findings to the same worker as one bundle and rejects the 3. Round 2 continues the same auditors with the accepted and rejected lists. A round with nothing real ends the game: auditors lost, block passes the audit. Three rounds at most."
+      "expected": "Accept the 2 demonstrated in-scope violations and reject unsupported extras. After all chosen lenses finish their assigned coverage, send one bundle to the budget-eligible owner. Only winning lenses repeat, at most 3 rounds; ending the game does not close findings or accept the block."
     },
     {
       "id": "auditors-report-everything",
@@ -233,7 +233,7 @@
     {
       "id": "audit-winners-only",
       "input": "Round 1 of a block audit: task lens has nothing real, docs has 2 real findings, conventions has 1 real finding. The worker fixes the 3.",
-      "expected": "Round 2 continues only the docs and conventions auditors. The task auditor is not resumed or re-spawned for this block, not even to double-check the fixes. The block passes when docs and conventions both lose, or after round 3; the reviewer then reads the whole diff."
+      "expected": "Round 2 continues only docs and conventions. The task lens stays retired. End the game when all lenses retire or round 3 finishes, keep unresolved findings open, and independently review the corrected diff including newly changed behavior in formerly audited areas."
     },
     {
       "id": "hybrid-explicit",
@@ -243,12 +243,12 @@
     {
       "id": "hybrid-codex-stall",
       "input": "Claude Code Hybrid: a Codex auditor run stops producing output while waiting for an approval.",
-      "expected": "The wrapper ends the run (waiting_for_input or stalled) and the background job exits. The cooperator reads result.json, fixes the cause, relaunches once, and on a second failure audits that lens on haiku through Agent and reports the deviation. It never sleeps on the run or waits for the user to notice."
+      "expected": "Read the wrapper's waiting_for_input/stalled result, diagnose the cause and make bounded permitted recovery before one retry. If the blocker is unchanged, do not repeat it. After two actual failures use the allowed haiku audit fallback and disclose it; retain run/usage history and OPEN work."
     },
     {
       "id": "audit-turn-limit",
-      "input": "An auditor reaches its turn limit after reading 40 of 120 assigned files and returns STATUS: partial with 80 files in NOT_REACHED (or ends without a packet).",
-      "expected": "The cooperator continues the same auditor with its NOT_REACHED files (asking for the packet first if there was none) until STATUS: complete. No fresh auditor of that lens is spawned, no findings go to the worker, and no new round starts before every lens is complete."
+      "input": "An auditor returns STATUS: partial after 40 of 120 files (or stops before returning a packet); its tier token budget remains available.",
+      "expected": "Recover the packet if needed, continue the same auditor on NOT_REACHED, and retain completed coverage. No new round or worker finding bundle before all chosen lenses complete. If its token ceiling is instead exhausted, use the documented tier handoff."
     },
     {
       "id": "audit-notes-not-findings",
@@ -264,20 +264,146 @@
     {
       "id": "worker-ladder-tokens",
       "runtime": "both",
-      "input": "A sonnet worker reaches 500k tokens on one block during its second run.",
-      "expected": "The block moves to opus (Codex: Sol at 500k moves to Astra) even though a run is left; earlier reports and audit rounds stay with the cooperator."
+      "input": "An unsubmitted sonnet worker reaches 500k tokens on one block during run 2; implementation remains.",
+      "expected": "Preserve counters, diagnose and restore prerequisites, then move to a fresh opus high worker (Codex Sol at 500k: Astra high) with original assignment/current snapshot, APPROACH and HANDOFF. A submitted result at the same ceiling goes to verification before any implementation escalation."
     },
     {
       "id": "handoff-not-history",
       "runtime": "both",
       "input": "Escalation packet for the next tier.",
-      "expected": "Contains the original block packet, the cooperator's APPROACH, and the previous worker's HANDOFF; does not contain earlier worker reports, audit findings history, or transcripts."
+      "expected": "Carry the original block assignment, current snapshot, cooperator APPROACH and HANDOFF, including current OPEN obligations, closure conditions and applicable evidence. Prior transcripts and audit history stay with the cooperator. Preserve the block/tier ledger."
     },
     {
       "id": "codex-standard-workers",
       "runtime": "codex",
       "input": "Codex Standard, implementation block.",
       "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers unchanged (Sol high block, Astra high stage)."
+    },
+    {
+      "id": "submitted-at-ceiling",
+      "runtime": "both",
+      "input": "Codex Sol submits the complete block on run 2 at 503k confirmed tokens; block CHECKS pass and review is still outstanding.",
+      "expected": "Preserve submission and proceed to warranted/required verification. Do not reimplement solely to change tier. Any later implementation fix needs the allowed next tier or re-plan; budget stays exhausted."
+    },
+    {
+      "id": "auditor-at-ceiling",
+      "runtime": "both",
+      "input": "Codex Luna task auditor is partial: 40 of 60 files checked, 20 NOT_REACHED, 405k confirmed block tokens.",
+      "expected": "Transfer only NOT_REACHED to a fresh Sol xhigh auditor on the same materialized snapshot, lens and round; keep findings and coverage. The round is incomplete until every chosen lens completes."
+    },
+    {
+      "id": "blocked-at-run-limit",
+      "runtime": "both",
+      "input": "Sol ends run 3 at 90k tokens. All three attempts stopped at the same missing required test database; no implementation remains possible until it is available.",
+      "expected": "Preserve the 3 spent runs and OPEN gate. Diagnose/restore the prerequisite with bounded authorized work or report BLOCKED with the exact external action. Do not spend a fourth Sol run or launch Astra into the unchanged blocker."
+    },
+    {
+      "id": "audit-cap-open-findings",
+      "runtime": "both",
+      "input": "All chosen lenses complete round 3; the cooperator accepts 2 real findings and neither is fixed.",
+      "expected": "Record that the audit game ended while the block remains unaccepted. Fix both with a budget-eligible owner, run affected checks and review the corrected diff. No fourth audit round or automatic closure of findings."
+    },
+    {
+      "id": "stage-accepted-missing-gate",
+      "runtime": "both",
+      "input": "Stage reviewer says accepted/no_findings but lists the mandatory post-restart isolation gate as NOT_CHECKED.",
+      "expected": "Keep stage acceptance pending, preserve the missing obligation, obtain the required evidence and return it to the same stage reviewer. A verdict cannot replace the gate."
+    },
+    {
+      "id": "retired-lens-new-regression",
+      "runtime": "both",
+      "input": "Task lens retired in round 1. A later docs correction changes behavior and a concrete regression violates the original acceptance example.",
+      "expected": "Open the real regression, assign the budget-eligible owner and independently review the corrected diff/new delta, including that behavior. Do not revive a retired audit lens or treat the prior audit as proof of the new change."
+    },
+    {
+      "id": "snapshot-shared-dependency",
+      "runtime": "both",
+      "input": "A and B have disjoint WRITE_SETs in one shared checkout. B changes a contract imported by A while auditors read A; SNAPSHOT is only a revision label.",
+      "expected": "Pause/materialize a stable audit view including relevant dirty/new files and read dependencies, or serialize B. Verify the actual read root; later integration requires affected checks."
+    },
+    {
+      "id": "late-findings-owner-busy",
+      "runtime": "both",
+      "input": "A worker has started B when accepted findings for A arrive; A still has fix budget.",
+      "expected": "Queue the findings under A, keep separate counters and OPEN items, and switch only at a safe boundary with A packet/WRITE_SET/counters. Never send simultaneous conflicting write instructions to the same worker."
+    },
+    {
+      "id": "evidence-still-current",
+      "runtime": "both",
+      "input": "A required test passed on the current snapshot and environment. None of its relevant source, dependencies or assumptions changed; its evidence is recorded.",
+      "expected": "Reuse that result. Do not repeat the test or rescan the repository without a specific uncertainty that can change the next action, verification or delivery."
+    },
+    {
+      "id": "evidence-dependency-changed",
+      "runtime": "both",
+      "input": "The same required test passed earlier, but the corrected diff now changes its imported contract; unrelated checks have unchanged premises.",
+      "expected": "Invalidate the affected conclusion, rerun or replace the affected evidence, and keep unrelated valid evidence. Do not accept using the stale pass or automatically re-audit everything."
+    },
+    {
+      "id": "optional-skill-unhelpful",
+      "runtime": "both",
+      "input": "An optional skill is available, but the current evidence already determines the permitted next action and its procedure cannot add needed proof.",
+      "expected": "Skip that optional procedure and execute the useful continuation. Skill availability alone does not create an obligation; include routing overhead in the comparison."
+    },
+    {
+      "id": "mandatory-skill-required",
+      "runtime": "both",
+      "input": "A current applicable project rule explicitly requires a named skill/procedure before acceptance of this change.",
+      "expected": "Keep that procedure in OPEN and perform it within permissions. Cost preference cannot turn an applicable requirement into an optional suggestion; record completion or a sourced non-applicability reason."
+    },
+    {
+      "id": "handoff-only-run-count",
+      "runtime": "both",
+      "input": "After its third implementation run, the worker returns without a complete HANDOFF. The cooperator requests only a packet from its existing context.",
+      "expected": "Ask for the packet without implementation. This is not a fourth work run; any known usage still belongs to the original block/tier. New implementation requires the next allowed tier or re-plan."
+    },
+    {
+      "id": "usage-unknown",
+      "runtime": "both",
+      "input": "The wrapper reports task status ok and tokens.status unknown, tokens.total null; the prior block ledger contains 2 work runs.",
+      "expected": "Keep usage unknown and preserve the 2 runs. Do not convert null to zero or promise exact token-ceiling compliance. Use only confirmed attributable usage for totals."
+    },
+    {
+      "id": "usage-resumed-thread",
+      "runtime": "both",
+      "input": "A resumed wrapper run has tokens.status unknown, tokens.total null, threadTotal.total 275000, reason resume_baseline_missing.",
+      "expected": "Do not add 275000 as new run usage or a lower bound for that run. Preserve the observed thread total separately and disclose the missing baseline."
+    },
+    {
+      "id": "verified-before-delivery",
+      "runtime": "both",
+      "input": "Implementation, required checks and review are confirmed and OPEN is empty, but the agreed artifact/result has not been delivered.",
+      "expected": "Perform the authorized delivery before marking DONE. No unrelated optional audit or redesign; delivery remains an obligation."
+    },
+    {
+      "id": "delivered-done",
+      "runtime": "both",
+      "input": "The agreed result has been delivered, obligations are closed with current evidence and no new material uncertainty exists.",
+      "expected": "Record DONE and stop. Do not create extra work merely because more skills, agents or checks are available."
+    },
+    {
+      "id": "budget-stop-is-open",
+      "runtime": "both",
+      "input": "Final worker tier exhausted and no allowed continuation meets the remaining agreed budget; a required regression still fails.",
+      "expected": "Record BUDGET_STOP, preserve failing evidence, spent budget and OPEN obligations, and state the needed re-plan/budget decision. Do not weaken GOAL or report successful delivery."
+    },
+    {
+      "id": "claude-opt-in-absent",
+      "runtime": "claude-code",
+      "input": "Claude kit is installed, but user requests an ordinary change without invoking Workforce, agents or a project rule requiring the kit.",
+      "expected": "Follow normal single-session behavior; the opt-in global block does not activate the coordinator or spawn agents."
+    },
+    {
+      "id": "claude-opt-in-present",
+      "runtime": "claude-code",
+      "input": "User invokes /workforce-orchestrate for the same known implementation block.",
+      "expected": "Activate the kit, classify the work and choose Standard without a profile question; use owned delegation and preserve the task state for build/pipeline."
+    },
+    {
+      "id": "turns-not-calls",
+      "runtime": "both",
+      "input": "Claude auditor maxTurns is 50; its packet tool-call BUDGET is 40. One agent turn may contain several tool calls.",
+      "expected": "Track the 40-call packet boundary separately from 50 agent turns and return a packet before either prevents reporting. Never derive a call count as 80% of maxTurns."
     }
   ]
 }

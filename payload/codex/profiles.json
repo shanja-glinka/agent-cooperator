@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.7.0",
+  "policyVersion": "1.8.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -45,9 +45,9 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "game": "Round 1 runs every lens; only lenses with accepted real findings repeat, for at most 3 rounds. A lens with no real findings retires. The round cap ends the audit game, not open findings, required checks, or task obligations; see workforce-orchestrate/SKILL.md.",
         "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
+        "coverage": "STATUS: complete requires reading every assigned file. Continue partial coverage on NOT_REACHED with the same auditor while within budget; the token-ceiling handoff in workerBudgets.auditors is an exception. Send the finding bundle only after every assigned lens in the round is complete."
       },
       "workerLadder": [
         "gpt-6.1-sol",
@@ -94,9 +94,9 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "game": "Round 1 runs every lens; only lenses with accepted real findings repeat, for at most 3 rounds. A lens with no real findings retires. The round cap ends the audit game, not open findings, required checks, or task obligations; see workforce-orchestrate/SKILL.md.",
         "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
+        "coverage": "STATUS: complete requires reading every assigned file. Continue partial coverage on NOT_REACHED with the same auditor while within budget; the token-ceiling handoff in workerBudgets.auditors is an exception. Send the finding bundle only after every assigned lens in the round is complete."
       },
       "workerLadder": [
         "gpt-6.1-sol",
@@ -144,9 +144,9 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "game": "Round 1 runs every lens; only lenses with accepted real findings repeat, for at most 3 rounds. A lens with no real findings retires. The round cap ends the audit game, not open findings, required checks, or task obligations; see workforce-orchestrate/SKILL.md.",
         "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
+        "coverage": "STATUS: complete requires reading every assigned file. Continue partial coverage on NOT_REACHED with the same auditor while within budget; the token-ceiling handoff in workerBudgets.auditors is an exception. Send the finding bundle only after every assigned lens in the round is complete."
       },
       "workerLadder": [
         "gpt-6-luna",
@@ -162,7 +162,7 @@
       "xhigh",
       "max"
     ],
-    "requires": "Rare exception only: state a concrete unresolved reasoning problem, why medium/high is insufficient, and the expected benefit. Never use xhigh/max by default for implementation or review, or solely because a task is large, important, or a prior attempt failed. Respect user budget and effort limits."
+    "requires": "For gpt-6-astra above high only: state a concrete unresolved reasoning problem, why high is insufficient, and the expected benefit. Do not escalate solely because a task is large, important, or a prior attempt failed. This exception does not restrict Sol xhigh workers, Luna xhigh roles, or the ordinary worker ladder to Astra high. Explicit user model, effort, and budget limits remain binding."
   },
   "selectionRules": {
     "default": "standard",
@@ -228,7 +228,7 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model.",
+  "continuity": "Within remaining budgets, fixes return to the same worker, winning audit lenses to the same auditors, and review deltas to the same reviewer through followup_task. Budget handoffs override continuity; see workerBudgets. Use a fresh agent for independence or a different model tier.",
   "workerBudgets": {
     "gpt-6-luna": {
       "toolCallsPerRun": 600,
@@ -246,7 +246,10 @@
       "tokenCeiling": null,
       "then": "the cooperator re-plans or asks the user"
     },
-    "rule": "Tokens are summed over one worker's runs on one block. Reaching the third run without a submitted block, or the token ceiling with runs left, moves the block to the next tier of the profile's workerLadder as a fresh spawn with the original packet, the cooperator's APPROACH, and the worker's HANDOFF only.",
-    "auditors": "An auditor on Luna that reaches 400k tokens on one block hands its lens to Sol with its NOT_REACHED files; its findings stay with the cooperator."
+    "rule": "When unfinished implementation needs another run after the run limit or token ceiling is reached, move to the next allowed tier as a fresh worker with the original packet, the cooperator's APPROACH, and HANDOFF only. An already submitted block can proceed to verification at the limit; further implementation requires remaining budget or the permitted handoff. Final-tier exhaustion requires replanning or user input; explicit user limits remain binding.",
+    "auditors": "A Luna auditor reaching 400k tokens on one block hands its lens and NOT_REACHED files to Sol xhigh. Preserve the assigned snapshot and completed coverage; findings stay with the cooperator. The handoff does not complete the lens or close findings.",
+    "accounting": "Count each implementation start or continuation, including post-submit fixes, as one run. A HANDOFF-only request is not an implementation run, but its known usage still counts. Track counters per model tier and block; handoff, blockage, submission, or starting another block does not reset that block's counters or obligations.",
+    "usage": "Sum confirmed usage with a known run/tier/block scope. Partial usage is only a measured lower bound; unknown usage is not zero. Cumulative session totals require a valid baseline before use as run totals. When complete usage is unavailable, retain run counts and disclose that exact token-ceiling compliance cannot be established.",
+    "enforcement": "These are instruction-level token and tool-call budgets, not runtime guards. Native turn limits and runner timeouts are separate boundaries."
   }
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.5.0",
+  "policyVersion": "1.6.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
@@ -49,10 +49,10 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "game": "Round 1 runs every lens; only lenses with accepted real findings repeat, for at most 3 rounds. A lens with no real findings retires. The round cap ends the audit game, not open findings, required checks, or task obligations; see workforce-orchestrate/SKILL.md.",
         "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete.",
-        "budget": "40 tool calls (80% of maxTurns 50), then STATUS: partial"
+        "coverage": "STATUS: complete requires reading every assigned file. Continue partial coverage on NOT_REACHED with the same auditor while within budget; the token-ceiling handoff in workerBudgets.auditors is an exception. Send the finding bundle only after every assigned lens in the round is complete.",
+        "budget": "40 tool calls before STATUS: partial, independent of maxTurns: 50. Return a partial packet before either limit prevents reporting."
       },
       "workerLadder": [
         "sonnet",
@@ -86,7 +86,7 @@
         "effort": "high",
         "fallback": {
           "model": "opus",
-          "effort": "xhigh"
+          "effort": "high"
         }
       },
       "design": {
@@ -95,7 +95,7 @@
         "scope": "bounded-open-design",
         "fallback": {
           "model": "opus",
-          "effort": "xhigh"
+          "effort": "high"
         }
       },
       "auditor": {
@@ -107,10 +107,10 @@
           "conventions"
         ],
         "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
+        "game": "Round 1 runs every lens; only lenses with accepted real findings repeat, for at most 3 rounds. A lens with no real findings retires. The round cap ends the audit game, not open findings, required checks, or task obligations; see workforce-orchestrate/SKILL.md.",
         "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete.",
-        "budget": "40 tool calls (80% of maxTurns 50), then STATUS: partial"
+        "coverage": "STATUS: complete requires reading every assigned file. Continue partial coverage on NOT_REACHED with the same auditor while within budget; the token-ceiling handoff in workerBudgets.auditors is an exception. Send the finding bundle only after every assigned lens in the round is complete.",
+        "budget": "40 tool calls before STATUS: partial, independent of maxTurns: 50. Return a partial packet before either limit prevents reporting."
       },
       "workerLadder": [
         "sonnet",
@@ -167,8 +167,8 @@
         ],
         "rounds": 3,
         "rerun": "winners-only",
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The block passes when every lens has lost or after the last round.",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or hits its turn limit is continued on its NOT_REACHED files, never replaced by a fresh one; nothing goes to the worker until every lens in the round is complete."
+        "game": "Round 1 runs every lens; only lenses with accepted real findings repeat, for at most 3 rounds. A lens with no real findings retires. The round cap ends the audit game, not open findings, required checks, or task obligations; see workforce-orchestrate/SKILL.md.",
+        "coverage": "STATUS: complete requires reading every assigned file. Continue partial coverage on NOT_REACHED with the same auditor while within budget; the token-ceiling handoff in workerBudgets.auditors is an exception. Send the finding bundle only after every assigned lens in the round is complete."
       },
       "codexRunner": {
         "script": "{{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs",
@@ -187,10 +187,9 @@
   "escalation": {
     "model": "fable",
     "efforts": [
-      "high",
-      "xhigh"
+      "high"
     ],
-    "requires": "A stated unresolved reasoning problem (architecture, money path, security boundary, repeated failed attempts) and the expected benefit. Respect user effort caps and budget. Fall back to opus xhigh when fable is unavailable."
+    "requires": "State an unresolved reasoning problem and the expected benefit before using fable high. Existing high-effort roles fall back to opus high when fable is unavailable. Explicit user model, effort, and budget requirements remain binding; do not silently substitute for a strict requirement."
   },
   "budgets": {
     "maxParallelWorkers": 3,
@@ -199,7 +198,7 @@
     "auditorMaxTurns": 50,
     "reviewerMaxTurns": 30,
     "auditRounds": 3,
-    "note": "Defaults for role frontmatter and packets. User limits and project rules override them.",
+    "note": "Native maxTurns values limit agent turns. Packet tool-call budgets and cumulative token ceilings are separate, instruction-level limits; do not convert turns into tool calls. Explicit user limits and applicable project rules remain binding.",
     "liteWorkerMaxTurns": 120
   },
   "selectionRules": {
@@ -276,7 +275,7 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, all through SendMessage. A fresh agent is for independence or a different model tier.",
+  "continuity": "Within remaining budgets, fixes return to the same worker, winning audit lenses to the same auditors, and review deltas to the same reviewer through SendMessage (resume the Codex thread in Hybrid). Budget handoffs override continuity; see workerBudgets. Use a fresh agent for independence or a different model tier.",
   "workerBudgets": {
     "haiku": {
       "role": "workforce-worker-lite",
@@ -299,7 +298,10 @@
       "tokenCeiling": null,
       "then": "the cooperator re-plans or asks the user"
     },
-    "rule": "Tokens are summed over one worker's runs on one block. Reaching the third run without a submitted block, or the token ceiling with runs left, moves the block to the next tier of the profile's workerLadder. The next tier gets the original packet, the cooperator's APPROACH, and the worker's HANDOFF only.",
-    "auditors": "An auditor on haiku (Codex Luna in Hybrid) that reaches 400k tokens on one block hands its lens to sonnet (Codex Sol) with its NOT_REACHED files; its findings stay with the cooperator."
+    "rule": "When unfinished implementation needs another run after the run limit or token ceiling is reached, move to the next allowed tier as a fresh worker with the original packet, the cooperator's APPROACH, and HANDOFF only. An already submitted block can proceed to verification at the limit; further implementation requires remaining budget or the permitted handoff. Final-tier exhaustion requires replanning or user input; explicit user limits remain binding.",
+    "auditors": "An auditor on haiku (Codex Luna in Hybrid) reaching 400k tokens on one block hands its lens and NOT_REACHED files to sonnet in the xhigh auditor role (Codex Sol xhigh). Preserve the assigned snapshot and completed coverage; findings stay with the cooperator. The handoff does not complete the lens or close findings.",
+    "accounting": "Count each implementation start or continuation, including post-submit fixes, as one run. A HANDOFF-only request is not an implementation run, but its known usage still counts. Track counters per model tier and block; handoff, blockage, submission, or starting another block does not reset that block's counters or obligations.",
+    "usage": "Sum confirmed usage with a known run/tier/block scope. Partial usage is only a measured lower bound; unknown usage is not zero. Cumulative session totals require a valid baseline before use as run totals. When complete usage is unavailable, retain run counts and disclose that exact token-ceiling compliance cannot be established.",
+    "enforcement": "These are instruction-level token and tool-call budgets, not runtime guards. Native turn limits and runner timeouts are separate boundaries."
   }
 }

@@ -53,24 +53,44 @@ Worker budgets per block, counted by the cooperator:
 | Sol | none | 3 | 500k | Astra high |
 | Astra | none | 3 | none | the cooperator re-plans or asks the user |
 
-Tokens are the sum over the runs of one worker on one block, from the usage
-the runtime reports; the ceiling applies even when runs are left. Escalation is
-a fresh spawn with the original block packet, the cooperator's APPROACH, and
-the worker's HANDOFF; nothing else from earlier runs. The same ceilings apply
-to an auditor on Luna: at 400k on one block its lens moves to Sol with its
-NOT_REACHED files, and its findings stay with the cooperator.
+Count each implementation start or continuation, including post-submit fixes,
+as one run under the same block and tier. A HANDOFF-only request asks for no
+implementation and adds no work run, but its known usage still counts. Keep
+counters when blocked, submitted, handed off or switched to another block.
+Queue late findings under their original block; restore its packet and counters
+before the worker returns to it.
 
-Astra high is also for a bounded unresolved decision; max and ultra need a
-stated question and expected benefit. Up to three audit rounds per block; after round 1
-only the lenses that won the last round play again. An auditor that returns
-`STATUS: partial` or stops early is continued with `followup_task` on its
-NOT_REACHED files, never replaced by a fresh one. Report usage from
-`/usage` when asked.
+Sum only confirmed, non-overlapping usage attributable to this block/tier/run.
+Partial usage is a measured lower bound; unavailable usage is unknown, not zero.
+Cumulative session totals need a valid starting baseline before they can be used
+as run totals. Retain run counts when usage is unavailable and disclose that
+exact token-ceiling compliance cannot be established. Token and tool-call
+budgets here are instructions, not runtime guards.
+
+At exhaustion, preserve and verify an already submitted result. If implementation
+remains, diagnose the cause, restore prerequisites and launch the next allowed
+tier with the original assignment, current snapshot, APPROACH and HANDOFF only.
+The cooperator retains earlier transcripts, findings and accounting; current
+unclosed obligations and their closure conditions must survive in HANDOFF.
+Re-planning does not reset spent budget or drop the original outcome.
+
+Astra high is the ordinary worker-ladder destination and a bounded design role.
+Astra above high requires a concrete unresolved question, why high is insufficient,
+and expected benefit; that condition does not restrict Sol/Luna xhigh roles.
+Explicit user model, effort and budget limits remain binding.
+
+Audits have up to three rounds per block; only winning lenses repeat. Continue
+ordinary partial coverage with the same auditor via `followup_task`. A Luna
+auditor at 400k instead transfers NOT_REACHED to a fresh Sol xhigh auditor on the
+same snapshot, lens and round; preserve completed coverage and findings. Ending
+the audit game does not close findings or accept the block. See the orchestration
+skill's coinciding-conditions table for competing transitions. Use runtime usage
+reports when available; `/usage` alone is not proof of a per-block token total.
 
 ## Work packet
 
 ```text
-TASK: identifier and assignment version
+TASK: identifier, assignment version and durable task-state location
 TIER / RUN: worker model and run number on this block (worker)
 WORK_CLASS: build | pipeline
 PROFILE / PROFILE_SOURCE: standard | enhanced | economy | custom; explicit | inherited | preference | automatic
@@ -81,7 +101,7 @@ GOAL: the complete result this block owns
 ACCEPTANCE_EXAMPLE: concrete before/after
 SCOPE / OUT_OF_SCOPE: what this block covers; what it must not do
 PROJECT_RULES: repository instruction files to read first
-INPUTS: exact sources, contracts, revision, relevant dirty diff
+INPUTS / SNAPSHOT: exact sources, contracts, stable read root, revision and relevant dirty/new files
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
 RETURN: concise result, evidence, gaps
@@ -91,4 +111,7 @@ BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
 
-Agents share the checkout; use worktrees only for a concrete write conflict.
+Agents may share a checkout when writes and relevant reads stay stable. For an
+audit running beside a writer, materialize a stable view including read
+dependencies, or serialize them; a revision label or disjoint WRITE_SETs alone
+are insufficient. Use a worktree or copied tree when it resolves that conflict.

@@ -68,13 +68,17 @@ Fix the described validation error.                  (no kit: normal session)
 
 The user-facing session is the brain. It classifies the work, resolves the profile,
 writes briefs, spawns roles with an explicit model, integrates the diff, and accepts.
+The [orchestration skill](../payload/claude/skills/workforce-orchestrate/SKILL.md)
+defines action selection, open obligations, and completion; the
+[dispatch reference](../payload/claude/skills/workforce-orchestrate/references/dispatch.md)
+defines the model, effort, and budget policy for those actions.
 
 ### Work classes
 
 | Class | Looks like | What happens |
 | --- | --- | --- |
 | `direct` | question, status, analysis-only, config/doc edit, trivial or single-file fix | Done inline. No agents. |
-| `build` | bug fix or ordinary feature with a known shape, roughly 1-5 files | One worker per complete block, independent review of the finished diff. |
+| `build` | bug fix or ordinary feature with a known shape | One worker per complete block; the cooperator chooses audit and review subject to required project gates. |
 | `pipeline` | multi-stage, cross-cutting, or design-open work | Plan, parallel workers with disjoint write sets, block review per block, stage review before closing. |
 
 Classification comes first because it is the single largest lever on usage: the
@@ -94,10 +98,10 @@ multi-stage work with substantial unresolved design where nothing already applie
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium | `haiku` medium |
 | Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` high (`workforce-worker-lite`) |
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
-| Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` xhigh) | the brain decides before briefing |
+| Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides before briefing |
 | Auditor (up to 3 rounds) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
 | Block review (MODE=block) | `opus` high (`workforce-reviewer`) | `opus` high (`workforce-reviewer`) | Codex GPT-6.1 Sol xhigh |
-| Stage acceptance (MODE=stage) | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` xhigh) | Codex GPT-6.1 Sol xhigh |
+| Stage acceptance (MODE=stage) | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
 
 The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
@@ -122,7 +126,11 @@ The session's own model is whatever the user selected; a prompt cannot change it
 If it differs from the preset, the brain says so once and continues. The role files
 declare `model: inherit` so that the `model` passed on each Agent call is what runs.
 `fable` is a reserve tier that needs a stated reason; when the account cannot use
-it, the fallback is `opus` at `xhigh`.
+it, the fallback is `opus` at `high` through the existing high-effort roles.
+Claude policy 1.6.0 changes the previously documented `opus` xhigh fallback for
+stage acceptance and design to match those roles. A named profile permits this
+adaptation; a separately explicit model or effort requirement needs the required
+setting or an accepted fallback before dependent work.
 
 ### Hybrid: Claude thinks, Codex checks
 
@@ -146,7 +154,7 @@ Codex calls go through `skills/workforce-orchestrate/scripts/codex-run.mjs`,
 never through bare `codex` or a hand-written `codex exec`. The wrapper exists
 because of a real incident: a cooperator started Codex in the background and
 waited for the completion notification for hours while Codex sat waiting for
-input. The wrapper makes that impossible:
+input. The wrapper sets these execution boundaries:
 
 - the packet goes in on stdin from a file, so Codex always sees end of input;
 - `approval_policy="never"`, a read-only sandbox, and `--ignore-user-config`
@@ -155,33 +163,60 @@ input. The wrapper makes that impossible:
   audits and reviews stay read-only;
 - a watchdog ends the run when it goes silent for 15 minutes (`stalled`), shows
   an approval or input request (`waiting_for_input`), or passes 60 minutes
-  (`timeout`), so the background job always exits and the notification always
-  arrives;
+  (`timeout`); the cooperator reads the result status before using the output;
 - it writes `<name>.result.json` with the status, the Codex thread id, the
-  token usage of the run, and the path of the final message. The next round of a winning lens, or the delta for
-  the same reviewer, resumes that thread with `--resume <threadId>`.
+  observed usage and its provenance, and the path of the final message. The next
+  round of a winning lens, or the delta for the same reviewer, resumes that thread
+  with `--resume <threadId>` while within budget.
+
+`tokens.status` is `known`, `partial`, or `unknown`. The nullable token fields
+describe the current run: `total = input + output`, with `cachedInput` already
+included in `input`. A partial total is only the measured portion of that run;
+unknown usage is `null`, not zero. A cumulative session total without a valid
+baseline cannot establish the cost of a resumed run. See the dispatch reference
+for accounting; `status: ok` alone does not establish complete usage or task success.
+`model` and `effort` record requested CLI settings. Known counters do not prove the
+actual model or billing; keep requested-tier history distinct from verified routing
+and do not calculate monetary cost from those fields.
 
 ### Worker ladder and handoff
 
-The cooperator holds each worker's budget per block and moves a block that
-exhausts it to a stronger model:
+The cooperator tracks each tier's budget per block. Further implementation after
+exhaustion follows the permitted worker ladder:
 
-| Tier | Per run | Runs | Token ceiling | Next tier |
+| Tier | Tool-call budget/run | Implementation runs/block | Token ceiling/tier/block | Next tier |
 | --- | --- | --- | --- | --- |
-| `haiku` (`workforce-worker-lite`) | 120 tool calls | 3 (360) | 400k | Hybrid: Codex GPT-6.1 Sol xhigh; otherwise `sonnet` |
-| `sonnet` | role limit | 3 | 500k | `opus` |
-| Codex GPT-6.1 Sol (Hybrid) | runner time limits | 3 | 500k | `opus` |
-| `opus` | role limit | 3 | none | the cooperator re-plans or asks you |
+| `haiku` (`workforce-worker-lite`) | 120 tool calls | 3 | 400k | Hybrid: Codex GPT-6.1 Sol xhigh; otherwise `sonnet` |
+| `sonnet` | no kit cap | 3 | 500k | `opus` |
+| Codex GPT-6.1 Sol (Hybrid) | no kit cap | 3 | 500k | `opus` |
+| `opus` | no kit cap | 3 | none | the cooperator re-plans or asks you |
 
-Tokens are summed over one worker's runs on one block (`subagent_tokens` from
-the completion notifications, `tokens.total` from the Codex runner's
-`result.json`). The ceiling applies even when runs are left. A worker at its
-limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED, OPEN, and NEXT.
-The cooperator reads it, decides the APPROACH (same path with more effort, a
-different route, or a split or re-scoped block), and starts the next tier with
-the original packet, APPROACH, and HANDOFF only; earlier reports, audit rounds,
-and transcripts stay with the cooperator. Auditors on `haiku` (Luna in Hybrid)
-follow the same 400k ceiling and hand their lens to `sonnet` (Sol).
+Native role turn limits and runner timeouts apply independently of this table.
+`maxTurns` counts agent turns, not tool calls. For example, the auditor's packet
+budget is 40 tool calls and its role limit is 50 turns; either can end its work.
+These token and tool-call budgets rely on instruction-level accounting,
+not automatic runtime enforcement.
+
+Count each implementation start or continuation, including fixes after submission,
+against the same tier and block. A request only to return HANDOFF is not another
+implementation run, but its known usage still counts. Blockage, submission, handoff,
+or work on a new block does not erase earlier counters or open obligations. A
+submitted result can proceed to verification at the limit; further implementation
+needs remaining budget or the permitted handoff.
+
+Use confirmed usage with a known run scope, including completion-notification fields
+only after establishing their meaning. Do not blindly sum a `subagent_tokens` value
+across continuations if its incremental or cumulative meaning is unknown. Partial
+usage is a measured lower bound. When complete usage is unavailable, retain run
+counts and disclose that exact token-ceiling compliance cannot be established.
+
+A worker at its limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED, OPEN,
+and NEXT. The cooperator diagnoses the cause, restores any missing prerequisite,
+and chooses the APPROACH before starting a permitted successor with the original
+packet, APPROACH, and HANDOFF only. Earlier reports, audit rounds, and transcripts
+stay with the cooperator. Auditors on `haiku` (Luna in Hybrid) retain the 400k
+ceiling and hand their lens to `sonnet` (Sol) with the assigned snapshot and remaining
+files; that transition does not complete the lens or close its findings.
 
 ### Rules that hold in every profile
 
@@ -193,34 +228,19 @@ follow the same 400k ceiling and hand their lens to `sonnet` (Sol).
 - Every Agent call sets `model`. Effort comes from the role frontmatter.
 - A worker gets a complete packet with SCOPE, OUT_OF_SCOPE, WRITE_SET, and
   CHECKS, and edits only its write set.
-- Fixes go back to the same worker, the next audit round only to the auditors
-  whose lens won the last round, the delta to the same reviewer, all through
-  SendMessage (in Hybrid, the Codex thread is resumed instead).
-- Audits run at the cooperator's choice:
-
-```text
-Worker submits a block
-  │
-  ▼
-Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, up to 3 rounds
-  b) no audit                      → next work to the worker
-  c) next block to the worker      → and auditors in parallel on
-                                     1, 2, 3 or N submitted blocks
-
-Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
-they find through one lens each: docs, task, conventions.
-Round 1 runs every lens. Then each lens plays on its own:
-real findings → that lens won, the same worker fixes, only winners
-                play the next round;
-nothing real  → that lens lost and is retired for this block.
-Every lens lost (or round 3 done) → the block passes the audit.
-A round ends only when each auditor has read all its files; an auditor
-that hits its turn limit is continued where it stopped, never replaced.
-The cooperator takes only real findings; theoretical, hypothetical, and
-out-of-scope ones are rejected.
-```
-
+- Within remaining budgets, fixes go back to the same worker, the next audit round
+  only to the auditors whose lens won the last round, the delta to the same reviewer, all through
+  SendMessage (in Hybrid, the Codex thread is resumed instead). Budget handoffs
+  override continuity.
+- Audits run at the cooperator's choice, subject to required project gates. It
+  may audit submitted blocks alongside compatible work under the orchestration
+  skill's snapshot and dependency conditions.
+- All lenses run in round 1; only lenses with accepted real findings repeat.
+  A lens with no real findings retires. Every assigned lens must finish its
+  files before the round is complete; continue partial coverage with the same
+  auditor within budget, except for the documented token-ceiling handoff.
+- Three rounds end the audit game, not unresolved findings, required checks,
+  or task obligations. Acceptance still requires evidence of their closure.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance
   line, and reproduces.
@@ -280,10 +300,11 @@ separately. It runs only on explicit request because it uses quota.
 
 ## Cost expectations
 
-The kit is instructions, not a scheduler. It cannot promise lower usage. What the
-public evidence supports: a single strong agent is often the cheapest way to finish
-a well-specified task; a builder plus one reviewer costs about three times that;
-a full per-task swarm costs about six times that on the same task without a
-quality gain. The kit's classification step and agent continuity rules exist to
-keep you on the cheap side of that curve. Use `/cost` and `/usage` in the session
-as the evidence, not estimates.
+The kit is instructions, not a scheduler; it cannot promise lower usage. The
+[historical survey recorded on 2026-09-17](research.md#controlled-experiment)
+describes one external Fresh Worktree experiment, dated August 2026 in that record,
+on a greenfield gym-booking app. Its reported median costs were about three times
+the plain-agent baseline for a builder plus reviewer and six times for Superpowers.
+Those ratios describe that task and those configurations; they are not cost
+expectations for this kit. Measure completed outcomes, rework and actual usage
+across all participants; use available `/cost` and `/usage` evidence.

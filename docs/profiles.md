@@ -11,6 +11,9 @@ your agents.
 policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
 explains its use and the contextual selection rules. Both ship with the release.
 This is configuration and agent guidance, not a scheduler that intercepts tool calls.
+The [orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
+defines action selection, open obligations, and completion; profiles recommend the
+model and effort for an action within those requirements.
 
 ## Standard
 
@@ -25,16 +28,20 @@ Use when the requirements and solution are sufficiently described. GPT-6.1 Sol h
 owns orchestration, GPT-6 Luna owns read-only lookups (Sol when judgment is needed),
 Sol implements at xhigh, Sol high independently reviews complete blocks, and Astra
 high accepts major stages. A bounded open decision can still receive Astra high
-assistance. The Sol orchestrator is a deliberate cost choice: it holds the longest
-context and costs about five times less per token than Astra; the places where
-Astra's reasoning changes the outcome keep Astra.
+assistance. The Sol orchestrator is a deliberate cost choice for the longest
+context: the per-token input/output prices recorded on 2026-10-08 give a 5:1
+Astra-to-Sol ratio. That historical price ratio does not establish current pricing
+or the full cost of a completed result. Stage acceptance and uncertain design keep
+their recommended Astra roles.
 
 ## Enhanced
 
 The same workers, block reviewers, and acceptance flow remain. Astra high orchestrates
 and owns bounded uncertain design or algorithm work. Once a contract is clear, ordinary
-implementation and consumer migration return to Sol. Use xhigh/max only with a
-stated unresolved question and expected benefit, respecting the user's limits.
+implementation and consumer migration return to Sol. Raising **Astra above high**
+to xhigh/max requires a stated unresolved question and expected benefit, respecting
+the user's limits. Sol workers and Luna audit roles still use their
+profile's xhigh setting; the ordinary worker ladder to Astra high is unchanged.
 
 The distinction is solution uncertainty. Many lines of code, a long runtime, or a
 sophisticated algorithm do not automatically require Enhanced.
@@ -49,19 +56,31 @@ per block; a block that exhausts it moves to Sol xhigh, then to Astra.
 
 ## Worker ladder and handoff
 
-| Tier | Per run (BUDGET) | Runs | Token ceiling | Next tier |
+| Tier | Tool-call budget/run | Implementation runs/block | Token ceiling/tier/block | Next tier |
 | --- | --- | --- | --- | --- |
 | Luna | 600 tool calls | 3 | 400k | Sol xhigh |
-| Sol | none | 3 | 500k | Astra high |
-| Astra | none | 3 | none | the cooperator re-plans or asks you |
+| Sol | no kit cap | 3 | 500k | Astra high |
+| Astra | no kit cap | 3 | none | the cooperator re-plans or asks you |
 
-Tokens are summed over one worker's runs on one block; the ceiling applies even
-when runs are left. A worker at its limit returns `STATUS: handoff` with DONE,
-STOPPED_AT, TRIED, OPEN, and NEXT. The cooperator treats an exhausted tier as
-evidence the block is hard: it reads the handoff, decides the APPROACH (same
-path with more effort, a different route, or a split or re-scoped block), and
-spawns the next tier fresh with the original packet, APPROACH, and HANDOFF only.
-Earlier reports, audit rounds, and transcripts stay with the cooperator.
+Count each implementation start or continuation, including fixes after submission,
+against the same tier and block. A request only to return HANDOFF is not another
+implementation run, but its known usage still counts. Blockage, submission, handoff,
+or work on a new block does not erase earlier counters or open obligations. A
+submitted result can proceed to verification at the limit; further implementation
+needs remaining budget or the permitted handoff.
+
+Use confirmed usage with a known run scope. Partial usage is a measured lower
+bound, and unknown usage is not zero; session totals need a valid baseline before
+they can represent one run. When complete usage is unavailable, retain run counts
+and disclose that exact token-ceiling compliance cannot be established. Token and
+tool-call budgets are instruction-level limits, separate from native runtime limits.
+
+An exhausted tier returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED, OPEN, and
+NEXT. The cooperator diagnoses the cause, restores any missing prerequisite, and
+chooses the APPROACH before starting a permitted successor with the original packet,
+APPROACH, and HANDOFF only. Earlier reports, audit rounds, and transcripts stay with
+the cooperator. The [dispatch reference](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
+defines the detailed budget and auditor handoff rules.
 
 ## Selection contract
 
@@ -94,11 +113,12 @@ fifth remains analysis-only.
 
 ## Actual model settings
 
-Current Codex CLI supports named config layers. The kit installs two optional layers:
+Current Codex CLI supports named config layers. The kit installs three optional layers:
 
 ```sh
 codex -p workforce-standard
 codex -p workforce-enhanced
+codex -p workforce-economy
 ```
 
 Launching one is an explicit profile choice. It sets the root model/effort for that
@@ -119,37 +139,25 @@ setting or an accepted fallback before dependent work. Do not claim exact routin
 The orchestrator is the cooperator: it cooperates agents so that they do the
 work. After a worker submits a block, the cooperator chooses what happens next.
 
-```text
-Worker submits a block
-  │
-  ▼
-Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, up to 3 rounds
-  b) no audit                      → next work to the worker
-  c) next block to the worker      → and auditors in parallel on
-                                     1, 2, 3 or N submitted blocks
-
-Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
-they find through one lens each: docs, task, conventions.
-Round 1 runs every lens. Then each lens plays on its own:
-real findings → that lens won, the same worker fixes, only winners
-                play the next round;
-nothing real  → that lens lost and is retired for this block.
-Every lens lost (or round 3 done) → the block passes the audit.
-A round ends only when each auditor has read all its files; an auditor
-that hits its turn limit is continued where it stopped, never replaced.
-The cooperator takes only real findings; theoretical, hypothetical, and
-out-of-scope ones are rejected.
-```
+It can audit the submitted block, proceed without an optional audit, or audit
+submitted blocks while workers continue compatible work. The orchestration skill
+sets the snapshot and dependency conditions for parallel work.
 
 Auditors report everything they find with `file:line` and the rule or document
 behind it. The cooperator judges each finding: it is real when it is in the
 diff or caused by it, breaks a named rule, document, or acceptance line, and
-reproduces by a check or a concrete scenario. Real findings go to the same
-worker as one bundle. Only the lenses that won a round play the next one, with
-what was accepted and what was rejected; a lens that found nothing real is
+reproduces by a check or a concrete scenario. Real findings go to the responsible
+worker as one bundle, reusing the same worker within budget. Only the lenses that
+won a round play the next one, with what was accepted and what was rejected;
+a lens that found nothing real is
 retired for that block. The reviewer then reads the diff together with
 the audit log.
+
+A round completes only after every assigned lens has read all its files. Continue
+partial coverage with the same auditor within budget; the token-ceiling handoff is
+an explicit exception. Three rounds end the audit game, not unresolved findings,
+required checks, or other task obligations. The block is ready for acceptance only
+when those obligations have evidence of closure.
 
 ## Complete blocks, proportional verification
 
@@ -160,7 +168,7 @@ Independent review happens after a substantial block is ready, not after every e
 A minimal isolated test can establish a component contract; it cannot by itself
 prove a real consumer was switched. An inventory can support planning; it cannot
 stand in for implementation. Review reports state the scope they actually prove.
-Findings return to the same owner as one packet, followed by affected checks and
+Findings return to the same owner within budget, followed by affected checks and
 review of the correction's impact. Required project acceptance gates still apply.
 
 ## What the research does and does not establish

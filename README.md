@@ -14,8 +14,12 @@ than it looked, and accepts. Agents implement, look things up, audit, and
 review. The cooperator is meant to think, not to forward results.
 
 No API proxy, background service, or task-management engine: an instruction
-pack with a Node.js installer. It does not guarantee model behavior or lower
-cost. Independent community project; not affiliated with Anthropic or OpenAI.
+pack with a Node.js installer. Routing and token budgets are instruction policy,
+not runtime enforcement; model behavior and cost savings are not guaranteed.
+Independent community project; not affiliated with Anthropic or OpenAI.
+
+Working draft: **1.4.0**, with Codex policy **1.8.0** and Claude policy **1.6.0**.
+See the [unreleased changes](CHANGELOG.md).
 
 ## Install
 
@@ -41,29 +45,34 @@ commands `claude-workforce` and `codex-workforce` still work.
 
 ## How work flows
 
-```text
-Task
-  │
-  ▼
-Cooperator: read the repository's rules, classify, pick a profile
-  direct   → it does the work itself, no agents
-  build    → one block
-  pipeline → a plan of blocks with disjoint write sets
-  │
-  ▼
-per block:
-  probe (when a fact is missing) → worker → submitted
-  worker exhausts its budget (3 runs or the token ceiling)
-     → HANDOFF → cooperator analyzes it and decides the approach
-     → next tier starts fresh with packet + APPROACH + HANDOFF only
-  after submission the cooperator chooses:
-     a) audit this block             → auditors, up to 3 rounds
-     b) no audit                     → next work to the worker
-     c) next block to the worker     → and auditors in parallel on 1..N blocks
-  review (diff + audit log) → real findings → the same worker
-  │
-  ▼
-stage acceptance (pipeline) → report
+**Route Decision** chooses the next allowed action by the expected full cost of
+reaching the agreed, verified and delivered outcome. Permissions, explicit user
+constraints and applicable mandatory rules come first. For build/pipeline work,
+the cooperator keeps one task record with current evidence, `OPEN` obligations,
+ownership and budgets; handoff or an audit limit never clears unfinished work.
+It reuses evidence while its relevant conditions hold and repeats affected checks
+when they change. Profiles recommend model/effort for those actions. The
+[Codex](payload/codex/skills/workforce-orchestrate/SKILL.md#route-decision) and
+[Claude](payload/claude/skills/workforce-orchestrate/SKILL.md#route-decision)
+orchestration skills define the transitions; [research](docs/research.md) records
+their rationale and limits. This policy has no measured savings claim.
+
+```mermaid
+flowchart TD
+  A["Task and repository rules"] --> B{"Work class"}
+  B -->|direct| C["Inline work and checks"]
+  B -->|build or pipeline| D["Owned worker block"]
+  D --> E{"Submitted result?"}
+  E -->|No, within budget| D
+  E -->|No, budget exhausted| F["Handoff, diagnosis and approach"]
+  F -->|Prerequisites ready; next tier allowed| D
+  E -->|Yes| G["Chosen checks, audit and review"]
+  G --> H{"Open required work?"}
+  H -->|Missing evidence| G
+  H -->|Fixes within allowed budget| D
+  H -->|No| I["Block or stage acceptance"]
+  I --> J["Deliver verified result"]
+  C --> J
 ```
 
 **Audit game.** Auditors on a cheap model at xhigh effort read a block
@@ -71,14 +80,16 @@ through one lens each: docs, task, conventions. They report everything; the
 cooperator keeps only real findings (in the diff, breaking a quoted rule or
 document line, reproducible). A lens with real findings wins the round and
 plays again; a lens with nothing real loses and is retired for that block.
+Three rounds end the audit game; accepted findings and required checks still
+need evidence of closure before acceptance.
 
-**Worker ladder.** A worker that uses up three runs, or its token ceiling
-even with runs left, has shown the block is hard. It returns a HANDOFF (done,
+**Worker ladder.** A worker that reaches its budget returns a HANDOFF (done,
 where it stopped, what it tried, what is open, what it would do next). The
-cooperator reads it, decides whether to continue the same path with more
-effort, take another route, or split and re-scope the block, and gives the
-next tier a fresh packet with that APPROACH and the HANDOFF. Earlier reports,
-audit rounds, and transcripts stay with the cooperator.
+cooperator diagnoses the cause, restores missing prerequisites, and chooses
+APPROACH before starting a permitted next tier with a fresh packet and the
+HANDOFF. A submitted result proceeds to verification at the limit; further
+implementation needs an eligible owner. Spent budgets and open obligations
+persist. Earlier reports, audit rounds, and transcripts stay with the cooperator.
 
 ## Claude Code
 
@@ -90,15 +101,21 @@ audit rounds, and transcripts stay with the cooperator.
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Auditor (up to 3 rounds) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
 | Block review | `opus` high | `opus` high | Codex GPT-6.1 Sol xhigh |
-| Stage acceptance | `opus` high | `fable` high | Codex GPT-6.1 Sol xhigh |
+| Stage acceptance | `opus` high | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
 
 Worker budgets per block: `haiku` 120 tool calls per run, 3 runs (360), 400k
 tokens; `sonnet` and Codex Sol 3 runs, 500k tokens; `opus` 3 runs, then the
-cooperator re-plans or asks you. Aliases resolve to Fable 5.1, Opus 5.5,
-Sonnet 5.5, and Haiku 5.5 on the Claude API (checked 2026-10-08). Hybrid runs
+cooperator re-plans or asks you. Native turn limits are separate from tool-call
+budgets. Alias resolutions dated 2026-10-08 are recorded in `profiles.json`;
+actual availability and routing depend on the runtime and account. Hybrid runs
 only when you choose it and needs the `codex` CLI; Codex runs go through the
 bundled `codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns
 nothing. Details: [docs/claude-code.md](docs/claude-code.md).
+
+Hybrid JSON consumers must check `tokens.status` (`known`, `partial`, `unknown`)
+before using counters. Unknown values are `null`; a partial run total is only a
+measured lower bound. `tokens.threadTotal` is an observed thread snapshot, not an
+additional run charge. A resumed run without a baseline has unknown run usage.
 
 ## Codex
 
