@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Per-cell metrics from the raw logs: wall time, tool calls by name, model requests, tokens
 // (input, cache write, cache read, output, thinking), agents with model and effort, skills and
-// kit files read, waits, messages, handoffs, and the suite's quality check.
+// kit files read, waits, messages, handoffs, the suite's quality check, and what the agent committed.
 // usage: metrics.mjs <run-dir>   writes <run-dir>/metrics.json
 import fs from 'node:fs';
 import path from 'node:path';
@@ -122,6 +122,7 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   };
   res.totals.inputTotal = res.totals.input + (res.totals.cacheWrite ?? 0) + res.totals.cacheRead;
   res.quality = fs.existsSync(path.join(dir, 'check.json')) ? JSON.parse(read(path.join(dir, 'check.json')) || '{}') : {};
+  if (fs.existsSync(path.join(dir, 'git.json'))) Object.assign(res.quality, JSON.parse(read(path.join(dir, 'git.json')) || '{}'));
   cells.push(res);
 }
 fs.writeFileSync(path.join(out, 'metrics.json'), JSON.stringify({ run: path.basename(out), suite: read(path.join(out, 'suite.txt')), variants: read(path.join(out, 'variants.txt')).split('\n'), cells }, null, 1));

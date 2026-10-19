@@ -27,16 +27,13 @@ for v in "${VARIANTS[@]}"; do
   [[ -d $OUT/kits/$name ]] || git -C $KIT_REPO worktree add -q --detach $OUT/kits/$name $commit
 done
 
-# The kit is installed into each Claude checkout's .claude/; keep it out of the agents' git status.
-EXCLUDE=$(git -C $REPO rev-parse --path-format=absolute --git-common-dir)/info/exclude
-ADDED_EXCLUDE=
-grep -qx '/.claude/' $EXCLUDE 2>/dev/null || { echo '/.claude/' >> $EXCLUDE; ADDED_EXCLUDE=1; }
-
+# Interleaved: within a repeat, the variants of one task and model run side by side,
+# so they share the same load and time of day.
 cells=()
-for task in "${TASKS[@]}"; do
-  for model in "${MODELS[@]}"; do
-    for v in "${VARIANTS[@]}"; do
-      for r in $(seq 1 $REPEATS); do
+for r in $(seq 1 $REPEATS); do
+  for task in "${TASKS[@]}"; do
+    for model in "${MODELS[@]}"; do
+      for v in "${VARIANTS[@]}"; do
         cells+=("$task ${v%%=*} $model $r")
       done
     done
@@ -49,8 +46,6 @@ for v in "${VARIANTS[@]}"; do
   [[ $v == nokit ]] || git -C $KIT_REPO worktree remove --force $OUT/kits/${v%%=*}
 done
 git -C $KIT_REPO worktree prune
-git -C $REPO worktree prune
-[[ -n $ADDED_EXCLUDE ]] && sed -i '' '/^\/\.claude\/$/d' $EXCLUDE
 [[ -n ${DRY:-} ]] && { echo "dry run: set up and cleaned up ${#cells[@]} cells"; exit 0; }
 node $BENCH/metrics.mjs $OUT
 node $BENCH/report.mjs $OUT

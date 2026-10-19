@@ -1,5 +1,5 @@
 #!/bin/zsh
-# One benchmark cell: isolated checkout and kit, one agent run, the suite's quality check.
+# One benchmark cell: isolated repository and kit, one agent run, the suite's quality check.
 # usage: cell.sh <out> <suite> <task> <variant-name> <model> <repeat>
 set -uo pipefail
 OUT=$1; SUITE=$2; TASK=$3; VARIANT=$4; MODEL=$5; REPEAT=$6
@@ -13,7 +13,16 @@ BRANCH=bench/${OUT:t}/$ID
 mkdir -p $LOG $HOMES
 echo "$TASK $VARIANT $MODEL $REPEAT" > $CELL/cell.txt
 
-git -C $REPO worktree add -q -b $BRANCH $WT $BASE
+# A fresh repository with only the task's base commit and its history: no other branches,
+# no remote, no results of other cells. BASE_<task> in the suite overrides BASE.
+TASK_BASE=BASE_$TASK
+BASE=$(git -C $REPO rev-parse "${(P)TASK_BASE:-$BASE}^{commit}")
+git init -q $WT
+git -C $WT fetch -q --no-tags $REPO $BASE
+git -C $WT checkout -q -b $BRANCH $BASE
+rm -f $WT/.git/FETCH_HEAD
+# The kit is installed into each Claude checkout's .claude/; keep it out of the agents' git status.
+echo '/.claude/' >> $WT/.git/info/exclude
 (cd $WT && zsh $SUITE/setup.sh $REPO)
 
 KIT=$OUT/kits/$VARIANT
@@ -86,12 +95,15 @@ if [[ -z ${DRY:-} ]]; then
     mkdir -p $LOG/rollouts
     find $HOMES/codex/sessions -name '*.jsonl' -exec cp {} $LOG/rollouts/ \; 2>/dev/null
   fi
+  # What the agent left: commits on top of the base and uncommitted files, before the check builds.
+  printf '{"Коммитов":%d,"Незакоммичено файлов":%d}\n' $(git -C $WT rev-list --count $BASE..HEAD) $(git -C $WT status --porcelain | wc -l) > $CELL/git.json
   (cd $WT && zsh $SUITE/checks/$TASK.sh $REPO $BASE) > $CELL/check.json 2> $CELL/check.stderr
   git -C $WT diff --stat $BASE HEAD > $CELL/diffstat.txt
+  git -C $WT diff $BASE HEAD > $CELL/diff.patch
+  # The result also stays on a branch of the target repository (local; nothing is pushed elsewhere).
+  git -C $WT push -q $REPO +HEAD:refs/heads/$BRANCH
 fi
 
 rm -f $HOMES/codex/auth.json
-git -C $REPO worktree remove --force $WT
 rm -rf $WORK
-[[ -n ${DRY:-} ]] && git -C $REPO branch -D $BRANCH >/dev/null
 echo "cell $ID done"

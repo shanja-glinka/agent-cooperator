@@ -18,7 +18,8 @@ const ROWS = [
   ['Вызовы инструментов: кооператор', (c) => c.totals.toolCallsCooperator, k], ['Вызовы инструментов: агенты', (c) => c.totals.toolCallsAgents, k],
   ['Вызовы инструментов', (c) => c.totals.toolCalls, k], ['Запросы к модели', (c) => c.totals.requests, k],
   ['Вход без кэша', (c) => c.totals.input, k], ['Запись в кэш', (c) => c.totals.cacheWrite, k], ['Чтение кэша', (c) => c.totals.cacheRead, k],
-  ['Вход всего', (c) => c.totals.inputTotal, k], ['Выход', (c) => c.totals.output, k], ['Мышление', (c) => c.totals.thinking, k],
+  ['Вход всего', (c) => c.totals.inputTotal, k], ['Вход на запрос', (c) => (c.totals.requests ? c.totals.inputTotal / c.totals.requests : null), k],
+  ['Выход', (c) => c.totals.output, k], ['Мышление', (c) => c.totals.thinking, k],
   ['Handoff', (c) => c.handoffs, k], ['Сообщения агентам', (c) => c.messagesToAgents, k], ['Сообщения от агентов', (c) => c.messagesFromAgents, k],
   ['sleep / wait_agent', null, null], ['Чтений файлов кита', (c) => Object.values(c.kitFiles).reduce((a, b) => a + b, 0), k],
 ];

@@ -17,10 +17,13 @@ suite has run.
    gaps afterwards.
 3. **Nothing changes during a run.** Do not edit the kit while it is being
    measured. A fix makes a new version and a new run.
-4. **Same conditions.** Isolated checkout per cell outside the home directory, the
-   kit installed only into that cell, no user skills, agents, MCP servers, or
-   private instruction files, the user's own `maxTurns` limits applied to the kit
-   roles, the same task text for every variant.
+4. **Same conditions.** A fresh repository per cell outside the home directory,
+   holding only the task's base commit and its history (no other branches, no
+   remote, no results of other cells); the kit installed only into that cell; no
+   user skills, agents, MCP servers, or private instruction files; the user's own
+   `maxTurns` limits applied to the kit roles; the same task text for every
+   variant. Within each repeat, the variants of one task and model run side by
+   side, so they share the same load and time of day.
 5. **Repeats.** At least two repeats per cell when a decision depends on the
    result; single runs vary by up to about 60% in time and 40% in input.
    A difference smaller than the spread between repeats is not a result.
@@ -41,10 +44,10 @@ The run directory `evaluation/runs/<date>-<label>/` gets:
 - `METRICS.md` — every metric for every variant;
 - `metrics.json` — full data per cell, per agent, and per tool;
 - `cells/<task>-<variant>-<model>-r<n>/` — logs, Claude transcripts or Codex
-  rollouts, the quality check, and the diff summary.
+  rollouts, the quality check, what the agent committed, and the diff.
 
 Each cell leaves its result on a branch `bench/<run>/<cell>` in the target
-repository.
+repository (a local push from the cell's repository).
 
 ## Metrics
 
@@ -54,13 +57,13 @@ Per cell and per agent:
 - number of agents;
 - tool calls (cooperator, agents, total);
 - model requests;
-- input without cache, cache writes, cache reads, total input;
+- input without cache, cache writes, cache reads, total input, input per request;
 - output and thinking tokens;
 - handoffs;
 - messages to and from agents;
 - `sleep`/`wait_agent`;
 - kit files read;
-- the suite's quality fields.
+- the suite's quality fields, plus commits made and files left uncommitted.
 
 Claude numbers come from the session transcripts. Codex numbers come from the
 rollout files; Codex does not report cache writes.
@@ -80,9 +83,11 @@ change, and why; then an overall verdict, including what the run did not test.
 
 A suite directory holds:
 
-- `suite.env` with `REPO`, `BASE`, `TASKS=(…)`, and optional `BENCH_MAXTURNS`;
+- `suite.env` with `REPO`, `BASE`, `TASKS=(…)`, optional `BASE_<task>` for a task
+  with its own base commit, and optional `BENCH_MAXTURNS`;
 - `setup.sh`, run inside each fresh checkout (for example, to provide
   dependencies);
 - `tasks/<task>.txt`, the prompt, where `{BRANCH}` becomes the cell's branch;
 - `checks/<task>.sh`, run inside the finished checkout, which prints one JSON object
-  of quality fields.
+  of quality fields. Hidden acceptance tests stay in the suite and are copied into
+  the checkout only by the check, after the agent has finished.
