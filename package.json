@@ -9,7 +9,7 @@
     "claude-workforce": "./bin/claude-workforce.js"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test \"test/*.test.js\""
   },
   "engines": {
     "node": ">=22"
