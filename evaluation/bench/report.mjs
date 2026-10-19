@@ -7,6 +7,12 @@ import path from 'node:path';
 
 const out = process.argv[2];
 const data = JSON.parse(fs.readFileSync(path.join(out, 'metrics.json'), 'utf8'));
+// Whether each cell kept its /tmp to itself (isolation.mjs), shown with the quality fields.
+const ISO = { clean: 'чисто', shared: 'общий файл', crossed: 'чтение чужого', container: 'свой контейнер' };
+if (fs.existsSync(path.join(out, 'isolation.json'))) {
+  const iso = JSON.parse(fs.readFileSync(path.join(out, 'isolation.json'), 'utf8'));
+  for (const c of data.cells) if (iso[c.id]) c.quality = { ...c.quality, 'Изоляция /tmp': ISO[iso[c.id].status] ?? iso[c.id].status };
+}
 const names = data.variants.map((v) => v.split('=')[0]);
 const kits = names.filter((n) => n !== 'nokit');
 const [prev, next] = [kits.at(-2), kits.at(-1)];
