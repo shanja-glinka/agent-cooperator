@@ -62,11 +62,23 @@ elif [[ -d $KIT ]]; then
   done
 fi
 
+# The agent's command. env takes its -u options before the first NAME=VALUE; every process the
+# agent starts inherits BENCH_CELL, so the ones it leaves behind can be found.
+CLEAN=(-u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_MESSAGING_SOCKET -u CLAUDE_CODE_MESSAGING_TOKEN -u CLAUDE_CODE_SESSION_ATTENDED -u CLAUDE_PID -u CLAUDE_EFFORT -u CLAUDE_CODE_ENTRYPOINT)
+if [[ $MODEL == opus ]]; then
+  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=$CLAUDE_DIR ${CLAUDE_BIN:-claude})
+  # A Claude project directory left from an earlier cell with the same path would carry its
+  # sessions and memory into this one.
+  STALE=$CLAUDE_DIR/projects/${WT//[^A-Za-z0-9]/-}
+  [[ -e $STALE ]] && { echo "$STALE exists" > $LOG/stale-project.txt; echo "cell $ID: stale Claude project dir $STALE" >&2; rm -rf $WORK; exit 1; }
+else
+  AGENT=(env $CLEAN -u CLAUDE_CONFIG_DIR BENCH_CELL=$ID HOME=$HOMES/home CODEX_HOME=$HOMES/codex ${CODEX_BIN:-codex})
+fi
+# A dry run starts the same command, only with --version.
+[[ -n ${DRY:-} ]] && { (cd $WT && $AGENT --version) > $LOG/dry-agent.txt 2>&1 || echo "cell $ID: the agent command does not start: $(<$LOG/dry-agent.txt)" >&2; }
+
 if [[ -z ${DRY:-} ]]; then
   PROMPT=$(sed "s#{BRANCH}#$BRANCH#g" $SUITE/tasks/$TASK.txt)
-  CLEAN=(-u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_MESSAGING_SOCKET -u CLAUDE_CODE_MESSAGING_TOKEN -u CLAUDE_CODE_SESSION_ATTENDED -u CLAUDE_PID -u CLAUDE_EFFORT -u CLAUDE_CODE_ENTRYPOINT)
-  # Every process the agent starts inherits BENCH_CELL, so the ones it leaves behind can be found.
-  MARK=(BENCH_CELL=$ID)
   date -u +%FT%TZ > $LOG/start.txt
   cd $WT
   if [[ $MODEL == opus ]]; then
@@ -74,13 +86,13 @@ if [[ -z ${DRY:-} ]]; then
     SID=$(uuidgen | tr A-Z a-z); echo $SID > $LOG/session-id.txt
     # Live logs of this cell, read by tmpclean.mjs of the cells that finish meanwhile.
     print -l "file $LOG/claude.stream.jsonl" "claude $CLAUDE_DIR $SID" > $OUT/running/$ID
-    env $CLEAN $MARK DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=$CLAUDE_DIR ${CLAUDE_BIN:-claude} -p "$PROMPT" --session-id $SID --model opus --effort medium \
+    $AGENT -p "$PROMPT" --session-id $SID --model opus --effort medium \
       --setting-sources project,local --dangerously-skip-permissions --strict-mcp-config --output-format stream-json --verbose \
       --forward-subagent-text --max-budget-usd 60 < /dev/null > $LOG/claude.stream.jsonl 2> $LOG/claude.stderr &
   else
     print -l "file $LOG/codex.events.jsonl" "dir $HOMES/codex/sessions" > $OUT/running/$ID
     PROFILE=(); [[ -d $KIT ]] && PROFILE=(-p workforce-standard)
-    env $CLEAN $MARK -u CLAUDE_CONFIG_DIR HOME=$HOMES/home CODEX_HOME=$HOMES/codex ${CODEX_BIN:-codex} exec --json $PROFILE -C $WT \
+    $AGENT exec --json $PROFILE -C $WT \
       --dangerously-bypass-approvals-and-sandbox -o $LOG/codex.last.md "$PROMPT" < /dev/null > $LOG/codex.events.jsonl 2> $LOG/codex.stderr &
   fi
   PID=$!

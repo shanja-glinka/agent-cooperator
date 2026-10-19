@@ -25,6 +25,8 @@ export CODEX_BIN=${commands[codex]:A}
 [[ $($CODEX_BIN --version) == *" ${CODEX_VERSION:?suite.env sets CODEX_VERSION}" ]] || { echo "codex is $($CODEX_BIN --version), the suite names $CODEX_VERSION"; exit 1; }
 
 OUT=$KIT_REPO/evaluation/runs/$(date +%F)-$LABEL
+# A run directory holds one run: cells of an earlier attempt would mix into the metrics.
+[[ -n $(ls $OUT/cells 2>/dev/null) ]] && { echo "$OUT already has cells; use another label"; exit 1; }
 mkdir -p $OUT/cells $OUT/kits $OUT/running
 printf '%s\n' "$SUITE" > $OUT/suite.txt
 printf '%s\n' "${VARIANTS[@]}" > $OUT/variants.txt
