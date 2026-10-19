@@ -4,3 +4,5 @@ coverage/
 .tap/
 *.log
 AGENTS.md
+# Live run records can contain private project details; they stay local.
+evaluation/runs/
