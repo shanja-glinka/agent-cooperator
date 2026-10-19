@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 // Per-cell metrics from the raw logs: wall time, tool calls by name, model requests, tokens
 // (input, cache write, cache read, output, thinking), agents with model and effort, skills and
-// kit files read, waits, messages, handoffs, the suite's quality check, and what the agent committed.
-// usage: metrics.mjs <run-dir>   writes <run-dir>/metrics.json
+// kit files read, kit text the cooperator received, waits, messages, handoffs, the suite's quality
+// check, and what the agent committed.
+// usage: metrics.mjs <run-dir> [<out-file>]   writes <out-file>, by default <run-dir>/metrics.json
 import fs from 'node:fs';
 import path from 'node:path';
 
 const out = process.argv[2];
+const target = process.argv[3] ?? path.join(out, 'metrics.json');
+const textLength = (v) => (typeof v === 'string' ? v.length : Array.isArray(v) ? v.reduce((a, x) => a + textLength(x.text ?? x.content ?? ''), 0) : v ? JSON.stringify(v).length : 0);
 const jsonl = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').split('\n').filter(Boolean).flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } }) : []);
 const read = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').trim() : '');
 const secs = (a, b) => Math.round((new Date(b) - new Date(a)) / 1000);
@@ -24,9 +27,16 @@ function claude(logs, res) {
   const tdir = path.join(logs, 'transcripts');
   const files = fs.existsSync(tdir) ? fs.readdirSync(tdir) : [];
   const actor = (file, meta) => {
-    const msgs = new Map(); const tools = {}; const ids = new Set(); let first = null; let last = null;
+    const msgs = new Map(); const tools = {}; const ids = new Set(); const kitReads = new Set(); let first = null; let last = null;
     for (const l of jsonl(path.join(tdir, file))) {
       if (l.timestamp) { first ??= l.timestamp; last = l.timestamp; }
+      // The cooperator's kit text: a skill Claude Code inserts into the context, and kit files it reads.
+      if (!meta && l.type === 'user') {
+        for (const c of Array.isArray(l.message?.content) ? l.message.content : [{ type: 'text', text: String(l.message?.content ?? '') }]) {
+          if (c.type === 'text' && /^Base directory for this skill: .*\/skills\/workforce-/.test(c.text ?? '')) res.kitChars += c.text.length;
+          if (c.type === 'tool_result' && kitReads.has(c.tool_use_id)) res.kitChars += textLength(c.content);
+        }
+      }
       if (l.type !== 'assistant') continue;
       const u = l.message?.usage; const id = l.message?.id;
       if (id && u) msgs.set(id, { in: u.input_tokens ?? 0, cw: u.cache_creation_input_tokens ?? 0, cr: u.cache_read_input_tokens ?? 0, out: Math.max(msgs.get(id)?.out ?? 0, u.output_tokens ?? 0) });
@@ -37,7 +47,7 @@ function claude(logs, res) {
         if (!meta && c.name === 'SendMessage') res.messagesToAgents += 1;
         if (c.name === 'Skill') res.skills.push(c.input.skill ?? c.input.name);
         const k = kitFile(String(c.input?.file_path ?? c.input?.command ?? ''));
-        if (k) res.kitFiles[k] = (res.kitFiles[k] ?? 0) + 1;
+        if (k) { res.kitFiles[k] = (res.kitFiles[k] ?? 0) + 1; if (!meta) kitReads.add(c.id); }
       }
     }
     const sum = { requests: msgs.size, input: 0, cacheWrite: 0, cacheRead: 0, output: 0 };
@@ -64,10 +74,14 @@ function codex(logs, res) {
     const dev = lines.filter((l) => l.type === 'response_item' && l.payload?.role === 'developer').flatMap((l) => l.payload.content ?? []).map((c) => c.text ?? '').join('\n');
     const counts = lines.filter((l) => l.type === 'event_msg' && l.payload?.type === 'token_count' && l.payload.info?.total_token_usage);
     const t = counts.at(-1)?.payload.info.total_token_usage ?? {};
-    const tools = {};
+    const tools = {}; const kitReads = new Set();
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
     for (const l of lines) {
       const p = l.payload ?? {};
+      // The cooperator's kit text: the full output of each command that read a kit file
+      // (an upper bound when the same command also read other files).
+      if (isMain && l.type === 'response_item' && (p.type === 'custom_tool_call' || p.type === 'function_call') && /skills\/workforce-[a-z-]+\/(SKILL\.md|references\/)|codex-workforce\/profiles\.json/.test(String(p.input ?? p.arguments ?? ''))) kitReads.add(p.call_id);
+      if (isMain && l.type === 'response_item' && (p.type === 'custom_tool_call_output' || p.type === 'function_call_output') && kitReads.has(p.call_id)) res.kitChars += textLength(p.output);
       if (l.type === 'response_item' && p.type === 'function_call') {
         add(p.name);
         let args = {}; try { args = JSON.parse(p.arguments); } catch {}
@@ -109,7 +123,7 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   const dir = path.join(out, 'cells', id);
   const [task, variant, model, repeat] = read(path.join(dir, 'cell.txt')).split(' ');
   const logs = path.join(dir, 'logs');
-  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0 } };
+  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0 } };
   res.exitCode = Number(read(path.join(logs, 'exit.txt')) || NaN);
   res.wallSeconds = secs(read(path.join(logs, 'start.txt')), read(path.join(logs, 'end.txt')));
   if (model === 'opus') claude(logs, res); else codex(logs, res);
@@ -125,5 +139,5 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   if (fs.existsSync(path.join(dir, 'git.json'))) Object.assign(res.quality, JSON.parse(read(path.join(dir, 'git.json')) || '{}'));
   cells.push(res);
 }
-fs.writeFileSync(path.join(out, 'metrics.json'), JSON.stringify({ run: path.basename(out), suite: read(path.join(out, 'suite.txt')), variants: read(path.join(out, 'variants.txt')).split('\n'), cells }, null, 1));
-console.log(`metrics: ${cells.length} cells -> ${path.join(out, 'metrics.json')}`);
+fs.writeFileSync(target, JSON.stringify({ run: path.basename(out), suite: read(path.join(out, 'suite.txt')), variants: read(path.join(out, 'variants.txt')).split('\n'), cells }, null, 1));
+console.log(`metrics: ${cells.length} cells -> ${target}`);

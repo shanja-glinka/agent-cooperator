@@ -4,15 +4,11 @@
 // usage: baseline.mjs <run-dir>   writes BASELINE.md and baseline.json
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadRun } from './load.mjs';
 
 const out = process.argv[2];
-const data = JSON.parse(fs.readFileSync(path.join(out, 'metrics.json'), 'utf8'));
-// Whether each cell kept its /tmp to itself (isolation.mjs), shown with the quality fields.
-const ISO = { clean: 'чисто', shared: 'общий файл', crossed: 'чтение чужого', container: 'свой контейнер' };
-if (fs.existsSync(path.join(out, 'isolation.json'))) {
-  const iso = JSON.parse(fs.readFileSync(path.join(out, 'isolation.json'), 'utf8'));
-  for (const c of data.cells) if (iso[c.id]) c.quality = { ...c.quality, 'Изоляция /tmp': ISO[iso[c.id].status] ?? iso[c.id].status };
-}
+// The run's cells with their isolation status, and the cells it takes from an earlier run.
+const data = loadRun(out);
 const k = (n) => (n == null || Number.isNaN(n) ? '—' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : Number.isInteger(n) || n >= 100 ? String(Math.round(n)) : n.toFixed(1));
 const tm = (s) => (s == null || Number.isNaN(s) ? '—' : `${Math.floor(Math.round(s) / 60)}:${String(Math.round(s) % 60).padStart(2, '0')}`);
 const METRICS = [

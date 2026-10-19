@@ -4,15 +4,11 @@
 // usage: report.mjs <run-dir>
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadRun } from './load.mjs';
 
 const out = process.argv[2];
-const data = JSON.parse(fs.readFileSync(path.join(out, 'metrics.json'), 'utf8'));
-// Whether each cell kept its /tmp to itself (isolation.mjs), shown with the quality fields.
-const ISO = { clean: 'чисто', shared: 'общий файл', crossed: 'чтение чужого', container: 'свой контейнер' };
-if (fs.existsSync(path.join(out, 'isolation.json'))) {
-  const iso = JSON.parse(fs.readFileSync(path.join(out, 'isolation.json'), 'utf8'));
-  for (const c of data.cells) if (iso[c.id]) c.quality = { ...c.quality, 'Изоляция /tmp': ISO[iso[c.id].status] ?? iso[c.id].status };
-}
+// The run's cells with their isolation status, and the cells it takes from an earlier run.
+const data = loadRun(out);
 const names = data.variants.map((v) => v.split('=')[0]);
 const kits = names.filter((n) => n !== 'nokit');
 const [prev, next] = [kits.at(-2), kits.at(-1)];
@@ -28,6 +24,7 @@ const ROWS = [
   ['Выход', (c) => c.totals.output, k], ['Мышление', (c) => c.totals.thinking, k],
   ['Handoff', (c) => c.handoffs, k], ['Сообщения агентам', (c) => c.messagesToAgents, k], ['Сообщения от агентов', (c) => c.messagesFromAgents, k],
   ['sleep / wait_agent', null, null], ['Чтений файлов кита', (c) => Object.values(c.kitFiles).reduce((a, b) => a + b, 0), k],
+  ['Текст кита у кооператора, символов', (c) => c.kitChars ?? null, k],
 ];
 const cellsOf = (task, model, name) => data.cells.filter((c) => c.task === task && c.model === model && c.variant === name);
 const mean = (vals) => (vals.length && vals.every((v) => v != null) ? vals.reduce((a, b) => a + b, 0) / vals.length : null);
@@ -55,6 +52,9 @@ const modelName = (m) => (m === 'opus' ? 'Opus 5.5' : m === 'sol' ? 'GPT-6.1 Sol
 
 const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.variants.join(', ')}. Полные данные — metrics.json. Codex не отдаёт запись в кэш (—). При нескольких повторах — среднее (мин–макс).`, ''];
 const comparison = [`# Сравнение: ${data.run}`, '', `Без кита | ${prev ?? '—'} | ${next}. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс).`, ''];
+// Cells taken from an earlier run ran on another day and under that run's conditions.
+const from = data.prev ? `Колонки ${data.prev.variants.map((v) => label(v.split('=')[0])).join(' и ')} — из прогона ${data.prev.run}, не перезапускались: другой день, условия того прогона, своя пометка изоляции. Эти разницы — сравнение двух прогонов, а не одного.` : null;
+if (from) { metrics.push(from, ''); comparison.push(from, ''); }
 for (const task of tasks) for (const model of models) {
   const groups = names.map((n) => cellsOf(task, model, n));
   const qkeys = qualityRows(groups.flat());

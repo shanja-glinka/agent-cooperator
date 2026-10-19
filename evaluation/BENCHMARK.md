@@ -14,22 +14,32 @@ suite has run.
 2. **Full grid in one run.** Every task × model × variant × repeat runs in the same
    batch: no kit, the previous version, and the new version, on both runtimes
    (Opus 5.5 in Claude Code, GPT-6.1 Sol in Codex). No partial runs, no filling of
-   gaps afterwards.
+   gaps afterwards. When the user decides so, a run measures only the new version
+   on the full grid and takes the no-kit and previous-version cells from an earlier
+   run of the same suite (`PREV_RUN`); the comparison then names that run, and its
+   differences in day, conditions, and isolation are part of the result.
 3. **Nothing changes during a run.** Do not edit the kit while it is being
    measured. A fix makes a new version and a new run. A fix of the bench itself
    makes a new run of every variant, not only of the new version.
-4. **A cell of its own.** Each cell runs in a container of its own: its checkout,
-   holding only the task's base commit and its history (no other branches, no
-   remote, no results of other cells); its own `/tmp`, CLI homes, and processes,
-   all removed with the container. Agents choose absolute paths such as
-   `/tmp/ci.log` themselves, so separate checkouts on one host are not enough:
-   on 2026-10-19 cells running side by side read each other's CI logs.
+4. **A cell of its own, as far as the host allows.** Each cell has its own
+   checkout, holding only the task's base commit and its history (no other
+   branches, no remote, no results of other cells), and its own CLI homes. The
+   host's `/tmp` is shared, and agents choose absolute paths such as
+   `/tmp/ci.log` themselves: on 2026-10-19 cells running side by side read each
+   other's CI logs. So cells that start one after another differ in task; after
+   its agent ends, a cell stops the processes it left (they carry its
+   `BENCH_CELL` mark) and removes the `/tmp` files its commands named and changed,
+   unless a running cell names them too (`tmpclean.mjs`); `isolation.mjs` then
+   reads every command log for shared paths and for reads of what an earlier cell
+   left. This lowers the risk; it does not isolate. A comparison that involves a
+   marked cell is not an effect of the kit.
 5. **Same conditions.** The kit installed only into its cells; no user skills,
    agents, MCP servers (Claude Code runs with `--strict-mcp-config`, which also
    keeps out the account's claude.ai connectors), or private instruction files;
-   the user's own `maxTurns` limits applied to the kit roles; the same task text,
-   image, memory, and CPUs for every variant. Within each repeat, the variants of
-   one task and model run side by side, so they share the same time of day.
+   the user's own `maxTurns` limits applied to the kit roles; the same task text
+   and host for every variant; the CLI versions named in the suite, run as fixed
+   binaries with Claude Code's auto-update off, recorded in `versions.txt` and per
+   cell in `provenance.json`.
 6. **Repeats.** At least two repeats per cell when a decision depends on the
    result; single runs vary by up to about 60% in time and 40% in input.
    A difference smaller than the spread between repeats is not a result, and
@@ -40,18 +50,12 @@ suite has run.
 ## Run
 
 ```sh
-evaluation/bench/image.sh <suite-dir>                 # the cell image, once per CLI version
-evaluation/bench/selftest.sh <suite-dir> [--agents]   # isolation and evidence, before every run
 evaluation/bench/bench.sh <suite-dir> <label> nokit <prev>=<commit> <new>=<commit>
-# REPEATS=2 PARALLEL=<n> MODELS="opus sol" ...
+# REPEATS=3 PARALLEL=4 MODELS="opus sol" ...
 # DRY=1 sets up and removes every cell without starting agents.
+# PREV_RUN=<run dir> PREV_VARIANTS="nokit v4" bench.sh <suite-dir> <label> <new>=<commit>
+#   runs only the new version and compares it with those variants' cells of that run.
 ```
-
-`selftest.sh` checks, without starting an agent, that two running cells writing
-the same `/tmp` path each read their own file, that a removed cell leaves no
-file or process to the next one, that a failing CI stays failing and a pass on
-the second attempt is marked, and that a checkout arrives intact. With
-`--agents` it also asks each CLI for one short answer inside a cell.
 
 The run directory `evaluation/runs/<date>-<label>/` gets:
 
@@ -62,16 +66,20 @@ The run directory `evaluation/runs/<date>-<label>/` gets:
   the model did by itself, at what cost, and how it worked;
 - `ROUTES.md` — whom each cooperator started, with which role and model, the
   reason it gave just before, what the agent returned, and the final report;
-- `isolation.json` — whether each cell kept its `/tmp` to itself (for runs
-  before containers, `isolation.mjs` finds shared files in the command logs);
-- `image.txt` — the cell image and its id;
+- `isolation.json` — per cell: clean, a file shared with a cell running at the
+  same time, a read of another running cell's file, or a read of what an earlier
+  cell left (`isolation.mjs`, from the command logs);
+- `versions.txt` — the CLI binaries and versions the cells ran;
+- `prev.txt` and `prev-metrics.json` — with `PREV_RUN`: the earlier run and its
+  cells, recounted by the current `metrics.mjs` (the earlier run's own files are
+  not changed);
 - `cells/<task>-<variant>-<model>-r<n>/` — logs, Claude transcripts or Codex
   rollouts, `timeline.md`, the quality check with a log per CI attempt
   (`check-logs/`), what the agent committed, `provenance.json` (base, checked
-  head, image), and the diff.
+  head, CLI versions), `tmp-cleaned.json`, and the diff.
 
 Each cell leaves its result on a branch `bench/<run>/<cell>` in the target
-repository (fetched locally from a bundle).
+repository (local; nothing is pushed elsewhere).
 
 ## Metrics
 
@@ -86,8 +94,11 @@ Per cell and per agent:
 - handoffs;
 - messages to and from agents;
 - `sleep`/`wait_agent`;
-- kit files read (Claude Code receives the orchestrate skill in context without
-  reading a file, so this does not measure the instructions delivered);
+- kit files read, and the kit text the cooperator received in characters: the
+  skill Claude Code inserts into its context plus kit files it reads; for Codex
+  the output of the cooperator's commands that read kit files (an upper bound when
+  a command also read other files). The always-loaded instruction block is not
+  counted;
 - the suite's quality fields, plus commits made, files left uncommitted, and the
   cell's isolation.
 
@@ -116,14 +127,12 @@ A suite directory holds:
 
 - `suite.env` with `REPO`, `BASE`, `TASKS=(…)`, optional `BASE_<task>` for a task
   with its own base commit, `BENCH_MAXTURNS`, the CLI versions
-  (`CLAUDE_CODE_VERSION`, `CODEX_VERSION`), `BENCH_IMAGE`, the cell resources
-  (`BENCH_PARALLEL`, `BENCH_MEMORY`, `BENCH_CPUS`), and the credentials: a Claude
-  token file from `claude setup-token` (`BENCH_CLAUDE_TOKEN_FILE`; a container
-  cannot read the macOS keychain) and the Codex `auth.json` (`BENCH_CODEX_AUTH`,
-  mounted so that a token refresh writes through to the same file);
-- `Dockerfile` and `image-context.sh`, the project's layer of the cell image (its
-  dependencies, installed at `/work/repo`);
+  (`CLAUDE_CODE_VERSION`, `CODEX_VERSION`), the signed-in Claude config dir
+  (`BENCH_CLAUDE_CONFIG_DIR`; its login stays in the keychain, nothing to create)
+  and the Codex `auth.json` (`BENCH_CODEX_AUTH`, linked so that a token refresh
+  writes through to the same file);
+- `setup.sh`, run in each fresh checkout to provide the project's dependencies;
 - `tasks/<task>.txt`, the prompt, where `{BRANCH}` becomes the cell's branch;
 - `checks/<task>.sh`, run inside the finished checkout, which prints one JSON object
   of quality fields. Hidden acceptance tests stay in the suite and enter the
-  container only with the check, after the agent has finished.
+  checkout only with the check, after the agent has finished.

@@ -5,6 +5,8 @@
 //   clean      no absolute /tmp path used by another cell running at the same time
 //   shared     such a path exists, but no read followed another cell's write
 //   crossed    a cell read a path after another running cell had written it
+//   stale      a cell's first use of a path was a read, an earlier cell had written it, and
+//              that cell's tmpclean.mjs did not remove it
 // Writes and reads are told apart from the command text, so the classification is heuristic.
 // usage: isolation.mjs <run-dir>
 import fs from 'node:fs';
@@ -12,13 +14,6 @@ import path from 'node:path';
 
 const out = process.argv[2];
 const cellsDir = path.join(out, 'cells');
-// Cells that ran in containers of their own (bench.sh writes isolation.txt) share no /tmp.
-if (fs.existsSync(path.join(out, 'isolation.txt')) && fs.readFileSync(path.join(out, 'isolation.txt'), 'utf8').trim() === 'container') {
-  const ids = fs.readdirSync(cellsDir).filter((id) => fs.existsSync(path.join(cellsDir, id, 'cell.txt')));
-  fs.writeFileSync(path.join(out, 'isolation.json'), JSON.stringify(Object.fromEntries(ids.map((id) => [id, { status: 'container', shared: [], crossed: [] }])), null, 1));
-  console.log(`isolation: ${ids.length} cells in containers of their own -> ${path.join(out, 'isolation.json')}`);
-  process.exit(0);
-}
 const jsonl = (f) => fs.readFileSync(f, 'utf8').split('\n').filter(Boolean).flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } });
 const TMP = /\/(?:private\/)?tmp\/[A-Za-z0-9._\-]+/g;
 const writes = (cmd, p) => {
@@ -50,7 +45,9 @@ for (const id of fs.readdirSync(cellsDir).sort()) {
       if (l.type === 'response_item' && l.timestamp && (p.type === 'custom_tool_call' || p.type === 'function_call')) add(l.timestamp, p.input ?? p.arguments);
     }
   }
-  cells[id] = { span, uses };
+  const cleaned = path.join(cellsDir, id, 'tmp-cleaned.json');
+  const removed = new Set(fs.existsSync(cleaned) ? (JSON.parse(fs.readFileSync(cleaned, 'utf8') || '{}').removed ?? []).map((x) => x.replace(/^\/private/, '')) : []);
+  cells[id] = { span, uses, removed };
 }
 
 const overlap = (a, b) => cells[a].span[0] < cells[b].span[1] && cells[b].span[0] < cells[a].span[1];
@@ -71,8 +68,20 @@ for (const id of Object.keys(cells)) {
       }
     }
   }
-  result[id] = { status: crossed.length ? 'crossed' : shared.length ? 'shared' : 'clean', shared, crossed };
+  // A read of what an earlier cell left: this cell's first use of p is a read, and a cell that
+  // had finished wrote p before it without removing it afterwards.
+  const stale = [];
+  for (const p of new Set(cells[id].uses.map((u) => u.path))) {
+    const first = cells[id].uses.filter((u) => u.path === p).sort((a, b) => a.t - b.t)[0];
+    if (first.write) continue;
+    for (const other of Object.keys(cells)) {
+      if (other === id || overlap(id, other) || cells[other].removed.has(p)) continue;
+      const w = cells[other].uses.find((u) => u.path === p && u.write && u.t < first.t);
+      if (w) { stale.push({ path: p, from: other, read: first.t.toISOString(), wrote: w.t.toISOString() }); break; }
+    }
+  }
+  result[id] = { status: crossed.length ? 'crossed' : stale.length ? 'stale' : shared.length ? 'shared' : 'clean', shared, crossed, stale };
 }
 fs.writeFileSync(path.join(out, 'isolation.json'), JSON.stringify(result, null, 1));
 const count = (s) => Object.values(result).filter((x) => x.status === s).length;
-console.log(`isolation: ${count('clean')} clean, ${count('shared')} shared, ${count('crossed')} crossed -> ${path.join(out, 'isolation.json')}`);
+console.log(`isolation: ${count('clean')} clean, ${count('shared')} shared, ${count('stale')} stale, ${count('crossed')} crossed -> ${path.join(out, 'isolation.json')}`);
