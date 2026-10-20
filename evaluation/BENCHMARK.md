@@ -32,8 +32,9 @@ suite has run.
    (`ZDOTDIR`): a command that names `/tmp` runs with those paths in the cell's
    temp dir, so the agent's command, its output, and its later reads agree and it
    gets no refusals; Claude Code's file tools go there through a PreToolUse hook
-   (`tmpjail/hook.mjs`), programs through `TMPDIR`; the user's zsh startup files
-   still run. A path written inside a file the agent then runs is not moved: after
+   (`tmpjail/hook.mjs`), programs through `TMPDIR`, which, like the macOS default,
+   is reached through a symlink (`/tmp`), so tests that compare a temp path with
+   its realpath behave as on the host; the user's zsh startup files still run. A path written inside a file the agent then runs is not moved: after
    its agent ends, a cell stops the processes it left (they carry its
    `BENCH_CELL` mark), and `tmpclean.mjs` finds and removes what still reached the
    host's `/tmp`; `isolation.mjs` counts only those names for a jailed cell.

@@ -37,7 +37,11 @@ CTMP=$WORK/tmp; ZD=$HOMES/zdot
 mkdir -p $CTMP $ZD
 cp $BENCH/tmpjail/zshenv $ZD/.zshenv
 for f in zprofile zshrc zlogin; do print -r -- "[[ -f \$HOME/.$f ]] && source \$HOME/.$f" > $ZD/.$f; done
-JAIL=(BENCH_TMP=$CTMP TMPDIR=$CTMP/ ZDOTDIR=$ZD)
+# The macOS TMPDIR (/var/folders/...) is reached through a symlink, so a program's temp paths
+# differ from their realpath; the cell's TMPDIR keeps that (/tmp links to /private/tmp), or a
+# test comparing the two would pass in the cell and fail in the suite's check.
+CTMP_LINK=${CTMP/#\/private\/tmp\//\/tmp\/}
+JAIL=(BENCH_TMP=$CTMP_LINK TMPDIR=$CTMP_LINK/ ZDOTDIR=$ZD)
 KIT_DELIVERY=none
 # Codex: the Sol cooperator and, in a Claude cell, the kit's Codex auditors and reviewers.
 CH=$HOMES/codex

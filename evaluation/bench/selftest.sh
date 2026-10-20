@@ -12,7 +12,8 @@ bad() { print -r -- "FAIL $1"; FAILS=$((FAILS + 1)); }
 jail() {  # jail <cell> <command>: run the command the way a cell's agent shell does
   local cell=$T/$1; mkdir -p $cell/tmp $cell/zdot
   cp $BENCH/tmpjail/zshenv $cell/zdot/.zshenv
-  env BENCH_TMP=$cell/tmp TMPDIR=$cell/tmp/ ZDOTDIR=$cell/zdot /bin/zsh -lc "$2"
+  local link=${cell/#\/private\/tmp\//\/tmp\/}
+  env BENCH_TMP=$link/tmp TMPDIR=$link/tmp/ ZDOTDIR=$cell/zdot /bin/zsh -lc "$2"
 }
 NAME=bench-selftest-$$-$RANDOM
 
@@ -29,6 +30,10 @@ jail a "sh -c 'echo child > /tmp/$NAME-child.txt'; cat /tmp/$NAME-child.txt" > $
 [[ $(<$T/child.out) == child && ! -e /private/tmp/$NAME-child.txt ]] && ok "a child shell writes into the cell's temp dir" || bad "child shell: $(<$T/child.out)"
 jail a "node -e 'require(\"fs\").writeFileSync(require(\"os\").tmpdir()+\"/$NAME-node.txt\",\"x\")'; ls \$TMPDIR" > $T/node.out
 grep -q "$NAME-node.txt" $T/node.out && [[ ! -e /private/tmp/$NAME-node.txt ]] && ok "os.tmpdir() of a child program is the cell's temp dir" || bad "os.tmpdir(): $(<$T/node.out)"
+
+# Like the macOS default, the cell's TMPDIR is reached through a symlink (its realpath differs).
+out=$(jail a "node -e 'const fs=require(\"fs\"),os=require(\"os\");console.log(fs.realpathSync(os.tmpdir())!==os.tmpdir())'")
+[[ $out == true ]] && ok "TMPDIR, like the macOS default, is reached through a symlink" || bad "TMPDIR realpath: $out"
 
 # Paths that must stay: Claude Code's temp dirs, the bench's checkouts, and look-alikes.
 out=$(jail a "print -r -- /tmp/claude-501/x /private/tmp/agent-cooperator-bench/r/c/repo ./tmp/x ~/tmp/x /tmpfoo http://h/tmp/x")
