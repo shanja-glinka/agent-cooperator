@@ -27,6 +27,8 @@ echo '/.claude/' >> $WT/.git/info/exclude
 (cd $WT && zsh $SUITE/setup.sh $REPO)
 
 KIT=$OUT/kits/$VARIANT
+# The variant's install-policy switches (bench.sh wrote them from +key=value).
+SETS=(); [[ -s $OUT/sets/$VARIANT.txt ]] && for kv in $(<$OUT/sets/$VARIANT.txt); do SETS+=(--set $kv); done
 # Signed-in Claude config dir and Codex auth file; the suite may set both.
 CLAUDE_DIR=${BENCH_CLAUDE_CONFIG_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}}
 CODEX_AUTH=${BENCH_CODEX_AUTH:-${CODEX_HOME:-$HOME/.codex}/auth.json}
@@ -69,12 +71,12 @@ max_depth = 1
 trust_level = "trusted"
 TOML
   printf '[user]\n\tname = %s\n\temail = %s\n' "$(git -C $REPO config user.name)" "$(git -C $REPO config user.email)" > $FH/.gitconfig
-  [[ -d $KIT ]] && { node $KIT/bin/agent-cooperator.js codex install --codex-home $CH --skills-dir $FH/.agents/skills >/dev/null; KIT_DELIVERY=codex-home; }
+  [[ -d $KIT ]] && { node $KIT/bin/agent-cooperator.js codex install --codex-home $CH --skills-dir $FH/.agents/skills $SETS >/dev/null; KIT_DELIVERY=codex-home; }
 else
   print -r -- "{\"hooks\":{\"PreToolUse\":[{\"matcher\":\"Read|Write|Edit|MultiEdit|NotebookEdit|Glob|Grep\",\"hooks\":[{\"type\":\"command\",\"command\":\"node $BENCH/tmpjail/hook.mjs\"}]}]}}" > $HOMES/settings.json
   KIT_INSTRUCTIONS=()
   if [[ -d $KIT ]]; then
-    node $KIT/bin/agent-cooperator.js claude install --claude-home $WT/.claude >/dev/null
+    node $KIT/bin/agent-cooperator.js claude install --claude-home $WT/.claude $SETS >/dev/null
     for pair in ${=BENCH_MAXTURNS:-}; do
       f=$WT/.claude/agents/${pair%%:*}.md
       [[ -f $f ]] && sed -i '' -E "s/^maxTurns: .*/maxTurns: ${pair##*:}/" $f
@@ -153,9 +155,9 @@ if [[ -z ${DRY:-} ]]; then
   node $BENCH/tmpclean.mjs $CELL $OUT/running > $CELL/tmp-cleaned.json 2> $CELL/tmp-cleaned.stderr
   # What the agent left: commits on top of the base and uncommitted files, before the check builds.
   printf '{"Коммитов":%d,"Незакоммичено файлов":%d}\n' $(git -C $WT rev-list --count $BASE..HEAD) $(git -C $WT status --porcelain | wc -l) > $CELL/git.json
-  printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s","tmpJail":true,"kitDelivery":"%s","taskAsFile":%s,"codexLaunch":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) \
+  printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s","tmpJail":true,"kitDelivery":"%s","taskAsFile":%s,"codexLaunch":"%s","policySets":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) \
     "$(${CLAUDE_BIN:-claude} --version 2>/dev/null)" "$(${CODEX_BIN:-codex} --version 2>/dev/null)" $KIT_DELIVERY \
-    $([[ $MODEL == opus && -d $KIT ]] && echo true || echo false) "$([[ $MODEL == sol && -d $KIT ]] && echo ${CODEX_LAUNCH:-workforce-standard})" > $CELL/provenance.json
+    $([[ $MODEL == opus && -d $KIT ]] && echo true || echo false) "$([[ $MODEL == sol && -d $KIT ]] && echo ${CODEX_LAUNCH:-workforce-standard})" "${(j:,:)${(@)SETS:#--set}}" > $CELL/provenance.json
   # Each CI attempt of the check keeps its own log with the cell.
   (cd $WT && CI_LOG_DIR=$CELL/check-logs zsh $SUITE/checks/$TASK.sh $REPO $BASE) > $CELL/check.json 2> $CELL/check.stderr
   git -C $WT diff --stat $BASE HEAD > $CELL/diffstat.txt

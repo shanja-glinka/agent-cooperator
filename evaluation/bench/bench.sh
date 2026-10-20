@@ -2,8 +2,9 @@
 # Measure kit versions on a fixed suite: every task x model x variant x repeat, then report.
 #
 # usage: evaluation/bench/bench.sh <suite-dir> <label> <variant> [<variant> ...]
-#   variant: nokit | <name>=<kit commit>[@task,task], e.g.  nokit v3=35a5753 v4=dee8d3d
-#   @task,task runs that variant on those tasks only. The comparison treats the first kit
+#   variant: nokit | <name>=<kit commit>[@task,task][+key=value,key=value]
+#   @task,task runs that variant on those tasks only; +key=value installs it with that
+#   install-policy switch (installer --set), e.g. v7nr=abc123@big+reviewBlock=off,reviewStage=off. The comparison treats the first kit
 #   variant of the run as the new version; a later one is shown beside it on its tasks.
 # env:   MODELS="opus sol"  REPEATS=1  PARALLEL=4  DRY=1 (set up and clean up, no agents)
 #        PREV_RUNS="<run dir>:<variant>,<variant> ...": take those variants' cells from earlier
@@ -48,12 +49,17 @@ zsh $BENCH/selftest.sh $SUITE > $OUT/selftest.txt 2>&1 || { cat $OUT/selftest.tx
 
 for v in "${VARIANTS[@]}"; do
   [[ $v == nokit ]] && continue
-  name=${v%%=*}; commit=${${v#*=}%%@*}
+  name=${v%%=*}; commit=${${${v#*=}%%@*}%%+*}
   [[ -d $OUT/kits/$name ]] || git -C $KIT_REPO worktree add -q --detach $OUT/kits/$name $commit
+  # Install-policy switches of this variant, one key=value per line, read by cell.sh.
+  mkdir -p $OUT/sets; : > $OUT/sets/$name.txt
+  [[ $v == *+* ]] && print -l ${(s:,:)${v#*+}} > $OUT/sets/$name.txt
 done
+# The policy each variant delivers, checked in every installed text before any cell runs.
+node $BENCH/policycheck.mjs $OUT > $OUT/policycheck.txt 2>&1 || { cat $OUT/policycheck.txt; exit 1; }
 # Tasks per variant name: all, or the @task,task list of its spec.
 typeset -A ONLY
-for v in "${VARIANTS[@]}"; do [[ $v == *@* ]] && ONLY[${v%%=*}]=" ${${v#*@}//,/ } "; done
+for v in "${VARIANTS[@]}"; do [[ $v == *@* ]] && ONLY[${v%%=*}]=" ${${${v#*@}%%+*}//,/ } "; done
 
 # Within a repeat, cells that start one after another differ in task, and the model/variant
 # pairs rotate across tasks: cells running side by side share the host's /tmp, and two cells

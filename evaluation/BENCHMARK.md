@@ -19,7 +19,11 @@ suite has run.
    runs of the same suite (`PREV_RUNS`); the comparison then names those runs, and
    their differences in day, conditions, and isolation are part of the result. A
    variant of the new version that changes one part (for example the review) may
-   run on the tasks that part touches (`<name>=<commit>@task`).
+   run on the tasks that part touches (`<name>=<commit>@task`); a variant that
+   only switches an install policy carries it as `+key=value`
+   (`v7nr=<commit>@big+reviewBlock=off,reviewStage=off`), and `policycheck.mjs`
+   checks, before any cell runs, that every installed text of each variant
+   delivers that policy.
 3. **Nothing changes during a run.** Do not edit the kit while it is being
    measured. A fix makes a new version and a new run. A fix of the bench itself
    makes a new run of every variant, not only of the new version.

@@ -82,9 +82,12 @@ function claude(logs, res) {
       }
     }
     for (const id of msgs.keys()) seen.add(id);
-    const sum = { requests: msgs.size, input: 0, cacheWrite: 0, cacheRead: 0, output: 0, usd: 0, usdHigh: 0 };
+    const sum = { requests: msgs.size, input: 0, cacheWrite: 0, cacheRead: 0, output: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
     for (const m of msgs.values()) {
       sum.input += m.in; sum.cacheWrite += m.cw; sum.cacheRead += m.cr; sum.output += m.out;
+      const prompt = m.in + m.cr + m.cw;
+      sum.maxPrompt = Math.max(sum.maxPrompt, prompt);
+      if (/haiku/.test(m.model ?? '') && prompt > 100000) sum.overTier += 1;
       const usd = claudeUsd({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, hit: m.cr, out: m.out });
       if (usd == null) sum.unpriced = true; else { sum.usd += usd; sum.usdHigh += usd; }
     }
@@ -125,7 +128,7 @@ function codex(logs, res, inClaudeCell) {
         ?? CODEX_RUN_ROLE.find(([re]) => re.test(firstUser.trim()))?.[1] ?? 'agent';
     const seenUsage = new Set(); const seenCalls = new Set(); const tools = {}; const kitReads = new Set();
     const byResponse = lines.some((l) => l.type === 'token_usage_record');
-    const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0 };
+    const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
     for (const l of lines) {
       const p = l.payload ?? {};
@@ -138,6 +141,8 @@ function codex(logs, res, inClaudeCell) {
           const u = record ? record.usage : info.last_token_usage;
           sum.requests += 1; sum.input += (u.input_tokens ?? 0) - (u.cached_input_tokens ?? 0); sum.cacheRead += u.cached_input_tokens ?? 0;
           sum.output += u.output_tokens ?? 0; sum.thinking += u.reasoning_output_tokens ?? 0;
+          sum.maxPrompt = Math.max(sum.maxPrompt, u.input_tokens ?? 0);
+          if ((u.input_tokens ?? 0) > 272000) sum.overTier += 1;
           const usd = openaiUsd(ctx.model, u);
           if (usd == null) sum.unpriced = true; else { sum.usd += usd.low; sum.usdHigh += usd.high; }
         }
@@ -179,6 +184,7 @@ function codex(logs, res, inClaudeCell) {
       turns: lines.filter((l) => l.type === 'turn_context').length,
       toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools,
       requests: sum.requests, input: sum.input, cacheWrite: null, cacheRead: sum.cacheRead, output: sum.output, thinking: sum.thinking,
+      maxPrompt: sum.maxPrompt, overTier: sum.overTier, compactions: lines.filter((l) => l.type === 'compacted').length,
       usd: sum.usd, usdHigh: sum.usdHigh, ...(sum.unpriced ? { unpriced: true } : {}),
     });
   }
@@ -212,6 +218,13 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
     workers: of('worker').length, workerTurns: sum('turns', of('worker')), auditorTurns: sum('turns', of('auditor')), reviewerTurns: sum('turns', of('reviewer')),
   };
   res.totals.fixRounds = Math.max(0, res.totals.workerTurns - res.totals.workers);
+  // What the organization costs the cooperator, and how large the workers' requests grew.
+  res.totals.cooperatorRequests = coop?.requests ?? 0;
+  res.totals.cooperatorTurns = coop?.turns ?? 0;
+  res.totals.workerMaxPrompt = Math.max(0, ...of('worker').map((a) => a.maxPrompt ?? 0));
+  res.totals.workerOverTier = sum('overTier', of('worker'));
+  res.totals.workerRequests = sum('requests', of('worker'));
+  res.totals.compactions = sum('compactions');
   res.totals.inputTotal = res.totals.input + (res.totals.cacheWrite ?? 0) + res.totals.cacheRead;
   res.review = reviewLines(res.finalReport);
   res.quality = fs.existsSync(path.join(dir, 'check.json')) ? JSON.parse(read(path.join(dir, 'check.json')) || '{}') : {};
