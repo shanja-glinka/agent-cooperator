@@ -90,7 +90,7 @@ defines the model, effort, and budget policy for those actions.
 | --- | --- | --- |
 | `direct` | work whose whole route (brief, worker, review, fixes) would cost more than doing it: a question, an analysis, a config or doc edit, or a change of a few lines the brain already knows exactly | Done inline by the brain, with the project's checks. No agents. |
 | `build` | any other verifiable block inside a clear write set: a fix, a feature, a mechanical change of any size, reproducing a bug, or tracing a cause; an unknown cause is a good block | One light worker per block, briefed with goal, boundaries, sources, checks, and the project's constraints. A submitted block is reviewed before it is accepted (`reviewBlock` on, the default); see the rules below. |
-| `pipeline` | several blocks with disjoint write sets that need no decision from each other, after open design is decided | Plan, parallel workers, the brain reads every diff. Stage review only when blocks interact in ways no block review saw. |
+| `pipeline` | several blocks with disjoint write sets that need no decision from each other, after open design is decided | Plan, parallel workers, the brain reads every diff. Stage review only for an integration part no block review covered. |
 
 The brief stays a brief. It names the goal, the boundaries, the sources, the
 check, and the project's constraints (CI steps, lint and size rules, frozen
@@ -102,10 +102,12 @@ first to dictate it.
 
 Hybrid is the default. Standard and Enhanced are optional starting recommendations,
 not binding schedules. Selection is contextual: when nothing already applies,
-Hybrid runs, autonomous and unattended runs included. Standard is the user's
-choice, or the fallback when Codex is unavailable. Enhanced is for substantial
-unresolved design. A question is asked only for long multi-stage work with
-substantial unresolved design where nothing already applies.
+Hybrid runs, autonomous and unattended runs included. Standard and Enhanced run
+only when the user chooses them, never as an automatic replacement for Hybrid;
+when Codex is unavailable, Hybrid keeps its `haiku` workers and reviews on `opus`
+high through Agent, marked as the fallback. A question is asked only for long
+multi-stage work with substantial unresolved design where nothing already
+applies.
 
 | Responsibility | Standard | Enhanced | Hybrid (default) |
 | --- | --- | --- | --- |
@@ -113,10 +115,10 @@ substantial unresolved design where nothing already applies.
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium | `haiku` medium |
 | Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` xhigh (`workforce-worker-lite`) |
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
-| Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides before briefing |
+| Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides architecture, block boundaries, and interactions before briefing; the worker keeps bounded search, reproduction, and the local way to implement |
 | Audit lens (on demand) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
 | Block review (MODE=block) | `opus` high (`workforce-reviewer`) | `opus` high (`workforce-reviewer`) | Codex GPT-6.1 Sol xhigh |
-| Stage acceptance (MODE=stage) | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
+| Stage review (MODE=stage), only for an integration part no block review covered | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
 
 The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
@@ -156,13 +158,15 @@ worker moves to a Codex GPT-6.1 Sol xhigh worker, then to `opus`.
 An audit lens, when one runs, uses Codex GPT-6 Luna at xhigh; block and stage
 review use Codex GPT-6.1 Sol at xhigh; all are read-only. Luna costs $0.10 /
 $0.50 and Sol $2 / $10 per MTok (checked 2026-10-20), so the expensive model only
-thinks. Claude policy 1.9.0 keeps the models and prices of the previous release;
-what changed is the review and audit routing.
+thinks. Claude policy 1.10.0 keeps the models and prices; the reviewer now
+checks each block against its CONTRACT site by site, a review can end with a
+condition that `scripts/accept.mjs` closes on the reviewed tree, and a stage
+review runs only for an integration part no block review covered.
 
 Hybrid needs the `codex` CLI on PATH and logged in; the Codex edition of the kit
-is not required. Without the CLI, use Standard and say so. If Codex is unavailable
-or a run fails twice, that role falls back to `haiku` xhigh auditors and `opus`
-high review through Agent, and the report says so. If the session runs at medium
+is not required. Without the CLI, or if Codex is unavailable or a run fails
+twice, Hybrid keeps its `haiku` workers and falls back to `haiku` xhigh auditors
+and `opus` high review through Agent, and the report says so. If the session runs at medium
 effort, the brain says so once and suggests `/effort high`.
 
 Codex calls go through `skills/workforce-orchestrate/scripts/codex-run.mjs`,
@@ -271,10 +275,12 @@ Cooperator (the orchestrator) chooses:
                                       parallel (only if that block changes
                                       nothing the review reads; else a snapshot)
 
-Review: the block reviewer reads the whole diff. Real findings go to the same
-worker as one bundle; the same reviewer checks the fixes and what they touch.
-The same finding twice without progress stops the loop for the cooperator's
-decision.
+Review: the block reviewer reads the whole diff at a snapshot and checks the
+CONTRACT: every changed protective site is kept, violated, or not established.
+Real findings go to the same worker as one bundle; the same reviewer checks the
+fixes and what they touch. accepted_if <check> closes through accept.mjs once
+that check passed on the reviewed tree. The same finding twice without progress
+stops the loop for the cooperator's decision.
 
 Audit lens (on demand, only for an area the checks and the review do not
 cover): one lens (docs, task, or conventions) reports everything; the cooperator
@@ -288,8 +294,9 @@ for the block; one with real findings may check the fix.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance
   line, and reproduces.
-- Each reviewed block gets one report line: `REVIEW: rounds=<n> findings=<n>
-  real=<n>`.
+- Each reviewed block gets one report line: `REVIEW: block=<label> rounds=<n>
+  findings=<n> real=<n> sites=<n> open=<n>`; the reviewer writes it and the
+  cooperator adds `real`.
 - Turn limits per run: worker 60, light worker 130, probe 20, auditor 50,
   reviewer 30.
 

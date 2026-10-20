@@ -1,12 +1,13 @@
 # Profiles, models, and task ownership
 
 The product name and role names are independent of model generations. The current
-release combines GPT-6 Astra, Sol, and Luna for Codex. The Claude Code edition uses the
+release uses GPT-6.1 Sol and GPT-6 Luna for Codex. The Claude Code edition uses the
 same roles with Claude model tiers; see [claude-code.md](claude-code.md) for its
 profile table and [research.md](research.md) for the evidence behind it. Future
 releases can update model policy without changing the install command or renaming
-your agents. Codex policy 1.11.0 keeps the previous release's models and prices;
-what changed is the review and audit routing.
+your agents. Codex policy 1.12.0 removes GPT-6 Astra and the Enhanced profile. The
+escalation ceiling is Sol xhigh, and stage review runs only for an integration part no
+block review covered. Claude policy 1.10.0 keeps Hybrid as its default.
 
 [`payload/codex/profiles.json`](../payload/codex/profiles.json) is the machine-readable routing
 policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
@@ -18,7 +19,7 @@ model and effort for an action within those requirements.
 
 ## Standard
 
-Standard and Enhanced are optional starting recommendations, not exhaustive or
+Economy and Standard are optional starting recommendations, not exhaustive or
 binding model/effort schedules. Choosing a profile expresses an approach preference;
 it does not by itself require its exact models, efforts, or team composition. Adapt
 routing to the task, available capabilities, and user limits, or use a custom setup
@@ -27,25 +28,15 @@ make those settings mandatory. Keep review independence and verification require
 
 Standard is the user's choice. Use it when the requirements and solution are
 sufficiently described. GPT-6.1 Sol high owns orchestration, GPT-6 Luna owns
-read-only lookups (Sol when judgment is needed), Sol implements at xhigh, Sol at
-xhigh independently reviews complete blocks, and Astra high accepts major stages.
-A bounded open decision can still receive Astra high assistance. The Sol
-orchestrator is a deliberate cost choice for the longest context: the per-token
-input/output prices recorded on 2026-10-20 give a 5:1 Astra-to-Sol ratio. That
-price ratio does not establish the full cost of a completed result. Stage
-acceptance and uncertain design keep their recommended Astra roles.
+read-only lookups (Sol when judgment is needed), Sol implements at xhigh, and Sol at
+xhigh independently reviews complete blocks. Stage review, also Sol at xhigh, runs
+only for an integration part no block review covered. The Sol orchestrator is a
+deliberate cost choice for the longest context.
 
-## Enhanced
+## Enhanced (removed)
 
-The same workers, block reviewers, and acceptance flow remain. Astra high orchestrates
-and owns bounded uncertain design or algorithm work. Once a contract is clear, ordinary
-implementation and consumer migration return to Sol. Raising **Astra above high**
-to xhigh/max requires a stated unresolved question and expected benefit, respecting
-the user's limits. Sol workers and Luna audit roles still use their
-profile's xhigh setting; the ordinary worker ladder to Astra high is unchanged.
-
-The distinction is solution uncertainty. Many lines of code, a long runtime, or a
-sophisticated algorithm do not automatically require Enhanced.
+Enhanced was removed in policy 1.12.0. A stored or launched choice of it runs as
+Standard.
 
 ## Economy
 
@@ -54,18 +45,17 @@ unattended runs. You can also launch it explicitly with `codex -p workforce-econ
 or keep it as a standing preference. Sol high is the cooperator: it thinks, judges,
 and integrates. Luna xhigh is the worker, reading and typing at xhigh; Sol at
 xhigh reviews the blocks Luna submits (`reviewBlock` on, the default). Luna also
-runs an audit lens when an area needs one, and Astra high is the stage reviewer
-for pipelines whose blocks interact (`reviewStage` on). A Luna worker has 600
-tool calls per run, three runs, and 400k tokens per block; a block that
-exhausts it moves to Sol xhigh, then to Astra.
+runs an audit lens when an area needs one. Sol at xhigh is the stage reviewer, and
+only for an integration part no block review covered (`reviewStage` on). A Luna
+worker has 600 tool calls per run, 1800 per block, three attempts, and 400k tokens
+per block; a block that exhausts it moves to Sol xhigh.
 
 ## Worker ladder and handoff
 
 | Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
 | Luna | 600 per run, 1800 per block | 3 | 400k | Sol xhigh |
-| Sol | no cap | 3 | 500k | Astra high |
-| Astra | no cap | 3 | none | the cooperator re-plans or asks you |
+| Sol | no cap | 3 | 500k | the cooperator re-plans or asks you |
 
 Only a run that ends without a result spends an attempt: the worker hit its
 BUDGET, returned `STATUS: handoff`, or its fix left the finding open. A
@@ -89,9 +79,8 @@ has the details, including the auditor handoff at 400k.
 Reuse an explicit task or native launch profile, active task choice, or applicable
 standing preference. Concrete, sufficiently specified tasks and small fixes proceed
 with Economy without asking. Autonomous instructions and unattended execution
-allow the agent to choose Economy for described work or Enhanced for substantial
-unresolved design. Standard is chosen by the user. Preserve the choice and its
-source across continuations.
+allow the agent to choose Economy for described work. Standard is chosen by the
+user. Preserve the choice and its source across continuations.
 
 Ask once only for long-running, multi-stage work with substantial unresolved solution
 choices where the profile materially changes approach or resource use, if no prior
@@ -105,24 +94,26 @@ Economy is a routing default, not evidence that the running model changed. Examp
 ```text
 Create and verify backups, then enable the maintenance page. Work autonomously.
 Fix the described validation error.
-Use Enhanced. Resolve the ambiguous contract, then complete the migration.
+Use Standard. Resolve the ambiguous contract, then complete the migration.
 Plan and implement a new platform across multiple stages; architecture is undecided.
 Analyze these options only. Do not edit files.
 ```
 
-The first two proceed without a profile question; the third honors Enhanced; the
+The first two proceed without a profile question; the third honors Standard; the
 fourth qualifies for the question absent a preference or delegated selection; the
 fifth remains analysis-only.
 
 ## Actual model settings
 
-Current Codex CLI supports named config layers. The kit installs three optional layers:
+Current Codex CLI supports named config layers. The kit installs two optional layers:
 
 ```sh
 codex -p workforce-standard
-codex -p workforce-enhanced
 codex -p workforce-economy
 ```
+
+Both layers set `[features.multi_agent_v2]` wait limits: a wait returns as soon as an
+agent sends a message or finishes, and otherwise lasts 20 minutes.
 
 Launching one is an explicit profile choice. It sets the root model/effort for that
 launch and tells the agent which policy to follow. It does not modify base settings.
@@ -174,11 +165,18 @@ findings may check the fix. A round ends only when its auditor returns
 continued where it stopped, never replaced.
 
 With `reviewBlock` on, the block reviewer then reads the whole diff, fixes
-included, together with the earlier findings and their outcome. Checks the
+included, together with the earlier findings and their outcome. It checks the change
+against CONTRACT, the requirements the packet quotes with their sources, and lists every
+changed protective site from the diff (a removed or changed condition, a changed
+fallback, a normalization, null becoming undefined, a changed order of evaluation) with
+one verdict: kept, violated, or not established. Checks the
 project requires always run, and a reviewer's "accepted" does not replace one
 that has not passed. A small local change with a clear contract and passing
 checks may be accepted on the cooperator's own reading of the diff; a review that
-the project, the user, or the task requires always runs.
+the project, the user, or the task requires always runs. A review may end with
+`ACCEPTANCE: accepted_if <check> on tree:<hash>`; the cooperator closes it with
+`scripts/accept.mjs` when a recorded run of that check passed on the reviewed tree,
+with no extra reviewer call.
 
 ## Complete blocks, proportional verification
 
@@ -188,8 +186,9 @@ With `reviewBlock` on (the default), every block a light worker submits is
 reviewed before it is accepted, and blocks ready together share one review run;
 the review reads the whole diff. With `reviewBlock` off, the cooperator accepts
 the block on its checks and its own reading of the whole diff. A stage review on
-Astra high checks the original outcome, and runs only when `reviewStage` is on
-and blocks interact in ways no block review saw.
+Sol at xhigh runs only when `reviewStage` is on and an integration part (blocks that
+interact, the cooperator's own integration edits, or a shared contract) was not covered
+by a block review; one review of the final merged diff closes both.
 
 A minimal isolated test can establish a component contract; it cannot by itself
 prove a real consumer was switched. An inventory can support planning; it cannot

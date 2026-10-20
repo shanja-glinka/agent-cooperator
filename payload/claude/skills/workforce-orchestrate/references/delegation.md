@@ -17,9 +17,11 @@ worker.
 │   next tier gets packet + APPROACH + HANDOFF only (dispatch)     │
 │                                                                  │
 {{#reviewBlock}}
-│ submitted blocks ready together → one Sol xhigh review run       │
+│ submitted blocks ready together → snapshot → one Sol xhigh       │
+│   review run of the CONTRACT on the touched paths                │
 │   real findings → the same worker → the same reviewer checks     │
 │   the fixes and what they touch → next round or accept           │
+│   accepted_if <check> → accept.mjs closes it on the same tree    │
 {{/reviewBlock}}
 {{^reviewBlock}}
 │ submitted → you read the whole diff → real findings → the same   │
@@ -30,7 +32,8 @@ worker.
   │
   ▼
 {{#reviewStage}}
-Stage acceptance (pipeline, when blocks interact) → required checks → report
+Stage review (Sol xhigh), only for an integration part no block review
+covered → required checks → report
 {{/reviewStage}}
 {{^reviewStage}}
 Required checks passed → report (stage review is off in this install)
@@ -42,17 +45,26 @@ Required checks passed → report (stage review is off in this install)
 1. **Profile.** Reuse an explicit choice or standing preference; otherwise
    Hybrid: you on `opus`, workers and probes on `haiku` at xhigh{{#reviewBlock}}, the
    reviewer on Codex GPT-6.1 Sol at xhigh{{/reviewBlock}}. Enhanced (Sonnet workers, Fable
-   stage review) for substantial unresolved design, and Standard (Sonnet
-   workers, Agent reviewers) on the user's choice or when Codex is
-   unavailable; say which applies. Ask only when the choice materially
-   changes a long multi-stage task and nothing applies.
+   stage review) and Standard (Sonnet workers, Agent reviewers) only on the
+   user's choice; when Codex is unavailable, Hybrid keeps its `haiku` workers
+   and uses the fallback in dispatch. Say which applies. Ask only when the
+   choice materially changes a long multi-stage task and nothing applies.
 2. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
    SCOPE and OUT_OF_SCOPE, exact inputs and what you already found, WRITE_SET,
    CHECKS with cwd and the expected result, PROJECT_RULES (every applicable
-   rule file, `AGENTS.md` included), and CONSTRAINTS: what the project will
-   check on this change (CI steps, lint and size rules, frozen areas), each
-   with the file that sets it, found in the project before you brief. A light
-   worker gets what it needs to work alone, not your conclusions to copy.
+   rule file, `AGENTS.md` included), CONTRACT (what the change must keep,
+   quoted with its source), and CONSTRAINTS. Before you send the brief, the
+   constraints of the touched areas that can change how the work is done are
+   in it, with their source: a rule for the whole block once, with its scope
+   (the format check and the files it covers); the limit of one large file
+   separately, with its current value. A constraint you hold and that is
+   current needs no new search; one you lack, look up with one targeted
+   search, and a substantial question still open after it becomes the
+   worker's first step, before any edit that depends on it. One owner finds
+   each constraint. You decide architecture, block boundaries, and how blocks
+   interact; the light worker keeps bounded search, reproduction, the local
+   way to implement, and testing its hypotheses. It gets what it needs to
+   work alone, not your conclusions to copy.
    Tell it to keep in its context what the next decision needs: long output
    goes to a file and is read where it matters, code is read by the functions
    it changes and the conditions they depend on. A `haiku` worker's prompt
@@ -78,25 +90,36 @@ Required checks passed → report (stage review is off in this install)
    of the ladder the next move is yours: re-plan or ask the user.
 4. **While agents work.** Wait for their completion notifications: no
    polling, no `sleep`, no ScheduleWakeup, because every turn you take rereads
-   your context. A worker's packet is its report; it does not send progress.
-   Act at once on a blocker, a contract question, a submitted block, a failed
-   run, or a spent budget. Blocks submitted together are accepted together.
+   your context. Without a new substantial event, do not check on the
+   agents' files or write a repeated status; after an event, do what it
+   needs. A worker's packet is its report; it does not send progress. Act at
+   once on a blocker, a contract question, a submitted block, a failed run, or
+   a spent budget. Blocks submitted together are accepted together.
 5. **Accept the block.**
 {{#reviewBlock}}
    The reviewer (GPT-6.1 Sol at xhigh through Codex, MODE=block) gets the
    packet with `REVIEW: acceptance of a light worker's block`, or `required
-   (<rule or request>)`, or `question (<what is in doubt>)`, the snapshot,
-   what is already fixed, and which checks already ran; blocks ready together
-   go to one run. Before taking a finding, open the code and the rule it
-   cites: it is real when it is in the diff or caused by it and reproduces by
-   a check or a concrete scenario; suggestions, hypothetical inputs, and work
-   outside SCOPE are not taken. Real findings go to their workers as one
-   bundle each; then resume the same reviewer thread with the delta, so it
-   checks the fixes and what they touch without rereading everything. The
-   same finding twice without progress stops the loop for your decision. A
-   reviewer's "accepted" does not replace a required check that has not
-   passed. A small local change with a clear contract and passing checks you
-   may accept on your own reading of the diff.
+   (<rule or request>)`, or `question (<what is in doubt>)`, the CONTRACT,
+   SNAPSHOT `tree:<hash>` from `accept.mjs snapshot`, what is already fixed,
+   and which checks already ran on which tree; blocks ready together go to one
+   run. It checks the CONTRACT on the touched paths: the changed protective
+   sites it lists from the diff, each kept, violated, or not established, and
+   the other requirements. Before taking a finding, open the code and the rule
+   it cites: it is real when it is in the diff or caused by it and contradicts
+   the CONTRACT or a rule, or reproduces by a check or a concrete scenario; a
+   change that breaks an explicit requirement needs no proof that the bad
+   input already occurred. Suggestions and work outside SCOPE are not taken.
+   Real findings go to their workers as one bundle each; then resume the same
+   reviewer thread with the delta, so it checks the fixes and what they touch
+   without rereading everything. The same finding twice without progress
+   stops the loop for your decision. A reviewer's "accepted" does not replace
+   a required check that has not passed: when only that check is left, the
+   reviewer ends with `accepted_if <check> on tree:<hash>`, and you close it
+   with `accept.mjs close` once a recorded run passed on that tree (tools); no
+   reviewer run is needed to read an exit code. If the fix for a failed check
+   changes code, that delta goes to the same reviewer. A small local change
+   with a clear contract and passing checks you may accept on your own
+   reading of the diff.
 {{/reviewBlock}}
 {{^reviewBlock}}
    Block review is off in this install. Read the whole diff yourself and take
@@ -116,9 +139,13 @@ Required checks passed → report (stage review is off in this install)
    [tools](tools.md) shows; act on its `result.json`.
 7. **Accept the stage.**
 {{#reviewStage}}
-   In a pipeline whose blocks interact in ways no block acceptance saw, a
-   separate reviewer checks the original outcome, cross-boundary paths, and
-   the project's required gates.
+   A stage review (Sol at xhigh through Codex in Hybrid, MODE=stage) runs only
+   for an integration part no block review covered: blocks that interact (a
+   format one block produces and another reads), your own integration edits,
+   a shared contract. It checks the original outcome on those paths and the
+   project's required gates. When one review already read the final merged
+   diff and those interactions, it closes both duties; do not repeat it under
+   another name.
 {{/reviewStage}}
 {{^reviewStage}}
    Stage review is off in this install: when the blocks are accepted and the
@@ -138,7 +165,7 @@ Required checks passed → report (stage review is off in this install)
 {{#reviewBlock}}
 | The reviewer brings the same finding again | Stop the loop: read the code and the finding yourself, then decide (accept with a reason, fix the packet, or escalate). |
 | Codex is unavailable or fails twice | Review on `opus` high through Agent, mark it as the fallback, and say so in the report. |
-| The reviewer accepts, but a required check is missing or stale | Not accepted yet: get that check and send it to the same reviewer. |
+| The reviewer accepts, but a required check is missing or stale | `accepted_if <check> on tree:<hash>`: run the check through `accept.mjs` and close it; no new review run unless the code changed in a way that bears on the review. |
 {{/reviewBlock}}
 | Findings for block A arrive while A's worker is on block B | Keep them under A and send them when that worker finishes its current step, never as a second assignment at once. |
 | The next block may change what an acceptance reads | Use a snapshot ([tools](tools.md)) or wait for the writer. Disjoint WRITE_SETs do not freeze imports. |
@@ -174,7 +201,12 @@ reviewer found real defects in light workers' results in 3 of 6 large tasks
 and in 2 of 3 small ones with `haiku`. Haiku requests over 100k tokens of
 prompt gave 80% of Haiku's price, so a worker keeps its context to what the
 next decision needs. Constraints found only when CI failed made workers redo
-blocks, so the brief names them with their source. The same worker and
+blocks, so the brief names them with their source. In the v7 measurement the
+brief left out the file-size limit in four of six large tasks, and the reviewer
+missed a fallback change that broke a database constraint in one of three;
+so the constraints of the touched areas are in the brief before the work
+starts, the review checks the contract site by site, and a check that passed
+on the reviewed tree closes its condition without a new round. The same worker and
 reviewer continue across rounds because a round then costs only the delta. A
 block that exhausts a tier is a signal about the block, so the next tier gets
 your analysis and a handoff instead of a pile of transcripts. Only a run that

@@ -23,7 +23,7 @@ change account configuration.
 
 Choose a bounded read-only question and a run token in the existing task state.
 Spawn one `workforce_probe` with GPT-6 Luna medium to inspect a concrete source path, and
-one independent `workforce_probe` with Astra high to check a different bounded fact.
+one independent `workforce_probe` with GPT-6.1 Sol high to check a different bounded fact.
 This explicitly scoped smoke tests both families, not the cost of a normal task.
 Pass PROFILE, ROOT, token, exact scope, and no-write/no-children constraints.
 

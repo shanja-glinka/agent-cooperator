@@ -39,8 +39,8 @@
     },
     {
       "id": "open-design",
-      "input": "Enhanced task with an unresolved cross-contract algorithm.",
-      "expected": "Bounded Astra design block; stable ordinary implementation goes to GPT-6.1 Sol. Explain any xhigh/max escalation."
+      "input": "Enhanced task (Claude Code) with an unresolved cross-contract algorithm.",
+      "expected": "Bounded fable high design block (fallback opus high); stable ordinary implementation goes back to the profile's workers. In Codex, where Enhanced was removed, the cooperator decides architecture and block boundaries before briefing, and the worker keeps bounded search, reproduction, and the local way to implement."
     },
     {
       "id": "false-completion",
@@ -186,7 +186,7 @@
     {
       "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Economy workers use gpt-6-luna xhigh, Standard and Enhanced workers gpt-6.1-sol xhigh; block review is Sol xhigh and lookup is Luna medium. Extra-justification requirements for Astra above high do not restrict routine Sol or Luna xhigh roles or the worker ladder to Astra high."
+      "expected": "Economy workers use gpt-6-luna xhigh, Standard workers gpt-6.1-sol xhigh; block and stage review are Sol xhigh and lookup is Luna medium. No tier above Sol exists."
     },
     {
       "id": "codex-probe-tier",
@@ -198,7 +198,7 @@
       "id": "codex-standard-brain",
       "runtime": "codex",
       "input": "Standard profile, concrete migration; orchestrator session runs gpt-6.1-sol.",
-      "expected": "That is the Standard recommendation; no mismatch to report. Stage acceptance still goes to a separate gpt-6-astra reviewer."
+      "expected": "That is the Standard recommendation; no mismatch to report. A stage review, when an integration part needs one, runs on gpt-6.1-sol xhigh."
     },
     {
       "id": "claude-haiku-55",
@@ -265,7 +265,7 @@
       "id": "worker-ladder-tokens",
       "runtime": "both",
       "input": "An unsubmitted sonnet worker reaches 500k tokens on one block during run 2; implementation remains.",
-      "expected": "Preserve counters, diagnose and restore prerequisites, then move to a fresh opus high worker (Codex Sol at 500k: Astra high) with original assignment/current snapshot, APPROACH and HANDOFF. A submitted result at the same ceiling goes to verification before any implementation escalation."
+      "expected": "Preserve counters, diagnose and restore prerequisites, then move to a fresh opus high worker (Codex Sol at 500k: no tier above, the cooperator re-plans or asks the user) with original assignment/current snapshot, APPROACH and HANDOFF. A submitted result at the same ceiling goes to verification before any implementation escalation."
     },
     {
       "id": "handoff-not-history",
@@ -277,7 +277,7 @@
       "id": "codex-standard-workers",
       "runtime": "codex",
       "input": "Codex Standard, implementation block.",
-      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers Sol xhigh for blocks and Astra high for the stage."
+      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers Sol xhigh for blocks and, when an integration part needs it, for the stage."
     },
     {
       "id": "submitted-at-ceiling",
@@ -295,7 +295,7 @@
       "id": "blocked-at-run-limit",
       "runtime": "both",
       "input": "Sol ends run 3 at 90k tokens. All three attempts stopped at the same missing required test database; no implementation remains possible until it is available.",
-      "expected": "Preserve the 3 spent runs and OPEN gate. Diagnose/restore the prerequisite with bounded authorized work or report BLOCKED with the exact external action. Do not spend a fourth Sol run or launch Astra into the unchanged blocker."
+      "expected": "Preserve the 3 spent runs and OPEN gate. Diagnose/restore the prerequisite with bounded authorized work or report BLOCKED with the exact external action. Do not spend a fourth Sol run; there is no tier above Sol to launch into the unchanged blocker."
     },
     {
       "id": "audit-cap-open-findings",
@@ -565,7 +565,7 @@
       "id": "no-wakeups-while-agents-run",
       "runtime": "both",
       "input": "Two background workers are running; nothing else is ready.",
-      "expected": "Wait for their completion (Claude: notifications; Codex: wait_agent). No polling, sleep, or ScheduleWakeup; workers send no progress messages."
+      "expected": "Wait for their completion (Claude: notifications; Codex: wait_agent with no short timeout, the install's minimum and default being 20 minutes). Without a new substantial event, no polling (files, git diff or status, list_agents), sleep, ScheduleWakeup, or repeated status; workers send no progress messages."
     },
     {
       "id": "blocks-ready-together-one-review",
@@ -577,7 +577,7 @@
       "id": "brief-names-constraints",
       "runtime": "both",
       "input": "The project's CI fails any file over 3000 lines (scripts/check-size.cjs); a block will grow bot.ts, now 2990 lines.",
-      "expected": "The brief's CONSTRAINTS names the size limit and its source file, found in the project before briefing; it does not dictate the solution or add rules the project lacks."
+      "expected": "Before the brief goes out, its CONSTRAINTS names the size limit with its source and bot.ts's current length; a rule for the whole block (the format check and the files it covers) appears once. A limit one targeted search did not settle becomes the worker's first step, before the edit that depends on it. The brief does not dictate the solution or add rules the project lacks."
     },
     {
       "id": "policy-review-off",
@@ -590,6 +590,36 @@
       "runtime": "both",
       "input": "A worker's CI output is 4,000 lines.",
       "expected": "It goes to a log with the exit code kept; the worker reads the failing part, not the whole log, and does not reread files it already has."
+    },
+    {
+      "id": "review-contract-sites",
+      "runtime": "both",
+      "input": "A light worker replaced `JSON.stringify(record.metadata || {})` with `?? {}` on data that comes from JSON; the task says defensive checks on runtime data stay.",
+      "expected": "The reviewer lists the changed fallback among the protective sites it found in the diff and marks it violated: '', 0, and false are now stored as scalars instead of {}; the fix is to keep the fallback. No proof that such data already occurred is needed. The cooperator sends it to the same worker."
+    },
+    {
+      "id": "accepted-if-closure",
+      "runtime": "both",
+      "input": "The reviewer ends with `ACCEPTANCE: accepted_if npm run ci on tree:<hash>`; CI then passes on that tree.",
+      "expected": "The cooperator closes the condition with scripts/accept.mjs (close): CLOSED, the block is accepted with no reviewer call to read the exit code. Had the code changed after the review, the condition would stay OPEN and the change would go to the same reviewer."
+    },
+    {
+      "id": "stage-review-scope",
+      "runtime": "both",
+      "input": "Two blocks were each reviewed; afterwards the cooperator edited the shared serializer both of them use.",
+      "expected": "A stage review on Sol xhigh for that integration edit and the interaction it touches. When one review already read the final merged diff and the interactions, it closes both duties and no second review runs."
+    },
+    {
+      "id": "no-tier-above-sol",
+      "runtime": "codex",
+      "input": "A Codex Sol xhigh worker spends its third attempt on a block without a result.",
+      "expected": "There is no tier above Sol: the cooperator finds the cause (the stop, the brief, the split, the way of checking) and re-plans or asks the user. It never launches GPT-6 Astra."
+    },
+    {
+      "id": "enhanced-removed",
+      "runtime": "codex",
+      "input": "A Codex user's standing preference says Enhanced.",
+      "expected": "Enhanced was removed in policy 1.12.0: the task runs as Standard and the cooperator says so."
     }
   ]
 }

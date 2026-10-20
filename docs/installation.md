@@ -59,7 +59,6 @@ CODEX_HOME/
   skills/workforce-review/...
   skills/workforce-smoke/...
   workforce-standard.config.toml
-  workforce-enhanced.config.toml
   workforce-economy.config.toml
   codex-workforce/profiles.json
   codex-workforce/manifest.json
@@ -171,19 +170,23 @@ discovers named TOML agents; this kit does not add legacy agent registration tab
 or change `[agents]` settings. If your configuration disables subagents, installation
 does not silently enable them. You must resolve that runtime setting yourself.
 
-Run `status` to verify owned files, links, and the effective instruction block. This
-is a file-level check. It does not prove account model access, runtime dispatch,
+Run `status` to verify owned files, links, and the effective instruction block. It also
+prints a `routing:` section: the policy version, the default profile's worker, block and
+stage reviewers, and ladder, and for Codex each launch layer's wait limits. This is a
+file-level check. It does not prove account model access, runtime dispatch,
 instruction-following quality, or a successful product implementation.
 
 For native CLI profile layers, current Codex supports:
 
 ```sh
 codex -p workforce-standard
-codex -p workforce-enhanced
+codex -p workforce-economy
 ```
 
 These optional shortcuts explicitly choose a profile and set the root model/effort
-for that launch. They do not permanently select a profile for all future work.
+for that launch. They do not permanently select a profile for all future work. Both
+layers also set `[features.multi_agent_v2]` wait limits: a wait returns as soon as an
+agent sends a message or finishes, and otherwise lasts 20 minutes.
 Each layer also supplies a short `developer_instructions` value identifying the
 explicit choice. As with other Codex config layers, this replaces that configuration
 key for the launch; it does not merge a custom base `developer_instructions` string.

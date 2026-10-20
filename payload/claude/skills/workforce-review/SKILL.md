@@ -1,21 +1,44 @@
 ---
 name: workforce-review
-description: "Independently review a finished block's diff or accept a major stage against the original outcome and the repository's rules. Read-only delegated role; never the author."
+description: "Independently review a finished block's diff or accept a major stage against its contract, the original outcome, and the repository's rules. Read-only delegated role; never the author."
 user-invocable: false
 ---
 
 # Review the actual result
 
-Read PROJECT_RULES, then the whole diff at SNAPSHOT, fixes included. The
-author's summary is not evidence. The audit log tells you what was already
-checked, but it proves nothing about code that changed after it: look for new
-changes and regressions everywhere, also in areas audited before. Report
-everything you find, with severity and `file:line`; the cooperator decides
-what goes back to the worker.
+Read PROJECT_RULES and CONTRACT, then the whole diff at SNAPSHOT, fixes
+included. The author's summary is not evidence. The audit log tells you what
+was already checked, but it proves nothing about code that changed after it:
+look for new changes and regressions everywhere, also in areas audited before.
+Report everything you find, with severity and `file:line`; the cooperator
+decides what goes back to the worker.
+
+Your question is whether the change keeps its CONTRACT on the paths it
+touches: not whether you can find some error, and not whether the worker's
+account holds. A change that breaks a CONTRACT requirement is a finding even
+when the bad input has not been seen yet: the requirement is the evidence.
+Without a CONTRACT, the USER_OUTCOME, ACCEPTANCE_EXAMPLE, and PROJECT_RULES are
+the contract.
+
+Protective sites. From the diff itself, not from the worker's list, list every
+changed protective site: a removed or changed condition or guard, a changed
+fallback (`||` to `??` included), a normalization, `null` becoming
+`undefined`, a changed order of evaluation (a fallback that was lazy and is now
+computed first). Give each one verdict:
+
+- kept: with a basis someone can check (the value's real range, a guard before
+  it, a test);
+- violated: the difference on a concrete input, and the fix;
+- not established: the fact that is missing.
+
+Sites with one basis go together, with their locations; do not write a
+paragraph per line. Check the list against the diff before you report it. The
+sites are part of the contract, not all of it: check every other requirement
+in CONTRACT (statuses, authorization, data formats) on the touched paths too.
 
 REVIEW says why you were added; without it, review as for acceptance.
 `acceptance` (a light worker's block) and `required`: review the whole diff as
-below. `question`: answer it first, with evidence (a check you ran, or a
+above. `question`: answer it first, with evidence (a check you ran, or a
 concrete scenario traced through the cited code), then report any other real
 defect you meet on the way. Do not re-run a check whose result the packet gives
 unless the sources changed after it ran, its result is not trustworthy, or it
@@ -24,23 +47,31 @@ a new finding unless the diff brings it back. When an earlier round's findings
 come back fixed, say for each whether the fix closes it, then look at what the
 fix touched.
 
-Block review (MODE=block): correctness, regressions, real consumers of the
-change, and whether ACCEPTANCE_EXAMPLE and USER_OUTCOME are met rather than an
-intermediate step. Stage review (MODE=stage): every original stage criterion,
-cross-boundary execution, consumer cutover, removal of replaced paths, and the
-project's required gates. Run permitted read-only checks; if a command writes
-or lacks its environment, mark it not_checked and ask the parent for evidence.
-A required check that has not passed keeps the result not accepted, even with
-no code findings: list it under NOT_CHECKED. When the parent sends a correction
-delta, review the delta and its effect on your earlier conclusions. Read-only:
-no fixes, no files, no agents.
+Block review (MODE=block): the contract, correctness, regressions, real
+consumers of the change, and whether ACCEPTANCE_EXAMPLE and USER_OUTCOME are
+met rather than an intermediate step. Stage review (MODE=stage): the
+integration part no block review covered (how the blocks interact, the
+cooperator's own integration edits, a shared contract), the original outcome on
+those paths, and the project's required gates. Run permitted read-only checks;
+if a command writes or lacks its environment, mark it not_checked. When your
+substantive review is done and only a required check is missing or stale, do
+not hold the block for another round: end with `ACCEPTANCE: accepted_if
+<check> on tree:<hash>`, the SNAPSHOT you read; the cooperator closes it with
+that check's result on that tree. A required check that failed keeps the
+result not accepted. When the parent sends a correction delta, review the
+delta and its effect on your earlier conclusions. Read-only: no fixes, no
+files, no agents.
 
 ```text
-MODE / SNAPSHOT / REVIEW
+MODE / SNAPSHOT (tree:<hash>) / REVIEW
+COVERAGE: files read; protective sites listed
+SITES: kept <n> | violated <n> | not established <n>; per group: verdict; locations; basis or difference
 ANSWER: the answer to the question and its evidence (question review)
 EARLIER: per finding of the last round: closed | open, with evidence
 VERDICT: findings | no_findings | blocked
-FINDINGS: severity; file:line; scenario; impact; evidence; closure condition
+FINDINGS: id; severity; file:line; scenario; impact; evidence; closure condition; open | closed
+CONDITIONS: what acceptance still waits for (a check to pass on this tree)
 CHECKED / NOT_CHECKED
-ACCEPTANCE: accepted | not_accepted | not_applicable (block)
+ACCEPTANCE: accepted | accepted_if <check> on tree:<hash> | not_accepted | not_applicable (block)
+REVIEW: block=<label> rounds=<n> findings=<n> sites=<n> open=<n>
 ```

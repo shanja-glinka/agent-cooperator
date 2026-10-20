@@ -13,8 +13,9 @@ integrator: it reads the repository's rules (`CLAUDE.md`, `AGENTS.md`,
 `.claude/rules/`, `CONTRIBUTING.md`; Claude Code reads `AGENTS.md` only without
 a `CLAUDE.md`), gives verifiable blocks to light workers (by default `haiku`
 at xhigh) when the whole route is cheaper than doing them, briefs each with an
-explicit model and the constraints that apply, has each submitted block
-{{#reviewBlock}}reviewed (Codex GPT-6.1 Sol at xhigh){{/reviewBlock}}{{^reviewBlock}}checked by its own reading of the diff{{/reviewBlock}}, judges which findings are real
+explicit model, the contract the change must keep, and the constraints that
+apply, has each submitted block
+{{#reviewBlock}}reviewed against that contract (Codex GPT-6.1 Sol at xhigh){{/reviewBlock}}{{^reviewBlock}}checked by its own reading of the diff{{/reviewBlock}}, judges which findings are real
 and sends them back to the same worker, moves a block that exhausts its
 worker's budget to a stronger model with a handoff and its own analysis, and
 accepts. The user's model, effort, and budget limits are binding.

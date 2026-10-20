@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.9.0",
+  "policyVersion": "1.10.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "policy": {
@@ -9,8 +9,8 @@
   },
   "workClasses": {
     "direct": "Work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly. Done inline with the project's checks; no agents.",
-    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, and check, without solving it first; the block is audited and reviewed before it is accepted.",
-    "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage acceptance only when blocks interact in ways no block review saw."
+    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, the constraints that can change how it is done, and the check, without solving it first; the block is reviewed before it is accepted.",
+    "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage review only for an integration part no block review covered."
   },
   "profiles": {
     "standard": {
@@ -152,12 +152,13 @@
         "runtime": "codex-cli",
         "model": "gpt-6.1-sol",
         "effort": "xhigh",
-        "sandbox": "read-only"
+        "sandbox": "read-only",
+        "when": "only for an integration part no block review covered"
       },
       "design": {
         "model": "opus",
         "effort": "high",
-        "scope": "the cooperator itself"
+        "scope": "the cooperator decides architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses"
       },
       "auditor": {
         "runtime": "codex-cli",
@@ -323,9 +324,12 @@
   "review": {
     "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
     "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol at xhigh; blocks ready together go to one review. With it off, the cooperator accepts on its own reading of the diff.",
+    "contract": "The review packet names CONTRACT: what the change must keep, quoted with its source (the task, the project's rules). The reviewer lists from the diff itself every changed protective site (a removed or changed condition, a changed fallback, a normalization, null becoming undefined, a changed order of evaluation) and gives each one verdict: kept, with a checkable basis; violated, with the difference and the fix; not established, with the missing fact. Sites with one basis are grouped with their locations. The site list is part of checking the contract, not all of it: every other requirement in CONTRACT is checked on the paths the change touches.",
+    "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and a change that bears on the review goes to the same reviewer. No reviewer call only to read an exit code.",
+    "stage": "Stage review runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract; in Hybrid on gpt-6.1-sol at xhigh through Codex, in the other profiles on their declared stageReviewer. One review that read the final merged diff and those interactions closes both.",
     "loop": "Real findings go to the same worker; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
     "smallLocal": "A small local change with a clear contract and passing checks may be accepted on the cooperator's own reading of the diff.",
     "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",
-    "report": "One line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>."
+    "report": "One line per reviewed block: the reviewer's REVIEW: block=<label> rounds=<n> findings=<n> sites=<n> open=<n>, with real=<n> (the findings the cooperator took as real) added after findings."
   }
 }

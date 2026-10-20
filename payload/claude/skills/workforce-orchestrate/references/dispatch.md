@@ -14,12 +14,15 @@ Read the record only to route outside the defaults below.
 | Worker ladder | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` | `sonnet` → `opus` | `sonnet` → `opus` |
 | Audit lens (on demand) | Codex `gpt-6-luna`, xhigh | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) |
 | Block reviewer (MODE=block) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `opus`, high (Agent) |
-| Stage reviewer (MODE=stage) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `fable`, high (Agent) |
-| Unresolved design | the cooperator decides before briefing | targeted `opus` help | bounded `fable` block |
+| Stage reviewer (MODE=stage), only for an integration part no block review covered | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `fable`, high (Agent) |
+| Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | targeted `opus` help | bounded `fable` block |
 
 Presets are starting recommendations. A named profile is an approach preference;
-the user's explicit model, effort, and budget limits are binding. If `fable` is
-unavailable, use `opus` at high and say so.
+the user's explicit model, effort, and budget limits are binding. Sol at xhigh
+reviews blocks and stages in Hybrid; Standard and Enhanced keep the reviewers
+declared above and run only when the user chooses them, never as a silent
+replacement for Hybrid. If `fable` is unavailable, use `opus` at high and say
+so.
 
 Hybrid is the default: `opus` thinks, judges, and integrates, and `haiku` reads
 and types at xhigh{{#reviewBlock}}; GPT-6.1 Sol at xhigh reviews the blocks light workers
@@ -49,8 +52,9 @@ cooperator on `opus` runs at medium unless `/effort` is set.
 1. Explicit choice, active task choice, or standing preference wins; the latest
    instruction takes precedence.
 2. Otherwise Hybrid, also for "work autonomously", "choose yourself", and
-   unattended runs; Enhanced for substantial unresolved design.
-3. Standard on the user's choice, or when Codex is unavailable; say which.
+   unattended runs.
+3. Standard or Enhanced only on the user's choice. When Codex is unavailable,
+   Hybrid keeps its `haiku` workers and uses the fallback above; say so.
 4. Ask once, in the user's language, only before long multi-stage work where
    the choice materially changes the approach and nothing above applies.
 
@@ -122,14 +126,15 @@ GOAL: the complete result this block owns
 ACCEPTANCE_EXAMPLE: concrete before/after
 SCOPE / OUT_OF_SCOPE: what this block covers; what it must not do
 PROJECT_RULES: repository instruction files to read first
-INPUTS / SNAPSHOT: exact sources, contracts, revision, relevant dirty diff; the tree to read
+CONTRACT: what the change must keep (behavior, interfaces, data at the boundaries), quoted with its source (the task, a rule file)
+INPUTS / SNAPSHOT: exact sources, revision, relevant dirty diff; the tree to read (reviewer: tree:<hash> from scripts/accept.mjs snapshot)
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
-CONSTRAINTS: what the project checks on this change (CI steps, lint and size rules, frozen areas), each with the file that sets it
+CONSTRAINTS: the limits of the touched areas that can change how the work is done, each once with its scope and source: a check and the files it covers; a size limit with the file's current value (bot.ts 2998 of 3000 lines, scripts/check-architecture.cjs:351); a limit still to find, as the worker's first step
 TRAPS: what you saw that can go wrong (a behavior-changing rewrite)
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
-REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run; the audit log
+REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run and the tree they ran on; the audit log
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff

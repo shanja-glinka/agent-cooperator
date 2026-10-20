@@ -1,12 +1,42 @@
 # Research and routing rationale
 
-The v7, v6, and v5 sections below were prepared on 2026-10-20 and the Route
+The v8, v7, v6, and v5 sections below were prepared on 2026-10-20 and the Route
 Decision synthesis on 2026-10-19, all for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v8 — 2026-10-20: review against the contract
+
+Claude policy 1.10.0, Codex policy 1.12.0. v7 measured 2026-10-20 (private suite, 30
+cells, report corrected after an external audit) cost less than v6 in 7 of 8
+groups, but «solved» meant only that the suite's check passed. A hidden test of
+the large task's contract (defensive checks on database and JSON data stay),
+run on the saved final code of every earlier run, found the behavior broken on
+the Claude line in 3 of 3 large tasks without review (no kit, v5, v7 without
+the reviewer) and in 1 of 3 with the v7 review, which missed two such sites in
+one task; on the Codex line in none. In four of six large Claude tasks the
+briefs left out the file-size limit, and CI failed on it in three of them; the
+Codex cooperator woke 72
+times on one-minute waits, mostly to write a status or look at the workers'
+files. v8 changes how acceptance works:
+
+- **The reviewer checks the contract:** the packet carries CONTRACT with its
+  source; the reviewer lists every changed protective site from the diff and
+  gives each kept, violated, or not established, without writing a paragraph
+  per line, and checks the other requirements too.
+- **A passed check closes a condition:** `accepted_if <check> on tree:<hash>`
+  closes through `scripts/accept.mjs` when a recorded run of that check passed
+  on the reviewed tree; a later code change sends the delta to the same
+  reviewer.
+- **Stage review only for an unreviewed integration part,** on Sol xhigh.
+- **Constraints before the work:** each limit of the touched areas once, with
+  scope and source; an unknown limit is the worker's first step.
+- **Codex:** no GPT-6 Astra and no Enhanced profile; the ladder ends at Sol;
+  the launch layers set `[features.multi_agent_v2]` waits to 20 minutes (Codex
+  0.163.0 requires min ≤ default ≤ max).
 
 ## v7 — 2026-10-20: the organization around light workers
 

@@ -62,6 +62,24 @@ git worktree remove --force "$SCRATCH/snap-blk1"   # after the round
 The copy has no installed dependencies: run checks that need them in the main
 checkout once the writer is done.
 
+## Review snapshot and conditions
+
+`{{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/accept.mjs` ties a review to
+the state it read and closes its conditions without another review run:
+
+```sh
+A={{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/accept.mjs
+node $A snapshot                     # tree:<hash> of the work tree, uncommitted files included
+node $A run "npm run ci"             # runs the check, keeps its log, records its exit code and tree
+node $A close --tree <hash> --check "npm run ci"
+```
+
+Put the `tree:<hash>` in the reviewer's SNAPSHOT. On `ACCEPTANCE: accepted_if
+<check> on tree:<hash>`, run that check through `run` (or reuse a recorded run
+on the same tree) and `close`: CLOSED accepts the block; OPEN names why (the
+check failed, never ran on that tree, or the files changed since the review).
+Changed files that bear on the review go to the same reviewer as a delta.
+
 ## Codex CLI (Hybrid, the default)
 
 In Hybrid, audit lenses and reviewers are Codex runs, not Agent calls. Start every

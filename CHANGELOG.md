@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- v8: review against the contract. The packet carries `CONTRACT` (what the
+  change must keep, with its source); the reviewer lists every changed
+  protective site from the diff and gives each kept, violated, or not
+  established. A review may end with `accepted_if <check> on tree:<hash>`,
+  which `skills/workforce-orchestrate/scripts/accept.mjs` closes when a
+  recorded run of that check passed on the reviewed tree, without another
+  reviewer call. Stage review runs only for an integration part no block
+  review covered, on GPT-6.1 Sol xhigh. Briefs carry the constraints of the
+  touched areas once each, with scope and source; an unknown limit is the
+  worker's first step. Codex: GPT-6 Astra and the Enhanced profile are
+  removed (a stored Enhanced choice runs as Standard), the worker ladder ends
+  at Sol, and the launch layers set `[features.multi_agent_v2]` waits to 20
+  minutes (min = default = 1200000 ms, max 3600000 ms). `status` prints the
+  installed routing. Policy: Claude 1.10.0, Codex 1.12.0.
 - v7: the organization around light workers. The route decision counts the
   whole route a brief sets off (the cooperator's turns, the worker, the
   review, the fix rounds). Audit lenses run only on demand, for an area the

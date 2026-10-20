@@ -8,3 +8,11 @@ Use PROFILE=standard for this task; do not ask them to choose the same profile a
 Apply {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for implementation work.
 The user's later explicit profile choice takes precedence; verify runtime settings.
 """
+
+# Waiting for agents: a wait returns as soon as an agent sends a message or finishes;
+# without an event it lasts 20 minutes, so the cooperator does not wake every minute.
+# Codex requires min <= default <= max.
+[features.multi_agent_v2]
+min_wait_timeout_ms = 1200000
+default_wait_timeout_ms = 1200000
+max_wait_timeout_ms = 3600000

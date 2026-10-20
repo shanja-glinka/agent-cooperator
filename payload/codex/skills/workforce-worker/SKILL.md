@@ -25,7 +25,13 @@ full log stays in the file), since a pipe to `tail` hides it. Keep in your
 context what the next decision needs: read code by the functions you change
 and the conditions they depend on, and do not reread what you already have.
 Honor CONSTRAINTS from the start: a limit the project checks is cheaper to
-meet than to redo. If a required check could not run, say so and why: a check you did
+meet than to redo. When CONSTRAINTS names a limit still to find, or you will
+grow a file it does not cover, find the project's rule for it first (the CI
+config, the check scripts) before the edit that depends on it, and report what
+you found. Keep the CONTRACT: a defensive check or fallback on data from a
+database, a message, or JSON stays even when the type says the bad value cannot
+come; list every protective site you changed under SITES, as a help for the
+reviewer, not as proof. If a required check could not run, say so and why: a check you did
 not run is not a pass. When the parent sends findings, fix them in this same
 context and re-run the affected checks.
 
@@ -49,6 +55,8 @@ TASK / SNAPSHOT: assignment version; revision and dirty diff identity
 STATUS: submitted | handoff | blocked
 RESULT: what the acceptance example shows now
 CHANGED: files; old -> new -> consumer where something was replaced
+SITES: protective sites you changed (a guard, a fallback, a normalization), with file:line
+CONSTRAINTS_FOUND: limits you looked up for this block, with their source
 CHECKS: command; cwd; exit code; required checks not run, and why
 FOLLOW_UPS: observations outside SCOPE, not implemented
 BLOCKER: what stops completion and why, or none

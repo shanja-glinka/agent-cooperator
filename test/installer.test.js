@@ -349,6 +349,23 @@ test('update installs the real contextual policy into existing consumers and pre
   assert.equal(policy.selectionRules.default, 'economy');
   assert.deepEqual([policy.profiles.economy.worker.model, policy.profiles.economy.worker.effort], ['gpt-6-luna', 'xhigh']);
   assert.deepEqual([policy.profiles.economy.blockReviewer.model, policy.profiles.economy.blockReviewer.effort], ['gpt-6.1-sol', 'xhigh']);
+  // Policy 1.12.0: no Astra anywhere, Sol xhigh reviews the stage, the ladder ends at Sol, and the
+  // Enhanced launch layer an older install left behind is removed.
+  assert.deepEqual(Object.keys(policy.profiles), ['standard', 'economy']);
+  assert.deepEqual([policy.profiles.economy.stageReviewer.model, policy.profiles.economy.stageReviewer.effort], ['gpt-6.1-sol', 'xhigh']);
+  assert.deepEqual(policy.profiles.economy.workerLadder, ['gpt-6-luna', 'gpt-6.1-sol']);
+  assert.equal(fssync.existsSync(path.join(fixture.codexHome, 'workforce-enhanced.config.toml')), false);
+  const installed = [];
+  const walk = async (dir) => { for (const e of await fs.readdir(dir, { withFileTypes: true })) { const p = path.join(dir, e.name); if (e.isDirectory()) await walk(p); else installed.push([p, await fs.readFile(p, 'utf8')]); } };
+  await walk(fixture.codexHome);
+  assert.deepEqual(installed.filter(([, text]) => /gpt-6-astra/.test(text)).map(([p]) => p), []);
+  for (const layer of ['workforce-economy.config.toml', 'workforce-standard.config.toml']) {
+    const text = await fs.readFile(path.join(fixture.codexHome, layer), 'utf8');
+    const [min, def, max] = ['min', 'default', 'max'].map((k) => Number(text.match(new RegExp(`^${k}_wait_timeout_ms = (\\d+)`, 'm'))?.[1]));
+    assert.ok(min <= def && def <= max && min >= 1200000, `${layer}: ${min} ${def} ${max}`);
+  }
+  const routing = (await runCommand('status', options)).routing;
+  assert.ok(routing.includes('economy (default): worker gpt-6-luna xhigh; block review gpt-6.1-sol xhigh; stage review gpt-6.1-sol xhigh; ladder gpt-6-luna → gpt-6.1-sol'), routing.join('\n'));
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
 });

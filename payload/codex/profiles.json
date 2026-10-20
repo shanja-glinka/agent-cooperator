@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.11.0",
+  "policyVersion": "1.12.0",
   "selection": "contextual",
   "policy": {
     "reviewBlock": true,
@@ -11,7 +11,7 @@
       "orchestrator": {
         "model": "gpt-6.1-sol",
         "effort": "high",
-        "note": "Cost choice: Sol is Codex's recommended default and about 5x cheaper per token than Astra; Astra keeps stage acceptance and Enhanced."
+        "note": "Cost choice: Sol is Codex's recommended default."
       },
       "probe": {
         "model": "gpt-6-luna",
@@ -32,13 +32,14 @@
         "effort": "xhigh"
       },
       "stageReviewer": {
-        "model": "gpt-6-astra",
-        "effort": "high"
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "when": "only for an integration part no block review covered"
       },
       "design": {
-        "model": "gpt-6-astra",
+        "model": "gpt-6.1-sol",
         "effort": "high",
-        "scope": "targeted-assistance"
+        "scope": "the cooperator decides architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses"
       },
       "auditor": {
         "model": "gpt-6-luna",
@@ -54,57 +55,7 @@
         "mode": "on-demand: only for an area the checks and the review do not cover"
       },
       "workerLadder": [
-        "gpt-6.1-sol",
-        "gpt-6-astra"
-      ]
-    },
-    "enhanced": {
-      "orchestrator": {
-        "model": "gpt-6-astra",
-        "effort": "high"
-      },
-      "probe": {
-        "model": "gpt-6-luna",
-        "effort": "medium",
-        "escalateTo": {
-          "model": "gpt-6.1-sol",
-          "effort": "medium",
-          "when": "the question needs judgment, not search"
-        }
-      },
-      "worker": {
-        "model": "gpt-6.1-sol",
-        "effort": "xhigh"
-      },
-      "blockReviewer": {
-        "model": "gpt-6.1-sol",
-        "effort": "xhigh"
-      },
-      "stageReviewer": {
-        "model": "gpt-6-astra",
-        "effort": "high"
-      },
-      "design": {
-        "model": "gpt-6-astra",
-        "effort": "high",
-        "scope": "bounded-open-design"
-      },
-      "auditor": {
-        "model": "gpt-6-luna",
-        "effort": "xhigh",
-        "lenses": [
-          "docs",
-          "task",
-          "conventions"
-        ],
-        "game": "A lens runs only when the cooperator adds it for an uncovered area. It reports everything; the cooperator takes only real findings to the same worker. A lens with nothing real is retired for the block; one with real findings may check the fix.",
-        "rerun": "on real findings",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors).",
-        "mode": "on-demand: only for an area the checks and the review do not cover"
-      },
-      "workerLadder": [
-        "gpt-6.1-sol",
-        "gpt-6-astra"
+        "gpt-6.1-sol"
       ]
     },
     "economy": {
@@ -132,13 +83,14 @@
         "effort": "xhigh"
       },
       "stageReviewer": {
-        "model": "gpt-6-astra",
-        "effort": "high"
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "when": "only for an integration part no block review covered"
       },
       "design": {
         "model": "gpt-6.1-sol",
         "effort": "high",
-        "scope": "the cooperator decides before briefing"
+        "scope": "the cooperator decides architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses"
       },
       "auditor": {
         "model": "gpt-6-luna",
@@ -155,45 +107,33 @@
       },
       "workerLadder": [
         "gpt-6-luna",
-        "gpt-6.1-sol",
-        "gpt-6-astra"
+        "gpt-6.1-sol"
       ],
       "selection": "Default."
     }
   },
   "escalation": {
-    "model": "gpt-6-astra",
-    "efforts": [
-      "xhigh",
-      "max"
-    ],
-    "requires": "For gpt-6-astra above high only: state a concrete unresolved reasoning problem, why high is insufficient, and the expected benefit. Do not escalate solely because a task is large, important, or a prior attempt failed. This exception does not restrict Sol xhigh workers, Luna xhigh roles, or the ordinary worker ladder to Astra high. Explicit user model, effort, and budget limits remain binding."
+    "ceiling": "gpt-6.1-sol",
+    "rule": "No tier above gpt-6.1-sol. When Sol at xhigh does not finish a block, the cooperator re-plans (the cause of the stop, the brief, the split, the way of checking) or asks the user; it does not buy a pricier run. Explicit user model, effort, and budget limits remain binding."
   },
   "selectionRules": {
     "default": "economy",
     "reuse": "Explicit task or launch choice, active task context, or applicable standing preference.",
-    "autonomous": "Economy for described work, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended execution too.",
+    "autonomous": "Economy for described work; proceed without asking. Applies to unattended execution too.",
     "askOnly": "Long-running multi-stage work with substantial unresolved solution choices and material approach/resource impact, with no applicable choice or delegated selection.",
-    "runtimeMismatch": "Adapt to available settings even for a user-selected preset without a new approval gate. Report material actual routing honestly; separately explicit strict model/effort/budget requirements remain binding."
+    "runtimeMismatch": "Adapt to available settings even for a user-selected preset without a new approval gate. Report material actual routing honestly; separately explicit strict model/effort/budget requirements remain binding.",
+    "removed": "Enhanced was removed in policy 1.12.0. A stored or launched choice of it runs as Standard; say so."
   },
   "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
   "modelResolution": {
     "checkedOn": "2026-10-20",
     "models": {
-      "gpt-6-astra": {
-        "priceInOutPerMTok": [
-          10,
-          50
-        ],
-        "role": "most capable; stage acceptance, Enhanced brain, bounded open design",
-        "cachedInputPerMTok": 1
-      },
       "gpt-6.1-sol": {
         "priceInOutPerMTok": [
           2,
           10
         ],
-        "role": "near-Astra for complex work at Sol price; cooperator, block review at xhigh, escalated implementation",
+        "role": "cooperator, block and stage review at xhigh, escalated implementation",
         "succeeds": "gpt-6-sol",
         "cachedInputPerMTok": 0.1
       },
@@ -224,12 +164,12 @@
         "status": "retiring 2026-10-14; not used"
       }
     },
-    "note": "Codex efforts: Astra light by default; Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra. Requests over 272k input tokens cost about twice; cache writes cost 1.25x input."
+    "note": "Codex efforts: Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra. Requests over 272k input tokens cost about twice; cache writes cost 1.25x input."
   },
   "workClasses": {
     "direct": "Work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly. Done inline with the project's checks; no agents.",
-    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, and check, without solving it first; the block is audited and reviewed before it is accepted.",
-    "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage acceptance only when blocks interact in ways no block review saw."
+    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, the constraints that can change how it is done, and the check, without solving it first; the block is reviewed before it is accepted.",
+    "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage review only for an integration part no block review covered."
   },
   "judging": {
     "real": "In the diff or caused by it; breaks a quoted rule, document line, or acceptance line at a line that really violates it (the cooperator opens both); reproduces by a check or a concrete scenario.",
@@ -247,12 +187,7 @@
     "gpt-6.1-sol": {
       "effort": "xhigh",
       "attempts": 3,
-      "tokenCeiling": 500000
-    },
-    "gpt-6-astra": {
-      "effort": "high",
-      "attempts": 3,
-      "tokenCeiling": null,
+      "tokenCeiling": 500000,
       "then": "the cooperator re-plans or asks the user"
     },
     "rule": "After the third attempt, or when the tool calls or tokens of the block are spent, unfinished work moves to the next tier of the profile's workerLadder as a fresh worker with the original packet, the cooperator's APPROACH, and the HANDOFF only. A submitted block at the limit is verified as it is; a later fix goes to the next tier. At the top of the ladder the cooperator re-plans or asks the user; explicit user limits are binding.",
@@ -264,9 +199,12 @@
   "review": {
     "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
     "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol at xhigh; blocks ready together go to one review. With it off, the cooperator accepts on its own reading of the diff.",
+    "contract": "The review packet names CONTRACT: what the change must keep, quoted with its source (the task, the project's rules). The reviewer lists from the diff itself every changed protective site (a removed or changed condition, a changed fallback, a normalization, null becoming undefined, a changed order of evaluation) and gives each one verdict: kept, with a checkable basis; violated, with the difference and the fix; not established, with the missing fact. Sites with one basis are grouped with their locations. The site list is part of checking the contract, not all of it: every other requirement in CONTRACT is checked on the paths the change touches.",
+    "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and a change that bears on the review goes to the same reviewer. No reviewer call only to read an exit code.",
+    "stage": "Stage review (gpt-6.1-sol at xhigh) runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract. One review that read the final merged diff and those interactions closes both.",
     "loop": "Real findings go to the same worker; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
     "smallLocal": "A small local change with a clear contract and passing checks may be accepted on the cooperator's own reading of the diff.",
     "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",
-    "report": "One line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>."
+    "report": "One line per reviewed block: the reviewer's REVIEW: block=<label> rounds=<n> findings=<n> sites=<n> open=<n>, with real=<n> (the findings the cooperator took as real) added after findings."
   }
 }

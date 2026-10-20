@@ -96,7 +96,11 @@ reached.
 worker submits is reviewed before it is accepted. The reviewer is GPT-6.1 Sol at
 xhigh in the Codex presets and in Claude Hybrid (through the Codex CLI from
 Claude Code), or opus at high in Claude Standard and Enhanced. Blocks that are
-ready together go to one review run. The reviewer reads the whole diff. Real
+ready together go to one review run. The reviewer reads the whole diff and
+checks it against CONTRACT (what the change must keep, quoted from the task or
+the project's rules with its source): every changed protective site (a removed
+or changed condition, a changed fallback, a normalization) gets a verdict of
+kept, violated, or not established. Real
 findings go to the same worker, and the same reviewer checks the fixes and what
 they touch; a second round is normal, and the same finding twice without
 progress stops the loop for the cooperator's decision. A small local change with
@@ -105,7 +109,11 @@ reading of the diff. A review that the project, the user, or the task requires
 always runs. With `reviewBlock` off, the cooperator accepts a light worker's
 block on its checks and its own reading of the whole diff. If Sol is
 unavailable, the fallback review is marked as such. The report has one line per
-reviewed block: `REVIEW: rounds=<n> findings=<n> real=<n>`.
+reviewed block: `REVIEW: block=<label> rounds=<n> findings=<n> real=<n>
+sites=<n> open=<n>`; the reviewer writes it and the cooperator adds `real`. A
+review may end with `ACCEPTANCE: accepted_if <check> on tree:<hash>`; the
+cooperator closes it with `scripts/accept.mjs` when a recorded run of that check
+passed on the reviewed tree, without another reviewer call.
 
 **Audit lenses on demand.** Audit lenses do not run by default. A lens (docs,
 task, or conventions) reads a block only for an area that the checks and the
@@ -148,29 +156,33 @@ Worker budgets per block: `haiku` 120 tool calls per run and 360 per block,
 separate from tool-call budgets. Alias resolutions dated 2026-10-20 are recorded
 in `profiles.json`; actual availability and routing depend on the runtime and
 account. Hybrid is the default. It needs the `codex` CLI on PATH and logged in;
-without it, use Standard and say so. Codex runs go through the bundled
+without it, Hybrid keeps `haiku` workers and runs the reviews on `opus` high
+through Agent, marked as the fallback. Standard and Enhanced run only when you
+choose them, never as an automatic replacement for Hybrid. Codex runs go through the bundled
 `codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns nothing.
-Policy 1.9.0 keeps the models and prices of the previous release.
+Claude policy 1.10.0 is the current routing policy.
 Details: [docs/claude-code.md](docs/claude-code.md).
 
 ## Codex
 
-| Role | Standard | Enhanced | Economy (default) |
-| --- | --- | --- | --- |
-| Cooperator (your session) | GPT-6.1 Sol high | GPT-6 Astra high | GPT-6.1 Sol high |
-| Probe | Luna medium, Sol for judgment | same | same |
-| Worker | Sol xhigh | Sol xhigh | Luna xhigh |
-| Worker ladder | Sol → Astra | Sol → Astra | Luna → Sol → Astra |
-| Audit lens (on demand) | Luna xhigh | same | same |
-| Block review | Sol xhigh | same | same |
-| Stage acceptance | Astra high | same | same |
+| Role | Economy (default) | Standard |
+| --- | --- | --- |
+| Cooperator (your session) | GPT-6.1 Sol high | GPT-6.1 Sol high |
+| Probe | Luna medium, Sol for judgment | same |
+| Worker | Luna xhigh | Sol xhigh |
+| Worker ladder | Luna → Sol | Sol |
+| Audit lens (on demand) | Luna xhigh | same |
+| Block review | Sol xhigh | same |
+| Stage acceptance | Sol xhigh, only for an integration part no block review covered | same |
 
-Worker budgets per block: Luna 600 tool calls per run, 3 attempts, 400k tokens;
-Sol 3 attempts, 500k tokens; Astra 3 attempts, then the cooperator re-plans or
-asks you. Economy is the default. Native launch layers:
-`codex -p workforce-economy`, `workforce-standard`, and `workforce-enhanced`.
-A prompt never changes the running model. Policy 1.11.0 keeps the models and
-prices of the previous release. Details: [docs/profiles.md](docs/profiles.md).
+Worker budgets per block: Luna 600 tool calls per run, 1800 per block, 3 attempts,
+400k tokens, then Sol xhigh; Sol 3 attempts, 500k tokens, then the cooperator
+re-plans or asks you. Economy is the default. Enhanced was removed in policy 1.12.0;
+a stored or launched choice of it runs as Standard. Native launch layers:
+`codex -p workforce-economy` and `workforce-standard`. Both set the agent wait: a
+wait returns as soon as an agent sends a message or finishes, and otherwise lasts 20
+minutes. A prompt never changes the running model. No profile uses GPT-6 Astra.
+Details: [docs/profiles.md](docs/profiles.md).
 
 ## What gets installed
 
@@ -178,7 +190,7 @@ prices of the previous release. Details: [docs/profiles.md](docs/profiles.md).
 | --- | --- | --- |
 | Roles | `agents/workforce-{worker,worker-lite,probe,auditor,reviewer}.md` | `agents/workforce_{worker,probe,auditor,reviewer}.toml` |
 | Skills | `skills/workforce-*/` | `skills/workforce-*/`, linked into `~/.agents/skills` |
-| Launch layers | none | `workforce-{standard,enhanced,economy}.config.toml` |
+| Launch layers | none | `workforce-{standard,economy}.config.toml` |
 | Policy and manifest | `claude-workforce/profiles.json`, `manifest.json` | `codex-workforce/profiles.json`, `manifest.json` |
 | Instructions | marked block in `CLAUDE.md` | marked block in `AGENTS.md` (or `AGENTS.override.md`) |
 

@@ -174,6 +174,10 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.deepEqual([hybrid.blockReviewer.model, hybrid.stageReviewer.model], ['gpt-6.1-sol', 'gpt-6.1-sol']);
   assert.equal(hybrid.codexRunner.script, `${portable(fixture.home)}/skills/workforce-orchestrate/scripts/codex-run.mjs`);
   await fs.access(path.join(fixture.home, 'skills', 'workforce-orchestrate', 'scripts', 'codex-run.mjs'));
+  await fs.access(path.join(fixture.home, 'skills', 'workforce-orchestrate', 'scripts', 'accept.mjs'));
+  assert.equal(hybrid.stageReviewer.effort, 'xhigh');
+  assert.ok(policy.review.contract.includes('CONTRACT') && policy.review.conditions.includes('accepted_if'));
+  assert.deepEqual((await runCommand('status', options)).routing.slice(1), ['hybrid (default): worker haiku xhigh; block review gpt-6.1-sol xhigh; stage review gpt-6.1-sol xhigh; ladder haiku → codex:gpt-6.1-sol → opus']);
   const auditor = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-auditor.md'), 'utf8');
   assert.match(auditor, /\neffort: xhigh\n/);
   assert.match(auditor, /\ndisallowedTools: Agent, Edit, Write, NotebookEdit\n/);
