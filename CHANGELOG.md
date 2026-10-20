@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- The reviewer judges a protective site against the inputs the contract covers.
+  "Kept" used to accept "the value's real range" as a basis, and in a measured
+  run a reviewer drew that range from today's callers and accepted a changed
+  fallback on database data that the contract protected. Now outside data (a
+  database row, a message, parsed JSON, an environment variable) and any value
+  taken from it can hold anything, whatever its type; a guard counts when the
+  code under review runs it itself, and a guard in today's callers counts only
+  when the contract protects an outer behavior and every path to it is traced.
+  A violated or not-established site keeps the block not accepted. Same rule in
+  both editions.
 - `accept.mjs run` started checks with `/bin/sh`, which Windows does not have, so
   no check could pass there. It now uses `sh` from `PATH` (Git for Windows ships
   one) and falls back to the platform shell.

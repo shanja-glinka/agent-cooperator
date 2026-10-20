@@ -25,10 +25,26 @@ fallback (`||` to `??` included), a normalization, `null` becoming
 `undefined`, a changed order of evaluation (a fallback that was lazy and is now
 computed first). Give each one verdict:
 
-- kept: with a basis someone can check (the value's real range, a guard before
-  it, a test);
+- kept: you showed the same results and errors as before for every input the
+  CONTRACT covers here. Outside data (a database row, a message, parsed JSON,
+  an environment variable), and any value taken from it, can hold anything at
+  runtime, whatever its type says; only values the program builds itself are
+  bounded by their type and the language's guarantees. A guard,
+  normalization, or helper is a basis when this code runs it itself, here or
+  in a function it calls, and it gives the same results for those inputs. A
+  guard in today's callers counts only when the CONTRACT protects an outer
+  behavior and you traced every path to it, never when it protects this check
+  or fallback;
 - violated: the difference on a concrete input, and the fix;
-- not established: the fact that is missing.
+- not established: the fact that is missing and what would settle it.
+
+A violated or not-established site keeps ACCEPTANCE at not_accepted. For
+example, a function that reads a parsed webhook body drops
+`if (!Array.isArray(body.items)) return [];` because both callers validate the
+body first, while the CONTRACT keeps guards on runtime data: violated, since
+`items: null` now throws instead of returning `[]`. If the same check moves
+into `readItems(body)`, which the function calls first and which returns `[]`
+for the same inputs, the site is kept.
 
 Sites with one basis go together, with their locations; do not write a
 paragraph per line. Check the list against the diff before you report it. The
