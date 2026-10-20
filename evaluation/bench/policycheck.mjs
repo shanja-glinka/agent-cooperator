@@ -12,7 +12,7 @@ import path from 'node:path';
 const out = process.argv[2];
 const kits = path.join(out, 'kits');
 // Text that only a review-on install may contain, and what an off install must say instead.
-const BLOCK_ON = [/independent review by\s+GPT-6\.1 Sol/, /reviewed \((Codex )?GPT-6\.1 Sol/, /one Sol xhigh review/, /Sol at xhigh reviews the blocks/];
+const BLOCK_ON = [/independent review by\s+GPT-6\.1 Sol/, /reviewed \((Codex )?GPT-6\.1 Sol/, /reviewed against that\s+contract \((Codex )?GPT-6\.1 Sol/, /one Sol xhigh review/, /Sol at xhigh reviews the blocks/];
 const STAGE_ON = [/Stage acceptance \(pipeline/];
 const texts = (dir) => {
   const found = [];
@@ -45,6 +45,20 @@ for (const name of fs.existsSync(kits) ? fs.readdirSync(kits).sort() : []) {
         if (/\.config\.toml$/.test(p) && /review/i.test(t)) fail(`${name} ${edition}: launch layer ${rel} names a review of its own`);
         if (!profiles.policy.reviewBlock) for (const re of BLOCK_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a block review (${re})`);
         if (!profiles.policy.reviewStage) for (const re of STAGE_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a stage review (${re})`);
+      }
+      // From policy 1.12.0 (Codex) and 1.10.0 (Claude): no route can assign GPT-6 Astra (its model
+      // id in any installed file), the default profile's stage reviewer is Sol xhigh, and every
+      // launch layer's waits satisfy Codex's min <= default <= max.
+      const atLeast = (v, min) => { const [a, b] = [v, min].map((s) => String(s).split('.').map(Number)); for (let i = 0; i < 3; i += 1) if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0); return true; };
+      const v8 = atLeast(profiles.policyVersion, edition === 'codex' ? '1.12.0' : '1.10.0');
+      if (v8) {
+        for (const [p, t] of all) if (/gpt-6-astra/.test(t)) fail(`${name} ${edition}: ${path.relative(home, p)} can assign gpt-6-astra`);
+        const def = profiles.profiles?.[profiles.selectionRules?.default];
+        if (!(def?.stageReviewer?.model === 'gpt-6.1-sol' && def.stageReviewer.effort === 'xhigh')) fail(`${name} ${edition}: default stage reviewer is ${JSON.stringify(def?.stageReviewer)}`);
+        for (const [p, t] of all.filter(([q]) => /\.config\.toml$/.test(q))) {
+          const [min, d, max] = ['min', 'default', 'max'].map((k) => Number(t.match(new RegExp(`^${k}_wait_timeout_ms\\s*=\\s*(\\d+)`, 'm'))?.[1]));
+          if (!(min <= d && d <= max)) fail(`${name} ${edition}: ${path.relative(home, p)} waits min ${min}, default ${d}, max ${max}`);
+        }
       }
       const joined = all.map(([, t]) => t).join('\n');
       if (profiles.policy.reviewBlock && !BLOCK_ON[0].test(joined)) fail(`${name} ${edition}: review is on, but no text asks for it`);

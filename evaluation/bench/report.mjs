@@ -31,6 +31,7 @@ const ROWS = [
   // Only a Codex cooperator waits with wait_agent; a Claude one is notified.
   ['Ожиданий кооператора, кончившихся таймаутом', (c) => (c.model === 'opus' ? null : c.waits.timedOut ?? null), k],
   ['Цена запросов после таймаута ожидания, $', (c) => (c.model === 'opus' ? null : c.waits.wakeUsd ?? null), usd],
+  ['Условий accepted_if закрыто без ревьюера', (c) => c.accept?.closed ?? null, k],
   ['Ходов воркеров', (c) => c.totals.workerTurns ?? null, k], ['Кругов исправлений', (c) => c.totals.fixRounds ?? null, k],
   ['Наибольший промпт воркера', (c) => c.totals.workerMaxPrompt || null, k],
   ['Запросов воркеров выше тарифного порога', (c) => c.totals.workerOverTier ?? null, k],
@@ -46,7 +47,9 @@ const ROWS = [
 ];
 // Text rows shown per cell.
 const TEXT = [
-  ['REVIEW в отчёте: находок / настоящих', (c) => (c.review ? `${c.review.findings} / ${c.review.real}` : '—')],
+  ['REVIEW в отчёте: находок / настоящих', (c) => (c.review ? `${c.review.findings} / ${c.review.realMissing ? '?' : c.review.real}` : '—')],
+  ['Брифы: с CONSTRAINTS / с CONTRACT / всего (Claude)', (c) => (c.briefs?.total ? `${c.briefs.withConstraints} / ${c.briefs.withContract} / ${c.briefs.total}` : '—')],
+  ['После таймаута: статус / подглядывание / своя работа (Codex)', (c) => (c.waits?.timedOut ? `${c.waits.afterTimeout?.status ?? 0} / ${c.waits.afterTimeout?.peek ?? 0} / ${c.waits.afterTimeout?.work ?? 0}` : '—')],
   ['Маршрут', (c) => route(c)],
 ];
 const route = (c) => {

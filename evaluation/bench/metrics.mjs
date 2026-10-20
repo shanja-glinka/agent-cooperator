@@ -24,15 +24,37 @@ const kitFile = (p) => {
 };
 // Role families for the price breakdown.
 const family = (role) => (role === 'cooperator' ? 'cooperator' : /worker/.test(role) ? 'worker' : /audit/.test(role) ? 'auditor' : /review/.test(role) ? 'reviewer' : /probe/.test(role) ? 'probe' : 'other');
-// The cooperator reports one line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>.
+// The cooperator reports one line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>, and
+// from v8 the reviewer's form REVIEW: block=<label> rounds=<n> findings=<n> real=<n> sites=<n>
+// open=<n>. A label may also sit before the colon ("REVIEW A:") or after it ("REVIEW: persistence").
+// Fields are read by name; a line without rounds and findings is not a review line.
 const reviewLines = (text) => {
-  const r = { blocks: 0, rounds: 0, findings: 0, real: 0 };
-  // A block label may sit between the word and the colon, "REVIEW A: rounds=...", or after the
-  // colon, "REVIEW: persistence rounds=...".
-  for (const m of String(text ?? '').matchAll(/REVIEW\b[^:\n=]{0,40}:?\**\s*(?:[^\s:=]{1,40}\s+)?rounds\s*=\s*(\d+)[,;\s]+findings\s*=\s*(\d+)[,;\s]+real\s*=\s*(\d+)/gi)) {
-    r.blocks += 1; r.rounds += Number(m[1]); r.findings += Number(m[2]); r.real += Number(m[3]);
+  const r = { blocks: 0, rounds: 0, findings: 0, real: 0, realMissing: 0, sites: 0, open: 0 };
+  for (const m of String(text ?? '').matchAll(/REVIEW\b(?:(?!REVIEW\b)[^\n]){0,240}/g)) {
+    const num = (key) => { const x = new RegExp(`\\b${key}\\s*=\\s*(\\d+)`, 'i').exec(m[0]); return x ? Number(x[1]) : null; };
+    const [rounds, findings, real] = [num('rounds'), num('findings'), num('real')];
+    if (rounds == null || findings == null) continue;
+    r.blocks += 1; r.rounds += rounds; r.findings += findings;
+    if (real == null) r.realMissing += 1; else r.real += real;
+    r.sites += num('sites') ?? 0; r.open += num('open') ?? 0;
   }
   return r.blocks ? r : null;
+};
+// What the cooperator did right after a wait that timed out (Codex).
+const afterTimeoutKind = (p) => {
+  if (p.type === 'message') return 'status';
+  if (p.type === 'function_call') return p.name === 'wait_agent' ? 'rewait' : p.name === 'list_agents' ? 'peek' : 'agent';
+  const cmd = String(p.input ?? '');
+  if (/git (status|diff)|git -C|\bls\b|tail |wc -l|stat /.test(cmd)) return 'peek';
+  if (/npm|npx|jest|eslint|tsc|node |sed -n|cat |rg |grep /.test(cmd)) return 'work';
+  return 'other';
+};
+const acceptUse = (res, text) => {
+  for (const m of String(text).matchAll(/accept\.mjs\s+(snapshot|run|close)\b/g)) res.accept[m[1] === 'snapshot' ? 'snapshots' : m[1] === 'run' ? 'runs' : 'closes'] += 1;
+};
+const acceptResult = (res, output) => {
+  const t = typeof output === 'string' ? output : JSON.stringify(output ?? '');
+  if (/CLOSED:/.test(t)) res.accept.closed += 1; else if (/OPEN:/.test(t)) res.accept.open += 1;
 };
 
 function claude(logs, res) {
@@ -47,7 +69,10 @@ function claude(logs, res) {
   const seen = new Set();
   const actor = (file, meta) => {
     const msgs = new Map(); const tools = {}; const ids = new Set(); const kitReads = new Set(); let first = null; let last = null; let turns = 0;
-    const efforts = new Set();
+    const efforts = new Set(); const closeIds = new Set();
+    // The cooperator's briefs: each Agent prompt, together with any brief file it wrote and the
+    // prompt names (a packet in a file is still the brief).
+    const prompts = []; const written = [];
     const model = meta ? (meta.model === 'inherit' ? init?.model : meta.model) : init?.model;
     for (const l of jsonl(path.join(tdir, file))) {
       if (l.timestamp) { first ??= l.timestamp; last = l.timestamp; }
@@ -61,6 +86,7 @@ function claude(logs, res) {
         if (!meta) for (const c of content) {
           if (c.type === 'text' && /^Base directory for this skill: .*\/skills\/workforce-/.test(c.text ?? '')) res.kitChars += c.text.length;
           if (c.type === 'tool_result' && kitReads.has(c.tool_use_id)) res.kitChars += textLength(c.content);
+          if (c.type === 'tool_result' && closeIds.has(c.tool_use_id)) { closeIds.delete(c.tool_use_id); acceptResult(res, c.content); }
         }
       }
       if (l.type !== 'assistant') continue;
@@ -77,12 +103,26 @@ function claude(logs, res) {
         if (c.type !== 'tool_use' || ids.has(c.id)) continue;
         ids.add(c.id); tools[c.name] = (tools[c.name] ?? 0) + 1;
         if (!meta && c.name === 'SendMessage') res.messagesToAgents += 1;
+        if (!meta && c.name === 'Agent') prompts.push(String(c.input?.prompt ?? ''));
+        if (!meta && c.name === 'Write') written.push([String(c.input?.file_path ?? ''), String(c.input?.content ?? '')]);
+        if (!meta && c.name === 'Bash') {
+          const cmd = String(c.input?.command ?? '');
+          const heredoc = /cat\s*>\s*(\S+)\s*<</.exec(cmd);
+          if (heredoc) written.push([heredoc[1], cmd]);
+          if (/accept\.mjs/.test(cmd)) { acceptUse(res, cmd); if (/accept\.mjs\s+close/.test(cmd)) closeIds.add(c.id); }
+        }
         if (c.name === 'Skill') res.skills.push(c.input.skill ?? c.input.name);
         const k = kitFile(String(c.input?.file_path ?? c.input?.command ?? ''));
         if (k) { res.kitFiles[k] = (res.kitFiles[k] ?? 0) + 1; if (!meta) kitReads.add(c.id); }
       }
     }
     for (const id of msgs.keys()) seen.add(id);
+    for (const prompt of prompts) {
+      const text = prompt + written.filter(([p]) => p && prompt.includes(p)).map(([, t]) => `\n${t}`).join('');
+      res.briefs.total += 1;
+      if (/CONSTRAINTS/.test(text)) res.briefs.withConstraints += 1;
+      if (/CONTRACT/.test(text)) res.briefs.withContract += 1;
+    }
     const sum = { requests: msgs.size, input: 0, cacheWrite: 0, cacheRead: 0, output: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
     for (const m of msgs.values()) {
       sum.input += m.in; sum.cacheWrite += m.cw; sum.cacheRead += m.cr; sum.output += m.out;
@@ -128,7 +168,7 @@ function codex(logs, res, inClaudeCell) {
       : dev.match(/You are a Workforce (worker|reviewer|auditor|probe)/i)?.[1]?.toLowerCase()
         ?? CODEX_RUN_ROLE.find(([re]) => re.test(firstUser.trim()))?.[1] ?? 'agent';
     const seenUsage = new Set(); const seenCalls = new Set(); const tools = {}; const kitReads = new Set();
-    const waitIds = new Set(); let afterTimeout = false;
+    const waitIds = new Set(); let afterTimeout = false; let classify = false; const closeIds = new Set();
     const byResponse = lines.some((l) => l.type === 'token_usage_record');
     const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
@@ -155,8 +195,17 @@ function codex(logs, res, inClaudeCell) {
       if (isMain && l.type === 'response_item' && p.type === 'function_call_output' && waitIds.has(p.call_id)) {
         waitIds.delete(p.call_id);
         afterTimeout = /"timed_out":\s*true/.test(String(p.output));
-        if (afterTimeout) res.waits.timedOut += 1;
+        if (afterTimeout) { res.waits.timedOut += 1; classify = true; }
       }
+      if (isMain && classify && l.type === 'response_item' && ((p.type === 'message' && p.role === 'assistant') || p.type === 'function_call' || p.type === 'custom_tool_call')) {
+        const kind = afterTimeoutKind(p); res.waits.afterTimeout[kind] = (res.waits.afterTimeout[kind] ?? 0) + 1; classify = false;
+      }
+      // Review conditions closed through accept.mjs, and what each close said.
+      if (isMain && l.type === 'response_item' && p.type === 'custom_tool_call' && /accept\.mjs/.test(String(p.input ?? ''))) {
+        acceptUse(res, p.input);
+        if (/accept\.mjs\s+close/.test(String(p.input))) closeIds.add(p.call_id);
+      }
+      if (isMain && l.type === 'response_item' && p.type === 'custom_tool_call_output' && closeIds.has(p.call_id)) { closeIds.delete(p.call_id); acceptResult(res, p.output); }
       // The cooperator's kit text: the full output of each command that read a kit file
       // (an upper bound when the same command also read other files).
       if (isMain && l.type === 'response_item' && (p.type === 'custom_tool_call' || p.type === 'function_call') && /skills\/workforce-[a-z-]+\/(SKILL\.md|references\/)|codex-workforce\/profiles\.json/.test(String(p.input ?? p.arguments ?? ''))) kitReads.add(p.call_id);
@@ -210,7 +259,7 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   if (!fs.existsSync(path.join(dir, 'cell.txt'))) continue;
   const [task, variant, model, repeat] = read(path.join(dir, 'cell.txt')).split(' ');
   const logs = path.join(dir, 'logs');
-  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0, timedOut: 0, wakeRequests: 0, wakeUsd: 0 } };
+  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0, timedOut: 0, wakeRequests: 0, wakeUsd: 0, afterTimeout: {} }, accept: { snapshots: 0, runs: 0, closes: 0, closed: 0, open: 0 }, briefs: { total: 0, withConstraints: 0, withContract: 0 } };
   res.exitCode = Number(read(path.join(logs, 'exit.txt')) || NaN);
   res.wallSeconds = secs(read(path.join(logs, 'start.txt')), read(path.join(logs, 'end.txt')));
   if (model === 'opus') { claude(logs, res); codex(logs, res, true); } else codex(logs, res, false);
