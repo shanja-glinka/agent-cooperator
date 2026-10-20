@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { runCli } from '../lib/cli.js';
-import { MANAGED_BEGIN, MANAGED_END, TARGETS, managedMarkers, runCommand } from '../lib/installer.js';
+import { MANAGED_BEGIN, MANAGED_END, TARGETS, managedMarkers, renderPolicySections, runCommand } from '../lib/installer.js';
 
 test('install is idempotent and uninstall preserves foreign bytes', async () => {
   const fixture = await makeFixture();
@@ -328,8 +328,9 @@ test('update installs the real contextual policy into existing consumers and pre
   const updated = await runCommand('update', options);
   assert.equal(updated.exitCode, 0, updated.issues.join('\n'));
   const sourceGlobal = await fs.readFile(path.join(packageRoot, 'payload', 'codex', 'global-instructions.md'), 'utf8');
+  const sourcePolicy = JSON.parse(await fs.readFile(path.join(packageRoot, 'payload', 'codex', 'profiles.json'), 'utf8')).policy;
   const actualGlobal = await fs.readFile(agentsPath, 'utf8');
-  assert.ok(actualGlobal.includes(sourceGlobal.replaceAll('{{CODEX_HOME}}', portable(fixture.codexHome)).trim()));
+  assert.ok(actualGlobal.includes(renderPolicySections(sourceGlobal.replaceAll('{{CODEX_HOME}}', portable(fixture.codexHome)), sourcePolicy).trim()));
   assert.doesNotMatch(actualGlobal, /Before every task, ask Standard or Enhanced and wait/);
   assert.ok(actualGlobal.startsWith('User standing instructions\n'));
   assert.ok(actualGlobal.endsWith('\nUser additions after install\n'));
@@ -339,8 +340,8 @@ test('update installs the real contextual policy into existing consumers and pre
     'skills/workforce-orchestrate/references/dispatch.md',
     'skills/workforce-smoke/SKILL.md',
   ]) {
-    const expected = (await fs.readFile(path.join(packageRoot, 'payload', 'codex', relative), 'utf8'))
-      .replaceAll('{{CODEX_HOME}}', portable(fixture.codexHome));
+    const expected = renderPolicySections((await fs.readFile(path.join(packageRoot, 'payload', 'codex', relative), 'utf8'))
+      .replaceAll('{{CODEX_HOME}}', portable(fixture.codexHome)), sourcePolicy);
     assert.equal(await fs.readFile(path.join(fixture.codexHome, relative), 'utf8'), expected);
   }
   const policy = JSON.parse(await fs.readFile(path.join(fixture.codexHome, 'codex-workforce/profiles.json'), 'utf8'));

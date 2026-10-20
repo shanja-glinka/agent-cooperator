@@ -25,7 +25,9 @@ ones. Roles installed by this kit: `workforce-worker`, `workforce-worker-lite`
 ```
 
 - Independent agents go in one message; `run_in_background: true` for anything
-  longer than about half a minute. You are notified on completion.
+  longer than about half a minute. You are notified on completion: do not
+  poll, `sleep`, or use ScheduleWakeup while agents run, since every turn
+  rereads your context.
 - The packet is the agent's whole context: exact sources, not your history.
   `subagent_type: "fork"` is for the rare case where the child needs everything
   you have seen.
@@ -62,7 +64,7 @@ checkout once the writer is done.
 
 ## Codex CLI (Hybrid, the default)
 
-In Hybrid, auditors and reviewers are Codex runs, not Agent calls. Start every
+In Hybrid, audit lenses and reviewers are Codex runs, not Agent calls. Start every
 one through the kit's wrapper, never with bare `codex` (an interactive UI that
 waits for a person) and never with `codex exec` directly:
 
@@ -78,8 +80,8 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   approvals off and the user's Codex config ignored (no MCP servers that ask for
   approval). Defaults: `audit` → `gpt-6-luna`, `review` → `gpt-6.1-sol`, effort
   `xhigh`.
-- Run each call with Bash `run_in_background: true`; the three lenses go in one
-  message. Do not sleep or poll: the completion notification arrives, because
+- Run each call with Bash `run_in_background: true`; runs that are independent
+  go in one message. Do not sleep or poll: the completion notification arrives, because
   the wrapper ends the run when it finishes, goes silent for 15 minutes
   (`stalled`), shows an approval or input request (`waiting_for_input`), or
   passes 60 minutes (`timeout`). Raise `--timeout-minutes` for a large stage

@@ -17,6 +17,17 @@ npx --yes github:shanja-glinka/agent-cooperator codex status
 npx --yes github:shanja-glinka/agent-cooperator codex uninstall
 ```
 
+`install` and `update` also take `--set KEY=on|off`, which sets one install-policy
+switch for that run. `reviewBlock` (review of the blocks light workers submit)
+and `reviewStage` (stage review of interacting pipeline blocks) are both on by
+default; the defaults come from the `policy` block of the runtime's
+`profiles.json`. For example, `npx --yes github:shanja-glinka/agent-cooperator
+claude install --set reviewBlock=off --set reviewStage=off` installs with both
+reviews off. Every installed text (skills, references, the managed instruction
+block, `profiles.json`, and Codex launch layers) renders from the chosen values,
+so pass `--set` again on `update`; a plain `update` renders the defaults. An
+unknown key is rejected.
+
 The package also keeps the older binaries `claude-workforce` and
 `codex-workforce` (`npx -p github:shanja-glinka/agent-cooperator claude-workforce
 status`). Pin a version with `github:shanja-glinka/agent-cooperator#<tag>` or a

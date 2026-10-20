@@ -5,7 +5,8 @@ release combines GPT-6 Astra, Sol, and Luna for Codex. The Claude Code edition u
 same roles with Claude model tiers; see [claude-code.md](claude-code.md) for its
 profile table and [research.md](research.md) for the evidence behind it. Future
 releases can update model policy without changing the install command or renaming
-your agents.
+your agents. Codex policy 1.11.0 keeps the previous release's models and prices;
+what changed is the review and audit routing.
 
 [`payload/codex/profiles.json`](../payload/codex/profiles.json) is the machine-readable routing
 policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
@@ -51,11 +52,12 @@ sophisticated algorithm do not automatically require Enhanced.
 Economy is the default preset. It applies when nothing else does, including
 unattended runs. You can also launch it explicitly with `codex -p workforce-economy`
 or keep it as a standing preference. Sol high is the cooperator: it thinks, judges,
-and integrates. Luna xhigh is the worker and the auditor, reading and typing at
-xhigh; Sol at xhigh reviews every submitted block; Astra high is the stage
-reviewer for pipelines whose blocks interact. A Luna worker has 600 tool calls per
-run, three runs, and 400k tokens per block; a block that exhausts it moves to Sol
-xhigh, then to Astra.
+and integrates. Luna xhigh is the worker, reading and typing at xhigh; Sol at
+xhigh reviews the blocks Luna submits (`reviewBlock` on, the default). Luna also
+runs an audit lens when an area needs one, and Astra high is the stage reviewer
+for pipelines whose blocks interact (`reviewStage` on). A Luna worker has 600
+tool calls per run, three runs, and 400k tokens per block; a block that
+exhausts it moves to Sol xhigh, then to Astra.
 
 ## Worker ladder and handoff
 
@@ -78,7 +80,7 @@ OPEN, and NEXT. The cooperator treats an exhausted tier as evidence the block is
 hard: it reads the handoff, finds the cause, decides the APPROACH (same path
 with more effort, a different route, or a split or re-scoped block), and spawns
 the next tier fresh with the original packet, APPROACH, and HANDOFF only.
-Earlier reports, audit rounds, and transcripts stay with the cooperator. The
+Earlier reports, review rounds, and transcripts stay with the cooperator. The
 [dispatch reference](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
 has the details, including the auditor handoff at 400k.
 
@@ -135,7 +137,7 @@ the available settings when material. A user-selected profile also allows adapta
 explicit strict model/effort/budget requirements need the required
 setting or an accepted fallback before dependent work. Do not claim exact routing.
 
-## The cooperator and the audit game
+## The cooperator and review
 
 The orchestrator is the cooperator: it cooperates agents so that they do the
 work. After a worker submits a block, the cooperator chooses what happens next.
@@ -145,52 +147,49 @@ Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit and review this block   → auditors, up to 3 rounds, then review
+  a) review this block              → one review run for the blocks ready
+                                      together (with reviewBlock off, the
+                                      cooperator reads the whole diff)
   b) small local change, clear contract, checks passed
                                    → accept on the cooperator's own reading
-  c) next block to the worker      → and audit and review in parallel on
-                                     1, 2, 3 or N submitted blocks
-                                     (only if that block changes nothing
-                                     the audit reads; else a snapshot)
+  c) next block to the worker      → and review the submitted blocks in
+                                     parallel (only if that block changes
+                                     nothing the review reads; else a snapshot)
 
-Audit game: auditors (GPT-6 Luna, xhigh) report everything they find
-through one lens each: docs, task, conventions.
-Round 1 runs every lens. Then each lens plays on its own:
-real findings → that lens won, the same worker fixes, only winners
-                play the next round;
-nothing real  → that lens lost and is retired for this block.
-Every lens lost, or round 3 done → the audit is over; real findings
-not yet fixed still go to the worker, and the review reads the fix.
-A round ends only when each auditor has read all its files; an auditor
-that hits its limit is continued where it stopped, never replaced.
-The cooperator takes only real findings; theoretical, hypothetical, and
-out-of-scope ones are rejected.
-
-Review: the block reviewer (GPT-6.1 Sol, xhigh) reads the whole diff with
-the audit log. Real findings go to the same worker as one bundle; the same
-reviewer checks the delta.
+Review: the block reviewer (GPT-6.1 Sol, xhigh) reads the whole diff. Real
+findings go to the same worker as one bundle; the same reviewer checks the
+fixes and what they touch.
 ```
 
-Auditors report everything they find with `file:line` and the rule or document
-behind it. The cooperator judges each finding: it is real when it is in the
-diff or caused by it, breaks a named rule, document, or acceptance line, and
-reproduces by a check or a concrete scenario. Real findings go to the same
-worker as one bundle. Only the lenses that won a round play the next one, with
-what was accepted and what was rejected; a lens that found nothing real is
-retired for that block. The reviewer then reads the whole diff, fixes included,
-together with the audit log. Checks the project requires always run, and a
-reviewer's "accepted" does not replace one that has not passed. A small local
-change with a clear contract and passing checks may be accepted on the
-cooperator's own reading of the diff; a review that the project, the user, or
-the task requires always runs.
+Audit lenses run on demand: docs, task, or conventions, and only for an area
+that the checks and the review do not cover. Each lens reports everything with
+`file:line` and the rule or document behind it. The cooperator judges each
+finding: it is real when it is in the diff or caused by it, breaks a named rule,
+document, or acceptance line, and reproduces by a check or a concrete scenario.
+The cooperator takes only real findings; theoretical, hypothetical, and
+out-of-scope ones are rejected. Real findings go to the same worker as one
+bundle. A lens with nothing real is retired for that block; one with real
+findings may check the fix. A round ends only when its auditor returns
+`STATUS: complete` (every assigned file read); an auditor that hits its limit is
+continued where it stopped, never replaced.
+
+With `reviewBlock` on, the block reviewer then reads the whole diff, fixes
+included, together with the earlier findings and their outcome. Checks the
+project requires always run, and a reviewer's "accepted" does not replace one
+that has not passed. A small local change with a clear contract and passing
+checks may be accepted on the cooperator's own reading of the diff; a review that
+the project, the user, or the task requires always runs.
 
 ## Complete blocks, proportional verification
 
 Every implementation packet includes the user's original outcome, an acceptance
 example, exact inputs, ownership, and intermediate results that do not count as done.
-Every block a light worker submits is reviewed before it is accepted; the review
-reads the whole diff. A stage review on Astra high checks the original outcome,
-and runs only when blocks interact in ways no block review saw.
+With `reviewBlock` on (the default), every block a light worker submits is
+reviewed before it is accepted, and blocks ready together share one review run;
+the review reads the whole diff. With `reviewBlock` off, the cooperator accepts
+the block on its checks and its own reading of the whole diff. A stage review on
+Astra high checks the original outcome, and runs only when `reviewStage` is on
+and blocks interact in ways no block review saw.
 
 A minimal isolated test can establish a component contract; it cannot by itself
 prove a real consumer was switched. An inventory can support planning; it cannot

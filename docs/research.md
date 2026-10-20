@@ -1,12 +1,41 @@
 # Research and routing rationale
 
-The v6 and v5 sections below were prepared on 2026-10-20 and the Route Decision
-synthesis on 2026-10-19, all for both editions.
+The v7, v6, and v5 sections below were prepared on 2026-10-20 and the Route
+Decision synthesis on 2026-10-19, all for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v7 — 2026-10-20: the organization around light workers
+
+Claude policy 1.9.0, Codex policy 1.11.0. v6 measured 2026-10-20 (private suite, 30
+cells) showed where the money goes when light workers do the work: on the
+Codex line the Luna workers took 7.3% of the price, the Sol cooperator 62.1%,
+the reviewer 24.5%, and three default audit lenses 6.1%; Haiku requests over
+100k tokens of prompt gave 80% of Haiku's price; workers redid blocks after CI
+rejected a file-size limit the brief had not named. An external audit of that
+run also found that the variant without the reviewer still delivered a
+reviewer requirement through the launch layer and the global blocks. v7
+changes the organization, not the workers:
+
+- **The route decision counts the whole route** a brief sets off (the
+  cooperator's turns, the worker, the review, the fix rounds), not the brief
+  alone.
+- **No audit lens by default;** a lens runs for an area the checks and the
+  review do not cover. The Sol xhigh review of light workers' blocks stays,
+  and blocks ready together share one review run.
+- **Fewer cooperator turns:** no polling, sleep, or scheduled wake-ups while
+  agents run; workers send their packet, a blocker, or a contract question,
+  not progress.
+- **Briefs name the project's constraints with their source files;** workers
+  keep long output in files and read what the next decision needs.
+- **One install policy** (`reviewBlock`, `reviewStage`) renders every
+  installed text, so a variant cannot deliver contradicting instructions; the
+  bench checks each variant's delivered texts before a run.
+
+These changes come from the measurement and its audit, not from new sources.
 
 ## v6 — 2026-10-20: light workers under a strong cooperator by default
 

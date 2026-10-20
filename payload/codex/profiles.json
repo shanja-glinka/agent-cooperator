@@ -1,7 +1,11 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.10.0",
+  "policyVersion": "1.11.0",
   "selection": "contextual",
+  "policy": {
+    "reviewBlock": true,
+    "reviewStage": true
+  },
   "profiles": {
     "standard": {
       "orchestrator": {
@@ -44,10 +48,10 @@
           "task",
           "conventions"
         ],
-        "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The audit ends when every lens has lost or after the last round; real findings not yet fixed still go to the worker.",
-        "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors)."
+        "game": "A lens runs only when the cooperator adds it for an uncovered area. It reports everything; the cooperator takes only real findings to the same worker. A lens with nothing real is retired for the block; one with real findings may check the fix.",
+        "rerun": "on real findings",
+        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors).",
+        "mode": "on-demand: only for an area the checks and the review do not cover"
       },
       "workerLadder": [
         "gpt-6.1-sol",
@@ -93,10 +97,10 @@
           "task",
           "conventions"
         ],
-        "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The audit ends when every lens has lost or after the last round; real findings not yet fixed still go to the worker.",
-        "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors)."
+        "game": "A lens runs only when the cooperator adds it for an uncovered area. It reports everything; the cooperator takes only real findings to the same worker. A lens with nothing real is retired for the block; one with real findings may check the fix.",
+        "rerun": "on real findings",
+        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors).",
+        "mode": "on-demand: only for an area the checks and the review do not cover"
       },
       "workerLadder": [
         "gpt-6.1-sol",
@@ -144,10 +148,10 @@
           "task",
           "conventions"
         ],
-        "rounds": 3,
-        "game": "Round 1 runs every lens. Auditors report everything; the cooperator takes only real findings. A lens with real findings won the round: the same worker fixes, and only winning lenses play the next round. A lens with nothing real lost and is retired for this block. The audit ends when every lens has lost or after the last round; real findings not yet fixed still go to the worker.",
-        "rerun": "winners-only",
-        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors)."
+        "game": "A lens runs only when the cooperator adds it for an uncovered area. It reports everything; the cooperator takes only real findings to the same worker. A lens with nothing real is retired for the block; one with real findings may check the fix.",
+        "rerun": "on real findings",
+        "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors).",
+        "mode": "on-demand: only for an area the checks and the review do not cover"
       },
       "workerLadder": [
         "gpt-6-luna",
@@ -258,11 +262,11 @@
     "enforcement": "Instruction-level budgets; the runtime does not enforce them."
   },
   "review": {
-    "delegatedBlocks": "A block a light worker submitted is accepted after the audit game and an independent review by gpt-6.1-sol at xhigh; the cooperator needs no error found first.",
-    "loop": "Real findings go to the same worker; the same reviewer checks the fixes and the places they touch; a second or third round is normal; the same finding twice without progress stops the loop for the cooperator's decision.",
+    "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
+    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol at xhigh; blocks ready together go to one review. With it off, the cooperator accepts on its own reading of the diff.",
+    "loop": "Real findings go to the same worker; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
     "smallLocal": "A small local change with a clear contract and passing checks may be accepted on the cooperator's own reading of the diff.",
-    "required": "An independent review the project, the user, or the task requires runs whatever the size.",
-    "report": "One line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>.",
-    "fallback": "Sol unavailable for a review: review on gpt-6-astra high, marked as the fallback in the report."
+    "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",
+    "report": "One line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>."
   }
 }

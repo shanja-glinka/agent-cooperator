@@ -127,7 +127,7 @@
       "id": "claude-build-class",
       "runtime": "claude-code",
       "input": "/workforce-orchestrate: fix a validation bug with a known cause across three files.",
-      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, and the check. On submission the audit game on Codex Luna and the gpt-6.1-sol xhigh review; the cooperator judges the findings, reads the diff, and accepts."
+      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, the check, and the CONSTRAINTS with their source files. On submission the gpt-6.1-sol xhigh review (no audit lens by default); the cooperator judges the findings, reads the diff, and accepts."
     },
     {
       "id": "claude-fix-round-continuity",
@@ -221,8 +221,8 @@
     {
       "id": "audit-game",
       "runtime": "both",
-      "input": "Round 1: auditors report 5 findings, 2 break a named project rule in the diff, 3 are hardening ideas for inputs nobody reported.",
-      "expected": "Accept the 2 demonstrated in-scope violations and reject unsupported extras. After all chosen lenses finish their assigned coverage, send one bundle to the same worker while its budget lasts. Only winning lenses repeat, at most 3 rounds; ending the game does not close findings or accept the block."
+      "input": "The cooperator added a docs lens for a block whose changelog no check or review covers. The lens reports 5 findings, 2 break a named project rule in the diff, 3 are hardening ideas for inputs nobody reported.",
+      "expected": "Accept the 2 demonstrated in-scope violations and reject the extras. Send one bundle to the same worker while its budget lasts. A lens with real findings may check the fix; one with nothing real is retired. Ending the lens does not close findings or accept the block."
     },
     {
       "id": "auditors-report-everything",
@@ -232,13 +232,13 @@
     },
     {
       "id": "audit-winners-only",
-      "input": "Round 1 of a block audit: task lens has nothing real, docs has 2 real findings, conventions has 1 real finding. The worker fixes the 3.",
-      "expected": "Round 2 continues only docs and conventions. The task lens stays retired. End the game when all lenses retire or round 3 finishes, keep unresolved findings open, and independently review the corrected diff including newly changed behavior in formerly audited areas."
+      "input": "Two lenses were added for a block: task found nothing real, docs found 2 real findings. The worker fixes them.",
+      "expected": "The task lens is retired; the docs lens may check the fix. The block is still accepted only after its review (or, with reviewBlock off, the cooperator's reading) of the corrected diff."
     },
     {
       "id": "hybrid-default",
       "input": "Claude Code: '/workforce-orchestrate Implement the described export pagination.' No profile named; Codex is installed and logged in.",
-      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, three Codex auditors on gpt-6-luna xhigh and the review on gpt-6.1-sol xhigh, both started only through codex-run.mjs in the background. Standard only on the user's choice or when Codex is unavailable."
+      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, and the review on gpt-6.1-sol xhigh through codex-run.mjs in the background; audit lenses only on demand. Standard only on the user's choice or when Codex is unavailable."
     },
     {
       "id": "hybrid-codex-stall",
@@ -475,7 +475,7 @@
       "id": "delegated-block-reviewed",
       "runtime": "both",
       "input": "A light worker submits a delegated block; no project rule requires independent review; the required checks pass.",
-      "expected": "The block goes through the audit game and the gpt-6.1-sol xhigh review before it is accepted; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
+      "expected": "With reviewBlock on, the block goes to the gpt-6.1-sol xhigh review before it is accepted, no audit lens by default; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
     },
     {
       "id": "required-independence-own-change",
@@ -554,6 +554,42 @@
       "runtime": "both",
       "input": "The cooperator ran `npm run ci 2>&1 | tail -15` and the tail shows passing tests.",
       "expected": "The pipe hid the exit code: run the check once as `cmd > log 2>&1; echo exit=$?` and read the log, then commit only on success (&&). Do not rerun CI only to learn a status the first run could have kept."
+    },
+    {
+      "id": "route-counts-whole-route",
+      "runtime": "both",
+      "input": "A three-file fix the cooperator could finish in a dozen edits; a worker would need a brief, a review, and probably one fix round.",
+      "expected": "The cooperator compares doing it with the whole route (its own turns to brief, wait, and accept, the worker, the review, the likely fix round), in words, and picks the cheaper; the cheap worker token alone does not decide."
+    },
+    {
+      "id": "no-wakeups-while-agents-run",
+      "runtime": "both",
+      "input": "Two background workers are running; nothing else is ready.",
+      "expected": "Wait for their completion (Claude: notifications; Codex: wait_agent). No polling, sleep, or ScheduleWakeup; workers send no progress messages."
+    },
+    {
+      "id": "blocks-ready-together-one-review",
+      "runtime": "both",
+      "input": "Two independent blocks are submitted within a minute.",
+      "expected": "One review run reads both diffs; findings go back to their own workers; the same reviewer checks the fixes."
+    },
+    {
+      "id": "brief-names-constraints",
+      "runtime": "both",
+      "input": "The project's CI fails any file over 3000 lines (scripts/check-size.cjs); a block will grow bot.ts, now 2990 lines.",
+      "expected": "The brief's CONSTRAINTS names the size limit and its source file, found in the project before briefing; it does not dictate the solution or add rules the project lacks."
+    },
+    {
+      "id": "policy-review-off",
+      "runtime": "both",
+      "input": "Installed with --set reviewBlock=off --set reviewStage=off; a light worker submits a block; no project rule asks for review.",
+      "expected": "No reviewer and no stage review: the cooperator accepts on the checks and its own reading of the whole diff, sends real findings to the same worker, and checks the fixes itself. A review the project or user requires would still run."
+    },
+    {
+      "id": "worker-context-targeted",
+      "runtime": "both",
+      "input": "A worker's CI output is 4,000 lines.",
+      "expected": "It goes to a log with the exit code kept; the worker reads the failing part, not the whole log, and does not reread files it already has."
     }
   ]
 }

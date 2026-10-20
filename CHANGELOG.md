@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- v7: the organization around light workers. The route decision counts the
+  whole route a brief sets off (the cooperator's turns, the worker, the
+  review, the fix rounds). Audit lenses run only on demand, for an area the
+  checks and the review do not cover; the Sol xhigh review of light workers'
+  blocks stays, and blocks ready together share one review run. While agents
+  run the cooperator waits (no polling, sleep, or scheduled wake-ups); workers
+  send no progress. Briefs carry `CONSTRAINTS` with their source files;
+  workers keep long output in files. Policy: Claude 1.9.0, Codex 1.11.0.
+- Install policy: `profiles.json` `policy` holds `reviewBlock` and
+  `reviewStage`; the installer renders `{{#key}}…{{/key}}` and `{{^key}}…{{/key}}`
+  sections of every installed text from it, `--set key=on|off` overrides a
+  switch, and an unknown key is rejected. The launch layers and global blocks
+  no longer name a review of their own.
+- Bench: a variant may carry install switches (`name=commit@task+key=value`),
+  and `policycheck.mjs` checks every variant's delivered texts before a run;
+  the metrics record each agent's request effort, Codex usage per response
+  (compaction included), the cooperator's requests, and the workers' prompt
+  sizes.
 - A light-worker team under a strong cooperator is the default (replaces the
   v5 rule "start yourself; size is not a reason" below). Claude Code: Hybrid
   by default, with `haiku` workers and probes (`workforce-worker-lite` now at

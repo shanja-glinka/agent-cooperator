@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { runCli } from '../lib/cli.js';
-import { TARGETS, managedMarkers, runCommand } from '../lib/installer.js';
+import { TARGETS, managedMarkers, renderPolicySections, runCommand } from '../lib/installer.js';
 
 const MARKERS = managedMarkers(TARGETS.claude);
 
@@ -127,7 +127,8 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
 
   const actual = await fs.readFile(claudeMd, 'utf8');
   const sourceGlobal = await fs.readFile(path.join(packageRoot, 'payload', 'claude', 'global-instructions.md'), 'utf8');
-  assert.ok(actual.includes(sourceGlobal.replaceAll('{{CLAUDE_HOME}}', portable(fixture.home)).trim()));
+  const sourcePolicy = JSON.parse(await fs.readFile(path.join(packageRoot, 'payload', 'claude', 'profiles.json'), 'utf8')).policy;
+  assert.ok(actual.includes(renderPolicySections(sourceGlobal.replaceAll('{{CLAUDE_HOME}}', portable(fixture.home)), sourcePolicy).trim()));
   assert.ok(actual.startsWith('User standing instructions\n'));
   assert.ok(actual.endsWith('\nUser additions after install\n'));
   assert.doesNotMatch(actual, /\{\{CLAUDE_HOME\}\}/);
@@ -161,7 +162,8 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.match(lite, /\neffort: xhigh\n/);
   assert.equal(policy.profiles.standard.auditor.model, 'haiku');
   assert.equal(policy.profiles.standard.auditor.effort, 'xhigh');
-  assert.equal(policy.profiles.standard.auditor.rerun, 'winners-only');
+  assert.match(policy.profiles.standard.auditor.mode, /^on-demand/);
+  assert.deepEqual(policy.policy, { reviewBlock: true, reviewStage: true });
   const hybrid = policy.profiles.hybrid;
   assert.equal(hybrid.orchestrator.effort, 'high');
   assert.equal(hybrid.worker.model, 'haiku');
@@ -177,6 +179,36 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.match(auditor, /\ndisallowedTools: Agent, Edit, Write, NotebookEdit\n/);
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
+});
+
+// Review switches come from one policy value: every installed text agrees with it.
+test('claude install renders the review switches into every installed text', async (t) => {
+  const packageRoot = path.resolve(import.meta.dirname, '..');
+  const texts = async (home) => {
+    const out = [];
+    const walk = async (dir) => {
+      for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+        const p = path.join(dir, entry.name);
+        if (entry.isDirectory()) await walk(p); else if (/\.(md|json|toml)$/.test(entry.name)) out.push(await fs.readFile(p, 'utf8'));
+      }
+    };
+    await walk(home);
+    return out.join('\n');
+  };
+  const on = await fs.mkdtemp(path.join(os.tmpdir(), 'claude-policy-on-'));
+  const off = await fs.mkdtemp(path.join(os.tmpdir(), 'claude-policy-off-'));
+  t.after(() => Promise.all([fs.rm(on, { recursive: true, force: true }), fs.rm(off, { recursive: true, force: true })]));
+  assert.equal((await runCommand('install', { target: 'claude', home: on, packageRoot })).exitCode, 0);
+  assert.equal((await runCommand('install', { target: 'claude', home: off, packageRoot, set: { reviewBlock: 'off', reviewStage: 'off' } })).exitCode, 0);
+  const [textOn, textOff] = [await texts(on), await texts(off)];
+  for (const text of [textOn, textOff]) assert.doesNotMatch(text, /\{\{[#^/][A-Za-z]/);
+  assert.match(textOn, /independent review by\nGPT-6\.1 Sol at xhigh/);
+  assert.doesNotMatch(textOff, /reviewed \(Codex GPT-6\.1 Sol|independent review by\nGPT-6\.1 Sol|one Sol xhigh review|Stage acceptance \(pipeline/);
+  assert.match(textOff, /Block review is off in this install/);
+  assert.match(textOff, /Stage review is off in this install/);
+  const policy = JSON.parse(await fs.readFile(path.join(off, 'claude-workforce', 'profiles.json'), 'utf8')).policy;
+  assert.deepEqual(policy, { reviewBlock: false, reviewStage: false });
+  await assert.rejects(runCommand('install', { target: 'claude', home: off, packageRoot, set: { review: 'off' } }), /Unknown policy key/);
 });
 
 async function makeFixture(homeName = 'Claude Home') {

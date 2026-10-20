@@ -20,7 +20,9 @@ npx --yes github:shanja-glinka/agent-cooperator claude uninstall
 
 Pin a release with `github:shanja-glinka/agent-cooperator#<tag>`. Start a new Claude Code session
 after installing or updating. Options: `--claude-home PATH` (precedence: option,
-`CLAUDE_CONFIG_DIR`, `~/.claude`), `--dry-run`, `--force`, `--json`. There is no
+`CLAUDE_CONFIG_DIR`, `~/.claude`), `--dry-run`, `--force`, `--json`, and
+`--set KEY=on|off` (install policy; see
+[installation](installation.md)). There is no
 `--skills-dir`: Claude Code discovers skills inside its home directory.
 
 ```text
@@ -86,12 +88,14 @@ defines the model, effort, and budget policy for those actions.
 
 | Class | Looks like | What happens |
 | --- | --- | --- |
-| `direct` | work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, or a change of a few lines the brain already knows exactly | Done inline by the brain, with the project's checks. No agents. |
-| `build` | any other verifiable block inside a clear write set: a fix, a feature, a mechanical change of any size, reproducing a bug, or tracing a cause; an unknown cause is a good block | One light worker per block, briefed with goal, boundaries, sources, and checks. Every submitted block goes through the audit game and the review; see the rules below. |
+| `direct` | work whose whole route (brief, worker, review, fixes) would cost more than doing it: a question, an analysis, a config or doc edit, or a change of a few lines the brain already knows exactly | Done inline by the brain, with the project's checks. No agents. |
+| `build` | any other verifiable block inside a clear write set: a fix, a feature, a mechanical change of any size, reproducing a bug, or tracing a cause; an unknown cause is a good block | One light worker per block, briefed with goal, boundaries, sources, checks, and the project's constraints. A submitted block is reviewed before it is accepted (`reviewBlock` on, the default); see the rules below. |
 | `pipeline` | several blocks with disjoint write sets that need no decision from each other, after open design is decided | Plan, parallel workers, the brain reads every diff. Stage review only when blocks interact in ways no block review saw. |
 
-The brief stays a brief. It names the goal, the boundaries, the sources, and the
-check, and leaves the solution to the worker. The brain does not solve the task
+The brief stays a brief. It names the goal, the boundaries, the sources, the
+check, and the project's constraints (CI steps, lint and size rules, frozen
+areas), each with the file that sets it. It leaves the solution to the worker and
+adds no requirement the project does not have. The brain does not solve the task
 first to dictate it.
 
 ### Profiles
@@ -110,7 +114,7 @@ substantial unresolved design where nothing already applies.
 | Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` xhigh (`workforce-worker-lite`) |
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides before briefing |
-| Auditor (up to 3 rounds) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
+| Audit lens (on demand) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
 | Block review (MODE=block) | `opus` high (`workforce-reviewer`) | `opus` high (`workforce-reviewer`) | Codex GPT-6.1 Sol xhigh |
 | Stage acceptance (MODE=stage) | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
 
@@ -149,9 +153,11 @@ Hybrid is the default preset. `opus` at high effort is the brain: it plans,
 decides design questions before briefing, judges every finding, integrates, and
 accepts. `haiku` workers implement at xhigh; a block that exhausts a `haiku`
 worker moves to a Codex GPT-6.1 Sol xhigh worker, then to `opus`.
-Auditors run on Codex GPT-6 Luna at xhigh, and block and stage review on Codex
-GPT-6.1 Sol at xhigh, all read-only. Luna costs $0.10 / $0.50 and Sol $2 / $10
-per MTok (checked 2026-10-20), so the expensive model only thinks.
+An audit lens, when one runs, uses Codex GPT-6 Luna at xhigh; block and stage
+review use Codex GPT-6.1 Sol at xhigh; all are read-only. Luna costs $0.10 /
+$0.50 and Sol $2 / $10 per MTok (checked 2026-10-20), so the expensive model only
+thinks. Claude policy 1.9.0 keeps the models and prices of the previous release;
+what changed is the review and audit routing.
 
 Hybrid needs the `codex` CLI on PATH and logged in; the Codex edition of the kit
 is not required. Without the CLI, use Standard and say so. If Codex is unavailable
@@ -174,8 +180,8 @@ input. The wrapper sets these execution boundaries:
   an approval or input request (`waiting_for_input`), or passes 60 minutes
   (`timeout`); the cooperator reads the result status before using the output;
 - it writes `<name>.result.json` with the status, the Codex thread id, the
-  token usage, and the path of the final message. The next round of a winning
-  lens, or the delta for the same reviewer, resumes that thread with
+  token usage, and the path of the final message. A later round of a lens, or the
+  delta for the same reviewer, resumes that thread with
   `--resume <threadId>` and `--baseline <previous result.json>`.
 
 Usage in `result.json`: `tokens.total` is the run's own `input + output`
@@ -214,7 +220,7 @@ A worker at its limit returns `STATUS: handoff` with DONE, STOPPED_AT, TRIED,
 OPEN, and NEXT. The cooperator reads it, finds the cause, decides the APPROACH
 (same path with more effort, a different route, or a split or re-scoped block),
 and starts the next tier with the original packet, APPROACH, and HANDOFF only;
-earlier reports, audit rounds, and transcripts stay with the cooperator. The
+earlier reports, review rounds, and transcripts stay with the cooperator. The
 [dispatch reference](../payload/claude/skills/workforce-orchestrate/references/dispatch.md)
 has the details, including the auditor handoff at 400k.
 
@@ -223,23 +229,32 @@ has the details, including the auditor handoff at 400k.
 - The session is the cooperator: the brain and the integrator. It does direct
   work itself; any other verifiable block goes to a light worker with a brief,
   and the cooperator judges, integrates, and accepts.
-- Review is one path for delegated work. Every block a light worker submits goes
-  through the audit game and then an independent review: GPT-6.1 Sol at xhigh in
-  Hybrid, opus high through Agent in Standard and Enhanced. A small local change
-  with a clear contract and passing checks may be accepted on the cooperator's own
-  reading of the diff. A review that the project, the user, or the task requires
-  always runs, whatever the size.
+- Review is one path for delegated work. With `reviewBlock` on (the default),
+  every block a light worker submits is reviewed before it is accepted: GPT-6.1
+  Sol at xhigh in Hybrid, opus high through Agent in Standard and Enhanced. Blocks
+  that are ready together share one review run. A small local change with a clear
+  contract and passing checks may be accepted on the cooperator's own reading of
+  the diff. A review that the project, the user, or the task requires always
+  runs, whatever the size and whatever the switches say. With `reviewBlock` off,
+  the cooperator accepts on the worker's checks and its own reading of the whole
+  diff.
 - The repository's own rules come first: `CLAUDE.md`, `AGENTS.md`,
   `.claude/rules/`, `CONTRIBUTING.md` (Claude Code reads `AGENTS.md` only when the
   project has no `CLAUDE.md`). They go to every agent as PROJECT_RULES.
 - Every Agent call sets `model`. Effort comes from the role frontmatter.
 - A worker gets a complete packet with SCOPE, OUT_OF_SCOPE, WRITE_SET, and
   CHECKS, and edits only its write set.
-- Fixes go back to the same worker, the next audit round only to the auditors
-  whose lens won the last round, the delta to the same reviewer, all through
-  SendMessage (in Hybrid, the Codex thread is resumed instead).
+- Fixes go back to the same worker, and the delta goes to the same reviewer (or
+  to the same lens, when a lens ran), all through SendMessage (in Hybrid, the
+  Codex thread is resumed instead).
 - Checks run once, with their exit code kept: `cmd > log 2>&1; echo "exit=$?"`,
   then the end of the log is read. Commit only on success.
+- While agents work, the cooperator waits for their results: no polling, sleep,
+  or ScheduleWakeup, since every turn rereads its context. Workers send their
+  packet, a blocker, or a contract question, not progress messages.
+- Workers keep in their context what the next decision needs: long output goes
+  to a file with its exit code kept, and code is read by the functions they
+  change and the conditions those depend on.
 - Every block a light worker submits goes through this loop:
 
 ```text
@@ -247,35 +262,28 @@ Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit and review this block   → auditors, up to 3 rounds, then review
+  a) review this block              → one review run for the blocks ready
+                                      together (with reviewBlock off, the
+                                      cooperator reads the whole diff)
   b) small local change, clear contract, checks passed
-                                   → accept on the cooperator's own reading
-  c) next block to the worker      → and audit and review in parallel on
-                                     1, 2, 3 or N submitted blocks
-                                     (only if that block changes nothing
-                                     the audit reads; else a snapshot)
+                                    → accept on the cooperator's own reading
+  c) next block to the worker       → and review the submitted blocks in
+                                      parallel (only if that block changes
+                                      nothing the review reads; else a snapshot)
 
-Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
-they find through one lens each: docs, task, conventions.
-Round 1 runs every lens. Then each lens plays on its own:
-real findings → that lens won, the same worker fixes, only winners
-                play the next round;
-nothing real  → that lens lost and is retired for this block.
-Every lens lost, or round 3 done → the audit is over; real findings
-not yet fixed still go to the worker, and the review reads the fix.
-A round ends only when each auditor has read all its files; an auditor
-that hits its limit is continued where it stopped, never replaced.
-The cooperator takes only real findings; theoretical, hypothetical, and
-out-of-scope ones are rejected.
+Review: the block reviewer reads the whole diff. Real findings go to the same
+worker as one bundle; the same reviewer checks the fixes and what they touch.
+The same finding twice without progress stops the loop for the cooperator's
+decision.
 
-Review: the block reviewer reads the whole diff with the audit log.
-Real findings go to the same worker as one bundle; the same reviewer
-checks the delta. The same finding twice without progress stops the
-loop for the cooperator's decision.
+Audit lens (on demand, only for an area the checks and the review do not
+cover): one lens (docs, task, or conventions) reports everything; the cooperator
+takes only real findings to the same worker. A lens with nothing real is retired
+for the block; one with real findings may check the fix.
 ```
 
 - Nothing closes without evidence: a handoff, a new worker, a submitted block,
-  or the third audit round leaves required checks and accepted findings open
+  or a finished review round leaves required checks and accepted findings open
   until they are done.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance

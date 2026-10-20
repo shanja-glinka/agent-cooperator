@@ -1,8 +1,8 @@
 # Routing and the work packet (Claude Code)
 
 `{{CLAUDE_HOME}}/claude-workforce/profiles.json` is the routing record; this file
-explains it. A model release updates the record, not the workflow. Read both
-when you choose a profile or a model for an agent, or fill a packet.
+holds its defaults. A model release updates the record, not the workflow.
+Read the record only to route outside the defaults below.
 
 ## Presets
 
@@ -12,7 +12,7 @@ when you choose a profile or a model for an agent, or fill a packet.
 | Probe (`workforce-probe`) | `haiku`; `sonnet` when judgment is needed | `haiku`; `sonnet` when judgment is needed | `sonnet` |
 | Worker | `haiku`, xhigh (`workforce-worker-lite`) | `sonnet`, high (`workforce-worker`) | `sonnet`; `opus` for non-trivial blocks |
 | Worker ladder | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` | `sonnet` → `opus` | `sonnet` → `opus` |
-| Auditor | Codex `gpt-6-luna`, xhigh | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) |
+| Audit lens (on demand) | Codex `gpt-6-luna`, xhigh | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) |
 | Block reviewer (MODE=block) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `opus`, high (Agent) |
 | Stage reviewer (MODE=stage) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `fable`, high (Agent) |
 | Unresolved design | the cooperator decides before briefing | targeted `opus` help | bounded `fable` block |
@@ -21,14 +21,16 @@ Presets are starting recommendations. A named profile is an approach preference;
 the user's explicit model, effort, and budget limits are binding. If `fable` is
 unavailable, use `opus` at high and say so.
 
-Hybrid is the default: `opus` thinks, judges, and integrates, `haiku` reads and
-types at xhigh, and Codex models audit and review at xhigh. Codex runs go
-through the wrapper in [tools](tools.md), never through the Agent tool; they
-need the `codex` CLI on PATH and logged in (the Codex edition of the kit is not
-required). If Codex is unavailable or fails twice, audit on `haiku` xhigh and
-review on `opus` high through Agent, mark that review as the fallback, and say
-so once. Hybrid wants the session at high effort: if it runs at medium, say so
-once and suggest `/effort high`.
+Hybrid is the default: `opus` thinks, judges, and integrates, and `haiku` reads
+and types at xhigh{{#reviewBlock}}; GPT-6.1 Sol at xhigh reviews the blocks light workers
+submit{{/reviewBlock}}{{^reviewBlock}}; block review is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{/reviewStage}}. Audit lenses run only on
+demand (delegation, step 6). Codex runs go through the wrapper in
+[tools](tools.md), never through the Agent tool; they need the `codex` CLI on
+PATH and logged in (the Codex edition of the kit is not required). If Codex is
+unavailable or fails twice, audit on `haiku` xhigh and review on `opus` high
+through Agent, mark that review as the fallback, and say so once. Hybrid
+wants the session at high effort: if it runs at medium, say so once and
+suggest `/effort high`.
 
 Prices per MTok (checked 2026-10-20): `opus` Claude Opus 5.5 $4 in / $20 out,
 cache read $0.20, 1-hour cache write $8 (default effort medium); `sonnet`
@@ -90,12 +92,11 @@ snapshot, the cooperator's APPROACH, and the worker's HANDOFF; nothing else from
 earlier runs. Re-planning does not reset spent budget or drop the outcome. If
 Codex is unavailable, the `haiku` worker's next tier is `sonnet`.
 
-Auditors: the packet BUDGET is 40 tool calls per run, separate from the role's
+Audit lenses (on demand): the packet BUDGET is 40 tool calls per run, separate from the role's
 50-turn limit. An auditor on `haiku` (Codex Luna in Hybrid) whose count reaches
 400k hands its lens to `sonnet` in the auditor role (Codex Sol xhigh) on the
 same snapshot and round, with its NOT_REACHED files; its findings stay with the
-cooperator. Up to three audit rounds per block; after round 1 only lenses that
-won the last round play again.
+cooperator. A lens with nothing real is retired for the block.
 
 `fable` high is for a stated unresolved design question and its expected
 benefit: architecture, a money or auth path, a security boundary. When the
@@ -124,7 +125,8 @@ PROJECT_RULES: repository instruction files to read first
 INPUTS / SNAPSHOT: exact sources, contracts, revision, relevant dirty diff; the tree to read
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
-TRAPS: what you saw that can go wrong (a behavior-changing rewrite, a frozen area)
+CONSTRAINTS: what the project checks on this change (CI steps, lint and size rules, frozen areas), each with the file that sets it
+TRAPS: what you saw that can go wrong (a behavior-changing rewrite)
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
 REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run; the audit log

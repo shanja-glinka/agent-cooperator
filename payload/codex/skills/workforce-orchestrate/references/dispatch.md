@@ -1,8 +1,8 @@
 # Routing and the work packet (Codex)
 
 `{{CODEX_HOME}}/codex-workforce/profiles.json` is the routing record; this file
-explains it. A model release updates the record, not the workflow. Read both
-when you choose a profile or a model for an agent, or fill a packet.
+holds its defaults. A model release updates the record, not the workflow.
+Read the record only to route outside the defaults below.
 
 ## Presets
 
@@ -12,15 +12,17 @@ when you choose a profile or a model for an agent, or fill a packet.
 | Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.1-sol` when judgment is needed | same | same |
 | Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6.1-sol`, xhigh | `gpt-6.1-sol`, xhigh |
 | Worker ladder | Luna → Sol → Astra | Sol → Astra | Sol → Astra |
-| Auditor (`workforce_auditor`) | `gpt-6-luna`, xhigh | same | same |
+| Audit lens (`workforce_auditor`, on demand) | `gpt-6-luna`, xhigh | same | same |
 | Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, xhigh | same | same |
 | Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6-astra`, high | same | same |
 | Unresolved design | the cooperator decides before briefing | targeted Astra help | bounded Astra high block |
 
 Presets are starting recommendations. A named profile is an approach preference;
 the user's explicit model, effort, and budget limits are binding. Economy is the
-default: Sol thinks, judges, and integrates, Luna reads and types at xhigh, and
-Sol at xhigh reviews. The native launch layers `codex -p workforce-economy`,
+default: Sol thinks, judges, and integrates, and Luna reads and types at
+xhigh{{#reviewBlock}}; Sol at xhigh reviews the blocks light workers submit{{/reviewBlock}}{{^reviewBlock}}; block review
+is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{/reviewStage}}. Audit lenses run only on demand
+(delegation, step 6). The native launch layers `codex -p workforce-economy`,
 `codex -p workforce-standard`, and `codex -p workforce-enhanced` set the
 cooperator's model and effort for that launch; a prompt never changes the
 running model, so report a mismatch instead of claiming one. If Sol is
@@ -79,8 +81,7 @@ Astra high is the ladder's last tier and the bounded design role. Astra above
 high needs a stated unresolved question, why high is not enough, and the
 expected benefit; that rule does not limit Sol and Luna roles at xhigh.
 
-Auditors: up to three rounds per block; after round 1 only lenses that won the
-last round play again. An auditor that returns `STATUS: partial` or stops early
+Audit lenses (on demand): a lens with nothing real is retired for the block. An auditor that returns `STATUS: partial` or stops early
 is continued with `followup_task` on its NOT_REACHED files. A Luna auditor that
 reaches 400k on a block hands its lens to a fresh Sol xhigh auditor on the same
 snapshot and round, with its NOT_REACHED files; its findings stay with the
@@ -103,7 +104,8 @@ PROJECT_RULES: repository instruction files to read first
 INPUTS / SNAPSHOT: exact sources, contracts, revision, relevant dirty diff; the tree to read
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
-TRAPS: what you saw that can go wrong (a behavior-changing rewrite, a frozen area)
+CONSTRAINTS: what the project checks on this change (CI steps, lint and size rules, frozen areas), each with the file that sets it
+TRAPS: what you saw that can go wrong (a behavior-changing rewrite)
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
 REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run; the audit log
