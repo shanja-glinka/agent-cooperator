@@ -3,7 +3,7 @@
 // the largest prompt, tool calls and price at list prices; then per review the VERDICT, ACCEPTANCE
 // and SITES lines, every line about the watched locations, and every line that calls a site violated
 // or not established or that lists a finding. Writes <out>/REVIEWS.md.
-// usage: score-replay.mjs <out-dir> [<location> ...]   e.g. repository.ts:68
+// usage: score-replay.mjs <out-dir> [<location> ...]   e.g. src/store.ts:42
 import fs from 'node:fs';
 import path from 'node:path';
 import { openaiUsd } from './prices.mjs';
