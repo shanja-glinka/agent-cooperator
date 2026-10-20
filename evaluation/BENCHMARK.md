@@ -30,7 +30,11 @@ suite has run.
 4. **A cell of its own, as far as the host allows.** Each cell has its own
    checkout, holding only the task's base commit and its history (no other
    branches, no remote, no results of other cells), its own CLI homes, and its own
-   `/tmp`. Agents choose absolute paths such as `/tmp/ci.log` themselves, and on
+   `/tmp`. Its dependencies come from a frozen copy, built once per lockfile from
+   the npm cache and checked against it (`frozen-deps.sh`, `depscheck.mjs`), never
+   from the project's live working copy: on 2026-10-20 one install there moved
+   seven packages off the bases' lockfile between the v6 and v7 runs, and every v7
+   cell started with a red test. A cell whose setup fails does not run. Agents choose absolute paths such as `/tmp/ci.log` themselves, and on
    2026-10-19 and 2026-10-20 cells running side by side read each other's CI logs.
    From the v6 run on (2026-10-20) every zsh a cell's agents start reads `tmpjail/zshenv` first
    (`ZDOTDIR`): a command that names `/tmp` runs with those paths in the cell's
@@ -164,7 +168,9 @@ A suite directory holds:
   (`BENCH_CLAUDE_CONFIG_DIR`; its login stays in the keychain, nothing to create)
   and the Codex `auth.json` (`BENCH_CODEX_AUTH`, linked so that a token refresh
   writes through to the same file);
-- `setup.sh`, run in each fresh checkout to provide the project's dependencies;
+- `setup.sh`, run in each fresh checkout to provide the project's dependencies
+  (for an npm project: `zsh <bench>/frozen-deps.sh <deps-root>`), its output kept
+  in the cell's `logs/setup.log` and its last line in `provenance.json`;
 - `tasks/<task>.txt`, the prompt, where `{BRANCH}` becomes the cell's branch;
 - `checks/<task>.sh`, run inside the finished checkout, which prints one JSON object
   of quality fields. Hidden acceptance tests stay in the suite and enter the

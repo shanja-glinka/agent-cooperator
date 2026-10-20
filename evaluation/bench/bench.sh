@@ -40,6 +40,7 @@ printf '%s\n' "${MODELS[@]}" > $OUT/models.txt
 printf '%s\n' "${TASKS[@]}" > $OUT/tasks.txt
 printf 'claude %s (%s)\ncodex %s (%s)\n' "$($CLAUDE_BIN --version)" $CLAUDE_BIN "$($CODEX_BIN --version)" $CODEX_BIN > $OUT/versions.txt
 printf 'codex launch %s\n' $CODEX_LAUNCH >> $OUT/versions.txt
+printf 'node %s (%s)\nnpm %s\n' "$(node --version)" ${commands[node]:A} "$(npm --version)" >> $OUT/versions.txt
 # One line per earlier run: its directory and the variants taken from it.
 : > $OUT/prev.txt
 for p in ${=PREV_RUNS:-}; do printf '%s %s\n' ${${p%%:*}:A} "${${p#*:}//,/ }" >> $OUT/prev.txt; done

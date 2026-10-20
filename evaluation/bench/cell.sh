@@ -24,7 +24,8 @@ git -C $WT checkout -q -b $BRANCH $BASE
 rm -f $WT/.git/FETCH_HEAD
 # The kit is installed into each Claude checkout's .claude/; keep it out of the agents' git status.
 echo '/.claude/' >> $WT/.git/info/exclude
-(cd $WT && zsh $SUITE/setup.sh $REPO)
+# A checkout whose setup failed is not run: its agent would start in another environment.
+(cd $WT && zsh $SUITE/setup.sh $REPO) > $LOG/setup.log 2>&1 || { echo "cell $ID: setup failed, see $LOG/setup.log"; exit 1; }
 
 KIT=$OUT/kits/$VARIANT
 # The variant's install-policy switches (bench.sh wrote them from +key=value).
@@ -155,9 +156,10 @@ if [[ -z ${DRY:-} ]]; then
   node $BENCH/tmpclean.mjs $CELL $OUT/running > $CELL/tmp-cleaned.json 2> $CELL/tmp-cleaned.stderr
   # What the agent left: commits on top of the base and uncommitted files, before the check builds.
   printf '{"Коммитов":%d,"Незакоммичено файлов":%d}\n' $(git -C $WT rev-list --count $BASE..HEAD) $(git -C $WT status --porcelain | wc -l) > $CELL/git.json
-  printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s","tmpJail":true,"kitDelivery":"%s","taskAsFile":%s,"codexLaunch":"%s","policySets":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) \
+  printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s","tmpJail":true,"kitDelivery":"%s","taskAsFile":%s,"codexLaunch":"%s","policySets":"%s","setup":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) \
     "$(${CLAUDE_BIN:-claude} --version 2>/dev/null)" "$(${CODEX_BIN:-codex} --version 2>/dev/null)" $KIT_DELIVERY \
-    $([[ $MODEL == opus && -d $KIT ]] && echo true || echo false) "$([[ $MODEL == sol && -d $KIT ]] && echo ${CODEX_LAUNCH:-workforce-standard})" "${(j:,:)${(@)SETS:#--set}}" > $CELL/provenance.json
+    $([[ $MODEL == opus && -d $KIT ]] && echo true || echo false) "$([[ $MODEL == sol && -d $KIT ]] && echo ${CODEX_LAUNCH:-workforce-standard})" "${(j:,:)${(@)SETS:#--set}}" \
+    "$(tail -n 1 $LOG/setup.log | tr -d '"\\')" > $CELL/provenance.json
   # Each CI attempt of the check keeps its own log with the cell.
   (cd $WT && CI_LOG_DIR=$CELL/check-logs zsh $SUITE/checks/$TASK.sh $REPO $BASE) > $CELL/check.json 2> $CELL/check.stderr
   git -C $WT diff --stat $BASE HEAD > $CELL/diffstat.txt
