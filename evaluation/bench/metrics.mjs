@@ -46,9 +46,12 @@ function claude(logs, res) {
   const seen = new Set();
   const actor = (file, meta) => {
     const msgs = new Map(); const tools = {}; const ids = new Set(); const kitReads = new Set(); let first = null; let last = null; let turns = 0;
+    const efforts = new Set();
     const model = meta ? (meta.model === 'inherit' ? init?.model : meta.model) : init?.model;
     for (const l of jsonl(path.join(tdir, file))) {
       if (l.timestamp) { first ??= l.timestamp; last = l.timestamp; }
+      // The effort each request was sent with, as Claude Code recorded the request.
+      if (l.type === 'api-request-blob' && l.message?.output_config?.effort) efforts.add(l.message.output_config.effort);
       if (l.type === 'user') {
         const content = Array.isArray(l.message?.content) ? l.message.content : [{ type: 'text', text: String(l.message?.content ?? '') }];
         // A turn starts with a prompt or a message to the agent, not with a tool result.
@@ -85,7 +88,7 @@ function claude(logs, res) {
       const usd = claudeUsd({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, hit: m.cr, out: m.out });
       if (usd == null) sum.unpriced = true; else { sum.usd += usd; sum.usdHigh += usd; }
     }
-    return { role: meta ? meta.agentType : 'cooperator', task: meta?.description ?? '', model, effort: meta ? ROLE_EFFORT[meta.agentType] ?? '?' : 'medium', background: meta ? meta.requestShape === 'background' : false, seconds: first && last ? secs(first, last) : null, turns: meta && msgs.size ? Math.max(turns, 1) : turns, toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools, ...sum, thinking: null };
+    return { role: meta ? meta.agentType : 'cooperator', task: meta?.description ?? '', model, effort: efforts.size ? [...efforts].join('/') : meta ? ROLE_EFFORT[meta.agentType] ?? '?' : 'medium', effortSource: efforts.size ? 'request' : 'role default', background: meta ? meta.requestShape === 'background' : false, seconds: first && last ? secs(first, last) : null, turns: meta && msgs.size ? Math.max(turns, 1) : turns, toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools, ...sum, thinking: null };
   };
   if (files.includes('main.jsonl')) res.actors.push(actor('main.jsonl', null));
   for (const f of files.filter((n) => n.startsWith('agent-') && n.endsWith('.jsonl')).sort()) {
@@ -121,16 +124,18 @@ function codex(logs, res, inClaudeCell) {
       : dev.match(/You are a Workforce (worker|reviewer|auditor|probe)/i)?.[1]?.toLowerCase()
         ?? CODEX_RUN_ROLE.find(([re]) => re.test(firstUser.trim()))?.[1] ?? 'agent';
     const seenUsage = new Set(); const seenCalls = new Set(); const tools = {}; const kitReads = new Set();
+    const byResponse = lines.some((l) => l.type === 'token_usage_record');
     const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0 };
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
     for (const l of lines) {
       const p = l.payload ?? {};
-      const info = l.type === 'event_msg' && p.type === 'token_count' ? p.info : null;
-      if (info?.total_token_usage && info.last_token_usage) {
-        const key = JSON.stringify(info.total_token_usage);
+      const info = !byResponse && l.type === 'event_msg' && p.type === 'token_count' ? p.info : null;
+      const record = byResponse && l.type === 'token_usage_record' && p.usage && (!p.thread_id || p.thread_id === meta.id) ? p : null;
+      if (record || (info?.total_token_usage && info.last_token_usage)) {
+        const key = record ? record.response_id ?? JSON.stringify(record.usage) : JSON.stringify(info.total_token_usage);
         if (!seenUsage.has(key)) {
           seenUsage.add(key);
-          const u = info.last_token_usage;
+          const u = record ? record.usage : info.last_token_usage;
           sum.requests += 1; sum.input += (u.input_tokens ?? 0) - (u.cached_input_tokens ?? 0); sum.cacheRead += u.cached_input_tokens ?? 0;
           sum.output += u.output_tokens ?? 0; sum.thinking += u.reasoning_output_tokens ?? 0;
           const usd = openaiUsd(ctx.model, u);
