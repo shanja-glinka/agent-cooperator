@@ -122,7 +122,9 @@ Per cell and per agent:
 - output and thinking tokens;
 - handoffs;
 - messages to and from agents;
-- `sleep`/`wait_agent`;
+- `sleep`/`wait_agent`; for a Codex cooperator, the waits that ended on their
+  timeout and the price of the request each of them caused (the cooperator
+  wakes with nothing to act on and rereads its context);
 - kit files read, and the kit text the cooperator received in characters: the
   skill Claude Code inserts into its context plus kit files it reads; for Codex
   the output of the cooperator's commands that read kit files (an upper bound when

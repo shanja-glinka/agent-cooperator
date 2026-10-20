@@ -28,6 +28,9 @@ const ROWS = [
   ['Цена: кооператор, $', role('cooperator'), usd], ['Цена: воркеры, $', role('worker'), usd],
   ['Цена: аудиторы, $', role('auditor'), usd], ['Цена: ревьюер, $', role('reviewer'), usd],
   ['Запросы кооператора', (c) => c.totals.cooperatorRequests ?? null, k],
+  // Only a Codex cooperator waits with wait_agent; a Claude one is notified.
+  ['Ожиданий кооператора, кончившихся таймаутом', (c) => (c.model === 'opus' ? null : c.waits.timedOut ?? null), k],
+  ['Цена запросов после таймаута ожидания, $', (c) => (c.model === 'opus' ? null : c.waits.wakeUsd ?? null), usd],
   ['Ходов воркеров', (c) => c.totals.workerTurns ?? null, k], ['Кругов исправлений', (c) => c.totals.fixRounds ?? null, k],
   ['Наибольший промпт воркера', (c) => c.totals.workerMaxPrompt || null, k],
   ['Запросов воркеров выше тарифного порога', (c) => c.totals.workerOverTier ?? null, k],

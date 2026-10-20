@@ -127,6 +127,7 @@ function codex(logs, res, inClaudeCell) {
       : dev.match(/You are a Workforce (worker|reviewer|auditor|probe)/i)?.[1]?.toLowerCase()
         ?? CODEX_RUN_ROLE.find(([re]) => re.test(firstUser.trim()))?.[1] ?? 'agent';
     const seenUsage = new Set(); const seenCalls = new Set(); const tools = {}; const kitReads = new Set();
+    const waitIds = new Set(); let afterTimeout = false;
     const byResponse = lines.some((l) => l.type === 'token_usage_record');
     const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
@@ -145,7 +146,15 @@ function codex(logs, res, inClaudeCell) {
           if ((u.input_tokens ?? 0) > 272000) sum.overTier += 1;
           const usd = openaiUsd(ctx.model, u);
           if (usd == null) sum.unpriced = true; else { sum.usd += usd.low; sum.usdHigh += usd.high; }
+          if (afterTimeout) { res.waits.wakeRequests += 1; res.waits.wakeUsd += usd?.low ?? 0; afterTimeout = false; }
         }
+      }
+      // A wait that timed out wakes the cooperator with nothing to act on; its next request still
+      // rereads the whole context.
+      if (isMain && l.type === 'response_item' && p.type === 'function_call_output' && waitIds.has(p.call_id)) {
+        waitIds.delete(p.call_id);
+        afterTimeout = /"timed_out":\s*true/.test(String(p.output));
+        if (afterTimeout) res.waits.timedOut += 1;
       }
       // The cooperator's kit text: the full output of each command that read a kit file
       // (an upper bound when the same command also read other files).
@@ -158,7 +167,7 @@ function codex(logs, res, inClaudeCell) {
       if (l.type === 'response_item' && p.type === 'function_call') {
         add(p.name);
         let args = {}; try { args = JSON.parse(p.arguments); } catch {}
-        if (p.name === 'wait_agent') res.waits.wait_agent += 1;
+        if (p.name === 'wait_agent') { res.waits.wait_agent += 1; if (isMain) waitIds.add(p.call_id); }
         if (p.name === 'sleep') { res.waits.sleep += 1; res.waits.sleepSeconds += Math.round((args.duration_ms ?? 0) / 1000); }
         if (p.name === 'send_message' || p.name === 'followup_task') { if (isMain) res.messagesToAgents += 1; else res.messagesFromAgents += 1; }
       }
@@ -200,7 +209,7 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   if (!fs.existsSync(path.join(dir, 'cell.txt'))) continue;
   const [task, variant, model, repeat] = read(path.join(dir, 'cell.txt')).split(' ');
   const logs = path.join(dir, 'logs');
-  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0 } };
+  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0, timedOut: 0, wakeRequests: 0, wakeUsd: 0 } };
   res.exitCode = Number(read(path.join(logs, 'exit.txt')) || NaN);
   res.wallSeconds = secs(read(path.join(logs, 'start.txt')), read(path.join(logs, 'end.txt')));
   if (model === 'opus') { claude(logs, res); codex(logs, res, true); } else codex(logs, res, false);
