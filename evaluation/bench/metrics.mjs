@@ -36,7 +36,8 @@ const reviewLines = (text) => {
 function claude(logs, res) {
   const ev = jsonl(path.join(logs, 'claude.stream.jsonl'));
   const init = ev.find((e) => e.type === 'system' && e.subtype === 'init');
-  const result = ev.find((e) => e.type === 'result');
+  // With background tasks a session writes a result after every turn; the last one is the session's.
+  const result = ev.filter((e) => e.type === 'result').at(-1);
   if (/workforce-orchestrate/.test(JSON.stringify(ev.slice(0, 6)))) res.skills.push('workforce-orchestrate');
   const tdir = path.join(logs, 'transcripts');
   const files = fs.existsSync(tdir) ? fs.readdirSync(tdir) : [];
