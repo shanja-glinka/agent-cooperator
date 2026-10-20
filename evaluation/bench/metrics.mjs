@@ -27,7 +27,8 @@ const family = (role) => (role === 'cooperator' ? 'cooperator' : /worker/.test(r
 // The cooperator reports one line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>.
 const reviewLines = (text) => {
   const r = { blocks: 0, rounds: 0, findings: 0, real: 0 };
-  for (const m of String(text ?? '').matchAll(/REVIEW:?\**\s*rounds\s*=\s*(\d+)[,;\s]+findings\s*=\s*(\d+)[,;\s]+real\s*=\s*(\d+)/gi)) {
+  // A block label may sit between the word and the colon: "REVIEW A: rounds=...".
+  for (const m of String(text ?? '').matchAll(/REVIEW\b[^:\n=]{0,40}:?\**\s*rounds\s*=\s*(\d+)[,;\s]+findings\s*=\s*(\d+)[,;\s]+real\s*=\s*(\d+)/gi)) {
     r.blocks += 1; r.rounds += Number(m[1]); r.findings += Number(m[2]); r.real += Number(m[3]);
   }
   return r.blocks ? r : null;
