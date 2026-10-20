@@ -23,7 +23,14 @@ suite has run.
    only switches an install policy carries it as `+key=value`
    (`v7nr=<commit>@big+reviewBlock=off,reviewStage=off`), and `policycheck.mjs`
    checks, before any cell runs, that every installed text of each variant
-   delivers that policy.
+   delivers that policy; from Claude policy 1.10.0 and Codex 1.12.0 it also
+   fails when any installed file can assign `gpt-6-astra`, when the default
+   profile's stage reviewer is not Sol xhigh, or when a launch layer's waits break
+   Codex's min ≤ default ≤ max. Two narrow checks run by hand before a new
+   version's series: `waitcheck.sh` (three live Codex waits: a worker's finish, its
+   message, and a short timeout raised to the layer's minimum) and
+   `upgradecheck.sh` (an update from an older installed kit removes the kit's
+   dropped files and keeps the user's own).
 3. **Nothing changes during a run.** Do not edit the kit while it is being
    measured. A fix makes a new version and a new run. A fix of the bench itself
    makes a new run of every variant, not only of the new version.
@@ -174,4 +181,8 @@ A suite directory holds:
 - `tasks/<task>.txt`, the prompt, where `{BRANCH}` becomes the cell's branch;
 - `checks/<task>.sh`, run inside the finished checkout, which prints one JSON object
   of quality fields. Hidden acceptance tests stay in the suite and enter the
-  checkout only with the check, after the agent has finished.
+  checkout only with the check, after the agent has finished. A suite may keep
+  the original «Решено» for comparison with earlier runs and add a contract field
+  (the private suite's big task: «Контракт выполнен» also needs its hidden contract test); a test
+  that did not run is «не проверено», never a pass. Earlier runs' final code can
+  be rechecked from the branches the bench pushed, with no model runs.
