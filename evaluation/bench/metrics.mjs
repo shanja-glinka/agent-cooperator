@@ -159,7 +159,8 @@ function claude(logs, res) {
     // The cooperator's first request, to tell a cold prompt cache from one an earlier session warmed.
     const firstMsg = meta ? null : msgs.values().next().value;
     if (firstMsg) sum.firstRequest = { read: firstMsg.cr, write: firstMsg.cw, ttl: firstMsg.w1 > 0 ? '1h' : '5m', model: firstMsg.model };
-    return { role: meta ? meta.agentType : 'cooperator', task: meta?.description ?? '', model, effort: efforts.size ? [...efforts].join('/') : meta ? ROLE_EFFORT[meta.agentType] ?? '?' : 'medium', effortSource: efforts.size ? 'request' : 'role default', background: meta ? meta.requestShape === 'background' : false, seconds: first && last ? secs(first, last) : null, turns: meta && msgs.size ? Math.max(turns, 1) : turns, toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools, ...sum, thinking: null };
+    return { role: meta ? meta.agentType : 'cooperator', task: meta?.description ?? '', model, effort: efforts.size ? [...efforts].join('/') : meta ? ROLE_EFFORT[meta.agentType] ?? '?' : 'medium', effortSource: efforts.size ? 'request' : 'role default', background: meta ? meta.requestShape === 'background' : false, seconds: first && last ? secs(first, last) : null, turns: meta && msgs.size ? Math.max(turns, 1) : turns, toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools, ...sum, thinking: null,
+      _requests: [...msgs.values()].map((m) => ({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, cr: m.cr, out: m.out })) };
   };
   if (files.includes('main.jsonl')) res.actors.push(actor('main.jsonl', null));
   for (const f of files.filter((n) => n.startsWith('agent-') && n.endsWith('.jsonl')).sort()) {
@@ -198,6 +199,7 @@ function codex(logs, res, inClaudeCell) {
     const waitIds = new Set(); let afterTimeout = false; let classify = false; const closeIds = new Map();
     const byResponse = lines.some((l) => l.type === 'token_usage_record');
     const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
+    const detail = [];
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
     for (const l of lines) {
       const p = l.payload ?? {};
@@ -214,6 +216,7 @@ function codex(logs, res, inClaudeCell) {
           if ((u.input_tokens ?? 0) > 272000) sum.overTier += 1;
           const usd = openaiUsd(ctx.model, u);
           if (usd == null) sum.unpriced = true; else { sum.usd += usd.low; sum.usdHigh += usd.high; }
+          detail.push({ model: ctx.model, input: u.input_tokens ?? 0, cached: u.cached_input_tokens ?? 0, cacheWrite: u.cache_write_input_tokens ?? 0, output: u.output_tokens ?? 0, reasoning: u.reasoning_output_tokens ?? 0 });
           if (afterTimeout) { res.waits.wakeRequests += 1; res.waits.wakeUsd += usd?.low ?? 0; afterTimeout = false; }
         }
       }
@@ -274,6 +277,7 @@ function codex(logs, res, inClaudeCell) {
       requests: sum.requests, input: sum.input, cacheWrite: null, cacheRead: sum.cacheRead, output: sum.output, thinking: sum.thinking,
       maxPrompt: sum.maxPrompt, overTier: sum.overTier, compactions: lines.filter((l) => l.type === 'compacted').length,
       usd: sum.usd, usdHigh: sum.usdHigh, ...(sum.unpriced ? { unpriced: true } : {}),
+      _requests: detail,
     });
   }
   if (!inClaudeCell) {
@@ -337,5 +341,10 @@ for (const c of cells) {
   c.warmStart = f ? (tokens ? { tokens, usd: extra } : false) : null;
   c.totals.usdCold = c.totals.usd + (extra ?? 0);
 }
-fs.writeFileSync(target, JSON.stringify({ run: path.basename(out), suite: read(path.join(out, 'suite.txt')), variants: read(path.join(out, 'variants.txt')).split('\n'), cells }, null, 1));
+// Every model request with its tokens and nothing else, for recomputing the prices: written to
+// METRICS_REQUESTS when it is set, one line per request with its cell and the actor's index there.
+const requests = [];
+for (const c of cells) c.actors.forEach((a, i) => { for (const r of a._requests ?? []) requests.push(JSON.stringify({ cell: c.id, actor: i, role: a.role, ...r })); delete a._requests; });
+if (process.env.METRICS_REQUESTS) fs.writeFileSync(process.env.METRICS_REQUESTS, requests.length ? `${requests.join('\n')}\n` : '');
+fs.writeFileSync(target, JSON.stringify({ run: path.basename(out), suite: read(path.join(out, 'suite.txt')), variants: read(path.join(out, 'variants.txt')).split('\n'), coldStartPrefix: shared, cells }, null, 1));
 console.log(`metrics: ${cells.length} cells -> ${target}`);

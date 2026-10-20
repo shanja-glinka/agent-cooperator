@@ -139,6 +139,17 @@ None of these runs a cooperator again:
   disagree: a metrics file of another run, an earlier column's recount of another
   run, a table built from other data, or a report that does not name the run's
   kit commit.
+- `evidence.mjs <run-dir> <evidence-root>` publishes a run without the private
+  suite. It keeps each cell's numbers and the token counts of every model
+  request (`METRICS_REQUESTS=<file> metrics.mjs` writes them), and rebuilds the
+  tables from what it publishes. It drops the agents' reports, task labels,
+  provenance commits, `/tmp` paths and quality fields that name source files.
+  It refuses to write when the output contains a string matched by
+  `EVIDENCE_PRIVATE`, the home path, or a commit of the private repository.
+- `verify-evidence.mjs <evidence-run-dir>` recomputes every request's price
+  from its tokens, checks each agent's and each cell's sums (the cold-start
+  price included), and rebuilds `METRICS.md` and `COMPARISON.md` in a copy to
+  compare them byte for byte. The published evidence is in `evaluation/evidence/`.
 
 ## Metrics
 

@@ -55,7 +55,9 @@ export function loadRun(out) {
   if (!fs.existsSync(prevFile)) return data;
   const cells = []; const variants = [];
   const rechecked = recheck(path.dirname(path.resolve(out)));
-  for (const { dir, names } of prevRuns(prevFile)) {
+  for (const { dir: listed, names } of prevRuns(prevFile)) {
+    // A relative directory (published evidence) is relative to this run's directory.
+    const dir = path.resolve(out, listed);
     const recount = [path.join(out, `prev-metrics-${path.basename(dir)}.json`), path.join(out, 'prev-metrics.json'), path.join(dir, 'metrics.json')].find((f) => fs.existsSync(f));
     const prev = JSON.parse(fs.readFileSync(recount, 'utf8'));
     const taken = prev.cells.filter((c) => names.includes(c.variant));
