@@ -8,6 +8,9 @@
 //   stale      a cell's first use of a path was a read, an earlier cell had written it, and
 //              that cell's tmpclean.mjs did not remove it
 // Writes and reads are told apart from the command text, so the classification is heuristic.
+// A cell run with the /tmp jail (provenance tmpJail) has its own /tmp: a name in its commands is
+// its own file, unless the host's /tmp has that name too (tmpclean.mjs lists what it found
+// there), which means a use escaped the jail; only those names count.
 // usage: isolation.mjs <run-dir>
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,8 +49,12 @@ for (const id of fs.readdirSync(cellsDir).sort()) {
     }
   }
   const cleaned = path.join(cellsDir, id, 'tmp-cleaned.json');
-  const removed = new Set(fs.existsSync(cleaned) ? (JSON.parse(fs.readFileSync(cleaned, 'utf8') || '{}').removed ?? []).map((x) => x.replace(/^\/private/, '')) : []);
-  cells[id] = { span, uses, removed };
+  const found = fs.existsSync(cleaned) ? JSON.parse(fs.readFileSync(cleaned, 'utf8') || '{}') : {};
+  const removed = new Set((found.removed ?? []).map((x) => x.replace(/^\/private/, '')));
+  const prov = path.join(cellsDir, id, 'provenance.json');
+  const jailed = fs.existsSync(prov) && JSON.parse(fs.readFileSync(prov, 'utf8') || '{}').tmpJail === true;
+  const escaped = new Set([...(found.removed ?? []), ...(found.kept ?? []).filter((k) => k.why !== 'other owner').map((k) => k.path)].map((x) => x.replace(/^\/private/, '')));
+  cells[id] = { span, uses: jailed ? uses.filter((u) => escaped.has(u.path)) : uses, removed, jailed };
 }
 
 const overlap = (a, b) => cells[a].span[0] < cells[b].span[1] && cells[b].span[0] < cells[a].span[1];
@@ -80,7 +87,7 @@ for (const id of Object.keys(cells)) {
       if (w) { stale.push({ path: p, from: other, read: first.t.toISOString(), wrote: w.t.toISOString() }); break; }
     }
   }
-  result[id] = { status: crossed.length ? 'crossed' : stale.length ? 'stale' : shared.length ? 'shared' : 'clean', shared, crossed, stale };
+  result[id] = { status: crossed.length ? 'crossed' : stale.length ? 'stale' : shared.length ? 'shared' : 'clean', jailed: cells[id].jailed, shared, crossed, stale };
 }
 fs.writeFileSync(path.join(out, 'isolation.json'), JSON.stringify(result, null, 1));
 const count = (s) => Object.values(result).filter((x) => x.status === s).length;

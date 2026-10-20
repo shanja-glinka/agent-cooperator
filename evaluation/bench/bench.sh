@@ -2,11 +2,14 @@
 # Measure kit versions on a fixed suite: every task x model x variant x repeat, then report.
 #
 # usage: evaluation/bench/bench.sh <suite-dir> <label> <variant> [<variant> ...]
-#   variant: nokit | <name>=<kit commit>, e.g.  nokit v3=35a5753 v4=dee8d3d
-#   The last variant is the new version, the one before it the previous version.
+#   variant: nokit | <name>=<kit commit>[@task,task], e.g.  nokit v3=35a5753 v4=dee8d3d
+#   @task,task runs that variant on those tasks only. The comparison treats the first kit
+#   variant of the run as the new version; a later one is shown beside it on its tasks.
 # env:   MODELS="opus sol"  REPEATS=1  PARALLEL=4  DRY=1 (set up and clean up, no agents)
-#        PREV_RUN=<run dir> PREV_VARIANTS="nokit v4": take those variants' cells from an
-#        earlier run of the same suite for the comparison instead of running them again.
+#        PREV_RUNS="<run dir>:<variant>,<variant> ...": take those variants' cells from earlier
+#        runs of the same suite instead of running them again (PREV_RUN with PREV_VARIANTS
+#        names one such run). CODEX_LAUNCH: the Codex launch layer of kit cells
+#        (workforce-standard by default).
 set -euo pipefail
 BENCH=${0:A:h}
 SUITE=${1:A}; LABEL=$2; shift 2
@@ -16,6 +19,8 @@ source $SUITE/suite.env
 MODELS=(${=${MODELS:-opus sol}})
 REPEATS=${REPEATS:-1}
 PARALLEL=${PARALLEL:-4}
+export CODEX_LAUNCH=${CODEX_LAUNCH:-workforce-standard}
+[[ -n ${PREV_RUN:-} ]] && PREV_RUNS="${PREV_RUNS:-} ${PREV_RUN}:${${PREV_VARIANTS:-nokit}// /,}"
 
 # The CLI versions the suite names, resolved to fixed binaries: an update of the installed
 # CLI during the run (another session may update it) does not reach the cells.
@@ -33,13 +38,22 @@ printf '%s\n' "${VARIANTS[@]}" > $OUT/variants.txt
 printf '%s\n' "${MODELS[@]}" > $OUT/models.txt
 printf '%s\n' "${TASKS[@]}" > $OUT/tasks.txt
 printf 'claude %s (%s)\ncodex %s (%s)\n' "$($CLAUDE_BIN --version)" $CLAUDE_BIN "$($CODEX_BIN --version)" $CODEX_BIN > $OUT/versions.txt
-[[ -n ${PREV_RUN:-} ]] && printf '%s\n%s\n' ${PREV_RUN:A} "${PREV_VARIANTS:-nokit}" > $OUT/prev.txt
+printf 'codex launch %s\n' $CODEX_LAUNCH >> $OUT/versions.txt
+# One line per earlier run: its directory and the variants taken from it.
+: > $OUT/prev.txt
+for p in ${=PREV_RUNS:-}; do printf '%s %s\n' ${${p%%:*}:A} "${${p#*:}//,/ }" >> $OUT/prev.txt; done
+[[ -s $OUT/prev.txt ]] || rm -f $OUT/prev.txt
+# The bench's own checks (the /tmp jail, the CI check) before any cell runs.
+zsh $BENCH/selftest.sh $SUITE > $OUT/selftest.txt 2>&1 || { cat $OUT/selftest.txt; exit 1; }
 
 for v in "${VARIANTS[@]}"; do
   [[ $v == nokit ]] && continue
-  name=${v%%=*}; commit=${v#*=}
+  name=${v%%=*}; commit=${${v#*=}%%@*}
   [[ -d $OUT/kits/$name ]] || git -C $KIT_REPO worktree add -q --detach $OUT/kits/$name $commit
 done
+# Tasks per variant name: all, or the @task,task list of its spec.
+typeset -A ONLY
+for v in "${VARIANTS[@]}"; do [[ $v == *@* ]] && ONLY[${v%%=*}]=" ${${v#*@}//,/ } "; done
 
 # Within a repeat, cells that start one after another differ in task, and the model/variant
 # pairs rotate across tasks: cells running side by side share the host's /tmp, and two cells
@@ -51,6 +65,7 @@ for r in $(seq 1 $REPEATS); do
   for i in $(seq 0 $(( ${#combos} - 1 ))); do
     for t in $(seq 1 ${#TASKS}); do
       pair=(${=combos[$(( (t - 1 + i) % ${#combos} + 1 ))]})
+      [[ -n ${ONLY[${pair[2]}]:-} && ${ONLY[${pair[2]}]} != *" ${TASKS[$t]} "* ]] && continue
       cells+=("${TASKS[$t]} ${pair[2]} ${pair[1]} $r")
     done
   done
@@ -64,7 +79,8 @@ done
 git -C $KIT_REPO worktree prune
 [[ -n ${DRY:-} ]] && { echo "dry run: set up and cleaned up ${#cells[@]} cells"; exit 0; }
 node $BENCH/metrics.mjs $OUT
-[[ -n ${PREV_RUN:-} ]] && node $BENCH/metrics.mjs ${PREV_RUN:A} $OUT/prev-metrics.json
+# Earlier runs' cells are recounted by the current metrics.mjs, so every column counts alike.
+[[ -f $OUT/prev.txt ]] && while read -r dir names; do node $BENCH/metrics.mjs $dir $OUT/prev-metrics-${dir:t}.json; done < $OUT/prev.txt
 node $BENCH/isolation.mjs $OUT
 node $BENCH/baseline.mjs $OUT
 node $BENCH/routes.mjs $OUT

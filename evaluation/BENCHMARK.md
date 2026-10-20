@@ -15,29 +15,42 @@ suite has run.
    batch: no kit, the previous version, and the new version, on both runtimes
    (Opus 5.5 in Claude Code, GPT-6.1 Sol in Codex). No partial runs, no filling of
    gaps afterwards. When the user decides so, a run measures only the new version
-   on the full grid and takes the no-kit and previous-version cells from an earlier
-   run of the same suite (`PREV_RUN`); the comparison then names that run, and its
-   differences in day, conditions, and isolation are part of the result.
+   on the full grid and takes the no-kit and previous-version cells from earlier
+   runs of the same suite (`PREV_RUNS`); the comparison then names those runs, and
+   their differences in day, conditions, and isolation are part of the result. A
+   variant of the new version that changes one part (for example the review) may
+   run on the tasks that part touches (`<name>=<commit>@task`).
 3. **Nothing changes during a run.** Do not edit the kit while it is being
    measured. A fix makes a new version and a new run. A fix of the bench itself
    makes a new run of every variant, not only of the new version.
 4. **A cell of its own, as far as the host allows.** Each cell has its own
    checkout, holding only the task's base commit and its history (no other
-   branches, no remote, no results of other cells), and its own CLI homes. The
-   host's `/tmp` is shared, and agents choose absolute paths such as
-   `/tmp/ci.log` themselves: on 2026-10-19 cells running side by side read each
-   other's CI logs. So cells that start one after another differ in task; after
+   branches, no remote, no results of other cells), its own CLI homes, and its own
+   `/tmp`. Agents choose absolute paths such as `/tmp/ci.log` themselves, and on
+   2026-10-19 and 2026-10-20 cells running side by side read each other's CI logs.
+   From the v6 run on (2026-10-20) every zsh a cell's agents start reads `tmpjail/zshenv` first
+   (`ZDOTDIR`): a command that names `/tmp` runs with those paths in the cell's
+   temp dir, so the agent's command, its output, and its later reads agree and it
+   gets no refusals; Claude Code's file tools go there through a PreToolUse hook
+   (`tmpjail/hook.mjs`), programs through `TMPDIR`; the user's zsh startup files
+   still run. A path written inside a file the agent then runs is not moved: after
    its agent ends, a cell stops the processes it left (they carry its
-   `BENCH_CELL` mark) and removes the `/tmp` files its commands named and changed,
-   unless a running cell names them too (`tmpclean.mjs`); `isolation.mjs` then
-   reads every command log for shared paths and for reads of what an earlier cell
-   left. This lowers the risk; it does not isolate. A comparison that involves a
-   marked cell is not an effect of the kit.
+   `BENCH_CELL` mark), and `tmpclean.mjs` finds and removes what still reached the
+   host's `/tmp`; `isolation.mjs` counts only those names for a jailed cell.
+   `selftest.sh` checks the jail and the CI check before every run. A comparison
+   that involves a marked cell is not an effect of the kit.
 5. **Same conditions.** The kit installed only into its cells; no user skills,
    agents, MCP servers (Claude Code runs with `--strict-mcp-config`, which also
    keeps out the account's claude.ai connectors), or private instruction files;
    the user's own `maxTurns` limits applied to the kit roles; the same task text
-   and host for every variant; the CLI versions named in the suite, run as fixed
+   and host for every variant. In a Claude cell the kit's instruction block goes
+   into the system prompt, as a real install keeps it in the user's
+   `~/.claude/CLAUDE.md`: in the checkout's `.claude/CLAUDE.md` it would count as
+   the project's CLAUDE.md and stop Claude Code from loading the project's
+   `AGENTS.md` (the v4 and v5 cells ran so). The skill gets the task as a file
+   path, because Claude Code copies a skill's arguments into the skill text. A
+   Claude cell has its own Codex home for the kit's Codex runs. The CLI versions
+   named in the suite, run as fixed
    binaries with Claude Code's auto-update off, recorded in `versions.txt` and per
    cell in `provenance.json`.
 6. **Repeats.** At least two repeats per cell when a decision depends on the
@@ -53,8 +66,10 @@ suite has run.
 evaluation/bench/bench.sh <suite-dir> <label> nokit <prev>=<commit> <new>=<commit>
 # REPEATS=3 PARALLEL=4 MODELS="opus sol" ...
 # DRY=1 sets up and removes every cell without starting agents.
-# PREV_RUN=<run dir> PREV_VARIANTS="nokit v4" bench.sh <suite-dir> <label> <new>=<commit>
-#   runs only the new version and compares it with those variants' cells of that run.
+# PREV_RUNS="<run dir>:nokit <run dir>:v5" bench.sh <suite-dir> <label> <new>=<commit> [<part>=<commit>@big]
+#   runs only the new version (and a variant on the named tasks) and compares them with
+#   those variants' cells of the earlier runs; PREV_RUN with PREV_VARIANTS names one run.
+# CODEX_LAUNCH=workforce-economy: the Codex launch layer of kit cells (workforce-standard by default).
 ```
 
 The run directory `evaluation/runs/<date>-<label>/` gets:
@@ -69,14 +84,16 @@ The run directory `evaluation/runs/<date>-<label>/` gets:
 - `isolation.json` — per cell: clean, a file shared with a cell running at the
   same time, a read of another running cell's file, or a read of what an earlier
   cell left (`isolation.mjs`, from the command logs);
-- `versions.txt` — the CLI binaries and versions the cells ran;
-- `prev.txt` and `prev-metrics.json` — with `PREV_RUN`: the earlier run and its
-  cells, recounted by the current `metrics.mjs` (the earlier run's own files are
-  not changed);
+- `versions.txt` — the CLI binaries and versions the cells ran, and the Codex launch layer;
+- `selftest.txt` — the bench's own checks before the run;
+- `prev.txt` and `prev-metrics-<run>.json` — with `PREV_RUNS`: the earlier runs and
+  their cells, recounted by the current `metrics.mjs` (the earlier runs' own files
+  are not changed);
 - `cells/<task>-<variant>-<model>-r<n>/` — logs, Claude transcripts or Codex
   rollouts, `timeline.md`, the quality check with a log per CI attempt
   (`check-logs/`), what the agent committed, `provenance.json` (base, checked
-  head, CLI versions), `tmp-cleaned.json`, and the diff.
+  head, CLI versions, the jail, how the kit was delivered), `tmp-cleaned.json`,
+  `logs/tmp-rewrites.log` (commands the jail moved), and the diff.
 
 Each cell leaves its result on a branch `bench/<run>/<cell>` in the target
 repository (local; nothing is pushed elsewhere).
@@ -87,6 +104,13 @@ Per cell and per agent:
 
 - wall time;
 - number of agents;
+- price at API list prices (`prices.mjs`), per request by its prompt's tier, in
+  total and by role (cooperator, workers, auditors, reviewer); for Codex a low and
+  a high value, because its logs report no cache writes and OpenAI bills them at
+  1.25x input;
+- turns per agent: its assignment and every message that continued it; fix
+  rounds of the workers, and the auditors' and reviewer's turns;
+- the cooperator's `REVIEW: rounds=<n> findings=<n> real=<n>` lines;
 - tool calls (cooperator, agents, total);
 - model requests;
 - input without cache, cache writes, cache reads, total input, input per request;
@@ -102,8 +126,9 @@ Per cell and per agent:
 - the suite's quality fields, plus commits made, files left uncommitted, and the
   cell's isolation.
 
-Claude numbers come from the session transcripts. Codex numbers come from the
-rollout files; Codex does not report cache writes.
+Claude numbers come from the session transcripts (a fork's transcript repeats its
+parent's messages; each counts once). Codex numbers come from the rollout files,
+in a Claude cell from the kit's Codex runs.
 
 ## The conclusion
 
@@ -117,9 +142,10 @@ For each task and model, one table:
 | --- | --- | --- | --- | --- | --- | --- |
 
 Changes are percentages; within ±5% is "no change"; several repeats show the mean
-and the range. Under each table, one line per comparison says better, worse, or no
-change, and why; then an overall verdict, including what the run did not test.
-A comparison that involves a cell without isolation is not an effect of the kit.
+and the range. Values come from the cells with a clean isolation status; a group
+without one is marked `*` as spend only, and its differences are not computed.
+Under each table, one line per comparison says better, worse, or no change, and
+why; then an overall verdict, including what the run did not test.
 
 ## Suites
 

@@ -106,13 +106,47 @@ function codex(logs) {
   return { entries, spawns, final };
 }
 
+// Codex runs the Claude kit starts through codex-run.mjs (Hybrid auditors, reviewers, escalated
+// workers): each opens with its role's skill.
+const RUN_ROLE = [[/^# Audit one lens/, 'auditor'], [/^# Review the actual result/, 'reviewer'], [/^# Complete the owned block/, 'worker'], [/^# Answer one question/, 'probe']];
+function codexRuns(logs) {
+  const dir = path.join(logs, 'rollouts');
+  const entries = []; const spawns = []; const threads = new Map();
+  for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : []).sort()) {
+    const lines = jsonl(path.join(dir, f));
+    const meta = lines.find((l) => l.type === 'session_meta')?.payload;
+    if (!meta) continue;
+    threads.set(meta.id, [...(threads.get(meta.id) ?? []), ...lines]);
+  }
+  for (const lines of threads.values()) {
+    const ctx = lines.find((l) => l.type === 'turn_context')?.payload ?? {};
+    const firstUser = lines.find((l) => l.type === 'response_item' && l.payload?.role === 'user' && !(l.payload.content ?? []).some((c) => /^<(environment_context|user_instructions)/.test(c.text ?? '')))?.payload.content?.map((c) => c.text ?? '').join('\n') ?? '';
+    const role = RUN_ROLE.find(([re]) => re.test(firstUser.trim()))?.[1] ?? 'agent';
+    const turns = lines.filter((l) => l.type === 'turn_context').length;
+    const effort = ctx.effort ?? ctx.reasoning_effort;
+    const who = `Codex ${role} / ${ctx.model}:${effort}`;
+    let last = '';
+    for (const l of lines) {
+      const p = l.payload ?? {};
+      if (l.type === 'response_item' && p.type === 'message' && p.role === 'assistant') { const text = (p.content ?? []).map((c) => c.text ?? '').join(' '); if (text.trim()) last = text; }
+    }
+    const stamps = lines.map((l) => l.timestamp).filter(Boolean).sort();
+    if (!stamps.length) continue;
+    spawns.push({ t: stamps[0], role: `Codex ${role}`, model: ctx.model, effort, background: true, name: `ходов: ${turns}`, report: last });
+    entries.push({ t: stamps[0], who: COOP, kind: 'запускает', text: `${who}, ходов: ${turns}` });
+    entries.push({ t: stamps.at(-1), who, kind: 'сдаёт', text: clip(last, 1500) });
+  }
+  return { entries, spawns };
+}
+
 const md = [`# Маршруты: ${path.basename(out)}`, '',
   'Кого кооператор запускал, с какой ролью и моделью, чем объяснил запуск (последняя мысль или реплика перед ним), что агент сдал, и итоговый отчёт. Полная хронология каждой ячейки — `cells/<ячейка>/timeline.md`. Codex шифрует тексты поручений и сообщений между агентами, их в логах нет.', ''];
-const cells = fs.readdirSync(path.join(out, 'cells')).sort().map((id) => {
+const cells = fs.readdirSync(path.join(out, 'cells')).sort().filter((id) => fs.existsSync(path.join(out, 'cells', id, 'cell.txt'))).map((id) => {
   const dir = path.join(out, 'cells', id);
   const [task, variant, model, repeat] = read(path.join(dir, 'cell.txt')).split(' ');
   const logs = path.join(dir, 'logs');
   const r = model === 'opus' ? claude(logs) : codex(logs);
+  if (model === 'opus') { const x = codexRuns(logs); r.entries.push(...x.entries); r.spawns.push(...x.spawns); }
   r.entries.sort((a, b) => new Date(a.t) - new Date(b.t));
   const start = new Date(read(path.join(logs, 'start.txt')));
   const at = (t) => { const s = Math.max(0, Math.round((new Date(t) - start) / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };

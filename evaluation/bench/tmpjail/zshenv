@@ -1,0 +1,22 @@
+# Sourced first by every zsh a bench cell's agents start: ZDOTDIR points to a copy of this file.
+# Agents choose absolute names such as /tmp/ci.log, and cells run side by side on one host. A
+# command string that names /tmp runs again with each such path moved into the cell's own temp
+# dir ($BENCH_TMP), so the agent's command, its output, and its later reads agree with each
+# other and never meet another cell's files. Claude Code's own temp dirs (/tmp/claude-*) and the
+# bench's checkouts are left alone. The user's own startup files still run (zprofile and the rest
+# chain to $HOME).
+if [[ -n ${BENCH_TMP_DONE-} ]]; then
+  # The rewritten command itself: its children start fresh.
+  unset BENCH_TMP_DONE
+elif [[ -n ${BENCH_TMP-} && ${ZSH_EXECUTION_STRING-} == */tmp* ]]; then
+  _bench_cmd=$(print -rn -- "$ZSH_EXECUTION_STRING" | /usr/bin/perl -0777 -pe 's{(?<![\w./~-])(?:/private)?/tmp(?![\w.-])(?!/claude-)(?!/agent-cooperator-bench)}{$ENV{BENCH_TMP}}g'; print -n .)
+  _bench_cmd=${_bench_cmd%.}
+  if [[ $_bench_cmd != "$ZSH_EXECUTION_STRING" ]]; then
+    # A read-only sandbox (a Codex auditor or reviewer) cannot write the log; say nothing then.
+    ( print -r -- "$(date -u +%FT%TZ) $$ ${${ZSH_EXECUTION_STRING//$'\n'/ }[1,400]}" >> ${BENCH_TMP:h}/tmp-rewrites.log ) 2>/dev/null
+    export BENCH_TMP_DONE=1
+    if [[ -o login ]]; then exec /bin/zsh -l -c "$_bench_cmd"; else exec /bin/zsh -c "$_bench_cmd"; fi
+  fi
+  unset _bench_cmd
+fi
+[[ -f $HOME/.zshenv ]] && source $HOME/.zshenv

@@ -30,9 +30,23 @@ KIT=$OUT/kits/$VARIANT
 # Signed-in Claude config dir and Codex auth file; the suite may set both.
 CLAUDE_DIR=${BENCH_CLAUDE_CONFIG_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}}
 CODEX_AUTH=${BENCH_CODEX_AUTH:-${CODEX_HOME:-$HOME/.codex}/auth.json}
+# The cell's own /tmp: every zsh its agents start reads tmpjail/zshenv first (ZDOTDIR), which
+# moves /tmp paths of a command into $CTMP; Claude Code's file tools go there through the hook,
+# and programs through TMPDIR. The user's zsh startup files still run.
+CTMP=$WORK/tmp; ZD=$HOMES/zdot
+mkdir -p $CTMP $ZD
+cp $BENCH/tmpjail/zshenv $ZD/.zshenv
+for f in zprofile zshrc zlogin; do print -r -- "[[ -f \$HOME/.$f ]] && source \$HOME/.$f" > $ZD/.$f; done
+JAIL=(BENCH_TMP=$CTMP TMPDIR=$CTMP/ ZDOTDIR=$ZD)
+KIT_DELIVERY=none
+# Codex: the Sol cooperator and, in a Claude cell, the kit's Codex auditors and reviewers.
+CH=$HOMES/codex
+mkdir -p $CH
+# A link, not a copy: a token refresh then writes through to the host's own file.
+ln -sf $CODEX_AUTH $CH/auth.json
 if [[ $MODEL == sol ]]; then
-  CH=$HOMES/codex; FH=$HOMES/home
-  mkdir -p $CH $FH/.agents/skills
+  FH=$HOMES/home
+  mkdir -p $FH/.agents/skills
   cat > $CH/config.toml <<TOML
 model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
@@ -50,29 +64,38 @@ max_depth = 1
 [projects."$WT"]
 trust_level = "trusted"
 TOML
-  # A link, not a copy: a token refresh then writes through to the host's own file.
-  ln -sf $CODEX_AUTH $CH/auth.json
   printf '[user]\n\tname = %s\n\temail = %s\n' "$(git -C $REPO config user.name)" "$(git -C $REPO config user.email)" > $FH/.gitconfig
-  [[ -d $KIT ]] && node $KIT/bin/agent-cooperator.js codex install --codex-home $CH --skills-dir $FH/.agents/skills >/dev/null
-elif [[ -d $KIT ]]; then
-  node $KIT/bin/agent-cooperator.js claude install --claude-home $WT/.claude >/dev/null
-  for pair in ${=BENCH_MAXTURNS:-}; do
-    f=$WT/.claude/agents/${pair%%:*}.md
-    [[ -f $f ]] && sed -i '' -E "s/^maxTurns: .*/maxTurns: ${pair##*:}/" $f
-  done
+  [[ -d $KIT ]] && { node $KIT/bin/agent-cooperator.js codex install --codex-home $CH --skills-dir $FH/.agents/skills >/dev/null; KIT_DELIVERY=codex-home; }
+else
+  print -r -- "{\"hooks\":{\"PreToolUse\":[{\"matcher\":\"Read|Write|Edit|MultiEdit|NotebookEdit|Glob|Grep\",\"hooks\":[{\"type\":\"command\",\"command\":\"node $BENCH/tmpjail/hook.mjs\"}]}]}}" > $HOMES/settings.json
+  KIT_INSTRUCTIONS=()
+  if [[ -d $KIT ]]; then
+    node $KIT/bin/agent-cooperator.js claude install --claude-home $WT/.claude >/dev/null
+    for pair in ${=BENCH_MAXTURNS:-}; do
+      f=$WT/.claude/agents/${pair%%:*}.md
+      [[ -f $f ]] && sed -i '' -E "s/^maxTurns: .*/maxTurns: ${pair##*:}/" $f
+    done
+    # Installed for real, the kit's block sits in the user's ~/.claude/CLAUDE.md. In the
+    # checkout's .claude/CLAUDE.md it would count as the project's CLAUDE.md, and Claude Code
+    # would stop loading the project's AGENTS.md; it goes into the system prompt instead.
+    if [[ -f $WT/.claude/CLAUDE.md ]]; then
+      mv $WT/.claude/CLAUDE.md $HOMES/kit-instructions.md
+      KIT_INSTRUCTIONS=(--append-system-prompt-file $HOMES/kit-instructions.md); KIT_DELIVERY=system-prompt
+    fi
+  fi
 fi
 
 # The agent's command. env takes its -u options before the first NAME=VALUE; every process the
 # agent starts inherits BENCH_CELL, so the ones it leaves behind can be found.
 CLEAN=(-u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_MESSAGING_SOCKET -u CLAUDE_CODE_MESSAGING_TOKEN -u CLAUDE_CODE_SESSION_ATTENDED -u CLAUDE_PID -u CLAUDE_EFFORT -u CLAUDE_CODE_ENTRYPOINT)
 if [[ $MODEL == opus ]]; then
-  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=$CLAUDE_DIR ${CLAUDE_BIN:-claude})
+  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=$CLAUDE_DIR CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
   # A Claude project directory left from an earlier cell with the same path would carry its
   # sessions and memory into this one.
   STALE=$CLAUDE_DIR/projects/${WT//[^A-Za-z0-9]/-}
   [[ -e $STALE ]] && { echo "$STALE exists" > $LOG/stale-project.txt; echo "cell $ID: stale Claude project dir $STALE" >&2; rm -rf $WORK; exit 1; }
 else
-  AGENT=(env $CLEAN -u CLAUDE_CONFIG_DIR BENCH_CELL=$ID HOME=$HOMES/home CODEX_HOME=$HOMES/codex ${CODEX_BIN:-codex})
+  AGENT=(env $CLEAN -u CLAUDE_CONFIG_DIR BENCH_CELL=$ID HOME=$HOMES/home CODEX_HOME=$CH $JAIL ${CODEX_BIN:-codex})
 fi
 # A dry run starts the same command, only with --version.
 [[ -n ${DRY:-} ]] && { (cd $WT && $AGENT --version) > $LOG/dry-agent.txt 2>&1 || echo "cell $ID: the agent command does not start: $(<$LOG/dry-agent.txt)" >&2; }
@@ -82,16 +105,19 @@ if [[ -z ${DRY:-} ]]; then
   date -u +%FT%TZ > $LOG/start.txt
   cd $WT
   if [[ $MODEL == opus ]]; then
-    [[ -d $KIT ]] && PROMPT="/workforce-orchestrate $PROMPT"
+    # The skill gets the task as a file path: Claude Code puts a skill's arguments into the skill
+    # text ($ARGUMENTS, or an appended ARGUMENTS: line), and the prompt would carry it twice.
+    if [[ -d $KIT ]]; then print -r -- "$PROMPT" > $WORK/task.md; PROMPT="/workforce-orchestrate $WORK/task.md"; fi
     SID=$(uuidgen | tr A-Z a-z); echo $SID > $LOG/session-id.txt
     # Live logs of this cell, read by tmpclean.mjs of the cells that finish meanwhile.
-    print -l "file $LOG/claude.stream.jsonl" "claude $CLAUDE_DIR $SID" > $OUT/running/$ID
+    print -l "file $LOG/claude.stream.jsonl" "claude $CLAUDE_DIR $SID" "dir $CH/sessions" > $OUT/running/$ID
     $AGENT -p "$PROMPT" --session-id $SID --model opus --effort medium \
-      --setting-sources project,local --dangerously-skip-permissions --strict-mcp-config --output-format stream-json --verbose \
+      --setting-sources project,local --settings $HOMES/settings.json $KIT_INSTRUCTIONS \
+      --dangerously-skip-permissions --strict-mcp-config --output-format stream-json --verbose \
       --forward-subagent-text --max-budget-usd 60 < /dev/null > $LOG/claude.stream.jsonl 2> $LOG/claude.stderr &
   else
-    print -l "file $LOG/codex.events.jsonl" "dir $HOMES/codex/sessions" > $OUT/running/$ID
-    PROFILE=(); [[ -d $KIT ]] && PROFILE=(-p workforce-standard)
+    print -l "file $LOG/codex.events.jsonl" "dir $CH/sessions" > $OUT/running/$ID
+    PROFILE=(); [[ -d $KIT ]] && PROFILE=(-p ${CODEX_LAUNCH:-workforce-standard})
     $AGENT exec --json $PROFILE -C $WT \
       --dangerously-bypass-approvals-and-sandbox -o $LOG/codex.last.md "$PROMPT" < /dev/null > $LOG/codex.events.jsonl 2> $LOG/codex.stderr &
   fi
@@ -113,16 +139,19 @@ if [[ -z ${DRY:-} ]]; then
       cp $TRANSCRIPT $LOG/transcripts/main.jsonl
       [[ -d ${TRANSCRIPT:h}/$SID/subagents ]] && cp ${TRANSCRIPT:h}/$SID/subagents/* $LOG/transcripts/
     fi
-  else
-    mkdir -p $LOG/rollouts
-    find $HOMES/codex/sessions -name '*.jsonl' -exec cp {} $LOG/rollouts/ \; 2>/dev/null
   fi
+  # Codex threads: the Sol cooperator and its agents, or a Claude cell's Codex runs.
+  mkdir -p $LOG/rollouts
+  find $CH/sessions -name '*.jsonl' -exec cp {} $LOG/rollouts/ \; 2>/dev/null
+  [[ -f $WORK/tmp-rewrites.log ]] && cp $WORK/tmp-rewrites.log $LOG/
   rm -f $OUT/running/$ID
   # The host's /tmp is shared: remove what this cell wrote there, unless a running cell uses it.
   node $BENCH/tmpclean.mjs $CELL $OUT/running > $CELL/tmp-cleaned.json 2> $CELL/tmp-cleaned.stderr
   # What the agent left: commits on top of the base and uncommitted files, before the check builds.
   printf '{"Коммитов":%d,"Незакоммичено файлов":%d}\n' $(git -C $WT rev-list --count $BASE..HEAD) $(git -C $WT status --porcelain | wc -l) > $CELL/git.json
-  printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) "$(${CLAUDE_BIN:-claude} --version 2>/dev/null)" "$(${CODEX_BIN:-codex} --version 2>/dev/null)" > $CELL/provenance.json
+  printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s","tmpJail":true,"kitDelivery":"%s","taskAsFile":%s,"codexLaunch":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) \
+    "$(${CLAUDE_BIN:-claude} --version 2>/dev/null)" "$(${CODEX_BIN:-codex} --version 2>/dev/null)" $KIT_DELIVERY \
+    $([[ $MODEL == opus && -d $KIT ]] && echo true || echo false) "$([[ $MODEL == sol && -d $KIT ]] && echo ${CODEX_LAUNCH:-workforce-standard})" > $CELL/provenance.json
   # Each CI attempt of the check keeps its own log with the cell.
   (cd $WT && CI_LOG_DIR=$CELL/check-logs zsh $SUITE/checks/$TASK.sh $REPO $BASE) > $CELL/check.json 2> $CELL/check.stderr
   git -C $WT diff --stat $BASE HEAD > $CELL/diffstat.txt
