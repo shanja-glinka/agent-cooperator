@@ -1,0 +1,205 @@
+{
+ "big-nokit-opus-r1": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "big-v4-opus-r1"
+   },
+   {
+    "with": "unknown-v4-opus-r1"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "big-v4-opus-r1"
+   }
+  ]
+ },
+ "big-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-nokit-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-nokit-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-v4-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "big-nokit-sol-r2": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "big-v4-sol-r2"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "big-v4-sol-r2"
+   }
+  ]
+ },
+ "big-nokit-sol-r3": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "big-v4-sol-r3"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "big-v4-sol-r3"
+   }
+  ]
+ },
+ "review-nokit-opus-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "review-v4-opus-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "review-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-nokit-opus-r3": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "review-v4-opus-r3"
+   }
+  ],
+  "crossed": []
+ },
+ "review-nokit-sol-r1": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "review-v4-sol-r1"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "review-v4-sol-r1"
+   }
+  ]
+ },
+ "review-nokit-sol-r2": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "review-v4-sol-r2"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "review-v4-sol-r2"
+   }
+  ]
+ },
+ "review-nokit-sol-r3": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "review-v4-sol-r3"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "review-v4-sol-r3"
+   }
+  ]
+ },
+ "small-nokit-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-nokit-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-nokit-sol-r1": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "small-v4-sol-r1"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "small-v4-sol-r1"
+   }
+  ]
+ },
+ "small-nokit-sol-r2": {
+  "status": "crossed",
+  "shared": [
+   {
+    "with": "small-v4-sol-r2"
+   }
+  ],
+  "crossed": [
+   {
+    "with": "small-v4-sol-r2"
+   }
+  ]
+ },
+ "small-nokit-sol-r3": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "small-v4-sol-r3"
+   }
+  ],
+  "crossed": []
+ },
+ "unknown-nokit-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-sol-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ }
+}

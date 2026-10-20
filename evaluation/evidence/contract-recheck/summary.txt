@@ -1,0 +1,6 @@
+2026-10-19-v4-vs-nokit big-nokit-opus-r1 - violated: T2,T3
+2026-10-19-v4-vs-nokit big-nokit-opus-r2 - violated: T3
+2026-10-19-v4-vs-nokit big-nokit-opus-r3 - violated: T2,T3
+2026-10-19-v4-vs-nokit big-nokit-sol-r1 - kept: T1-T4
+2026-10-19-v4-vs-nokit big-nokit-sol-r2 - kept: T1-T4
+2026-10-19-v4-vs-nokit big-nokit-sol-r3 - kept: T1-T4
