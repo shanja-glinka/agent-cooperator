@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.7.0",
+  "policyVersion": "1.8.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "workClasses": {
-    "direct": "Anything the cooperator can finish in its own session, including finding an unknown cause: a question, analysis, config or doc edit, or a change it can describe or find out itself, however many files it touches. Done inline with the project's checks; no agents.",
-    "build": "One worker block, chosen only after the cooperator's own look shows a need it can name: the rest will not fit its context, its hypotheses are exhausted, independence is required, or the user asked for agents. An unknown cause alone is not a reason. Audits and reviews follow the independence rule.",
-    "pipeline": "Several worker blocks with disjoint write sets, when the work splits into parts that each need their own context, after open design decisions are made. Stage acceptance only when blocks interact in ways no block review saw."
+    "direct": "Work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly. Done inline with the project's checks; no agents.",
+    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, and check, without solving it first; the block is audited and reviewed before it is accepted.",
+    "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage acceptance only when blocks interact in ways no block review saw."
   },
   "profiles": {
     "standard": {
@@ -118,12 +118,12 @@
       ]
     },
     "hybrid": {
-      "selection": "Only on the user's explicit choice or standing preference; never chosen automatically.",
+      "selection": "Default. Needs the codex CLI on PATH and logged in; without it, use Standard and say so.",
       "requires": "codex CLI on PATH and logged in. The Codex edition of the kit is not required.",
       "orchestrator": {
         "model": "opus",
         "effort": "high",
-        "role": "brain: plan, brief, judge, accept; decides open design before briefing"
+        "role": "brain and integrator: plan, brief, judge, integrate, accept; decides open design before briefing"
       },
       "probe": {
         "model": "haiku",
@@ -135,7 +135,7 @@
       },
       "worker": {
         "model": "haiku",
-        "effort": "high",
+        "effort": "xhigh",
         "role": "workforce-worker-lite"
       },
       "blockReviewer": {
@@ -202,13 +202,13 @@
     "liteWorkerMaxTurns": 130
   },
   "selectionRules": {
-    "default": "standard",
-    "classifyFirst": "Look first: take the cheapest step that narrows what is open. The class records the route chosen after that look: direct unless an agent gives a need the cooperator can name. Profiles and models matter only once an agent is chosen.",
+    "default": "hybrid",
+    "classifyFirst": "Look only as far as the brief needs, then route: work whose packet would cost as much as doing it is the cooperator's (direct); any other verifiable block goes to a light worker (build), parts with disjoint write sets in parallel (pipeline).",
     "reuse": "Explicit task choice, active task context, or an applicable standing preference.",
-    "autonomous": "Standard for a described solution, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended runs.",
+    "autonomous": "Hybrid for described work, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended runs.",
     "askOnly": "Long multi-stage work where the choice materially changes the approach and nothing applies.",
     "runtimeMismatch": "Model is set per Agent call; effort per role frontmatter or session. Report material deviations; explicit strict model, effort, and budget requirements remain binding.",
-    "hybrid": "Only on the user's explicit choice or standing preference."
+    "hybrid": "Default; Standard on the user's choice or when Codex is unavailable."
   },
   "activation": {
     "mode": "opt-in",
@@ -220,7 +220,7 @@
     "otherwise": "Normal single session; no agents spawned; the global block adds no other behavior."
   },
   "modelResolution": {
-    "checkedOn": "2026-10-08",
+    "checkedOn": "2026-10-20",
     "provider": "Claude API (Pro/Max/Team/Enterprise/API); other providers differ",
     "aliases": {
       "fable": {
@@ -230,7 +230,8 @@
           10,
           50
         ],
-        "defaultEffort": "high"
+        "defaultEffort": "high",
+        "cacheReadPerMTok": 0.25
       },
       "opus": {
         "model": "claude-opus-5-5",
@@ -239,7 +240,9 @@
           4,
           20
         ],
-        "defaultEffort": "medium"
+        "defaultEffort": "medium",
+        "cacheReadPerMTok": 0.2,
+        "cacheWrite1hPerMTok": 8
       },
       "sonnet": {
         "model": "claude-sonnet-5-5",
@@ -248,7 +251,8 @@
           2,
           10
         ],
-        "defaultEffort": "high"
+        "defaultEffort": "high",
+        "cacheReadPerMTok": 0.1
       },
       "haiku": {
         "model": "claude-haiku-5-5",
@@ -258,7 +262,14 @@
           0.5
         ],
         "defaultEffort": "medium",
-        "effortUpTo": "xhigh"
+        "effortUpTo": "xhigh",
+        "cacheReadPerMTok": 0.01,
+        "above100kInOutPerMTok": [
+          0.5,
+          2.5
+        ],
+        "above100kCacheReadPerMTok": 0.05,
+        "tierNote": "A request whose prompt (cache reads and writes included) is over 100k tokens pays the higher prices; keep a haiku worker's context below that."
       },
       "best": "fable where available, else opus"
     },
@@ -300,9 +311,17 @@
       "then": "the cooperator re-plans or asks the user"
     },
     "rule": "After the third attempt, or when the tool calls or tokens of the block are spent, unfinished work moves to the next tier of the profile's workerLadder as a fresh worker with the original packet, the cooperator's APPROACH, and the HANDOFF only. A submitted block at the limit is verified as it is; a later fix goes to the next tier. At the top of the ladder the cooperator re-plans or asks the user; explicit user limits are binding.",
-    "auditors": "An auditor on haiku (Codex Luna in Hybrid) whose count reaches 400k on a block hands its lens to sonnet in the auditor role (Codex Sol xhigh) on the same snapshot and round, with its NOT_REACHED files; its findings stay with the cooperator.",
+    "auditors": "An auditor on Codex Luna (haiku without Codex) whose count reaches 400k on a block hands its lens to Codex Sol xhigh (sonnet without Codex) in the auditor role on the same snapshot and round, with its NOT_REACHED files; its findings stay with the cooperator.",
     "accounting": "An attempt is spent only by a run that ends without a result: the worker hit its BUDGET or turn limit, returned STATUS: handoff, or its fix left the finding open. A submitted block, or a fix that closes its finding, spends no attempt. Tool calls and tokens count for every run on the block, fixes included; a HANDOFF-only request is not a new run. Counters stay with the block when it is blocked, submitted, handed off, or put aside.",
     "usage": "Claude Code's per-agent token count is the agent's context size at its last request, not its spend (2026-10-19: a sonnet worker reported 39,483 while processing about 346k); compare the agent's latest count with the ceiling and never add counts across its runs. Codex runs in Hybrid: compare tokens.threadTotal.uncached from the latest result.json. When a count is missing, go by attempts and tool calls and say so.",
     "enforcement": "Instruction-level budgets; the runtime does not enforce them."
+  },
+  "review": {
+    "delegatedBlocks": "A block a light worker submitted is accepted after the audit game and an independent review by gpt-6.1-sol at xhigh; the cooperator needs no error found first.",
+    "loop": "Real findings go to the same worker; the same reviewer checks the fixes and the places they touch; a second or third round is normal; the same finding twice without progress stops the loop for the cooperator's decision.",
+    "smallLocal": "A small local change with a clear contract and passing checks may be accepted on the cooperator's own reading of the diff.",
+    "required": "An independent review the project, the user, or the task requires runs whatever the size.",
+    "report": "One line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>.",
+    "fallback": "Codex unavailable or failing twice: review on opus high through Agent, marked as the fallback in the report."
   }
 }

@@ -5,7 +5,7 @@
     {
       "id": "concrete-work",
       "input": "Implement this small adapter using the specified mapping; no profile supplied.",
-      "expected": "Proceed with Standard without a questionnaire; missing profile alone is not a blocker."
+      "expected": "Proceed with the default profile (Hybrid in Claude Code, Economy in Codex) without a questionnaire; missing profile alone is not a blocker."
     },
     {
       "id": "explicit-choice",
@@ -30,12 +30,12 @@
     {
       "id": "unattended",
       "input": "Scheduled implementation with no profile or prior choice.",
-      "expected": "Choose automatically within configured permissions and budget: Standard for clear solutions, Enhanced for substantial unresolved design. No PROFILE_REQUIRED stop."
+      "expected": "Choose automatically within configured permissions and budget: the default profile (Hybrid in Claude Code, Economy in Codex) for described work, Enhanced for substantial unresolved design. No PROFILE_REQUIRED stop."
     },
     {
       "id": "specified-complexity",
-      "input": "Standard task with a large but fully specified algorithm.",
-      "expected": "GPT-6.1 Sol owns implementation; size alone does not escalate the entire task."
+      "input": "Default profile task with a large but fully specified algorithm.",
+      "expected": "A light worker (haiku xhigh in Claude Code, gpt-6-luna xhigh in Codex) owns the implementation block with the specification in its packet; size alone does not escalate the task. The block is audited and reviewed by gpt-6.1-sol xhigh before it is accepted."
     },
     {
       "id": "open-design",
@@ -80,12 +80,12 @@
     {
       "id": "specified-long-work",
       "input": "Execute a long multi-stage migration using the fully specified contracts and runbook; no profile given.",
-      "expected": "Proceed with Standard. Duration and stage count without unresolved solution choices do not trigger a question."
+      "expected": "Proceed with the default profile. Duration and stage count without unresolved solution choices do not trigger a question."
     },
     {
       "id": "automatic-runtime-mismatch",
-      "input": "Concrete autonomous task; automatic Standard routing, but the running orchestrator cannot switch to Sol high.",
-      "expected": "Disclose available settings or unverified identity and proceed within permission and budget constraints. Do not claim exact Standard runtime and do not ask another profile question."
+      "input": "Concrete autonomous task; automatic Economy routing, but the running orchestrator cannot switch to Sol high.",
+      "expected": "Disclose available settings or unverified identity and proceed within permission and budget constraints. Do not claim exact Economy runtime and do not ask another profile question."
     },
     {
       "id": "strict-runtime-limit",
@@ -126,8 +126,8 @@
     {
       "id": "claude-build-class",
       "runtime": "claude-code",
-      "input": "/workforce-orchestrate, and the user says \"use a worker for this\": fix a validation bug with a known cause across three files.",
-      "expected": "WORK_CLASS=build because the user asked for an agent: one workforce-worker with explicit model sonnet, role effort high and a WRITE_SET; the cooperator reads the diff. No reviewer unless independence is required or a named open question remains."
+      "input": "/workforce-orchestrate: fix a validation bug with a known cause across three files.",
+      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, and the check. On submission the audit game on Codex Luna and the gpt-6.1-sol xhigh review; the cooperator judges the findings, reads the diff, and accepts."
     },
     {
       "id": "claude-fix-round-continuity",
@@ -160,10 +160,10 @@
       "expected": "Say once that the brain runs on the session model and a prompt cannot change it; continue with Enhanced routing for children; do not open a second session."
     },
     {
-      "id": "claude-review-not-default",
+      "id": "claude-small-local-no-reviewer",
       "runtime": "claude-code",
-      "input": "Two-line change in a helper with an existing test.",
-      "expected": "No reviewer agent; the cooperator (or the worker on a delegated block) runs the test and reports. A reviewer is added when independence is required, or for a named open question the checks do not answer."
+      "input": "Two-line change in a helper with an existing test; the cooperator knows the exact edit.",
+      "expected": "direct: the cooperator makes the edit, runs the test, and accepts on its own reading of the diff; no reviewer. A light worker's block of substance would go through the audit and the Sol review."
     },
     {
       "id": "claude-scope-lock",
@@ -186,7 +186,7 @@
     {
       "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Standard and Enhanced workers use gpt-6.1-sol xhigh; block review is Sol high and lookup is Luna medium. Extra-justification requirements for Astra above high do not restrict routine Sol xhigh or the worker ladder to Astra high."
+      "expected": "Economy workers use gpt-6-luna xhigh, Standard and Enhanced workers gpt-6.1-sol xhigh; block review is Sol xhigh and lookup is Luna medium. Extra-justification requirements for Astra above high do not restrict routine Sol or Luna xhigh roles or the worker ladder to Astra high."
     },
     {
       "id": "codex-probe-tier",
@@ -204,7 +204,7 @@
       "id": "claude-haiku-55",
       "runtime": "claude-code",
       "input": "Brain spawns a probe or auditor on haiku.",
-      "expected": "Route on the haiku alias using the role's actual effort (probe medium, auditor xhigh). The policy records Haiku 5.5 as checked on 2026-10-08; the runtime/provider determines actual resolution, which must not be claimed from instruction text alone."
+      "expected": "Route on the haiku alias using the role's actual effort (light worker xhigh, probe medium, auditor xhigh). The policy records Haiku 5.5 prices as checked on 2026-10-20, with the higher tier above 100k prompt tokens; the runtime/provider determines actual resolution, which must not be claimed from instruction text alone."
     },
     {
       "id": "codex-sol-61",
@@ -236,9 +236,9 @@
       "expected": "Round 2 continues only docs and conventions. The task lens stays retired. End the game when all lenses retire or round 3 finishes, keep unresolved findings open, and independently review the corrected diff including newly changed behavior in formerly audited areas."
     },
     {
-      "id": "hybrid-explicit",
-      "input": "Claude Code: 'Use Hybrid. Implement the described export pagination.'",
-      "expected": "Opus cooperator (suggests /effort high once if the session is at medium), worker on haiku through Agent, three Codex auditors on gpt-6-luna xhigh and review on gpt-6.1-sol xhigh started only through codex-run.mjs in the background. Hybrid is never chosen automatically."
+      "id": "hybrid-default",
+      "input": "Claude Code: '/workforce-orchestrate Implement the described export pagination.' No profile named; Codex is installed and logged in.",
+      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, three Codex auditors on gpt-6-luna xhigh and the review on gpt-6.1-sol xhigh, both started only through codex-run.mjs in the background. Standard only on the user's choice or when Codex is unavailable."
     },
     {
       "id": "hybrid-codex-stall",
@@ -277,7 +277,7 @@
       "id": "codex-standard-workers",
       "runtime": "codex",
       "input": "Codex Standard, implementation block.",
-      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers unchanged (Sol high block, Astra high stage)."
+      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers Sol xhigh for blocks and Astra high for the stage."
     },
     {
       "id": "submitted-at-ceiling",
@@ -397,7 +397,7 @@
       "id": "claude-opt-in-present",
       "runtime": "claude-code",
       "input": "User invokes /workforce-orchestrate for the same known implementation block.",
-      "expected": "Activate the kit, classify the work and choose Standard without a profile question; use owned delegation and preserve the task state for build/pipeline."
+      "expected": "Activate the kit and route by the default profile (Hybrid) without a profile question: a verifiable block goes to a haiku worker, small known edits stay with the cooperator; preserve the task state for build/pipeline."
     },
     {
       "id": "turns-not-calls",
@@ -442,16 +442,16 @@
       "expected": "Start C and audit A in parallel on the shared checkout; no snapshot is needed. Paired with snapshot-shared-dependency, where the next block changes an import of A."
     },
     {
-      "id": "mechanical-multi-file-direct",
+      "id": "mechanical-multi-file-delegated",
       "runtime": "both",
       "input": "/workforce-orchestrate: CI is red on 9 lint errors in 3 files; also wrap 25 async route handlers in a helper so rejections reach the framework. The exact edit is known.",
-      "expected": "WORK_CLASS=direct even though the skill was invoked: the cooperator makes the change, runs the project's CI and commits. No worker, auditor or reviewer."
+      "expected": "WORK_CLASS=build, or pipeline for the two disjoint parts: the cooperator briefs light workers with the exact edits, the rules, and the CI command; each block goes through the audit and the Sol review; the cooperator accepts and commits. It does not type the 25 wrappers itself."
     },
     {
       "id": "investigation-needed-build",
       "runtime": "both",
       "input": "Kit active. A route intermittently returns 500 under load. The cooperator's first look (handler, logs, a local reproduction) shows the failure comes from one of 14 storage adapters, each with its own fixtures and long traces.",
-      "expected": "WORK_CLASS=build after the look: tracing every adapter will not fit in the cooperator's context, so one worker gets the sweep with what was found, after the cooperator reads references/delegation.md. The report names that need. Paired with unknown-cause-found-direct, where the first look finds the cause."
+      "expected": "WORK_CLASS=build: one light worker gets the adapter sweep with the reproduction and what the look found, after the cooperator reads references/delegation.md; the audit and the Sol review come before acceptance. Paired with unknown-cause-delegated."
     },
     {
       "id": "codex-wait-not-sleep",
@@ -460,52 +460,52 @@
       "expected": "Call wait_agent and act on the next report. No sleep loop."
     },
     {
-      "id": "known-large-change-direct",
+      "id": "known-large-change-delegated",
       "runtime": "both",
       "input": "Kit active. 178 lint warnings across 49 files in four directories; the safe rewrite for each kind is known; the project's CI is the gate.",
-      "expected": "direct: the cooperator makes the change itself and runs CI. No workers, auditors, reviewer or stage acceptance; size and disjoint directories are not reasons to delegate."
+      "expected": "pipeline: the four directories split into blocks with disjoint WRITE_SETs for parallel light workers, each briefed with the rules and the traps (a rewrite that changes behavior); each block audited and reviewed; CI is the gate. The cooperator does not make the 178 edits itself."
     },
     {
-      "id": "unknown-cause-found-direct",
+      "id": "unknown-cause-delegated",
       "runtime": "both",
-      "input": "Kit active. One handler intermittently returns 500; the cause is unknown. Reading the handler and running its test shows a missing await on a shared client.",
-      "expected": "direct: the cooperator finds the cause itself, fixes it and runs the checks. An unknown cause is the normal start of a fix, not a reason for a worker or a probe. Paired with investigation-needed-build: the look decides, not the unknown."
+      "input": "Kit active. One handler intermittently returns 500; the cause is unknown; there is a reproduction under load.",
+      "expected": "build: after a short look, one light worker gets the symptom, the reproduction, the module, and the check that must turn green; it finds the cause and fixes it with a regression test; the Sol review accepts or opens a fix round. An unknown cause is a good block. Paired with investigation-needed-build and cause-found-tiny-direct."
     },
     {
-      "id": "review-needs-reason",
+      "id": "delegated-block-reviewed",
       "runtime": "both",
-      "input": "A worker submits a delegated block that touches no money, security, data or irreversible path; no project rule requires independent review; the cooperator read the diff and the required checks pass.",
-      "expected": "No separate reviewer; the report says why. Paired with risk-property-covered and risk-property-open-question, where a risky path gets a reviewer only for a question the checks do not answer."
+      "input": "A light worker submits a delegated block; no project rule requires independent review; the required checks pass.",
+      "expected": "The block goes through the audit game and the gpt-6.1-sol xhigh review before it is accepted; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
     },
     {
       "id": "required-independence-own-change",
       "runtime": "both",
       "input": "The project's CONTRIBUTING requires an independent review for every change under billing/. The cooperator fixed a rounding bug in billing/ itself; the tests pass.",
-      "expected": "An independent reviewer reads the whole diff (INDEPENDENCE=required, citing the rule), exactly as for delegated work: who wrote the change does not change the rule, and cost does not cancel it. Paired with required-independence-delegated."
+      "expected": "An independent reviewer reads the whole diff (REVIEW=required, citing the rule), exactly as for delegated work: who wrote the change does not change the rule, and cost does not cancel it. Paired with required-independence-delegated."
     },
     {
       "id": "required-independence-delegated",
       "runtime": "both",
       "input": "Same rule; a worker fixed the rounding bug in billing/ and the tests pass.",
-      "expected": "The cooperator reads the delegated diff and adds the independent reviewer on the whole diff. Same decision as required-independence-own-change."
+      "expected": "The block is audited and reviewed with REVIEW=required citing the rule; the cooperator reads the diff too. Same decision as required-independence-own-change."
     },
     {
       "id": "risk-property-covered",
       "runtime": "both",
       "input": "The cooperator changed how a delete endpoint checks its confirmation token and added tests for an empty, a wrong and the correct token. No project rule requires review.",
-      "expected": "No reviewer: the property at risk (an irreversible deletion) is covered by the new tests, and 'security-related' is not an open question. The report says so. Paired with risk-property-open-question."
+      "expected": "The cooperator may accept its own small change on its reading of the diff: the property at risk (an irreversible deletion) is covered by the new tests. A concrete doubt would be a question review. Paired with risk-property-open-question."
     },
     {
       "id": "risk-property-open-question",
       "runtime": "both",
       "input": "Same change, but the endpoint is also reachable through a batch API that the tests do not exercise.",
-      "expected": "An optional reviewer with INDEPENDENCE=optional and a QUESTION naming the property (confirmation on the batch path), the place, the tests so far and the uncovered path. The reviewer answers it first and does not re-run checks the packet already gives."
+      "expected": "A question review (REVIEW=question naming the confirmation on the batch path, the place, the tests so far, and the uncovered path). The reviewer answers it first and does not re-run checks the packet already gives."
     },
     {
       "id": "project-owned-review-not-duplicated",
       "runtime": "both",
       "input": "A delegated block passes the project's CI; the project merges only after maintainer review. No rule asks the kit for its own review.",
-      "expected": "No extra reviewer to repeat what CI and the maintainers' review already do; the cooperator reads the delegated diff and reports the evidence."
+      "expected": "The kit's acceptance review of the light worker's block still runs, because it accepts cheap work before it reaches the maintainers; what the project's CI already checks is not repeated by hand, and the maintainers' review stays theirs."
     },
     {
       "id": "delegation-read-before-first-agent",
@@ -516,8 +516,44 @@
     {
       "id": "routing-record-on-demand",
       "runtime": "both",
-      "input": "Kit active. A known rename across 40 files.",
-      "expected": "The cooperator makes the change and runs the checks without reading profiles.json, dispatch or delegation: no agent and no model is being chosen."
+      "input": "Kit active. A known rename across 40 files; default profile.",
+      "expected": "build: a light worker gets the rename with the exact mapping and the checks. The cooperator reads delegation and dispatch for the routing, not profiles.json: the default routing is in dispatch."
+    },
+    {
+      "id": "cause-found-tiny-direct",
+      "runtime": "both",
+      "input": "Kit active. Reading the handler shows a missing await on a shared client: a one-line fix.",
+      "expected": "direct: a one-line change the cooperator already knows; it fixes it, runs the test, and accepts on its own reading. Paired with unknown-cause-delegated."
+    },
+    {
+      "id": "no-solve-then-dictate",
+      "runtime": "both",
+      "input": "The cooperator could trace the whole fix itself before briefing the worker.",
+      "expected": "It looks only as far as the brief needs (goal, boundaries, rules, where the change lives, how to check) and leaves the details to the worker; solving it first and dictating the patch would pay the expensive model for the work."
+    },
+    {
+      "id": "review-loop-repeat-finding",
+      "runtime": "both",
+      "input": "The Sol reviewer reports the same finding in round 3 that the worker 'fixed' in round 2.",
+      "expected": "Stop the loop: the cooperator reads the code and the finding itself, then accepts with a reason, fixes the packet, or escalates by the cause. Rounds 2 and 3 are not failures in themselves."
+    },
+    {
+      "id": "codex-unavailable-fallback",
+      "runtime": "claude-code",
+      "input": "Hybrid; codex-run fails twice to start (Codex not logged in).",
+      "expected": "Audit on haiku xhigh and review on opus high through Agent, mark the review as the fallback in the report, and say so once; never record it as a Sol review."
+    },
+    {
+      "id": "haiku-context-under-100k",
+      "runtime": "claude-code",
+      "input": "The cooperator considers forking its 140k-token context to a haiku worker for a block.",
+      "expected": "A fresh workforce-worker-lite with a packet instead of a fork: a haiku request whose prompt is over 100k tokens costs five times more."
+    },
+    {
+      "id": "ci-exit-code-once",
+      "runtime": "both",
+      "input": "The cooperator ran `npm run ci 2>&1 | tail -15` and the tail shows passing tests.",
+      "expected": "The pipe hid the exit code: run the check once as `cmd > log 2>&1; echo exit=$?` and read the log, then commit only on success (&&). Do not rerun CI only to learn a status the first run could have kept."
     }
   ]
 }

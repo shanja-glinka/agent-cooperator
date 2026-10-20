@@ -16,9 +16,10 @@ No live agent calls are required for the installer's ordinary test suite.
 
 For an explicitly requested live smoke, inherit the task's selected PROFILE; if
 none exists, the user-facing parent resolves it using dispatch selection rules
-(a bounded, specified smoke uses Standard without a question). Check actual tools
-for custom roles and model/effort overrides. Report missing capability rather than
-claiming success. Do not install another runtime or change account configuration.
+(a bounded, specified smoke uses the default, Economy, without a question).
+Check actual tools for custom roles and model/effort overrides. Report missing
+capability rather than claiming success. Do not install another runtime or
+change account configuration.
 
 Choose a bounded read-only question and a run token in the existing task state.
 Spawn one `workforce_probe` with GPT-6 Luna medium to inspect a concrete source path, and

@@ -1,86 +1,99 @@
 ---
 name: workforce-orchestrate
-description: "Opt-in cooperator workflow for Claude Code. Use when the user invokes /workforce-orchestrate, asks for Workforce, subagents, or multi-agent work, or a project instruction file requires it. The cooperator (this session) does the work itself, adds an agent or a check only for a need it can name, and accepts only verified results."
+description: "Opt-in cooperator workflow for Claude Code. Use when the user invokes /workforce-orchestrate, asks for Workforce, subagents, or multi-agent work, or a project instruction file requires it. The cooperator (this session) briefs light workers, has their blocks audited and reviewed, integrates, and accepts only verified results."
 argument-hint: "[task description or plan path]"
 ---
 
 # Workforce orchestration
 
-You are the cooperator: the user's session and the brain of the task. You do
-the work yourself unless an agent gives something you can name; when agents
-work, you brief them, judge what comes back, and accept. Forwarding results
-from one agent to the next is not orchestration. The repository's own rules
-(`CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `CONTRIBUTING.md`) override this
-kit. Claude Code reads `AGENTS.md` only when the project has no `CLAUDE.md`,
-so read it yourself. If `$ARGUMENTS` is present, it is the task or a plan
-path. An analysis-only request ends with the analysis.
+You are the cooperator: the user's session, the brain and the integrator of
+the task. You decide, brief, judge, integrate, and accept; light models at
+xhigh effort do the reading and the typing. By default (Hybrid) workers and
+probes run on `haiku`, auditors on Codex Luna, and the reviewer on Codex
+GPT-6.1 Sol at xhigh. Forwarding results from one agent to the next is not
+orchestration. The repository's own rules (`CLAUDE.md`, `AGENTS.md`,
+`.claude/rules/`, `CONTRIBUTING.md`) override this kit; Claude Code loads
+`AGENTS.md` by itself only when the project has no `CLAUDE.md`, so read it
+when its rules are not in your context. If `$ARGUMENTS` is present, it is the
+task or a path to it. An analysis-only request ends with the analysis.
 
 ## Choosing the next move
 
 At every decision take the move that gets the task to a verified and
-delivered result at the lowest total cost. Count everything it sets off:
-agents, checks, handoffs, and redone work. Compare in words; do not invent
-numbers. Routine steps need no deliberation. What is not allowed comes first:
-the user's explicit limits, permissions, and required project rules. An
-optional skill is a candidate, not a duty; a skill or check the project
-requires stays required.
+delivered result at the lowest total cost and in good time. Count everything
+it sets off: your own requests, the workers, audits, the review, fix rounds,
+escalation, and redone work. A `haiku` token costs 1/40 of yours while its
+prompt stays under 100k tokens and 1/8 above, so a worker that reads more than
+you would is still cheaper; your own long reading and typing is the expensive
+part. Compare in words; do not invent numbers. What is not allowed comes
+first: the user's explicit limits, permissions, and required project rules.
 
-Start yourself; invoking this skill does not oblige you to spawn agents. Take
-the cheapest step that narrows what is still open: read the code path, run
-the failing check, test your hypothesis, and decide again after each finding.
-An unknown cause is the normal start of a fix, not a reason for an agent.
-Add an agent only when that look shows what it gives that you cannot get
-here:
+Look first, but only as far as the brief needs: the goal, the boundaries, the
+rules that apply, where the change lives, and how to check it. Do not solve
+the task in your head to dictate the solution: a worker that gets the goal,
+the boundaries, the sources, and the check finds the details itself.
 
-- the rest of the work will not fit in your context;
-- a broad search with a short answer, which a probe returns without filling
-  your context (a search or two of your own is cheaper than any agent);
-- your hypotheses are exhausted, and a fresh context or a stronger model is
-  the cheaper next step;
-- independence that the rule below requires;
-- agents or a model the user asked for.
+- **Yourself:** a question, an analysis, a config or doc edit, or a change of
+  a few lines you already know exactly. Its packet would cost as much as
+  making it.
+- **One worker block:** anything else that is verifiable inside a clear
+  WRITE_SET: a fix, a feature, a mechanical change of any size, reproducing a
+  bug, tracing a cause through the code. An unknown cause is a good block:
+  give the symptom, the reproduction you have, and the check that proves the
+  fix.
+- **Blocks in parallel:** parts with disjoint WRITE_SETs that need no
+  decision from each other; they finish sooner. Decide open design first.
+- **A probe:** a bounded lookup whose answer you need before you brief.
 
-Size is not a reason: a known change stays yours however many files it
-touches, and disjoint files make parallel work possible, not cheaper. The work
-class records the route you took: `direct` you do it, `build` one block for a
-worker, `pipeline` several blocks with disjoint WRITE_SETs.
+The work class records the route: `direct` you did it, `build` one worker
+block, `pipeline` several blocks. Before your first agent, read
+[delegation](references/delegation.md) in full: the profile, the packet,
+budgets and the ladder, the audit game, the review loop, and stage
+acceptance. [dispatch](references/dispatch.md) has the models and the packet
+fields, [tools](references/tools.md) the exact Agent, SendMessage, and Codex
+calls; `{{CLAUDE_HOME}}/claude-workforce/profiles.json` is needed only to
+route outside the defaults.
 
-Before your first worker, auditor, or reviewer, read
-[delegation](references/delegation.md) in full: profile, packet, budgets and
-the ladder, the audit game, review, and stage acceptance; a probe needs only
-dispatch and tools. Read [dispatch](references/dispatch.md) and
-`{{CLAUDE_HOME}}/claude-workforce/profiles.json` when you choose a model or
-fill a packet, and [tools](references/tools.md) for the exact Agent,
-SendMessage, and Codex calls. Work you do yourself needs none of them.
+## Review of delegated blocks
 
-## Independence
+A block a light worker submitted is accepted after the audit game and an
+independent review by GPT-6.1 Sol at xhigh through Codex. You do not need to
+have found an error to call the reviewer: the review is how cheap work is
+accepted. The loop:
 
-Decide what confirmation the task needs before deciding who works on it, and
-apply the same rule to your own change and to an agent's.
+1. the worker submits the change and its check results;
+2. the auditors play their rounds, and the reviewer reads the whole diff;
+3. you separate real defects from optional suggestions;
+4. the same worker fixes the real ones in its own context;
+5. the same reviewer checks the fixes and the places they touch;
+6. accept, or play the next round.
 
-- **Required:** a project rule, the user, or the task asks for an independent
-  review or check. It goes on the OPEN list and runs whatever it costs.
-- **The kit's own rule:** you read every delegated diff yourself before you
-  accept it. The kit requires nothing more.
-- **Optional:** an extra reviewer or audit lens only for a named open
-  question: the property at risk (an authorization decision, isolation
-  between users or tenants, an irreversible deletion, an amount of money,
-  parsing of untrusted input), the place in the diff, the evidence you
-  already have, and what that evidence does not answer. "Touches data" or
-  "security-related" is not a question. When your checks already cover the
-  property, a reviewer has nothing to add; validation that the project's CI
-  or its reviewers already perform is not repeated.
+A second or third round is the loop working, not a failure; a round that
+repeats the same finding without progress is a reason to stop and decide.
+When the budget is spent, report the block as unfinished and escalate by its
+cause. A small local change with a clear contract and passing checks you may
+accept on your own reading of the diff. When the project, the user, or the
+task requires an independent review, it runs whatever the size. If Codex is
+unavailable, use the fallback in dispatch and say so; never record another
+model's review as Sol's.
+
+## Checks
+
+Run a check so that its result is its own: `cmd > log 2>&1; echo "exit=$?"`,
+then read the end of the log; a pipe to `tail` hides the exit code. Commit
+only on success (`&&`). A check that passed stays valid until something it
+depends on changes; then repeat only what that change affects. What the
+project's CI or its reviewers already validate is not repeated by hand.
 
 ## OPEN and the ends
 
 Keep the OPEN list: the outcome, every required check and gate, every accepted
 finding. An item closes only with evidence that it is done, or a reason it
 does not apply. A handoff, a new agent, a submitted block, a round limit, or a
-blocker closes nothing. A check that passed stays valid until something it
-depends on changes; then repeat only what that change affects. When the same
-blocker is still there, do not repeat the blocked step: fix the cause if you
-can, otherwise stop as BLOCKED and name exactly what is needed. When
-everything is verified, deliver, report, and stop; reopen only for a new fact.
+blocker closes nothing. When the same blocker is still there, do not repeat
+the blocked step: fix the cause if you can, otherwise stop as BLOCKED and name
+exactly what is needed. When everything is verified, deliver, report, and
+stop; reopen only for a new fact.
 
 DONE is a delivered result with nothing OPEN. BLOCKED (something from outside
 is needed) and BUDGET_STOP (no allowed move fits the budget) are unfinished:
@@ -89,26 +102,28 @@ cheaper.
 
 ## Report
 
-What was done and its evidence; for each agent or check round you added, the
-open question it closed and why it could not be closed in this session;
-findings rejected as not real; follow-ups; the usage you know and what you
-could not measure. Commit, push, merge, deploy, and messages to third parties
-need the user's authorization.
+What was done and its evidence; the route: who did which block on which
+model, and why; for each reviewed block one line `REVIEW: rounds=<n>
+findings=<n> real=<n>`; findings rejected as not real; escalations and their
+cause; follow-ups; the usage you know and what you could not measure. Commit,
+push, merge, deploy, and messages to third parties need the user's
+authorization.
 
 ## Examples
 
-**Known change.** "Rename `fetchUser` to `loadUser` across 40 files and fix
-the imports." You make the change and run the project's checks. No agents.
+**Mechanical change.** "Clear 120 lint warnings in four directories without
+changing behavior." You read the rules and one file of each kind, split the
+directories into two blocks with disjoint WRITE_SETs, and brief two `haiku`
+workers with the rules, the trap you saw (`||` to `??` changes behavior for an
+empty string), and the lint and test commands. They run in parallel; each
+submission goes through the audit and the Sol review; one finding goes back to
+its worker; both blocks are accepted.
 
-**Unknown cause.** "`--total` double-counts tax." You read the total
-function, find tax added per line and again on the sum, remove one, add a
-test for a two-line cart, and run the tests. Money is involved, but the test
-covers the amount and no rule asks for a review: no agents. Had the project
-required review of billing code, a reviewer would read the whole diff.
+**Unknown cause.** "`--total` double-counts tax." You read the report and the
+scenario and brief one `haiku` worker: the symptom, the reproduction, the
+module, and the check that must turn green; it finds the cause, fixes it, and
+adds a regression test. The review finds that discounted lines are not
+covered; the worker adds the case; accepted.
 
-**After a look.** "Imports drop rows for some customers." Reading the importer
-shows the loss happens in one of 14 format adapters, each with its own
-fixtures; tracing them all will not fit in your context. You read delegation,
-give the adapter sweep to one worker with what you found, and read its diff.
-The fix parses untrusted files, and its new fixtures cover every adapter: no
-reviewer.
+**Yourself.** "The README still names the old `--verbose` flag." One line you
+know: you edit it and run the docs check. No agents.

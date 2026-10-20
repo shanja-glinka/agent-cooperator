@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- A light-worker team under a strong cooperator is the default (replaces the
+  v5 rule "start yourself; size is not a reason" below). Claude Code: Hybrid
+  by default, with `haiku` workers and probes (`workforce-worker-lite` now at
+  xhigh), Codex Luna auditors, and a Codex GPT-6.1 Sol xhigh reviewer; Standard
+  on the user's choice or when Codex is unavailable. Codex: Economy by default,
+  with Luna workers and auditors at xhigh and the block reviewer on Sol at
+  xhigh in every profile. The cooperator does itself only work whose packet
+  would cost as much as doing it, looks only as far as the brief needs, and
+  does not solve a task first to dictate it; parts with disjoint write sets run
+  in parallel. Policy: Claude 1.8.0, Codex 1.10.0.
+- Every block a light worker submits goes through the audit game and the Sol
+  xhigh review before acceptance; real findings go back to the same worker and
+  the same reviewer checks the delta; a repeated finding without progress
+  stops the loop for the cooperator. The report carries one `REVIEW:
+  rounds=<n> findings=<n> real=<n>` line per reviewed block. Packets carry
+  `REVIEW` (acceptance, required, or question) instead of `INDEPENDENCE`, and
+  `TRAPS`.
+- Checks keep their exit code (`cmd > log 2>&1; echo "exit=$?"`), and commits
+  follow only a passing check. Prices in dispatch and the routing records are
+  checked on 2026-10-20, with Haiku's tier above 100k prompt tokens.
+- Bench: every cell has its own `/tmp` (`tmpjail/`), the Claude kit's block goes
+  into the system prompt so the project's `AGENTS.md` still loads, the task
+  goes to the skill as a file path, Claude cells get their own Codex home, and
+  the metrics price every request and count agents' turns and review rounds.
 - The cooperator starts itself. An unknown cause is the normal start of a fix,
   not a reason for an agent; workers no longer write every non-`direct` change
   by rule. An agent is added only when the cooperator's own look shows a need it

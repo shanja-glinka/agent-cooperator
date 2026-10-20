@@ -8,8 +8,14 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
 
 ```json
 { "task_name": "consumer_cutover", "agent_type": "workforce_worker",
-  "model": "gpt-6.1-sol", "reasoning_effort": "xhigh",
+  "model": "gpt-6-luna", "reasoning_effort": "xhigh",
   "fork_turns": "none", "message": "<work packet>" }
+```
+
+```json
+{ "task_name": "review_consumer_cutover", "agent_type": "workforce_reviewer",
+  "model": "gpt-6.1-sol", "reasoning_effort": "xhigh",
+  "fork_turns": "none", "message": "<packet with MODE: block, REVIEW, SNAPSHOT, the audit log>" }
 ```
 
 ```json

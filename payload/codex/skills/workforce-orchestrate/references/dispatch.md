@@ -6,38 +6,41 @@ when you choose a profile or a model for an agent, or fill a packet.
 
 ## Presets
 
-| Role | Standard | Enhanced | Economy |
+| Role | Economy (default) | Standard | Enhanced |
 | --- | --- | --- | --- |
-| Cooperator (user-facing session) | `gpt-6.1-sol`, high | `gpt-6-astra`, high | `gpt-6.1-sol`, high |
+| Cooperator (user-facing session) | `gpt-6.1-sol`, high | `gpt-6.1-sol`, high | `gpt-6-astra`, high |
 | Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.1-sol` when judgment is needed | same | same |
-| Worker (`workforce_worker`) | `gpt-6.1-sol`, xhigh | `gpt-6.1-sol`, xhigh | `gpt-6-luna`, xhigh |
-| Worker ladder | Sol → Astra | Sol → Astra | Luna → Sol → Astra |
+| Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6.1-sol`, xhigh | `gpt-6.1-sol`, xhigh |
+| Worker ladder | Luna → Sol → Astra | Sol → Astra | Sol → Astra |
 | Auditor (`workforce_auditor`) | `gpt-6-luna`, xhigh | same | same |
-| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, high | same | same |
+| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, xhigh | same | same |
 | Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6-astra`, high | same | same |
-| Unresolved design | targeted Astra help | bounded Astra high block | the cooperator decides before briefing |
+| Unresolved design | the cooperator decides before briefing | targeted Astra help | bounded Astra high block |
 
 Presets are starting recommendations. A named profile is an approach preference;
-the user's explicit model, effort, and budget limits are binding. Economy is
-chosen only by the user, explicitly or as a standing preference. The native
-launch layers `codex -p workforce-standard`, `codex -p workforce-enhanced`, and
-`codex -p workforce-economy` set
-the cooperator's model and effort for that launch; a prompt never changes the
-running model, so report a mismatch instead of claiming one.
+the user's explicit model, effort, and budget limits are binding. Economy is the
+default: Sol thinks, judges, and integrates, Luna reads and types at xhigh, and
+Sol at xhigh reviews. The native launch layers `codex -p workforce-economy`,
+`codex -p workforce-standard`, and `codex -p workforce-enhanced` set the
+cooperator's model and effort for that launch; a prompt never changes the
+running model, so report a mismatch instead of claiming one. If Sol is
+unavailable for a review, review on Astra high, mark it as the fallback, and
+say so.
 
-Models as checked on 2026-10-08: GPT-6 Astra $10/$50 per MTok in/out, GPT-6.1 Sol
-$2/$10 (near-Astra on complex work), GPT-6 Luna $0.1/$0.5 (effort up to xhigh).
-Role files omit model and effort on purpose: the spawn sets them. Sol and Luna
-default to medium, so set effort on every spawn: workers run at xhigh.
+Prices per MTok (checked 2026-10-20): GPT-6 Astra $10 in / $50 out, cached $1;
+GPT-6.1 Sol $2 / $10, cached $0.10 (near-Astra on complex work); GPT-6 Luna
+$0.10 / $0.50, cached $0.01 (effort up to xhigh); above 272k input tokens a
+request costs about twice. Role files omit model and effort on purpose: the
+spawn sets them. Sol and Luna default to medium, so set effort on every spawn:
+workers, auditors, and the block reviewer run at xhigh.
 
 ## Selection
 
 1. Explicit choice, native launch profile, active task choice, or standing
    preference wins; the latest instruction takes precedence.
-2. "Work autonomously", "choose yourself", and unattended runs delegate the
-   choice: Standard for a described solution, Enhanced for substantial
-   unresolved design.
-3. Concrete work and small fixes use Standard without a question.
+2. Otherwise Economy, also for "work autonomously", "choose yourself", and
+   unattended runs; Enhanced for substantial unresolved design.
+3. Standard on the user's choice.
 4. Ask once, in the user's language, only before long multi-stage work where
    the choice materially changes the approach and nothing above applies.
 
@@ -89,7 +92,7 @@ cooperator. Report usage from `/usage` when asked.
 TASK: identifier and assignment version; task state file (pipeline)
 TIER / RUN: worker model; run number and attempts spent on this block (worker)
 WORK_CLASS: build | pipeline
-PROFILE / PROFILE_SOURCE: standard | enhanced | economy | custom; explicit | inherited | preference | automatic
+PROFILE / PROFILE_SOURCE: economy | standard | enhanced | custom; explicit | inherited | preference | automatic
 REQUEST_KIND: analysis | implementation
 ROOT / BRANCH: absolute checkout and agreed branch
 USER_OUTCOME: what the user asked for
@@ -100,9 +103,10 @@ PROJECT_RULES: repository instruction files to read first
 INPUTS / SNAPSHOT: exact sources, contracts, revision, relevant dirty diff; the tree to read
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
+TRAPS: what you saw that can go wrong (a behavior-changing rewrite, a frozen area)
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
-INDEPENDENCE (reviewer, auditor): required (<rule or request>) | optional (QUESTION: property; place; evidence so far; what it does not answer); what is already fixed; checks already run
+REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run; the audit log
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff

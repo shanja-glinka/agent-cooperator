@@ -63,13 +63,20 @@ Start a task with the kit explicitly:
 ```text
 /workforce-orchestrate Migrate the resolver to the generated DTO and switch its consumers.
 /workforce-orchestrate Use Enhanced. Resolve the ambiguous contract, then complete the migration.
-Use workforce: fix the described validation error.   (direct, no question)
+Use workforce: fix the described validation error.   (no question; the work class decides)
 Fix the described validation error.                  (no kit: normal session)
 ```
 
-The user-facing session is the brain. It looks first and does the work itself; it
-adds a role only for a need it can name, and then resolves the profile, writes the
-brief, spawns the role with an explicit model, reads the diff, and accepts.
+For a long task, write it to a file and pass the path:
+`/workforce-orchestrate docs/tasks/resolver.md`. Claude Code copies a skill's
+arguments into the skill text, so a long task typed after the command is sent
+twice.
+
+The user-facing session is the brain and the integrator. It looks only as far as
+the brief needs and does the direct work itself. Any other verifiable block goes
+to a light worker: the brain resolves the profile, writes the brief (goal,
+boundaries, sources, checks, traps), spawns the role with an explicit model, and
+then judges what comes back, integrates it, and accepts.
 The [orchestration skill](../payload/claude/skills/workforce-orchestrate/SKILL.md)
 defines action selection, open obligations, and completion; the
 [dispatch reference](../payload/claude/skills/workforce-orchestrate/references/dispatch.md)
@@ -79,27 +86,28 @@ defines the model, effort, and budget policy for those actions.
 
 | Class | Looks like | What happens |
 | --- | --- | --- |
-| `direct` | anything the brain can finish in its own session: a question, analysis, config/doc edit, a known change however many files, or a bug whose cause it finds itself | Done inline, project checks run by the brain. No agents. |
-| `build` | work where the brain's own look showed a need it can name: the rest will not fit its context, its hypotheses are exhausted, independence is required, or the user asked for agents | One worker per complete block; audit and review follow the independence rule and required project gates. |
-| `pipeline` | work that splits into parts that each need their own context, after design decisions are made | Plan, parallel workers with disjoint write sets, the brain reads every diff, stage review before closing. |
+| `direct` | work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, or a change of a few lines the brain already knows exactly | Done inline by the brain, with the project's checks. No agents. |
+| `build` | any other verifiable block inside a clear write set: a fix, a feature, a mechanical change of any size, reproducing a bug, or tracing a cause; an unknown cause is a good block | One light worker per block, briefed with goal, boundaries, sources, and checks. Every submitted block goes through the audit game and the review; see the rules below. |
+| `pipeline` | several blocks with disjoint write sets that need no decision from each other, after open design is decided | Plan, parallel workers, the brain reads every diff. Stage review only when blocks interact in ways no block review saw. |
 
-The look comes before any agent because it is the single largest lever on usage:
-the public configurations that run well all refuse to run a pipeline on work that
-did not need one, and an unknown cause is the normal start of a fix, not a reason
-for an agent.
+The brief stays a brief. It names the goal, the boundaries, the sources, and the
+check, and leaves the solution to the worker. The brain does not solve the task
+first to dictate it.
 
 ### Profiles
 
-Standard and Enhanced are optional starting recommendations, not binding schedules.
-Selection is contextual: concrete work proceeds with Standard, autonomous or
-unattended runs choose automatically, and a question is asked only for long
-multi-stage work with substantial unresolved design where nothing already applies.
+Hybrid is the default. Standard and Enhanced are optional starting recommendations,
+not binding schedules. Selection is contextual: when nothing already applies,
+Hybrid runs, autonomous and unattended runs included. Standard is the user's
+choice, or the fallback when Codex is unavailable. Enhanced is for substantial
+unresolved design. A question is asked only for long multi-stage work with
+substantial unresolved design where nothing already applies.
 
-| Responsibility | Standard | Enhanced | Hybrid |
+| Responsibility | Standard | Enhanced | Hybrid (default) |
 | --- | --- | --- | --- |
 | Brain (this session) | `opus` medium | `opus` high | `opus` high |
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium | `haiku` medium |
-| Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` high (`workforce-worker-lite`) |
+| Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` xhigh (`workforce-worker-lite`) |
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides before briefing |
 | Auditor (up to 3 rounds) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
@@ -110,12 +118,12 @@ The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
 `modelResolution`:
 
-| Alias | Resolves to (Claude API provider, checked 2026-10-08) | Price in/out per MTok | Default effort |
+| Alias | Resolves to (Claude API provider, checked 2026-10-20) | Price in/out per MTok | Default effort |
 | --- | --- | --- | --- |
 | `fable` | Claude Fable 5.1 (`claude-fable-5-1`) | $10 / $50 | `high` |
 | `opus` | Claude Opus 5.5 (`claude-opus-5-5`) | $4 / $20 | `medium` |
 | `sonnet` | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | $2 / $10 | `high` |
-| `haiku` | Claude Haiku 5.5 (`claude-haiku-5-5`) | from $0.10 / $0.50 | `medium` |
+| `haiku` | Claude Haiku 5.5 (`claude-haiku-5-5`) | $0.10 / $0.50 up to 100k prompt tokens; $0.50 / $2.50 above | `medium` (up to `xhigh`) |
 | `best` | `fable` where available, else `opus` | | |
 
 Opus 5.5 replaced Opus 5 behind the `opus` alias at a lower price and with a
@@ -137,21 +145,19 @@ setting or an accepted fallback before dependent work.
 
 ### Hybrid: Claude thinks, Codex checks
 
-Hybrid is the economy preset. `opus` at high effort is the brain: it plans,
-decides design questions before briefing, judges every finding, and accepts.
-`haiku` workers implement; a block that exhausts a `haiku` worker moves to a
-Codex GPT-6.1 Sol xhigh worker, then to `opus`.
+Hybrid is the default preset. `opus` at high effort is the brain: it plans,
+decides design questions before briefing, judges every finding, integrates, and
+accepts. `haiku` workers implement at xhigh; a block that exhausts a `haiku`
+worker moves to a Codex GPT-6.1 Sol xhigh worker, then to `opus`.
 Auditors run on Codex GPT-6 Luna at xhigh, and block and stage review on Codex
-GPT-6.1 Sol at xhigh, both read-only. Luna costs $0.1/$0.5 and Sol $2/$10 per
-MTok (checked 2026-10-08), so the expensive model only thinks.
+GPT-6.1 Sol at xhigh, all read-only. Luna costs $0.10 / $0.50 and Sol $2 / $10
+per MTok (checked 2026-10-20), so the expensive model only thinks.
 
-It runs only when you choose it (`/workforce-orchestrate Use Hybrid. ...`) or
-record it as a standing preference; automatic selection never picks it. It
-needs the `codex` CLI on PATH and logged in; the Codex edition of the kit is not
-required. If Codex is unavailable or a run fails twice, that role falls back to
-`haiku` xhigh auditors and `opus` high review through Agent, and the report
-says so. If the session runs at medium effort, the brain says so once and
-suggests `/effort high`.
+Hybrid needs the `codex` CLI on PATH and logged in; the Codex edition of the kit
+is not required. Without the CLI, use Standard and say so. If Codex is unavailable
+or a run fails twice, that role falls back to `haiku` xhigh auditors and `opus`
+high review through Agent, and the report says so. If the session runs at medium
+effort, the brain says so once and suggests `/effort high`.
 
 Codex calls go through `skills/workforce-orchestrate/scripts/codex-run.mjs`,
 never through bare `codex` or a hand-written `codex exec`. The wrapper exists
@@ -214,13 +220,15 @@ has the details, including the auditor handoff at 400k.
 
 ### Rules that hold in every profile
 
-- The session is the cooperator: it does the work itself unless an agent gives
-  something it can name; when agents work, it briefs, judges, and accepts.
-- Independence is one rule for its own and delegated work: a review required by
-  a project rule, the user, or the task always runs; the kit itself only requires
-  that the cooperator read every delegated diff; an optional reviewer or audit lens
-  needs a named open question (property, place, evidence so far, what it does not
-  answer) and does not repeat what the project's CI or reviewers already do.
+- The session is the cooperator: the brain and the integrator. It does direct
+  work itself; any other verifiable block goes to a light worker with a brief,
+  and the cooperator judges, integrates, and accepts.
+- Review is one path for delegated work. Every block a light worker submits goes
+  through the audit game and then an independent review: GPT-6.1 Sol at xhigh in
+  Hybrid, opus high through Agent in Standard and Enhanced. A small local change
+  with a clear contract and passing checks may be accepted on the cooperator's own
+  reading of the diff. A review that the project, the user, or the task requires
+  always runs, whatever the size.
 - The repository's own rules come first: `CLAUDE.md`, `AGENTS.md`,
   `.claude/rules/`, `CONTRIBUTING.md` (Claude Code reads `AGENTS.md` only when the
   project has no `CLAUDE.md`). They go to every agent as PROJECT_RULES.
@@ -230,16 +238,19 @@ has the details, including the auditor handoff at 400k.
 - Fixes go back to the same worker, the next audit round only to the auditors
   whose lens won the last round, the delta to the same reviewer, all through
   SendMessage (in Hybrid, the Codex thread is resumed instead).
-- Audits run at the cooperator's choice; checks the project requires always run:
+- Checks run once, with their exit code kept: `cmd > log 2>&1; echo "exit=$?"`,
+  then the end of the log is read. Commit only on success.
+- Every block a light worker submits goes through this loop:
 
 ```text
 Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, up to 3 rounds
-  b) no audit                      → next work to the worker
-  c) next block to the worker      → and auditors in parallel on
+  a) audit and review this block   → auditors, up to 3 rounds, then review
+  b) small local change, clear contract, checks passed
+                                   → accept on the cooperator's own reading
+  c) next block to the worker      → and audit and review in parallel on
                                      1, 2, 3 or N submitted blocks
                                      (only if that block changes nothing
                                      the audit reads; else a snapshot)
@@ -256,6 +267,11 @@ A round ends only when each auditor has read all its files; an auditor
 that hits its limit is continued where it stopped, never replaced.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
+
+Review: the block reviewer reads the whole diff with the audit log.
+Real findings go to the same worker as one bundle; the same reviewer
+checks the delta. The same finding twice without progress stops the
+loop for the cooperator's decision.
 ```
 
 - Nothing closes without evidence: a handoff, a new worker, a submitted block,
@@ -264,6 +280,8 @@ out-of-scope ones are rejected.
 - Auditors and reviewers report everything; the cooperator decides what is real:
   in the diff or caused by it, breaks a named rule, document, or acceptance
   line, and reproduces.
+- Each reviewed block gets one report line: `REVIEW: rounds=<n> findings=<n>
+  real=<n>`.
 - Turn limits per run: worker 60, light worker 130, probe 20, auditor 50,
   reviewer 30.
 

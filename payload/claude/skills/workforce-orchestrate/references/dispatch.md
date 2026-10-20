@@ -6,48 +6,49 @@ when you choose a profile or a model for an agent, or fill a packet.
 
 ## Presets
 
-| Role | Standard | Enhanced | Hybrid |
+| Role | Hybrid (default) | Standard | Enhanced |
 | --- | --- | --- | --- |
-| Cooperator (this session) | `opus`, medium | `opus`, high | `opus`, high |
-| Probe (`workforce-probe`) | `haiku`; `sonnet` when judgment is needed | `sonnet` | `haiku`; `sonnet` when judgment is needed |
-| Worker | `sonnet`, high (`workforce-worker`) | `sonnet`; `opus` for non-trivial blocks | `haiku`, high (`workforce-worker-lite`) |
-| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` |
-| Auditor | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) | Codex `gpt-6-luna`, xhigh |
-| Block reviewer (MODE=block) | `opus`, high (Agent) | `opus`, high (Agent) | Codex `gpt-6.1-sol`, xhigh |
-| Stage reviewer (MODE=stage) | `opus`, high (Agent) | `fable`, high (Agent) | Codex `gpt-6.1-sol`, xhigh |
-| Unresolved design | targeted `opus` help | bounded `fable` block | the cooperator decides before briefing |
+| Cooperator (this session) | `opus`, high | `opus`, medium | `opus`, high |
+| Probe (`workforce-probe`) | `haiku`; `sonnet` when judgment is needed | `haiku`; `sonnet` when judgment is needed | `sonnet` |
+| Worker | `haiku`, xhigh (`workforce-worker-lite`) | `sonnet`, high (`workforce-worker`) | `sonnet`; `opus` for non-trivial blocks |
+| Worker ladder | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` | `sonnet` → `opus` | `sonnet` → `opus` |
+| Auditor | Codex `gpt-6-luna`, xhigh | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) |
+| Block reviewer (MODE=block) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `opus`, high (Agent) |
+| Stage reviewer (MODE=stage) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `fable`, high (Agent) |
+| Unresolved design | the cooperator decides before briefing | targeted `opus` help | bounded `fable` block |
 
 Presets are starting recommendations. A named profile is an approach preference;
 the user's explicit model, effort, and budget limits are binding. If `fable` is
 unavailable, use `opus` at high and say so.
 
-Hybrid is the economy preset: `opus` thinks and judges, `haiku` types, and
-cheap Codex models audit and review at xhigh (GPT-6 Luna $0.1/$0.5 and
-GPT-6.1 Sol $2/$10 per MTok, checked 2026-10-08). Codex runs go through the
-wrapper in [tools](tools.md), never through the Agent tool. It needs the
-`codex` CLI on PATH and logged in; the Codex edition of the kit is not
-required. If Codex is unavailable, audit on `haiku` xhigh and review on `opus`
-high through Agent, and say so once. Hybrid wants the session at high effort:
-if it runs at medium, say so once and suggest `/effort high`.
+Hybrid is the default: `opus` thinks, judges, and integrates, `haiku` reads and
+types at xhigh, and Codex models audit and review at xhigh. Codex runs go
+through the wrapper in [tools](tools.md), never through the Agent tool; they
+need the `codex` CLI on PATH and logged in (the Codex edition of the kit is not
+required). If Codex is unavailable or fails twice, audit on `haiku` xhigh and
+review on `opus` high through Agent, mark that review as the fallback, and say
+so once. Hybrid wants the session at high effort: if it runs at medium, say so
+once and suggest `/effort high`.
 
-Aliases as Claude Code resolves them on the Claude API (checked 2026-10-08):
-`fable` Claude Fable 5.1 ($10/$50 per MTok in/out), `opus` Claude Opus 5.5
-($4/$20, default effort medium), `sonnet` Claude Sonnet 5.5 ($2/$10), `haiku`
-Claude Haiku 5.5 (from $0.10/$0.50, effort up to xhigh). Role files use
-`model: inherit` so the model on the Agent call is what runs. The Agent tool has
-no per-call effort; effort comes from the role frontmatter (worker high, probe
-medium, auditor xhigh, reviewer high) or the session. A cooperator on `opus`
-runs at medium unless `/effort` is set.
+Prices per MTok (checked 2026-10-20): `opus` Claude Opus 5.5 $4 in / $20 out,
+cache read $0.20, 1-hour cache write $8 (default effort medium); `sonnet`
+Claude Sonnet 5.5 $2 / $10, cache read $0.10; `haiku` Claude Haiku 5.5 $0.10 /
+$0.50, cache read $0.01, while a request's prompt stays at or under 100k
+tokens, and $0.50 / $2.50, cache read $0.05, above (effort up to xhigh);
+`fable` Claude Fable 5.1 $10 / $50. Codex: GPT-6 Luna $0.10 / $0.50, cached
+$0.01; GPT-6.1 Sol $2 / $10, cached $0.10. Role files use `model: inherit` so
+the model on the Agent call is what runs. The Agent tool has no per-call
+effort; effort comes from the role frontmatter (light worker xhigh, worker
+high, probe medium, auditor xhigh, reviewer high) or the session. A
+cooperator on `opus` runs at medium unless `/effort` is set.
 
 ## Selection
 
 1. Explicit choice, active task choice, or standing preference wins; the latest
    instruction takes precedence.
-2. "Work autonomously", "choose yourself", and unattended runs delegate the
-   choice: Standard for a described solution, Enhanced for substantial
-   unresolved design. Hybrid is chosen only by the user, explicitly or as a
-   standing preference.
-3. Concrete work and small fixes use Standard without a question.
+2. Otherwise Hybrid, also for "work autonomously", "choose yourself", and
+   unattended runs; Enhanced for substantial unresolved design.
+3. Standard on the user's choice, or when Codex is unavailable; say which.
 4. Ask once, in the user's language, only before long multi-stage work where
    the choice materially changes the approach and nothing above applies.
 
@@ -60,7 +61,7 @@ Worker budgets per block, counted by the cooperator:
 
 | Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
-| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Hybrid: Codex `gpt-6.1-sol` xhigh; otherwise `sonnet` |
+| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Codex `gpt-6.1-sol` xhigh; without Codex `sonnet` |
 | `sonnet` | role turn limit | 3 | 500k | `opus` |
 | Codex `gpt-6.1-sol` (Hybrid) | runner time limits | 3 | 500k | `opus` |
 | `opus` | role turn limit | 3 | none | the cooperator re-plans or asks the user |
@@ -87,7 +88,7 @@ are instructions; neither Claude Code nor the runner enforces them.
 The next tier gets a fresh packet: the original block packet, the current
 snapshot, the cooperator's APPROACH, and the worker's HANDOFF; nothing else from
 earlier runs. Re-planning does not reset spent budget or drop the outcome. If
-Codex is unavailable in Hybrid, the `haiku` worker's next tier is `sonnet`.
+Codex is unavailable, the `haiku` worker's next tier is `sonnet`.
 
 Auditors: the packet BUDGET is 40 tool calls per run, separate from the role's
 50-turn limit. An auditor on `haiku` (Codex Luna in Hybrid) whose count reaches
@@ -112,7 +113,7 @@ runner's idle and total time limits instead. Report usage from `/cost` or
 TASK: identifier and assignment version; task state file (pipeline)
 TIER / RUN: worker model; run number and attempts spent on this block (worker)
 WORK_CLASS: build | pipeline
-PROFILE / PROFILE_SOURCE: standard | enhanced | hybrid | custom; explicit | preference | automatic
+PROFILE / PROFILE_SOURCE: hybrid | standard | enhanced | custom; explicit | preference | automatic
 REQUEST_KIND: analysis | implementation
 ROOT / BRANCH: absolute checkout and agreed branch
 USER_OUTCOME: what the user asked for
@@ -123,9 +124,10 @@ PROJECT_RULES: repository instruction files to read first
 INPUTS / SNAPSHOT: exact sources, contracts, revision, relevant dirty diff; the tree to read
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: commands with cwd and expected result
+TRAPS: what you saw that can go wrong (a behavior-changing rewrite, a frozen area)
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
-INDEPENDENCE (reviewer, auditor): required (<rule or request>) | optional (QUESTION: property; place; evidence so far; what it does not answer); what is already fixed; checks already run
+REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run; the audit log
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff

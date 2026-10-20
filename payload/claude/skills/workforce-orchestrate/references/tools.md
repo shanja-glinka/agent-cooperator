@@ -14,7 +14,8 @@ ones. Roles installed by this kit: `workforce-worker`, `workforce-worker-lite`
 
 ```json
 { "subagent_type": "workforce-worker-lite", "model": "haiku",
-  "description": "Export pagination block", "prompt": "<work packet with BUDGET: 120>" }
+  "description": "Export pagination block", "prompt": "<work packet with BUDGET: 120>",
+  "run_in_background": true }
 ```
 
 ```json
@@ -59,7 +60,7 @@ git worktree remove --force "$SCRATCH/snap-blk1"   # after the round
 The copy has no installed dependencies: run checks that need them in the main
 checkout once the writer is done.
 
-## Codex CLI (Hybrid profile)
+## Codex CLI (Hybrid, the default)
 
 In Hybrid, auditors and reviewers are Codex runs, not Agent calls. Start every
 one through the kit's wrapper, never with bare `codex` (an interactive UI that
@@ -93,7 +94,7 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   `stderrTail` and the end of the `.jsonl`, fix the cause, and relaunch once;
   if it fails again, run that lens on the Agent fallback from dispatch and say
   so in the report.
-- A Hybrid block escalated from `haiku` runs as a Codex worker: the same
+- A block escalated from `haiku` runs as a Codex worker: the same
   command with `--role work` (defaults: `gpt-6.1-sol`, effort `xhigh`, sandbox
   `workspace-write`, the `workforce-worker` skill prepended) and the escalation
   packet. Continue the same worker with `--resume <threadId>` and

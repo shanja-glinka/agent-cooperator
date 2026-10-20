@@ -345,7 +345,9 @@ test('update installs the real contextual policy into existing consumers and pre
   }
   const policy = JSON.parse(await fs.readFile(path.join(fixture.codexHome, 'codex-workforce/profiles.json'), 'utf8'));
   assert.equal(policy.selection, 'contextual');
-  assert.equal(policy.selectionRules.default, 'standard');
+  assert.equal(policy.selectionRules.default, 'economy');
+  assert.deepEqual([policy.profiles.economy.worker.model, policy.profiles.economy.worker.effort], ['gpt-6-luna', 'xhigh']);
+  assert.deepEqual([policy.profiles.economy.blockReviewer.model, policy.profiles.economy.blockReviewer.effort], ['gpt-6.1-sol', 'xhigh']);
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
 });

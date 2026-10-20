@@ -150,7 +150,7 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
 
   const policy = JSON.parse(await fs.readFile(path.join(fixture.home, 'claude-workforce', 'profiles.json'), 'utf8'));
   assert.equal(policy.runtime, 'claude-code');
-  assert.equal(policy.selectionRules.default, 'standard');
+  assert.equal(policy.selectionRules.default, 'hybrid');
   assert.deepEqual(Object.keys(policy.workClasses), ['direct', 'build', 'pipeline']);
   assert.equal(policy.profiles.standard.worker.model, 'sonnet');
   assert.deepEqual(policy.profiles.hybrid.workerLadder, ['haiku', 'codex:gpt-6.1-sol', 'opus']);
@@ -158,12 +158,16 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.equal(policy.workerBudgets.sonnet.tokenCeiling, 500000);
   const lite = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-worker-lite.md'), 'utf8');
   assert.match(lite, /\nmaxTurns: 130\n/);
+  assert.match(lite, /\neffort: xhigh\n/);
   assert.equal(policy.profiles.standard.auditor.model, 'haiku');
   assert.equal(policy.profiles.standard.auditor.effort, 'xhigh');
   assert.equal(policy.profiles.standard.auditor.rerun, 'winners-only');
   const hybrid = policy.profiles.hybrid;
   assert.equal(hybrid.orchestrator.effort, 'high');
   assert.equal(hybrid.worker.model, 'haiku');
+  assert.equal(hybrid.worker.effort, 'xhigh');
+  assert.equal(hybrid.blockReviewer.effort, 'xhigh');
+  assert.ok(policy.review.delegatedBlocks.includes('gpt-6.1-sol'));
   assert.deepEqual([hybrid.auditor.runtime, hybrid.auditor.model, hybrid.auditor.effort], ['codex-cli', 'gpt-6-luna', 'xhigh']);
   assert.deepEqual([hybrid.blockReviewer.model, hybrid.stageReviewer.model], ['gpt-6.1-sol', 'gpt-6.1-sol']);
   assert.equal(hybrid.codexRunner.script, `${portable(fixture.home)}/skills/workforce-orchestrate/scripts/codex-run.mjs`);

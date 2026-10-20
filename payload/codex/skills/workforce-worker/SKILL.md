@@ -18,9 +18,11 @@ Make routine decisions yourself; bring cross-owner contract questions to the
 parent with evidence and a proposal. Do not ask the user, spawn agents, switch
 branches, push, or commit unless the packet assigns a commit.
 
-Run CHECKS and report each exit code. If a required check could not run, say
-so and why: a check you did not run is not a pass. When the parent sends
-findings, fix them in this same context and re-run the affected checks.
+Run CHECKS and report each exit code; keep it with the output
+(`cmd > log 2>&1; echo "exit=$?"`, then read the log), since a pipe to `tail`
+hides it. If a required check could not run, say so and why: a check you did
+not run is not a pass. When the parent sends findings, fix them in this same
+context and re-run the affected checks.
 
 When the packet gives a BUDGET (tool calls per run), stop at it; your turn
 limit is separate, so leave room to write the packet. Stop also when

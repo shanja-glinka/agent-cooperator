@@ -1,12 +1,53 @@
 # Research and routing rationale
 
-The v5 section below was prepared on 2026-10-20 and the Route Decision synthesis on
-2026-10-19, both for both editions.
+The v6 and v5 sections below were prepared on 2026-10-20 and the Route Decision
+synthesis on 2026-10-19, all for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v6 — 2026-10-20: light workers under a strong cooperator by default
+
+Claude policy 1.8.0, Codex policy 1.10.0. v6 replaces the v5 rule "start
+yourself; size is not a reason" with the scheme the user works with: the
+cooperator is the brain and the integrator, and light models at xhigh do the
+reading and the typing.
+
+- **Hybrid (Claude Code) and Economy (Codex) are the defaults.** Workers and
+  probes on Haiku 5.5 or GPT-6 Luna at xhigh, auditors on Luna, the reviewer on
+  GPT-6.1 Sol at xhigh. Per token, Haiku costs 1/40 of Opus 5.5 while a
+  request's prompt stays at or under 100k tokens and 1/8 above, and Luna 1/20 of
+  Sol. v5 started no agent in 24 of 24 runs (2026-10-20), so all of its cost was
+  on the expensive model; on the large lint task three Opus forks (2026-10-19,
+  no kit) did the bulk for $3.06, which at Haiku prices is $0.13. That is a
+  re-pricing of tokens, not a measurement of Haiku.
+- **What the cooperator does itself:** only work whose packet would cost as
+  much as doing it. It looks as far as the brief needs and does not solve the
+  task first to dictate it. Parts with disjoint write sets run in parallel.
+- **Every delegated block is audited and reviewed.** The Sol xhigh review is
+  how cheap work is accepted; real findings go back to the same worker and the
+  same reviewer checks the delta. In the user's practice the reviewer catches
+  real defects in light workers' results again and again. The v4 reviewers
+  received diffs that were already fixed, so their value on cheap workers'
+  output was never measured.
+- **A check keeps its exit code.** A v5 run piped CI into `tail`, lost its
+  status, and ran the full CI again before committing.
+- **The Codex global block no longer points at the routing record;** the
+  defaults are in `dispatch.md`.
+
+| Source | What it reports, as read | Use here and its boundary |
+| --- | --- | --- |
+| [The advisor strategy](https://claude.com/blog/the-advisor-strategy) (Anthropic, 2026-04-09) | Haiku executing with an Opus advisor: BrowseComp 41.2% against 19.7% for Haiku alone, 29% below Sonnet alone at 85% lower cost per task; Sonnet with an Opus advisor: +2.7 points on SWE-bench Multilingual at 11.9% lower cost per task; the advisor answers in about 400–700 tokens | The strong model's tokens go to decisions, the cheap model's to the work. The advisor tool is an API beta; Claude Code 2.1.303 has an `advisorModel` setting that the kit does not use. |
+| [Claude Haiku 4.5 launch coverage](https://thenewstack.io/anthropic-launches-claude-haiku-4-5/) (2025-10) | A larger model splits a problem and hands the parts to parallel Haiku sub-agents | The hybrid layout. Secondary coverage; the announcement itself was not read. |
+| [Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI pricing](https://developers.openai.com/api/docs/pricing), [OpenAI prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching) (read 2026-10-20) | List prices; Haiku 5.5 pays five times more for a request whose prompt is over 100k tokens; OpenAI bills cache writes at 1.25x input | The ratios in the skills and dispatch; a Haiku worker gets a fresh context with a packet instead of a fork. |
+| [Towards a Science of Scaling Agent Systems](https://arxiv.org/html/2512.08296) | More agents lowered results when one agent already succeeded on about 45% | Measured with agents of one model; it says nothing about cheap workers under a strong cooperator. v6 keeps work a packet does not pay for with the cooperator. |
+| [What Should a Skill Remember?](https://arxiv.org/html/2606.09421v1) (cited by an external review of v5; not read) | Removing concrete commands can shrink a skill and raise the work that follows | The CI recipe in the skills stays concrete. |
+
+v6 is measured on the private suite against the no-kit and v5 cells of the
+2026-10-19 and 2026-10-20 runs, with and without the reviewer on the large task
+(`evaluation/runs/`, not in git).
 
 ## v5 — 2026-10-20: start yourself, one independence rule, a short default path
 

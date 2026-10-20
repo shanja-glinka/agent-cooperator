@@ -21,7 +21,8 @@ session's available agent types and that `/workforce-orchestrate` is listed.
 
 ## Live check (explicit request only)
 
-Inherit the task's PROFILE; a bounded smoke uses Standard without a question.
+Inherit the task's PROFILE; otherwise use the default profile, Hybrid, without
+a question.
 Choose a bounded read-only question and a run token, and record them in the task
 state. In one message spawn two probes:
 

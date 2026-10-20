@@ -1,6 +1,6 @@
 # Agent Cooperator
 
-**The session thinks and does the work. Agents join for a need it can name. Hard blocks climb a ladder with a handoff.**
+**The session decides, briefs, and accepts. Light models read and type at xhigh effort. Hard blocks climb a ladder with a handoff.**
 
 [Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
@@ -8,12 +8,13 @@ Agent Cooperator is a small, inspectable set of roles, skills, and routing
 profiles for agentic development in **Claude Code** and **Codex**, shipped as
 one package with one installer.
 
-The user-facing session is the **cooperator**: it reads the repository's rules,
-looks first, and does the work itself. It adds an agent only for a need it can
-name (work that will not fit its context, exhausted hypotheses, required
-independence, or the user's request); then it briefs, judges what comes back,
-re-plans when a block is harder than it looked, and accepts. The cooperator is
-meant to think, not to forward results.
+The user-facing session is the **cooperator**. It is the brain and the
+integrator: it reads the repository's rules, looks only as far as the brief
+needs, and decides. It does the direct work itself. Any other verifiable block
+goes to a light worker at xhigh effort with a brief (goal, boundaries, sources,
+checks, traps). The cooperator judges what comes back, integrates it, re-plans
+when a block is harder than it looked, and accepts. Light models do the reading
+and the typing; the cooperator thinks and does not forward results.
 
 No API proxy, background service, or task-management engine: an instruction
 pack with a Node.js installer. Routing and token budgets are instruction policy,
@@ -48,11 +49,11 @@ commands `claude-workforce` and `codex-workforce` still work.
 Task
   │
   ▼
-Cooperator: read the repository's rules, look first, do the work itself
-  direct   → it finishes the task, no agents
-  an agent only for a need it can name → read delegation, pick a profile
-  build    → one block
-  pipeline → a plan of blocks with disjoint write sets
+Cooperator: read the repository's rules, look as far as the brief needs
+  direct   → a question, analysis, config or doc edit, a few known lines:
+             it does the work, no agents
+  build    → one worker block: a fix, a feature, a bug with an unknown cause
+  pipeline → blocks with disjoint write sets, run in parallel
   │
   ▼
 per block:
@@ -60,11 +61,12 @@ per block:
   worker stuck (3 attempts without a result, or its volume spent)
      → HANDOFF → cooperator finds the cause and decides the approach
      → next tier starts fresh with packet + APPROACH + HANDOFF only
-  after submission the cooperator chooses:
-     a) audit this block             → auditors, up to 3 rounds
-     b) no audit                     → next work to the worker
-     c) next block to the worker     → and auditors in parallel on 1..N blocks
-  review (independence rule) → real findings → the same worker
+  submitted, then the cooperator chooses:
+     a) audit and review this block      → auditors, up to 3 rounds, review
+     b) small local change, clear contract, checks passed
+                                         → accept on its own reading
+     c) next block to the worker         → audit and review run in parallel
+  review → real findings → same worker → same reviewer checks the delta
   │
   ▼
 stage acceptance (pipeline) → required checks passed → report
@@ -72,16 +74,28 @@ stage acceptance (pipeline) → required checks passed → report
 
 **Choosing the next move.** At every decision the cooperator takes the move
 that gets the task to a verified, delivered result at the lowest total cost,
-counting every agent, check, and redo it sets off. The user's limits,
-permissions, and required project rules come first. The cooperator starts
-itself: an unknown cause is the normal start of a fix, not a reason for an
-agent, and size is not a reason either. An agent or a check round needs a need
-the cooperator can name, and the report states the open question it closed.
-One independence rule covers its own and delegated work: a review that a
-project rule, the user, or the task requires always runs; an optional one needs
-a named open question that the checks do not answer. It keeps an OPEN list (the
-outcome, required checks, accepted findings); an item closes only with evidence,
-never because work changed hands or a round limit was reached.
+counting every agent, check, review round, and redo it sets off. The user's
+limits, permissions, and required project rules come first. The cooperator does
+by itself only work whose packet would cost as much as doing it: a question, an
+analysis, a config or doc edit, or a few lines it already knows exactly. Any
+other verifiable block goes to a light worker, and parts with disjoint write
+sets run in parallel. The brief gives the goal, the boundaries, the sources, and
+the check; the cooperator does not solve the task first to dictate it. An
+unknown cause is a good block. The cooperator keeps an OPEN list (the outcome,
+required checks, accepted findings); an item closes only with evidence, never
+because work changed hands or a round limit was reached.
+
+**Review.** Every block a light worker submits goes through the audit game and
+then an independent review. The reviewer is GPT-6.1 Sol at xhigh in the Codex
+presets and in Claude Hybrid, or opus at high in Claude Standard and Enhanced.
+It reads the whole diff. Real findings go to the same worker, and the same
+reviewer checks the delta; a second or third round is normal, and the same
+finding twice without progress stops the loop for the cooperator's decision. A
+small local change with a clear contract and passing checks may be accepted on
+the cooperator's own reading of the diff. A review that the project, the user,
+or the task requires always runs. If Sol is unavailable, the fallback review is
+marked as such. The report has one line per reviewed block:
+`REVIEW: rounds=<n> findings=<n> real=<n>`.
 
 **Audit game.** Auditors on a cheap model at xhigh effort read a block
 through one lens each: docs, task, conventions. They report everything; the
@@ -104,11 +118,11 @@ cooperator.
 
 ## Claude Code
 
-| Role | Standard | Enhanced | Hybrid |
+| Role | Standard | Enhanced | Hybrid (default) |
 | --- | --- | --- | --- |
 | Cooperator (your session) | `opus` medium | `opus` high | `opus` high |
 | Probe | `haiku`, `sonnet` for judgment | `sonnet` | `haiku` |
-| Worker | `sonnet` high | `sonnet`, `opus` for non-trivial blocks | `haiku` high |
+| Worker | `sonnet` high | `sonnet`, `opus` for non-trivial blocks | `haiku` xhigh |
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Auditor (up to 3 rounds) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
 | Block review | `opus` high | `opus` high | Codex GPT-6.1 Sol xhigh |
@@ -116,31 +130,31 @@ cooperator.
 
 Worker budgets per block: `haiku` 120 tool calls per run and 360 per block,
 3 attempts, 400k tokens; `sonnet` and Codex Sol 3 attempts, 500k tokens; `opus`
-3 attempts, then the cooperator re-plans or asks you. Native turn limits are separate from tool-call
-budgets. Alias resolutions dated 2026-10-08 are recorded in `profiles.json`;
-actual availability and routing depend on the runtime and account. Hybrid runs
-only when you choose it and needs the `codex` CLI; Codex runs go through the
-bundled `codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns
-nothing. Details: [docs/claude-code.md](docs/claude-code.md).
+3 attempts, then the cooperator re-plans or asks you. Native turn limits are
+separate from tool-call budgets. Alias resolutions dated 2026-10-20 are recorded
+in `profiles.json`; actual availability and routing depend on the runtime and
+account. Hybrid is the default. It needs the `codex` CLI on PATH and logged in;
+without it, use Standard and say so. Codex runs go through the bundled
+`codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns nothing.
+Details: [docs/claude-code.md](docs/claude-code.md).
 
 ## Codex
 
-| Role | Standard | Enhanced | Economy |
+| Role | Standard | Enhanced | Economy (default) |
 | --- | --- | --- | --- |
 | Cooperator (your session) | GPT-6.1 Sol high | GPT-6 Astra high | GPT-6.1 Sol high |
 | Probe | Luna medium, Sol for judgment | same | same |
 | Worker | Sol xhigh | Sol xhigh | Luna xhigh |
 | Worker ladder | Sol → Astra | Sol → Astra | Luna → Sol → Astra |
 | Auditor (up to 3 rounds) | Luna xhigh | same | same |
-| Block review | Sol high | same | same |
+| Block review | Sol xhigh | same | same |
 | Stage acceptance | Astra high | same | same |
 
 Worker budgets per block: Luna 600 tool calls per run, 3 attempts, 400k tokens;
 Sol 3 attempts, 500k tokens; Astra 3 attempts, then the cooperator re-plans or
-asks you.
-Native launch layers: `codex -p workforce-standard`, `workforce-enhanced`,
-`workforce-economy`. Economy runs only when you choose it. A prompt never
-changes the running model. Details: [docs/profiles.md](docs/profiles.md).
+asks you. Economy is the default. Native launch layers:
+`codex -p workforce-economy`, `workforce-standard`, and `workforce-enhanced`.
+A prompt never changes the running model. Details: [docs/profiles.md](docs/profiles.md).
 
 ## What gets installed
 

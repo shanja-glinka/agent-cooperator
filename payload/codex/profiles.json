@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.9.0",
+  "policyVersion": "1.10.0",
   "selection": "contextual",
   "profiles": {
     "standard": {
@@ -25,7 +25,7 @@
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "high"
+        "effort": "xhigh"
       },
       "stageReviewer": {
         "model": "gpt-6-astra",
@@ -74,7 +74,7 @@
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "high"
+        "effort": "xhigh"
       },
       "stageReviewer": {
         "model": "gpt-6-astra",
@@ -106,7 +106,8 @@
     "economy": {
       "orchestrator": {
         "model": "gpt-6.1-sol",
-        "effort": "high"
+        "effort": "high",
+        "note": "Sol thinks, judges, and integrates; Luna reads and types at xhigh; Sol at xhigh reviews."
       },
       "probe": {
         "model": "gpt-6-luna",
@@ -124,7 +125,7 @@
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "high"
+        "effort": "xhigh"
       },
       "stageReviewer": {
         "model": "gpt-6-astra",
@@ -153,7 +154,7 @@
         "gpt-6.1-sol",
         "gpt-6-astra"
       ],
-      "selection": "Only on the user's explicit choice, launch layer, or standing preference; never chosen automatically."
+      "selection": "Default."
     }
   },
   "escalation": {
@@ -165,30 +166,32 @@
     "requires": "For gpt-6-astra above high only: state a concrete unresolved reasoning problem, why high is insufficient, and the expected benefit. Do not escalate solely because a task is large, important, or a prior attempt failed. This exception does not restrict Sol xhigh workers, Luna xhigh roles, or the ordinary worker ladder to Astra high. Explicit user model, effort, and budget limits remain binding."
   },
   "selectionRules": {
-    "default": "standard",
+    "default": "economy",
     "reuse": "Explicit task or launch choice, active task context, or applicable standing preference.",
-    "autonomous": "Choose Standard for clear solutions or Enhanced for substantial unresolved design; proceed without asking. Applies to unattended execution too.",
+    "autonomous": "Economy for described work, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended execution too.",
     "askOnly": "Long-running multi-stage work with substantial unresolved solution choices and material approach/resource impact, with no applicable choice or delegated selection.",
     "runtimeMismatch": "Adapt to available settings even for a user-selected preset without a new approval gate. Report material actual routing honestly; separately explicit strict model/effort/budget requirements remain binding."
   },
   "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
   "modelResolution": {
-    "checkedOn": "2026-10-08",
+    "checkedOn": "2026-10-20",
     "models": {
       "gpt-6-astra": {
         "priceInOutPerMTok": [
           10,
           50
         ],
-        "role": "most capable; stage acceptance, Enhanced brain, bounded open design"
+        "role": "most capable; stage acceptance, Enhanced brain, bounded open design",
+        "cachedInputPerMTok": 1
       },
       "gpt-6.1-sol": {
         "priceInOutPerMTok": [
           2,
           10
         ],
-        "role": "near-Astra for complex work at Sol price; Standard brain, implementation, block review",
-        "succeeds": "gpt-6-sol"
+        "role": "near-Astra for complex work at Sol price; cooperator, block review at xhigh, escalated implementation",
+        "succeeds": "gpt-6-sol",
+        "cachedInputPerMTok": 0.1
       },
       "gpt-6-sol": {
         "priceInOutPerMTok": [
@@ -202,8 +205,9 @@
           0.1,
           0.5
         ],
-        "role": "read-only lookups, mechanical checks, audit lenses at xhigh",
-        "effortUpTo": "xhigh (max on the API; no ultra)"
+        "role": "workers, probes, and audit lenses at xhigh",
+        "effortUpTo": "xhigh (max on the API; no ultra)",
+        "cachedInputPerMTok": 0.01
       },
       "gpt-5.6-terra": {
         "priceInOutPerMTok": [
@@ -216,12 +220,12 @@
         "status": "retiring 2026-10-14; not used"
       }
     },
-    "note": "Codex efforts: Astra light by default; Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra."
+    "note": "Codex efforts: Astra light by default; Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra. Requests over 272k input tokens cost about twice; cache writes cost 1.25x input."
   },
   "workClasses": {
-    "direct": "Anything the cooperator can finish in its own session, including finding an unknown cause: a question, analysis, config or doc edit, or a change it can describe or find out itself, however many files it touches. Done inline with the project's checks; no agents.",
-    "build": "One worker block, chosen only after the cooperator's own look shows a need it can name: the rest will not fit its context, its hypotheses are exhausted, independence is required, or the user asked for agents. An unknown cause alone is not a reason. Audits and reviews follow the independence rule.",
-    "pipeline": "Several worker blocks with disjoint write sets, when the work splits into parts that each need their own context, after open design decisions are made. Stage acceptance only when blocks interact in ways no block review saw."
+    "direct": "Work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly. Done inline with the project's checks; no agents.",
+    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, and check, without solving it first; the block is audited and reviewed before it is accepted.",
+    "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage acceptance only when blocks interact in ways no block review saw."
   },
   "judging": {
     "real": "In the diff or caused by it; breaks a quoted rule, document line, or acceptance line at a line that really violates it (the cooperator opens both); reproduces by a check or a concrete scenario.",
@@ -252,5 +256,13 @@
     "accounting": "An attempt is spent only by a run that ends without a result: the worker hit its BUDGET or turn limit, returned STATUS: handoff, or its fix left the finding open. A submitted block, or a fix that closes its finding, spends no attempt. Tool calls and tokens count for every run on the block, fixes included; a HANDOFF-only request is not a new run. Counters stay with the block when it is blocked, submitted, handed off, or put aside.",
     "usage": "Count the new tokens a worker's thread has processed (input minus cached input, plus output), all its runs together; a continued thread keeps counting from its previous total. When the runtime reports no usage, go by attempts and tool calls and say so.",
     "enforcement": "Instruction-level budgets; the runtime does not enforce them."
+  },
+  "review": {
+    "delegatedBlocks": "A block a light worker submitted is accepted after the audit game and an independent review by gpt-6.1-sol at xhigh; the cooperator needs no error found first.",
+    "loop": "Real findings go to the same worker; the same reviewer checks the fixes and the places they touch; a second or third round is normal; the same finding twice without progress stops the loop for the cooperator's decision.",
+    "smallLocal": "A small local change with a clear contract and passing checks may be accepted on the cooperator's own reading of the diff.",
+    "required": "An independent review the project, the user, or the task requires runs whatever the size.",
+    "report": "One line per reviewed block: REVIEW: rounds=<n> findings=<n> real=<n>.",
+    "fallback": "Sol unavailable for a review: review on gpt-6-astra high, marked as the fallback in the report."
   }
 }

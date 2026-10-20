@@ -24,15 +24,15 @@ routing to the task, available capabilities, and user limits, or use a custom se
 without a named profile. Only separately explicit model/effort/budget constraints
 make those settings mandatory. Keep review independence and verification requirements.
 
-Use when the requirements and solution are sufficiently described. GPT-6.1 Sol high
-owns orchestration, GPT-6 Luna owns read-only lookups (Sol when judgment is needed),
-Sol implements at xhigh, Sol high independently reviews complete blocks, and Astra
-high accepts major stages. A bounded open decision can still receive Astra high
-assistance. The Sol orchestrator is a deliberate cost choice for the longest
-context: the per-token input/output prices recorded on 2026-10-08 give a 5:1
-Astra-to-Sol ratio. That historical price ratio does not establish current pricing
-or the full cost of a completed result. Stage acceptance and uncertain design keep
-their recommended Astra roles.
+Standard is the user's choice. Use it when the requirements and solution are
+sufficiently described. GPT-6.1 Sol high owns orchestration, GPT-6 Luna owns
+read-only lookups (Sol when judgment is needed), Sol implements at xhigh, Sol at
+xhigh independently reviews complete blocks, and Astra high accepts major stages.
+A bounded open decision can still receive Astra high assistance. The Sol
+orchestrator is a deliberate cost choice for the longest context: the per-token
+input/output prices recorded on 2026-10-20 give a 5:1 Astra-to-Sol ratio. That
+price ratio does not establish the full cost of a completed result. Stage
+acceptance and uncertain design keep their recommended Astra roles.
 
 ## Enhanced
 
@@ -48,11 +48,14 @@ sophisticated algorithm do not automatically require Enhanced.
 
 ## Economy
 
-The cheapest preset, chosen only by the user (explicitly, with
-`codex -p workforce-economy`, or as a standing preference). Sol high is the
-cooperator, Luna xhigh implements, and auditors and reviewers stay as in
-Standard. A Luna worker has 600 tool calls per run, three runs, and 400k tokens
-per block; a block that exhausts it moves to Sol xhigh, then to Astra.
+Economy is the default preset. It applies when nothing else does, including
+unattended runs. You can also launch it explicitly with `codex -p workforce-economy`
+or keep it as a standing preference. Sol high is the cooperator: it thinks, judges,
+and integrates. Luna xhigh is the worker and the auditor, reading and typing at
+xhigh; Sol at xhigh reviews every submitted block; Astra high is the stage
+reviewer for pipelines whose blocks interact. A Luna worker has 600 tool calls per
+run, three runs, and 400k tokens per block; a block that exhausts it moves to Sol
+xhigh, then to Astra.
 
 ## Worker ladder and handoff
 
@@ -83,9 +86,10 @@ has the details, including the auditor handoff at 400k.
 
 Reuse an explicit task or native launch profile, active task choice, or applicable
 standing preference. Concrete, sufficiently specified tasks and small fixes proceed
-with Standard without asking. Autonomous instructions and unattended execution
-allow the agent to choose Standard for clear solutions or Enhanced for substantial
-unresolved design. Preserve the choice and its source across continuations.
+with Economy without asking. Autonomous instructions and unattended execution
+allow the agent to choose Economy for described work or Enhanced for substantial
+unresolved design. Standard is chosen by the user. Preserve the choice and its
+source across continuations.
 
 Ask once only for long-running, multi-stage work with substantial unresolved solution
 choices where the profile materially changes approach or resource use, if no prior
@@ -94,7 +98,7 @@ answer before dependent work. Continue independent authorized prerequisites. Dur
 production risk, urgency, and step count alone do not justify the question.
 
 The installer does not change base model settings or invent a permanent user preference.
-Standard is a routing default, not evidence that the running model changed. Examples:
+Economy is a routing default, not evidence that the running model changed. Examples:
 
 ```text
 Create and verify backups, then enable the maintenance page. Work autonomously.
@@ -141,15 +145,16 @@ Worker submits a block
   │
   ▼
 Cooperator (the orchestrator) chooses:
-  a) audit this block              → auditors, up to 3 rounds
-  b) no audit                      → next work to the worker
-  c) next block to the worker      → and auditors in parallel on
+  a) audit and review this block   → auditors, up to 3 rounds, then review
+  b) small local change, clear contract, checks passed
+                                   → accept on the cooperator's own reading
+  c) next block to the worker      → and audit and review in parallel on
                                      1, 2, 3 or N submitted blocks
                                      (only if that block changes nothing
                                      the audit reads; else a snapshot)
 
-Audit game: auditors (Haiku 5.5 / GPT-6 Luna, xhigh) report everything
-they find through one lens each: docs, task, conventions.
+Audit game: auditors (GPT-6 Luna, xhigh) report everything they find
+through one lens each: docs, task, conventions.
 Round 1 runs every lens. Then each lens plays on its own:
 real findings → that lens won, the same worker fixes, only winners
                 play the next round;
@@ -160,6 +165,10 @@ A round ends only when each auditor has read all its files; an auditor
 that hits its limit is continued where it stopped, never replaced.
 The cooperator takes only real findings; theoretical, hypothetical, and
 out-of-scope ones are rejected.
+
+Review: the block reviewer (GPT-6.1 Sol, xhigh) reads the whole diff with
+the audit log. Real findings go to the same worker as one bundle; the same
+reviewer checks the delta.
 ```
 
 Auditors report everything they find with `file:line` and the rule or document
@@ -170,13 +179,18 @@ worker as one bundle. Only the lenses that won a round play the next one, with
 what was accepted and what was rejected; a lens that found nothing real is
 retired for that block. The reviewer then reads the whole diff, fixes included,
 together with the audit log. Checks the project requires always run, and a
-reviewer's "accepted" does not replace one that has not passed.
+reviewer's "accepted" does not replace one that has not passed. A small local
+change with a clear contract and passing checks may be accepted on the
+cooperator's own reading of the diff; a review that the project, the user, or
+the task requires always runs.
 
 ## Complete blocks, proportional verification
 
 Every implementation packet includes the user's original outcome, an acceptance
 example, exact inputs, ownership, and intermediate results that do not count as done.
-Independent review happens after a substantial block is ready, not after every edit. An independent Astra stage review checks the original outcome.
+Every block a light worker submits is reviewed before it is accepted; the review
+reads the whole diff. A stage review on Astra high checks the original outcome,
+and runs only when blocks interact in ways no block review saw.
 
 A minimal isolated test can establish a component contract; it cannot by itself
 prove a real consumer was switched. An inventory can support planning; it cannot
