@@ -77,6 +77,19 @@ for r in $(seq 1 $REPEATS); do
     done
   done
 done
+# What a stopped run of the same name left at the cells' paths would make those cells refuse to
+# start in the middle of this run (a Claude project dir) or reuse an old checkout: refuse the
+# whole run now instead.
+CD=${BENCH_CLAUDE_CONFIG_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}}
+WROOT=${BENCH_TMP:-/private/tmp/agent-cooperator-bench}/${OUT:t}
+left=()
+[[ -d $WROOT && -z ${DRY:-} ]] && left+=($WROOT)
+for c in "${cells[@]}"; do
+  f=(${=c}); [[ ${f[3]} == opus ]] || continue
+  w=$WROOT/${f[1]}-${f[2]}-${f[3]}-r${f[4]}/repo
+  [[ -e $CD/projects/${w//[^A-Za-z0-9]/-} ]] && left+=($CD/projects/${w//[^A-Za-z0-9]/-})
+done
+(( ${#left} )) && { print -l "bench $LABEL: left by an earlier run at this run's paths; move them away first:" $left; exit 1; }
 echo "bench $LABEL: ${#cells[@]} cells, $PARALLEL at a time -> $OUT"
 printf '%s\n' "${cells[@]}" | xargs -P $PARALLEL -L 1 zsh $BENCH/cell.sh $OUT $SUITE
 
