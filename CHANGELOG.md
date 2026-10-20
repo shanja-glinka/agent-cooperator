@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.4.0 — 2026-10-20
 
+- README: measurements with and without the kit on four tasks, three runs per
+  task and model, as charts (`docs/images/*.svg`, rebuilt by
+  `node docs/images/charts.mjs`) and a table.
 - v8: review against the contract. The packet carries `CONTRACT` (what the
   change must keep, with its source); the reviewer lists every changed
   protective site from the diff and gives each kept, violated, or not

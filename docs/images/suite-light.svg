@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="266" viewBox="0 0 960 266" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="t">All four tasks: the kit against the same model without it</title><desc id="d">Sum of the per-task means, three runs per task; one private TypeScript project, 2026-10-19 and 2026-10-20. The same values are in the table under the chart.</desc>
+<rect width="960" height="266" rx="8" fill="#fcfcfb"/>
+<text x="16" y="28" font-size="17" font-weight="600" fill="#0b0b0b">All four tasks: the kit against the same model without it</text>
+<text x="16" y="48" font-size="12.5" fill="#52514e">Sum of the per-task means, three runs per task; one private TypeScript project, 2026-10-19 and 2026-10-20</text>
+<rect x="16" y="62" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="34" y="72.5" font-size="12.5" fill="#0b0b0b">Without the kit</text>
+<rect x="168.5" y="62" width="12" height="12" rx="3" fill="#eb6834"/>
+<text x="186.5" y="72.5" font-size="12.5" fill="#0b0b0b">With the kit 1.4.0</text>
+<text x="16" y="136" font-size="12.5" fill="#0b0b0b">All four tasks · Opus</text>
+<text x="16" y="176" font-size="12.5" fill="#0b0b0b">All four tasks · Sol</text>
+<text x="190" y="100" font-size="12" font-weight="600" fill="#52514e">Price, US$</text>
+<line x1="190" y1="112" x2="190" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="190" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<line x1="251.33333333333331" y1="112" x2="251.33333333333331" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="251.33333333333331" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$2</text>
+<line x1="312.66666666666663" y1="112" x2="312.66666666666663" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="312.66666666666663" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$4</text>
+<line x1="374" y1="112" x2="374" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="374" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$6</text>
+<line x1="190" y1="112" x2="190" y2="192" stroke="#c3c2b7" stroke-width="1"/>
+<path d="M190,121 h176.62666666666664 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-176.62666666666664 z" fill="#2a78d6"/>
+<text x="375.62666666666667" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$5.89</text>
+<path d="M190,133 h154.85333333333332 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-154.85333333333332 z" fill="#eb6834"/>
+<text x="353.85333333333335" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$5.18</text>
+<path d="M190,161 h44.760000000000005 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-44.760000000000005 z" fill="#2a78d6"/>
+<text x="243.76" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$1.59*</text>
+<path d="M190,173 h82.17333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-82.17333333333333 z" fill="#eb6834"/>
+<text x="281.17333333333335" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$2.81</text>
+<text x="448" y="100" font-size="12" font-weight="600" fill="#52514e">Wall time, minutes</text>
+<line x1="448" y1="112" x2="448" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="448" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<line x1="509.3333333333333" y1="112" x2="509.3333333333333" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="509.3333333333333" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">20</text>
+<line x1="570.6666666666666" y1="112" x2="570.6666666666666" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="570.6666666666666" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">40</text>
+<line x1="632" y1="112" x2="632" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="632" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">60</text>
+<line x1="448" y1="112" x2="448" y2="192" stroke="#c3c2b7" stroke-width="1"/>
+<path d="M448,121 h62.54666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-62.54666666666667 z" fill="#2a78d6"/>
+<text x="519.5466666666666" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">21.7</text>
+<path d="M448,133 h120.2 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-120.2 z" fill="#eb6834"/>
+<text x="577.2" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">40.5</text>
+<path d="M448,161 h47.21333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-47.21333333333333 z" fill="#2a78d6"/>
+<text x="504.2133333333333" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">16.7*</text>
+<path d="M448,173 h159.14666666666668 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-159.14666666666668 z" fill="#eb6834"/>
+<text x="616.1466666666666" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">53.2</text>
+<text x="706" y="100" font-size="12" font-weight="600" fill="#52514e">Runs that met the contract</text>
+<line x1="706" y1="112" x2="706" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="706" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<line x1="767.3333333333334" y1="112" x2="767.3333333333334" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="767.3333333333334" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">4</text>
+<line x1="828.6666666666666" y1="112" x2="828.6666666666666" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="828.6666666666666" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">8</text>
+<line x1="890" y1="112" x2="890" y2="192" stroke="#e1e0d9" stroke-width="1"/>
+<text x="890" y="208" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">12</text>
+<line x1="706" y1="112" x2="706" y2="192" stroke="#c3c2b7" stroke-width="1"/>
+<path d="M706,121 h134 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-134 z" fill="#2a78d6"/>
+<text x="849" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">9 of 12</text>
+<path d="M706,133 h164.66666666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-164.66666666666666 z" fill="#eb6834"/>
+<text x="879.6666666666666" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">11 of 12</text>
+<path d="M706,161 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">12 of 12</text>
+<path d="M706,173 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">12 of 12</text>
+<text x="16" y="248" font-size="11" fill="#898781">* actual spend: those runs without the kit shared /tmp with other runs. Price at API list prices; Codex is the lower bound.</text>
+</svg>

@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="506" viewBox="0 0 960 506" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="t">Per task: the kit against the same model without it</title><desc id="d">Mean of three runs per task and model; Opus is Claude Code (Hybrid), Sol is Codex (Economy). The same values are in the table under the chart.</desc>
+<rect width="960" height="506" rx="8" fill="#fcfcfb"/>
+<text x="16" y="28" font-size="17" font-weight="600" fill="#0b0b0b">Per task: the kit against the same model without it</text>
+<text x="16" y="48" font-size="12.5" fill="#52514e">Mean of three runs per task and model; Opus is Claude Code (Hybrid), Sol is Codex (Economy)</text>
+<rect x="16" y="62" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="34" y="72.5" font-size="12.5" fill="#0b0b0b">Without the kit</text>
+<rect x="168.5" y="62" width="12" height="12" rx="3" fill="#eb6834"/>
+<text x="186.5" y="72.5" font-size="12.5" fill="#0b0b0b">With the kit 1.4.0</text>
+<text x="16" y="136" font-size="12.5" fill="#0b0b0b">Small fix · Opus</text>
+<text x="16" y="176" font-size="12.5" fill="#0b0b0b">Small fix · Sol</text>
+<text x="16" y="216" font-size="12.5" fill="#0b0b0b">Large cleanup · Opus</text>
+<text x="16" y="256" font-size="12.5" fill="#0b0b0b">Large cleanup · Sol</text>
+<text x="16" y="296" font-size="12.5" fill="#0b0b0b">Unknown bug · Opus</text>
+<text x="16" y="336" font-size="12.5" fill="#0b0b0b">Unknown bug · Sol</text>
+<text x="16" y="376" font-size="12.5" fill="#0b0b0b">Patch review · Opus</text>
+<text x="16" y="416" font-size="12.5" fill="#0b0b0b">Patch review · Sol</text>
+<text x="190" y="100" font-size="12" font-weight="600" fill="#52514e">Price per task, US$</text>
+<line x1="190" y1="112" x2="190" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="190" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<line x1="226.8" y1="112" x2="226.8" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="226.8" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$1</text>
+<line x1="263.6" y1="112" x2="263.6" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="263.6" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$2</text>
+<line x1="300.4" y1="112" x2="300.4" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="300.4" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$3</text>
+<line x1="337.20000000000005" y1="112" x2="337.20000000000005" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="337.20000000000005" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$4</text>
+<line x1="374" y1="112" x2="374" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="374" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">$5</text>
+<line x1="190" y1="112" x2="190" y2="432" stroke="#c3c2b7" stroke-width="1"/>
+<path d="M190,121 h19.92 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-19.92 z" fill="#2a78d6"/>
+<text x="218.92000000000002" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.65</text>
+<path d="M190,133 h53.04 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-53.04 z" fill="#eb6834"/>
+<text x="252.04" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$1.55</text>
+<path d="M190,161 h10.352 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.352 z" fill="#2a78d6"/>
+<text x="209.352" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.39*</text>
+<path d="M190,173 h18.816 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-18.816 z" fill="#eb6834"/>
+<text x="217.816" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.62</text>
+<path d="M190,201 h159.02399999999997 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-159.02399999999997 z" fill="#2a78d6"/>
+<text x="358.024" y="210" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$4.43</text>
+<path d="M190,213 h96.46400000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-96.46400000000001 z" fill="#eb6834"/>
+<text x="295.464" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$2.73</text>
+<path d="M190,241 h23.232 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-23.232 z" fill="#2a78d6"/>
+<text x="222.232" y="250" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.74*</text>
+<path d="M190,253 h44.208 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-44.208 z" fill="#eb6834"/>
+<text x="243.208" y="262" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$1.31</text>
+<path d="M190,281 h11.823999999999998 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.823999999999998 z" fill="#2a78d6"/>
+<text x="210.824" y="290" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.43</text>
+<path d="M190,293 h11.823999999999998 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.823999999999998 z" fill="#eb6834"/>
+<text x="210.824" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.43</text>
+<path d="M190,321 h3.727999999999999 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-3.727999999999999 z" fill="#2a78d6"/>
+<text x="202.728" y="330" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.21</text>
+<path d="M190,333 h12.928 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-12.928 z" fill="#eb6834"/>
+<text x="211.928" y="342" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.46</text>
+<path d="M190,361 h9.984 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-9.984 z" fill="#2a78d6"/>
+<text x="208.984" y="370" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.38</text>
+<path d="M190,373 h13.296 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-13.296 z" fill="#eb6834"/>
+<text x="212.296" y="382" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.47</text>
+<path d="M190,401 h5.568000000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-5.568000000000001 z" fill="#2a78d6"/>
+<text x="204.568" y="410" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.26*</text>
+<path d="M190,413 h11.087999999999997 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.087999999999997 z" fill="#eb6834"/>
+<text x="210.088" y="422" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.41</text>
+<text x="448" y="100" font-size="12" font-weight="600" fill="#52514e">Wall time, minutes</text>
+<line x1="448" y1="112" x2="448" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="448" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<line x1="509.3333333333333" y1="112" x2="509.3333333333333" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="509.3333333333333" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">10</text>
+<line x1="570.6666666666666" y1="112" x2="570.6666666666666" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="570.6666666666666" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">20</text>
+<line x1="632" y1="112" x2="632" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="632" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">30</text>
+<line x1="448" y1="112" x2="448" y2="432" stroke="#c3c2b7" stroke-width="1"/>
+<path d="M448,121 h22.863999999999997 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-22.863999999999997 z" fill="#2a78d6"/>
+<text x="479.864" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">4:23</text>
+<path d="M448,133 h95.97333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-95.97333333333333 z" fill="#eb6834"/>
+<text x="552.9733333333334" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">16:18</text>
+<path d="M448,161 h20.22666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-20.22666666666667 z" fill="#2a78d6"/>
+<text x="477.2266666666667" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3:57*</text>
+<path d="M448,173 h61.626666666666665 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-61.626666666666665 z" fill="#eb6834"/>
+<text x="518.6266666666667" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">10:42</text>
+<path d="M448,201 h72.05333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-72.05333333333333 z" fill="#2a78d6"/>
+<text x="529.0533333333333" y="210" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">12:24</text>
+<path d="M448,213 h118.78933333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-118.78933333333333 z" fill="#eb6834"/>
+<text x="575.7893333333334" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">20:01</text>
+<path d="M448,241 h42.49066666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-42.49066666666666 z" fill="#2a78d6"/>
+<text x="499.49066666666664" y="250" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">7:35*</text>
+<path d="M448,253 h176.01333333333335 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-176.01333333333335 z" fill="#eb6834"/>
+<text x="633.0133333333333" y="262" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">29:21</text>
+<path d="M448,281 h11.210666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.210666666666667 z" fill="#2a78d6"/>
+<text x="468.21066666666667" y="290" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:29</text>
+<path d="M448,293 h9.063999999999998 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-9.063999999999998 z" fill="#eb6834"/>
+<text x="466.064" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:08</text>
+<path d="M448,321 h9.616000000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-9.616000000000001 z" fill="#2a78d6"/>
+<text x="466.616" y="330" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:13</text>
+<path d="M448,333 h45.55733333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-45.55733333333333 z" fill="#eb6834"/>
+<text x="502.5573333333333" y="342" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">8:05</text>
+<path d="M448,361 h10.904 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.904 z" fill="#2a78d6"/>
+<text x="467.904" y="370" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:26</text>
+<path d="M448,373 h8.88 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-8.88 z" fill="#eb6834"/>
+<text x="465.88" y="382" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:06</text>
+<path d="M448,401 h14.400000000000002 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-14.400000000000002 z" fill="#2a78d6"/>
+<text x="471.4" y="410" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3:00*</text>
+<path d="M448,413 h27.096000000000004 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-27.096000000000004 z" fill="#eb6834"/>
+<text x="484.096" y="422" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">5:04</text>
+<text x="706" y="100" font-size="12" font-weight="600" fill="#52514e">Runs that met the contract</text>
+<line x1="706" y1="112" x2="706" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="706" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<line x1="767.3333333333334" y1="112" x2="767.3333333333334" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="767.3333333333334" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">1</text>
+<line x1="828.6666666666666" y1="112" x2="828.6666666666666" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="828.6666666666666" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">2</text>
+<line x1="890" y1="112" x2="890" y2="432" stroke="#e1e0d9" stroke-width="1"/>
+<text x="890" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">3</text>
+<line x1="706" y1="112" x2="706" y2="432" stroke="#c3c2b7" stroke-width="1"/>
+<path d="M706,121 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,133 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,161 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,173 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+
+<text x="711" y="210" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">0 of 3</text>
+<path d="M706,213 h118.66666666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-118.66666666666666 z" fill="#eb6834"/>
+<text x="833.6666666666666" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2 of 3</text>
+<path d="M706,241 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="250" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,253 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="262" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,281 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="290" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,293 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,321 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="330" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,333 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="342" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,361 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="370" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,373 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="382" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,401 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#2a78d6"/>
+<text x="895" y="410" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<path d="M706,413 h180 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-180 z" fill="#eb6834"/>
+<text x="895" y="422" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3 of 3</text>
+<text x="16" y="488" font-size="11" fill="#898781">* actual spend: those runs without the kit shared /tmp with other runs. Price at API list prices; Codex is the lower bound.</text>
+</svg>

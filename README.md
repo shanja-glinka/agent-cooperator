@@ -21,6 +21,55 @@ pack with a Node.js installer. Routing and token budgets are instruction policy,
 not runtime enforcement; model behavior and cost savings are not guaranteed.
 Independent community project; not affiliated with Anthropic or OpenAI.
 
+## Measured: with and without the kit
+
+Four tasks in one private TypeScript project (a Telegram bot), three runs per
+task and model, each in its own clean checkout: the same task text and the same
+model, once with the kit (1.4.0, default profiles: Claude Code Hybrid with an
+Opus cooperator, Codex Economy with a Sol cooperator) and once without it. Price
+is at API list prices (Codex: the lower bound). A run met the contract when the
+task's own checks passed and, on the large task, a hidden test confirmed that
+the defensive checks on database and JSON data were kept.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/suite-dark.svg">
+  <img alt="All four tasks: with Opus, $5.89 and 9 of 12 runs that met the contract without the kit against $5.18 and 11 of 12 with it; with Sol, $1.59 and 12 of 12 without the kit against $2.81 and 12 of 12 with it. Wall time is longer with the kit." src="docs/images/suite-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/tasks-dark.svg">
+  <img alt="Per task: price, wall time, and runs that met the contract, without and with the kit, for eight task and model pairs; the values are in the table below." src="docs/images/tasks-light.svg">
+</picture>
+
+| Task · model | Without the kit | With the kit |
+| --- | --- | --- |
+| Small fix · Opus | $0.65 · 4:23 · 3 of 3 | $1.55 · 16:18 · 3 of 3 |
+| Small fix · Sol | $0.39* · 3:57* · 3 of 3 | $0.62 · 10:42 · 3 of 3 |
+| Large cleanup · Opus | $4.43 · 12:24 · 0 of 3 | $2.73 · 20:01 · 2 of 3 |
+| Large cleanup · Sol | $0.74* · 7:35* · 3 of 3 | $1.31 · 29:21 · 3 of 3 |
+| Unknown bug · Opus | $0.43 · 2:29 · 3 of 3 | $0.43 · 2:08 · 3 of 3 |
+| Unknown bug · Sol | $0.21 · 2:13 · 3 of 3 | $0.46 · 8:05 · 3 of 3 |
+| Patch review · Opus | $0.38 · 2:26 · 3 of 3 | $0.47 · 2:06 · 3 of 3 |
+| Patch review · Sol | $0.26* · 3:00* · 3 of 3 | $0.41 · 5:04 · 3 of 3 |
+| **All four · Opus** | $5.89 · 21.7 min · 9 of 12 | $5.18 · 40.5 min · 11 of 12 |
+| **All four · Sol** | $1.59* · 16.7 min* · 12 of 12 | $2.81 · 53.2 min · 12 of 12 |
+
+Each cell: mean price · mean wall time · runs that met the contract. \* Actual
+spend: those runs without the kit shared `/tmp` with other runs, so they are not
+a clean comparison.
+
+- **Claude Code.** On the large task the kit costs 38% less ($2.73 against
+  $4.43) and keeps the required behavior in 2 runs of 3, where Opus alone kept
+  it in none. Over all four tasks it costs 12% less and meets the contract in 11
+  runs of 12 against 9. It takes about twice as long, and a small task costs
+  more through a worker and a review than in the session.
+- **Codex.** GPT-6.1 Sol alone is cheap on these tasks and met every contract;
+  with the kit it meets the same contracts at about 1.8 times the price and
+  three times the time.
+- One project, four tasks, three runs per cell: an indication, not a guarantee.
+  Method: [benchmark](evaluation/BENCHMARK.md); history: [research](docs/research.md).
+  Regenerate the charts with `node docs/images/charts.mjs`.
+
 ## Install
 
 Requires Node.js 22+, npm, and Git. The package runs directly from GitHub.
