@@ -2,12 +2,13 @@
 // Per-cell metrics from the raw logs: wall time, tool calls by name, model requests, tokens
 // (input, cache write, cache read, output, thinking), the price of every request at list prices
 // (prices.mjs), agents with model, effort, and turns, skills and kit files read, kit text the
-// cooperator received, waits, messages, handoffs, the cooperator's REVIEW lines, the suite's
-// quality check, and what the agent committed.
+// cooperator received, waits, messages, handoffs, the cooperator's REVIEW lines, the reviewer's
+// MODE, accept.mjs calls and what each close printed, the route, a prompt cache an earlier session
+// warmed (with the price at a cold start), the suite's quality check, and what the agent committed.
 // usage: metrics.mjs <run-dir> [<out-file>]   writes <out-file>, by default <run-dir>/metrics.json
 import fs from 'node:fs';
 import path from 'node:path';
-import { claudeUsd, openaiUsd } from './prices.mjs';
+import { claudeReadAsWrite, claudeUsd, openaiUsd } from './prices.mjs';
 
 const out = process.argv[2];
 const target = process.argv[3] ?? path.join(out, 'metrics.json');
@@ -49,12 +50,34 @@ const afterTimeoutKind = (p) => {
   if (/npm|npx|jest|eslint|tsc|node |sed -n|cat |rg |grep /.test(cmd)) return 'work';
   return 'other';
 };
+// accept.mjs run as a command (node …/accept.mjs <command>), not its name inside a commit message or
+// a note. Returns how many closes the command holds.
+const ACCEPT_CALL = /\bnode\s+(?:"[^"]*|'[^']*|\S*)accept\.mjs["']?\s+(snapshot|run|close)\b/g;
 const acceptUse = (res, text) => {
-  for (const m of String(text).matchAll(/accept\.mjs\s+(snapshot|run|close)\b/g)) res.accept[m[1] === 'snapshot' ? 'snapshots' : m[1] === 'run' ? 'runs' : 'closes'] += 1;
+  let closes = 0;
+  for (const m of String(text).matchAll(ACCEPT_CALL)) {
+    res.accept[m[1] === 'snapshot' ? 'snapshots' : m[1] === 'run' ? 'runs' : 'closes'] += 1;
+    if (m[1] === 'close') closes += 1;
+  }
+  return closes;
 };
-const acceptResult = (res, output) => {
+// Every close prints one CLOSED or OPEN line, and one command can hold several closes; a close
+// whose line is not in the output stays unknown.
+const ACCEPT_CLOSED = /CLOSED: (?:(?!CLOSED: |OPEN: )[\s\S]){0,600}?passed on tree:[0-9a-f]{7}/g;
+const ACCEPT_OPEN = /OPEN: (?:the work tree changed since the review|no recorded run of|(?:(?!CLOSED: |OPEN: )[\s\S]){0,600}?failed on tree:[0-9a-f]{7})/g;
+const acceptResult = (res, output, closes) => {
   const t = typeof output === 'string' ? output : JSON.stringify(output ?? '');
-  if (/CLOSED:/.test(t)) res.accept.closed += 1; else if (/OPEN:/.test(t)) res.accept.open += 1;
+  const closed = (t.match(ACCEPT_CLOSED) ?? []).length; const open = (t.match(ACCEPT_OPEN) ?? []).length;
+  res.accept.closed += closed; res.accept.open += open;
+  res.accept.unknown += Math.max(0, closes - closed - open);
+};
+// The reviewer's packet opens with MODE: block, stage, or both in one pass.
+const reviewMode = (text) => {
+  const m = /MODE:\s*\**\s*([^\n]*)/i.exec(String(text ?? ''));
+  if (!m) return null;
+  const head = m[1].split(/\s\/\s|SNAPSHOT/i)[0].toLowerCase();
+  const block = /block/.test(head); const stage = /stage|integration/.test(head);
+  return block && stage ? 'block+stage' : stage ? 'stage' : block ? 'block' : null;
 };
 
 function claude(logs, res) {
@@ -69,7 +92,7 @@ function claude(logs, res) {
   const seen = new Set();
   const actor = (file, meta) => {
     const msgs = new Map(); const tools = {}; const ids = new Set(); const kitReads = new Set(); let first = null; let last = null; let turns = 0;
-    const efforts = new Set(); const closeIds = new Set();
+    const efforts = new Set(); const closeIds = new Map();
     // The cooperator's briefs: each Agent prompt, together with any brief file it wrote and the
     // prompt names (a packet in a file is still the brief).
     const prompts = []; const written = [];
@@ -86,7 +109,7 @@ function claude(logs, res) {
         if (!meta) for (const c of content) {
           if (c.type === 'text' && /^Base directory for this skill: .*\/skills\/workforce-/.test(c.text ?? '')) res.kitChars += c.text.length;
           if (c.type === 'tool_result' && kitReads.has(c.tool_use_id)) res.kitChars += textLength(c.content);
-          if (c.type === 'tool_result' && closeIds.has(c.tool_use_id)) { closeIds.delete(c.tool_use_id); acceptResult(res, c.content); }
+          if (c.type === 'tool_result' && closeIds.has(c.tool_use_id)) { acceptResult(res, c.content, closeIds.get(c.tool_use_id)); closeIds.delete(c.tool_use_id); }
         }
       }
       if (l.type !== 'assistant') continue;
@@ -109,7 +132,8 @@ function claude(logs, res) {
           const cmd = String(c.input?.command ?? '');
           const heredoc = /cat\s*>\s*(\S+)\s*<</.exec(cmd);
           if (heredoc) written.push([heredoc[1], cmd]);
-          if (/accept\.mjs/.test(cmd)) { acceptUse(res, cmd); if (/accept\.mjs\s+close/.test(cmd)) closeIds.add(c.id); }
+          const closes = acceptUse(res, cmd);
+          if (closes) closeIds.set(c.id, closes);
         }
         if (c.name === 'Skill') res.skills.push(c.input.skill ?? c.input.name);
         const k = kitFile(String(c.input?.file_path ?? c.input?.command ?? ''));
@@ -132,6 +156,9 @@ function claude(logs, res) {
       const usd = claudeUsd({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, hit: m.cr, out: m.out });
       if (usd == null) sum.unpriced = true; else { sum.usd += usd; sum.usdHigh += usd; }
     }
+    // The cooperator's first request, to tell a cold prompt cache from one an earlier session warmed.
+    const firstMsg = meta ? null : msgs.values().next().value;
+    if (firstMsg) sum.firstRequest = { read: firstMsg.cr, write: firstMsg.cw, ttl: firstMsg.w1 > 0 ? '1h' : '5m', model: firstMsg.model };
     return { role: meta ? meta.agentType : 'cooperator', task: meta?.description ?? '', model, effort: efforts.size ? [...efforts].join('/') : meta ? ROLE_EFFORT[meta.agentType] ?? '?' : 'medium', effortSource: efforts.size ? 'request' : 'role default', background: meta ? meta.requestShape === 'background' : false, seconds: first && last ? secs(first, last) : null, turns: meta && msgs.size ? Math.max(turns, 1) : turns, toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools, ...sum, thinking: null };
   };
   if (files.includes('main.jsonl')) res.actors.push(actor('main.jsonl', null));
@@ -168,7 +195,7 @@ function codex(logs, res, inClaudeCell) {
       : dev.match(/You are a Workforce (worker|reviewer|auditor|probe)/i)?.[1]?.toLowerCase()
         ?? CODEX_RUN_ROLE.find(([re]) => re.test(firstUser.trim()))?.[1] ?? 'agent';
     const seenUsage = new Set(); const seenCalls = new Set(); const tools = {}; const kitReads = new Set();
-    const waitIds = new Set(); let afterTimeout = false; let classify = false; const closeIds = new Set();
+    const waitIds = new Set(); let afterTimeout = false; let classify = false; const closeIds = new Map();
     const byResponse = lines.some((l) => l.type === 'token_usage_record');
     const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
@@ -202,10 +229,10 @@ function codex(logs, res, inClaudeCell) {
       }
       // Review conditions closed through accept.mjs, and what each close said.
       if (isMain && l.type === 'response_item' && p.type === 'custom_tool_call' && /accept\.mjs/.test(String(p.input ?? ''))) {
-        acceptUse(res, p.input);
-        if (/accept\.mjs\s+close/.test(String(p.input))) closeIds.add(p.call_id);
+        const closes = acceptUse(res, p.input);
+        if (closes) closeIds.set(p.call_id, closes);
       }
-      if (isMain && l.type === 'response_item' && p.type === 'custom_tool_call_output' && closeIds.has(p.call_id)) { closeIds.delete(p.call_id); acceptResult(res, p.output); }
+      if (isMain && l.type === 'response_item' && p.type === 'custom_tool_call_output' && closeIds.has(p.call_id)) { acceptResult(res, p.output, closeIds.get(p.call_id)); closeIds.delete(p.call_id); }
       // The cooperator's kit text: the full output of each command that read a kit file
       // (an upper bound when the same command also read other files).
       if (isMain && l.type === 'response_item' && (p.type === 'custom_tool_call' || p.type === 'function_call') && /skills\/workforce-[a-z-]+\/(SKILL\.md|references\/)|codex-workforce\/profiles\.json/.test(String(p.input ?? p.arguments ?? ''))) kitReads.add(p.call_id);
@@ -232,8 +259,10 @@ function codex(logs, res, inClaudeCell) {
         }
       }
       if (l.type === 'response_item' && (p.type === 'agent_message' || (p.type === 'message' && p.role === 'assistant'))) {
-        const text = p.text ?? (p.content ?? []).map((c) => c.text ?? '').join(' ');
+        const text = p.text ?? (p.content ?? []).map((c) => c.text ?? '').join('\n');
         if (!isMain && /STATUS:\s*handoff/i.test(text)) res.handoffs += 1;
+        const mode = role === 'reviewer' ? reviewMode(text) : null;
+        if (mode && !res.reviewModes.includes(mode)) res.reviewModes.push(mode);
       }
     }
     const stamps = lines.map((l) => l.timestamp).filter(Boolean).sort();
@@ -259,7 +288,7 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   if (!fs.existsSync(path.join(dir, 'cell.txt'))) continue;
   const [task, variant, model, repeat] = read(path.join(dir, 'cell.txt')).split(' ');
   const logs = path.join(dir, 'logs');
-  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0, timedOut: 0, wakeRequests: 0, wakeUsd: 0, afterTimeout: {} }, accept: { snapshots: 0, runs: 0, closes: 0, closed: 0, open: 0 }, briefs: { total: 0, withConstraints: 0, withContract: 0 } };
+  const res = { id, task, variant, model, repeat: Number(repeat), actors: [], skills: [], kitFiles: {}, kitChars: 0, handoffs: 0, messagesToAgents: 0, messagesFromAgents: 0, waits: { sleep: 0, sleepSeconds: 0, wait_agent: 0, timedOut: 0, wakeRequests: 0, wakeUsd: 0, afterTimeout: {} }, accept: { snapshots: 0, runs: 0, closes: 0, closed: 0, open: 0, unknown: 0 }, briefs: { total: 0, withConstraints: 0, withContract: 0 }, reviewModes: [] };
   res.exitCode = Number(read(path.join(logs, 'exit.txt')) || NaN);
   res.wallSeconds = secs(read(path.join(logs, 'start.txt')), read(path.join(logs, 'end.txt')));
   if (model === 'opus') { claude(logs, res); codex(logs, res, true); } else codex(logs, res, false);
@@ -285,11 +314,28 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   res.totals.workerRequests = sum('requests', of('worker'));
   res.totals.compactions = sum('compactions');
   res.totals.inputTotal = res.totals.input + (res.totals.cacheWrite ?? 0) + res.totals.cacheRead;
+  // Route: the cooperator alone, with workers, and with or without a reviewer.
+  const worked = of('worker').length + of('probe').length > 0; const reviewed = of('reviewer').length > 0;
+  res.route = worked ? (reviewed ? 'worker+review' : 'worker') : reviewed ? 'solo+review' : 'solo';
   res.review = reviewLines(res.finalReport);
   res.quality = fs.existsSync(path.join(dir, 'check.json')) ? JSON.parse(read(path.join(dir, 'check.json')) || '{}') : {};
   if (fs.existsSync(path.join(dir, 'git.json'))) Object.assign(res.quality, JSON.parse(read(path.join(dir, 'git.json')) || '{}'));
   res.provenance = fs.existsSync(path.join(dir, 'provenance.json')) ? JSON.parse(read(path.join(dir, 'provenance.json')) || '{}') : {};
   cells.push(res);
+}
+// A cooperator whose first request wrote nothing to the prompt cache found its whole prefix already
+// cached by an earlier session with the same prefix (an aborted attempt at the same paths within
+// the cache lifetime). Its cold-start price moves the tokens beyond the prefix every cell of the run
+// shares (the tool definitions) from cache reads to cache writes. Only Claude cells carry it.
+const firstOf = (c) => c.actors.find((a) => a.role === 'cooperator')?.firstRequest;
+const cold = cells.map(firstOf).filter((f) => f && f.write > 0);
+const shared = cold.length ? Math.min(...cold.map((f) => f.read)) : null;
+for (const c of cells) {
+  const f = firstOf(c);
+  const tokens = f && shared != null && f.write === 0 && f.read > shared ? f.read - shared : 0;
+  const extra = tokens ? claudeReadAsWrite(f.model, tokens, cold[0].ttl) : null;
+  c.warmStart = f ? (tokens ? { tokens, usd: extra } : false) : null;
+  c.totals.usdCold = c.totals.usd + (extra ?? 0);
 }
 fs.writeFileSync(target, JSON.stringify({ run: path.basename(out), suite: read(path.join(out, 'suite.txt')), variants: read(path.join(out, 'variants.txt')).split('\n'), cells }, null, 1));
 console.log(`metrics: ${cells.length} cells -> ${target}`);

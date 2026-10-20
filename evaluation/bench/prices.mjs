@@ -25,6 +25,14 @@ export function claudeUsd(m) {
   return (m.in * p.in + m.w5 * p.w5 + m.w1 * p.w1 + m.hit * p.hit + m.out * p.out) / 1e6;
 }
 
+// What `tokens` read from the prompt cache would have cost more as a cache write with that TTL.
+export function claudeReadAsWrite(model, tokens, ttl = '1h') {
+  const tiers = CLAUDE[ALIAS[model] ?? model];
+  if (!tiers) return null;
+  const p = tier(tiers, tokens);
+  return (tokens * ((ttl === '1h' ? p.w1 : p.w5) - p.hit)) / 1e6;
+}
+
 // u: last_token_usage of one Codex request; returns { low, high } or null.
 export function openaiUsd(model, u) {
   const tiers = OPENAI[model];

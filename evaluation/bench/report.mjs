@@ -2,11 +2,13 @@
 // Writes METRICS.md (every metric, every variant) and COMPARISON.md (no kit | previous | new, and
 // any further kit variant of the run beside the new one, with deltas) for a bench run, and prints
 // the comparison. Values come from the cells with a clean isolation status; a group without one
-// shows its cells marked with *, as spend only, and its deltas stay empty.
+// shows its cells marked with *, as spend only, and its deltas stay empty. Both files name the data
+// files they were built from, with their SHA-256.
 // usage: report.mjs <run-dir>
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadRun, isClean } from './load.mjs';
+import { loadRun, isClean, contractMet } from './load.mjs';
 
 const out = process.argv[2];
 // The run's cells with their isolation status, and the cells it takes from earlier runs.
@@ -24,7 +26,8 @@ const tm = (s) => (s == null || Number.isNaN(s) ? '—' : `${Math.floor(Math.rou
 const role = (r) => (c) => c.totals.usdByRole?.[r] ?? null;
 const ROWS = [
   ['Время', (c) => c.wallSeconds, tm], ['Агентов', (c) => c.totals.agents, k],
-  ['Цена, $', (c) => c.totals.usd ?? null, usd], ['Цена, верхняя оценка, $', (c) => c.totals.usdHigh ?? null, usd],
+  ['Цена, $', (c) => c.totals.usd ?? null, usd], ['Цена с холодным стартом кэша, $', (c) => c.totals.usdCold ?? c.totals.usd ?? null, usd],
+  ['Цена, верхняя оценка, $', (c) => c.totals.usdHigh ?? null, usd],
   ['Цена: кооператор, $', role('cooperator'), usd], ['Цена: воркеры, $', role('worker'), usd],
   ['Цена: аудиторы, $', role('auditor'), usd], ['Цена: ревьюер, $', role('reviewer'), usd],
   ['Запросы кооператора', (c) => c.totals.cooperatorRequests ?? null, k],
@@ -51,7 +54,12 @@ const TEXT = [
   ['Брифы: с CONSTRAINTS / с CONTRACT / всего (Claude)', (c) => (c.briefs?.total ? `${c.briefs.withConstraints} / ${c.briefs.withContract} / ${c.briefs.total}` : '—')],
   ['После таймаута: статус / подглядывание / своя работа (Codex)', (c) => (c.waits?.timedOut ? `${c.waits.afterTimeout?.status ?? 0} / ${c.waits.afterTimeout?.peek ?? 0} / ${c.waits.afterTimeout?.work ?? 0}` : '—')],
   ['Маршрут', (c) => route(c)],
+  ['Тип маршрута', (c) => ROUTE[c.route] ?? '—'],
+  ['Режим ревью (MODE ревьюера)', (c) => (c.reviewModes?.length ? c.reviewModes.join(', ') : '—')],
+  ['accept.mjs: закрытий / закрыто / открыто / не разобрано', (c) => (c.accept?.closes ? `${c.accept.closes} / ${c.accept.closed} / ${c.accept.open} / ${c.accept.unknown ?? 0}` : '—')],
+  ['Кэш промпта на старте (Claude)', (c) => (c.warmStart ? `прогрет, ${k(c.warmStart.tokens)}` : c.warmStart === false ? 'холодный' : '—')],
 ];
+const ROUTE = { solo: 'сам', worker: 'воркер без ревью', 'worker+review': 'воркер + ревью', 'solo+review': 'сам + ревью' };
 const route = (c) => {
   const agents = c.actors.filter((a) => a.role !== 'cooperator');
   if (!agents.length) return 'сам';
@@ -87,17 +95,42 @@ const useful = (title, get, cs) => {
   const vals = cs.map(get);
   if (vals.every((v) => v == null)) return false;
   if (title === 'Цена, верхняя оценка, $') return cs.some((c) => Math.abs((c.totals.usdHigh ?? 0) - (c.totals.usd ?? 0)) > 0.005);
+  if (title === 'Цена с холодным стартом кэша, $') return cs.some((c) => c.warmStart);
   return true;
 };
+// Group rows. The spend of all the group's cells per cell that kept the contract: what one correct
+// result cost in this series, not a forecast. And the mean price of each route the group took.
+const perCorrect = (get) => (cs) => {
+  const use = admitted(cs) ?? cs; const ok = use.filter(contractMet).length;
+  return use.length && ok ? use.reduce((a, c) => a + (get(c) ?? 0), 0) / ok : null;
+};
+const GROUP = [
+  ['Цена корректного результата, $', perCorrect((c) => c.totals.usd)],
+  ['Цена корректного результата с холодным стартом, $', perCorrect((c) => c.totals.usdCold ?? c.totals.usd)],
+];
+const groupUseful = (title, cs) => title !== 'Цена корректного результата с холодным стартом, $' || cs.some((c) => c.warmStart);
+const showGroup = (cs, get) => {
+  if (!cs.length) return '—';
+  const v = get(cs);
+  return (v == null ? 'нет корректных' : usd(v)) + (admitted(cs) ? '' : ' *');
+};
+const byRoute = (cs) => {
+  const use = admitted(cs) ?? cs; const groups = {};
+  for (const c of use) (groups[c.route] ??= []).push(c.totals.usdCold ?? c.totals.usd);
+  return Object.entries(groups).map(([r, v]) => `${ROUTE[r] ?? r} ${usd(mean(v))}${v.length > 1 ? ` (${v.length})` : ''}`).join(' · ') || '—';
+};
+// The data files the tables come from, so a copy of the report can be matched to its data.
+const sources = () => ['metrics.json', ...fs.readdirSync(out).filter((f) => /^prev-metrics.*\.json$/.test(f)).sort()]
+  .map((f) => `${f} sha256:${crypto.createHash('sha256').update(fs.readFileSync(path.join(out, f))).digest('hex').slice(0, 16)}`).join(', ');
 // Tasks in the suite's order, as bench.sh recorded it.
 const order = fs.existsSync(path.join(out, 'tasks.txt')) ? fs.readFileSync(path.join(out, 'tasks.txt'), 'utf8').split('\n').filter(Boolean) : [];
 const tasks = [...new Set(data.cells.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
 const models = [...new Set(data.cells.map((c) => c.model))];
 const modelName = (m) => (m === 'opus' ? 'Opus 5.5' : m === 'sol' ? 'GPT-6.1 Sol' : m);
 
-const legend = 'Значения — по ячейкам с чистой изоляцией; группа без таких ячеек помечена * (фактический расход), её разницы не считаются. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс). Цена — по API-прайсу (prices.mjs); у Codex нижняя оценка, верхняя — отдельной строкой, если отличается.';
-const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.variants.join(', ')}. Полные данные — metrics.json. ${legend}`, ''];
-const comparison = [`# Сравнение: ${data.run}`, '', `Без кита | ${prev ?? '—'} | ${next}${extras.length ? ` | ${extras.join(' | ')}` : ''}. ${legend}`, ''];
+const legend = 'Значения — по ячейкам с чистой изоляцией; группа без таких ячеек помечена * (фактический расход), её разницы не считаются. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс). Цена — по API-прайсу (prices.mjs); у Codex нижняя оценка, верхняя — отдельной строкой, если отличается. Цена с холодным стартом кэша — как если бы кэш промпта на старте был пуст: если первый запрос кооператора Claude нашёл весь свой префикс уже в кэше (его записала более ранняя сессия с тем же префиксом, например прерванный запуск тех же путей), этот префикс оценён как запись в кэш; строка есть, только когда такие ячейки были. Цена корректного результата — расход всех ячеек группы, делённый на число ячеек с выполненным контрактом.';
+const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.variants.join(', ')}. Полные данные — metrics.json. ${legend}`, '', `Источники: ${sources()}.`, ''];
+const comparison = [`# Сравнение: ${data.run}`, '', `Без кита | ${prev ?? '—'} | ${next}${extras.length ? ` | ${extras.join(' | ')}` : ''}. ${legend}`, '', `Источники: ${sources()}.`, ''];
 // Cells taken from earlier runs ran on another day and under those runs' conditions.
 for (const p of data.prev) {
   const line = `Колонки ${p.variants.map((v) => label(v.split('=')[0])).join(' и ')} — из прогона ${p.run}, не перезапускались: другой день, условия того прогона, своя пометка изоляции.`;
@@ -114,6 +147,8 @@ for (const task of tasks) for (const model of models) {
     if (!get) { rowsAll.push([title, ...groups.map((cs) => cs.map((c) => `${c.waits.sleep}/${c.waits.wait_agent}`).join(' · ') || '—')]); continue; }
     if (useful(title, get, all)) rowsAll.push([title, ...groups.map((cs) => show(cs, get, fmt))]);
   }
+  for (const [title, get] of GROUP) if (groupUseful(title, all)) rowsAll.push([title, ...groups.map((cs) => showGroup(cs, get))]);
+  rowsAll.push(['Цена по типу маршрута, холодный старт, $', ...groups.map((cs) => (cs.length ? byRoute(cs) : '—'))]);
   for (const [title, get] of TEXT) rowsAll.push([title, ...groups.map((cs) => perCell(cs, get))]);
   for (const q of qkeys) rowsAll.push([q, ...groups.map((cs) => perCell(cs, (c) => c.quality?.[q]))]);
   metrics.push(`## ${task} — ${modelName(model)}`, '', table(['Метрика', ...names.map(label)], rowsAll), '');
@@ -129,7 +164,14 @@ for (const task of tasks) for (const model of models) {
     const [b, a, c] = [cleanMean(base, get), cleanMean(p, get), cleanMean(n, get)];
     rows.push([title, ...cols.map(([, cs]) => show(cs, get, fmt)), ...(prev ? [delta(a, b)] : []), delta(c, b), ...(prev ? [delta(c, a)] : []), ...ex.map((e) => delta(cleanMean(cellsOf(task, model, e), get), c))]);
   }
+  const gval = (get) => (cs) => (admitted(cs) ? get(cs) : null);
+  for (const [title, get] of GROUP) {
+    if (!groupUseful(title, cols.flatMap(([, cs]) => cs))) continue;
+    const g = gval(get);
+    rows.push([title, ...cols.map(([, cs]) => showGroup(cs, get)), ...(prev ? [delta(g(p), g(base))] : []), delta(g(n), g(base)), ...(prev ? [delta(g(n), g(p))] : []), ...ex.map((e) => delta(g(cellsOf(task, model, e)), g(n)))]);
+  }
   const blanks = [...(prev ? [''] : []), '', ...(prev ? [''] : []), ...ex.map(() => '')];
+  rows.push(['Цена по типу маршрута, холодный старт, $', ...cols.map(([, cs]) => (cs.length ? byRoute(cs) : '—')), ...blanks]);
   for (const [title, get] of TEXT) rows.push([title, ...cols.map(([, cs]) => perCell(cs, get)), ...blanks]);
   for (const q of qkeys) rows.push([q, ...cols.map(([, cs]) => perCell(cs, (c) => c.quality?.[q])), ...blanks]);
   comparison.push(`## ${task} — ${modelName(model)}`, '', table(head, rows), '');

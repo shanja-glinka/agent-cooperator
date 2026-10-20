@@ -91,7 +91,8 @@ evaluation/bench/bench.sh <suite-dir> <label> nokit <prev>=<commit> <new>=<commi
 The run directory `evaluation/runs/<date>-<label>/` gets:
 
 - `COMPARISON.md` — the conclusion table, also printed at the end of the run;
-- `METRICS.md` — every metric for every variant;
+- `METRICS.md` — every metric for every variant; both tables name the data files
+  they were built from, with their SHA-256;
 - `metrics.json` — full data per cell, per agent, and per tool;
 - `BASELINE.md`, `baseline.json` — the no-kit result per task and model: what
   the model did by itself, at what cost, and how it worked;
@@ -114,6 +115,31 @@ The run directory `evaluation/runs/<date>-<label>/` gets:
 Each cell leaves its result on a branch `bench/<run>/<cell>` in the target
 repository (local; nothing is pushed elsewhere).
 
+## Recount, replay, pack
+
+None of these runs a cooperator again:
+
+- `post.sh <run-dir>` derives the metrics, the earlier columns, isolation,
+  baseline, routes and both tables from the saved logs. `bench.sh` runs it after
+  the cells; run it again after a change to the counters.
+- `replay-review.sh <out-dir> <suite-dir> <kit-dir> <cell-dir> <n>` reviews a
+  saved Claude cell's result again with another kit. It takes the cell's first
+  review packet from the cooperator's transcript and rebuilds the tree the
+  reviewer saw: the base checked out, the result as uncommitted changes. It
+  stops when that tree does not hash to the packet's SNAPSHOT, then runs the
+  kit's own `codex-run.mjs` in a fresh Codex home. Nothing else reaches the
+  reviewer.
+- `score-replay.mjs <out-dir> [<location> ...]` collects what each replayed review
+  said into `REVIEWS.md` (status, time, price, verdict lines, the watched
+  locations), for judging by hand against expectations written before the replay.
+- `pack.mjs <run-dir>` writes `pack/<run>.zip`: the reports, metrics, settings and
+  each cell's small files, with `MANIFEST.json` (variants and kit commits as
+  measured and as published, the bench commit, the dependency snapshot, the
+  contract evaluator, SHA-256 of every file). It refuses a run whose files
+  disagree: a metrics file of another run, an earlier column's recount of another
+  run, a table built from other data, or a report that does not name the run's
+  kit commit.
+
 ## Metrics
 
 Per cell and per agent:
@@ -124,9 +150,22 @@ Per cell and per agent:
   total and by role (cooperator, workers, auditors, reviewer); for Codex a low and
   a high value, because its logs report no cache writes and OpenAI bills them at
   1.25x input;
+- the price with a cold prompt cache: when a Claude cooperator's first request
+  wrote nothing to the cache, an earlier session with the same prefix had cached
+  it (an aborted attempt at the same paths within the cache lifetime). The
+  tokens beyond the prefix every cell of the run shares are then priced as a
+  cache write. The row appears only when such a cell exists;
+- the route: the cooperator alone, with workers, with or without a reviewer;
+  per group, the price of each route taken;
+- the price of a correct result per group: the spend of all its cells divided by
+  the cells that kept the task's contract (the series' cost, not a forecast);
 - turns per agent: its assignment and every message that continued it; fix
   rounds of the workers, and the auditors' and reviewer's turns;
-- the cooperator's `REVIEW: rounds=<n> findings=<n> real=<n>` lines;
+- the cooperator's `REVIEW: rounds=<n> findings=<n> real=<n>` lines, and the
+  `MODE` the reviewer's packet states (block, stage, or both in one pass);
+- `accept.mjs` calls: snapshots, runs, and closes, counted as commands (not where
+  a message only names the script), and what each close printed: closed, open, or
+  not in the output;
 - tool calls (cooperator, agents, total);
 - model requests;
 - input without cache, cache writes, cache reads, total input, input per request;

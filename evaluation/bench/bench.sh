@@ -98,10 +98,4 @@ for v in "${VARIANTS[@]}"; do
 done
 git -C $KIT_REPO worktree prune
 [[ -n ${DRY:-} ]] && { echo "dry run: set up and cleaned up ${#cells[@]} cells"; exit 0; }
-node $BENCH/metrics.mjs $OUT
-# Earlier runs' cells are recounted by the current metrics.mjs, so every column counts alike.
-[[ -f $OUT/prev.txt ]] && while read -r dir names; do node $BENCH/metrics.mjs $dir $OUT/prev-metrics-${dir:t}.json; done < $OUT/prev.txt
-node $BENCH/isolation.mjs $OUT
-node $BENCH/baseline.mjs $OUT
-node $BENCH/routes.mjs $OUT
-node $BENCH/report.mjs $OUT
+zsh $BENCH/post.sh $OUT
