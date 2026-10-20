@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- `accept.mjs run` started checks with `/bin/sh`, which Windows does not have, so
+  no check could pass there. It now uses `sh` from `PATH` (Git for Windows ships
+  one) and falls back to the platform shell.
+
 ## 1.4.0 — 2026-10-20
 
 - README: measurements with and without the kit on four tasks, three runs per

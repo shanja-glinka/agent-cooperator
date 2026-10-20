@@ -46,7 +46,9 @@ if (command === 'snapshot') {
   fs.mkdirSync(path.join(stateDir, 'logs'), { recursive: true });
   const log = path.join(stateDir, 'logs', `${new Date().toISOString().replace(/[:.]/g, '-')}.log`);
   const out = fs.openSync(log, 'w');
-  const result = spawnSync('/bin/sh', ['-c', check], { stdio: ['ignore', out, out] });
+  // sh from PATH (Git for Windows ships one); without it, the platform shell.
+  let result = spawnSync('sh', ['-c', check], { stdio: ['ignore', out, out] });
+  if (result.error?.code === 'ENOENT') result = spawnSync(check, { shell: true, stdio: ['ignore', out, out] });
   fs.closeSync(out);
   const exit = result.status ?? 1;
   const after = snapshot();
