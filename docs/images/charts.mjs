@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-// Builds the README charts: the kit (1.4.0) against the same model without it, light and dark.
+// Builds the README charts: the kit (1.4.1) against the same model without it, light and dark.
 // Numbers are the measured means from the runs of 2026-10-19 (no kit) and 2026-10-20 (the kit),
-// three runs per task and model, clean runs only (see evaluation/BENCHMARK.md); a value marked *
-// is the actual spend of runs that shared /tmp with other runs. Contract: runs that met the task's
-// contract (the suite's checks, plus on the large task a hidden test of the behavior it must keep).
+// three runs per task and model, clean runs only, priced as if every run started with an empty
+// prompt cache (evaluation/evidence/2026-10-20-v9/COMPARISON.md, evaluation/BENCHMARK.md); a value
+// marked * is the actual spend of runs that shared /tmp with other runs. Contract: runs that met
+// the task's contract (the suite's checks, plus on the large task a hidden test of the behavior it
+// must keep).
 // usage: node docs/images/charts.mjs   writes docs/images/{suite,tasks}-{light,dark}.svg
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,21 +15,21 @@ const THEMES = {
   light: { surface: '#fcfcfb', ink: '#0b0b0b', ink2: '#52514e', muted: '#898781', grid: '#e1e0d9', axis: '#c3c2b7', series: ['#2a78d6', '#eb6834'] },
   dark: { surface: '#1a1a19', ink: '#f0efec', ink2: '#c3c2b7', muted: '#898781', grid: '#2c2c2a', axis: '#383835', series: ['#3987e5', '#d95926'] },
 };
-const SERIES = ['Without the kit', 'With the kit 1.4.0'];
+const SERIES = ['Without the kit', 'With the kit 1.4.1'];
 // [label, [price no kit, price kit], [minutes no kit, minutes kit], [contract no kit, contract kit], spend-only no-kit?]
 const TASKS = [
-  ['Small fix · Opus', [0.65, 1.55], [4.38, 16.3], [3, 3], false],
-  ['Small fix · Sol', [0.39, 0.62], [3.95, 10.7], [3, 3], true],
-  ['Large cleanup · Opus', [4.43, 2.73], [12.4, 20.02], [0, 2], false],
-  ['Large cleanup · Sol', [0.74, 1.31], [7.58, 29.35], [3, 3], true],
-  ['Unknown bug · Opus', [0.43, 0.43], [2.48, 2.13], [3, 3], false],
-  ['Unknown bug · Sol', [0.21, 0.46], [2.22, 8.08], [3, 3], false],
-  ['Patch review · Opus', [0.38, 0.47], [2.43, 2.1], [3, 3], false],
-  ['Patch review · Sol', [0.26, 0.41], [3.0, 5.07], [3, 3], true],
+  ['Small fix · Opus', [0.69, 1.01], [4.38, 7.92], [3, 3], false],
+  ['Small fix · Sol', [0.39, 0.60], [3.95, 9.0], [3, 3], true],
+  ['Large cleanup · Opus', [4.43, 2.96], [12.4, 22.88], [0, 3], false],
+  ['Large cleanup · Sol', [0.74, 1.08], [7.58, 17.57], [3, 3], true],
+  ['Unknown bug · Opus', [0.43, 0.45], [2.48, 2.02], [3, 3], false],
+  ['Unknown bug · Sol', [0.21, 0.52], [2.22, 7.53], [3, 3], false],
+  ['Patch review · Opus', [0.38, 0.43], [2.43, 1.9], [3, 3], false],
+  ['Patch review · Sol', [0.26, 0.49], [3.0, 5.47], [3, 3], true],
 ];
 const SUITE = [
-  ['All four tasks · Opus', [5.89, 5.18], [21.7, 40.5], [9, 11], false],
-  ['All four tasks · Sol', [1.59, 2.81], [16.7, 53.2], [12, 12], true],
+  ['All four tasks · Opus', [5.93, 4.85], [21.7, 34.7], [9, 12], false],
+  ['All four tasks · Sol', [1.59, 2.68], [16.7, 39.6], [12, 12], true],
 ];
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -89,7 +91,7 @@ function chart(rows, panels, theme, { title, subtitle, note }) {
   return out.join('\n') + '\n';
 }
 
-const note = '* actual spend: those runs without the kit shared /tmp with other runs. Price at API list prices; Codex is the lower bound.';
+const note = '* actual spend: those runs without the kit shared /tmp with other runs. API list prices at a cold prompt cache; Codex is the lower bound.';
 const taskPanels = [
   { title: 'Price per task, US$', field: 1, max: 5, ticks: [0, 1, 2, 3, 4, 5], tick: (v) => (v ? `$${v}` : '0'), label: (v) => `$${v.toFixed(2)}`, spend: true },
   { title: 'Wall time, minutes', field: 2, max: 30, ticks: [0, 10, 20, 30], tick: (v) => String(v), label: (v) => mmss(v), spend: true },

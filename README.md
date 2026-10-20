@@ -25,15 +25,17 @@ Independent community project; not affiliated with Anthropic or OpenAI.
 
 Four tasks in one private TypeScript project (a Telegram bot), three runs per
 task and model, each in its own clean checkout: the same task text and the same
-model, once with the kit (1.4.0, default profiles: Claude Code Hybrid with an
+model, once with the kit (1.4.1, default profiles: Claude Code Hybrid with an
 Opus cooperator, Codex Economy with a Sol cooperator) and once without it. Price
-is at API list prices (Codex: the lower bound). A run met the contract when the
-task's own checks passed and, on the large task, a hidden test confirmed that
-the defensive checks on database and JSON data were kept.
+is at API list prices, as if every run started with an empty prompt cache (one
+run without the kit found its prompt already cached); for Codex it is the lower
+bound. A run met the contract when the task's own checks passed and, on the
+large task, a hidden test confirmed that the defensive checks on database and
+JSON data were kept.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/suite-dark.svg">
-  <img alt="All four tasks: with Opus, $5.89 and 9 of 12 runs that met the contract without the kit against $5.18 and 11 of 12 with it; with Sol, $1.59 and 12 of 12 without the kit against $2.81 and 12 of 12 with it. Wall time is longer with the kit." src="docs/images/suite-light.svg">
+  <img alt="All four tasks: with Opus, $5.93 and 9 of 12 runs that met the contract without the kit against $4.85 and 12 of 12 with it; with Sol, $1.59 and 12 of 12 without the kit against $2.68 and 12 of 12 with it. Wall time is longer with the kit." src="docs/images/suite-light.svg">
 </picture>
 
 <picture>
@@ -43,32 +45,89 @@ the defensive checks on database and JSON data were kept.
 
 | Task · model | Without the kit | With the kit |
 | --- | --- | --- |
-| Small fix · Opus | $0.65 · 4:23 · 3 of 3 | $1.55 · 16:18 · 3 of 3 |
-| Small fix · Sol | $0.39* · 3:57* · 3 of 3 | $0.62 · 10:42 · 3 of 3 |
-| Large cleanup · Opus | $4.43 · 12:24 · 0 of 3 | $2.73 · 20:01 · 2 of 3 |
-| Large cleanup · Sol | $0.74* · 7:35* · 3 of 3 | $1.31 · 29:21 · 3 of 3 |
-| Unknown bug · Opus | $0.43 · 2:29 · 3 of 3 | $0.43 · 2:08 · 3 of 3 |
-| Unknown bug · Sol | $0.21 · 2:13 · 3 of 3 | $0.46 · 8:05 · 3 of 3 |
-| Patch review · Opus | $0.38 · 2:26 · 3 of 3 | $0.47 · 2:06 · 3 of 3 |
-| Patch review · Sol | $0.26* · 3:00* · 3 of 3 | $0.41 · 5:04 · 3 of 3 |
-| **All four · Opus** | $5.89 · 21.7 min · 9 of 12 | $5.18 · 40.5 min · 11 of 12 |
-| **All four · Sol** | $1.59* · 16.7 min* · 12 of 12 | $2.81 · 53.2 min · 12 of 12 |
+| Small fix · Opus | $0.69 · 4:23 · 3 of 3 | $1.01 · 7:55 · 3 of 3 |
+| Small fix · Sol | $0.39* · 3:57* · 3 of 3 | $0.60 · 9:00 · 3 of 3 |
+| Large cleanup · Opus | $4.43 · 12:24 · 0 of 3 | $2.96 · 22:53 · 3 of 3 |
+| Large cleanup · Sol | $0.74* · 7:35* · 3 of 3 | $1.08 · 17:34 · 3 of 3 |
+| Unknown bug · Opus | $0.43 · 2:29 · 3 of 3 | $0.45 · 2:01 · 3 of 3 |
+| Unknown bug · Sol | $0.21 · 2:13 · 3 of 3 | $0.52 · 7:32 · 3 of 3 |
+| Patch review · Opus | $0.38 · 2:26 · 3 of 3 | $0.43 · 1:54 · 3 of 3 |
+| Patch review · Sol | $0.26* · 3:00* · 3 of 3 | $0.49 · 5:28 · 3 of 3 |
+| **All four · Opus** | $5.93 · 21.7 min · 9 of 12 | $4.85 · 34.7 min · 12 of 12 |
+| **All four · Sol** | $1.59* · 16.7 min* · 12 of 12 | $2.68 · 39.6 min · 12 of 12 |
 
 Each cell: mean price · mean wall time · runs that met the contract. \* Actual
 spend: those runs without the kit shared `/tmp` with other runs, so they are not
 a clean comparison.
 
-- **Claude Code.** On the large task the kit costs 38% less ($2.73 against
-  $4.43) and keeps the required behavior in 2 runs of 3, where Opus alone kept
-  it in none. Over all four tasks it costs 12% less and meets the contract in 11
-  runs of 12 against 9. It takes about twice as long, and a small task costs
+- **Claude Code.** On the large task the kit costs 33% less ($2.96 against
+  $4.43) and keeps the required behavior in 3 runs of 3, where Opus alone kept
+  it in none. Over all four tasks it costs 18% less and meets the contract in 12
+  runs of 12 against 9. It takes about 1.6 times as long, and a small task costs
   more through a worker and a review than in the session.
 - **Codex.** GPT-6.1 Sol alone is cheap on these tasks and met every contract;
-  with the kit it meets the same contracts at about 1.8 times the price and
-  three times the time.
+  with the kit it meets the same contracts at about 1.7 times the price and 2.4
+  times the time.
+- **Against the previous kit version (1.4.0)** on the same tasks, 1.4.1 met the
+  contract in 24 runs of 24 instead of 23. It was cheaper on both lines (Opus
+  −6%, Sol −5%) and faster (−14% and −26%).
 - One project, four tasks, three runs per cell: an indication, not a guarantee.
   Method: [benchmark](evaluation/BENCHMARK.md); history: [research](docs/research.md).
-  Regenerate the charts with `node docs/images/charts.mjs`.
+  Regenerate the charts with `node docs/images/charts.mjs`. The data and a
+  command that recomputes it: [Check it yourself](#check-it-yourself).
+
+## Check it yourself
+
+### Recompute these numbers
+
+The data behind the charts is in [`evaluation/evidence/`](evaluation/evidence/).
+It holds every cell's metrics and the token counts of every model request. The
+project itself is left out: no code, task texts, transcripts, file names, paths,
+or commits. The evidence lives in the repository only and is not part of the
+npm package that `npx` installs.
+
+One command recomputes every price from the token counts at the list prices in
+[`prices.mjs`](evaluation/bench/prices.mjs), checks the sums per agent and per
+run, and rebuilds the comparison tables byte for byte:
+
+```sh
+git clone https://github.com/shanja-glinka/agent-cooperator.git
+cd agent-cooperator
+node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-20-v9
+```
+
+### Measure your own project
+
+`evaluation/bench/bench.sh` runs each task in a fresh checkout of your
+repository, once per model, variant, and repeat, and writes the comparison.
+
+You need macOS (the scripts use zsh and BSD tools), Node.js 22+, Git, and
+signed-in Claude Code and Codex CLIs. Every cell runs real models, so the runs
+cost what your account pays for them.
+
+1. Make a suite directory. Keep it outside this repository if your project is
+   private.
+   - `suite.env`: `REPO=<your repository>`, `BASE=<commit>`,
+     `TASKS=(<task> ...)`, `CLAUDE_CODE_VERSION=<x.y.z>`, `CODEX_VERSION=<x.y.z>`.
+   - `setup.sh`: installs the project's dependencies in a fresh checkout.
+   - `tasks/<task>.txt`: the prompt, the same for every variant. `{BRANCH}`
+     becomes the cell's branch.
+   - `checks/<task>.sh`: runs in the finished checkout and prints one JSON object
+     of quality fields, with `"Решено": "да"` when the task is solved.
+2. Run the kit against the same models without it:
+
+   ```sh
+   REPEATS=3 PARALLEL=4 MODELS="opus sol" \
+     evaluation/bench/bench.sh <suite-dir> <label> nokit kit=<kit commit>
+   ```
+
+3. Read `evaluation/runs/<date>-<label>/COMPARISON.md`; `METRICS.md` and
+   `metrics.json` hold every metric. To publish a run without your data, run
+   `EVIDENCE_PRIVATE='<names to keep out>' node evaluation/bench/evidence.mjs <run-dir> <out-dir>`.
+   It refuses to write if any of those names, your home path, or your commits
+   would be published.
+
+Details: [benchmark method](evaluation/BENCHMARK.md).
 
 ## Install
 

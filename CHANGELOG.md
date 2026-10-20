@@ -1,7 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.4.1 — 2026-10-21
 
+- Measured on the same four tasks as 1.4.0, three runs per task and model: the
+  contract held in 24 runs of 24 (1.4.0: 23), and both lines cost less (Opus
+  −6%, Sol −5%) and took less time (−14% and −26%). The README charts and table
+  now compare 1.4.1 with the same models without the kit, priced at a cold
+  prompt cache.
+- README: "Check it yourself". The run data is published in
+  `evaluation/evidence/`: per-cell metrics and every model request's token
+  counts, without the private project. `verify-evidence.mjs` recomputes every
+  price and rebuilds the tables. There are also steps to run the benchmark on
+  your own project. The evidence is not part of the npm package.
+- Bench:
+  - `post.sh` recounts a run from its logs;
+  - `accept.mjs` closes are counted from the real calls;
+  - the reviewer's `MODE` is read from its packet;
+  - new metrics: the cold-start price, the route and its price, the price of a
+    correct result;
+  - `replay-review.sh` re-runs a saved review on the same tree with another kit;
+  - `pack.mjs` packs a run for handover;
+  - `evidence.mjs` and `verify-evidence.mjs` publish and check evidence.
 - The reviewer judges a protective site against the inputs the contract covers.
   "Kept" used to accept "the value's real range" as a basis, and in a measured
   run a reviewer drew that range from today's callers and accepted a changed

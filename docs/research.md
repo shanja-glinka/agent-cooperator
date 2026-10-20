@@ -1,12 +1,68 @@
 # Research and routing rationale
 
-The v8, v7, v6, and v5 sections below were prepared on 2026-10-20 and the Route
-Decision synthesis on 2026-10-19, all for both editions.
+The v9, v8, v7, v6, and v5 sections below were prepared on 2026-10-20 and the
+Route Decision synthesis on 2026-10-19, all for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v9 (release 1.4.1) — 2026-10-20: the basis of a kept verdict
+
+Claude policy 1.10.0, Codex policy 1.12.0, unchanged.
+
+An external audit of the v8 report and a recount of its logs found three
+things:
+
+- **The reviewer accepted a contract break that it had listed itself.** In one
+  large Claude task the reviewer listed both changed fallbacks on database data
+  (`|| null` to `?? null`, `|| {}` to `?? {}`). It marked them kept because
+  today's callers normalize the input, yet the task's contract protects those
+  checks. The skill allowed this: "kept" accepted "the value's real range" as a
+  basis without tying it to the inputs the contract covers.
+- **v7 started with a warm cache.** Five of twelve v7 Opus cells found their
+  whole prompt prefix already cached, written by an aborted attempt of the same
+  cells less than an hour earlier. Priced cold, v8 on Opus cost 8% more than
+  v7, not 14%.
+- **Two counters were wrong.**
+  - `accept.mjs` was used for 14 closes, all closed. The counter had taken a
+    commit message that mentioned the script for a close, and read only one of
+    two closes in one command.
+  - The reviewer's `MODE` is in its packet: in 4 of 10 delegated Codex cells one
+    reviewer did block and stage review in one pass.
+
+v9 changes only what "kept" means for the reviewer:
+
+- the same results and errors for every input the contract covers;
+- outside data (a database row, a message, parsed JSON, an environment
+  variable), and any value taken from it, can hold anything;
+- a guard counts when the code under review runs it itself;
+- a guard in today's callers counts only when the contract protects an outer
+  behavior and every path to it is traced;
+- a violated or not-established site keeps the block not accepted.
+
+Before the series, the reviewer alone was replayed on saved results, with the
+same packets on the same trees.
+
+- **First wording** ("a guard … on the same path is a basis"): one replay of
+  three still accepted the break, by counting the callers' normalization as a
+  guard on the path.
+- **Final wording:** the break was caught in 6 of 6 replays on two results, one
+  of which the patch had not seen. On a correct result there was no false
+  finding (0 of 3). Elsewhere there was one low-severity false finding (1 of 9).
+
+The v9 series ran 24 cells with the same tasks, models, and launch layers. The
+no-kit and v8 cells were taken from their own runs.
+
+- **Contract:** held in 24 of 24 (v8: 23).
+- **Opus line:** $4.85 against v8's $5.18 (−6%), 34.7 minutes (−14%).
+- **Sol line:** $2.68 against $2.81 (−5%), 39.6 minutes (−26%).
+- **Mechanics:** 0 Codex wait timeouts; 11 `accept.mjs` closes, all closed.
+- **Large Claude task:** the reviewers made 2, 1, and 3 real findings, and none
+  reached the final code (contract 3 of 3; v8: 2 of 3).
+
+The data and a command that recomputes it are in `evaluation/evidence/`.
 
 ## v8 — 2026-10-20: review against the contract
 
