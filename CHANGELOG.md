@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.4.2 — 2026-10-21
+
+- Measurements only; the kit is the same as in 1.4.1. The Sol line was measured
+  again (12 runs) after the Codex hooks in one home were found pointing at a
+  removed Node.js. Bench cells use their own Codex home, and the logs show no
+  hook or tool errors in either run. One run stopped when the API answered
+  "Selected model is at capacity" and was run again alone.
+- The README charts and table now show this run: with the kit, Sol met the
+  contract in 12 runs of 12 at $3.32 and 68.7 minutes for all four tasks
+  (first run: $2.68 and 39.6 minutes; 1.4.0: $2.81 and 53.2 minutes). That day
+  each Sol request took 12–16 s instead of 7–9 s. On the large task the reviewer
+  sent the work back about twice as often as with 1.4.0. The Opus line is
+  unchanged.
+- Evidence: `evaluation/evidence/2026-10-21-v9-sol-rerun/`, checked by
+  `verify-evidence.mjs` like the first run.
+
 ## 1.4.1 — 2026-10-21
 
 - Measured on the same four tasks as 1.4.0, three runs per task and model: the
