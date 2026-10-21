@@ -148,8 +148,10 @@ None of these runs a cooperator again:
   `EVIDENCE_PRIVATE`, the home path, or a commit of the private repository.
 - `verify-evidence.mjs <evidence-run-dir>` recomputes every request's price
   from its tokens, checks each agent's and each cell's sums (the cold-start
-  price included), and rebuilds `METRICS.md` and `COMPARISON.md` in a copy to
-  compare them byte for byte. The published evidence is in `evaluation/evidence/`.
+  price and the long-prompt surcharge included), and rebuilds `METRICS.md` and
+  `COMPARISON.md` in a copy to compare them byte for byte. It checks the
+  arithmetic and the tables, not the contract verdicts: the hidden tests stay
+  with the private suite. The published evidence is in `evaluation/evidence/`.
 
 ## Metrics
 
@@ -161,26 +163,39 @@ Per cell and per agent:
   total and by role (cooperator, workers, auditors, reviewer); for Codex a low and
   a high value, because its logs report no cache writes and OpenAI bills them at
   1.25x input;
+- the long-prompt surcharge: what requests above a tier (Haiku above 100k
+  tokens of prompt, OpenAI above 272k) added against the same tokens at the base
+  tier;
 - the price with a cold prompt cache: when a Claude cooperator's first request
   wrote nothing to the cache, an earlier session with the same prefix had cached
   it (an aborted attempt at the same paths within the cache lifetime). The
   tokens beyond the prefix every cell of the run shares are then priced as a
-  cache write. The row appears only when such a cell exists;
-- the route: the cooperator alone, with workers, with or without a reviewer;
-  per group, the price of each route taken;
+  cache write; the shared prefix (the tool definitions) stays a cache read. The
+  row appears only when such a cell exists;
+- the route: the cooperator alone, with workers, with its own forks (Claude
+  Code's generic agents, not the kit's roles), with or without a reviewer; per
+  group, the price of each route taken;
 - the price of a correct result per group: the spend of all its cells divided by
   the cells that kept the task's contract (the series' cost, not a forecast);
-- turns per agent: its assignment and every message that continued it; fix
-  rounds of the workers, and the auditors' and reviewer's turns;
+- turns per agent: its assignment and every message that continued it; the
+  workers' continuations (turns beyond the first assignment: fixes, follow-ups
+  and continuations alike), and the auditors' and reviewer's turns;
+- files of the result written after the last review turn began: `cell.sh`
+  records when each file of the final diff was last written, before the check
+  builds, and the metrics compare it with the start of the reviewer's last turn;
 - the cooperator's `REVIEW: rounds=<n> findings=<n> real=<n>` lines, and the
   `MODE` the reviewer's packet states (block, stage, or both in one pass);
 - `accept.mjs` calls: snapshots, runs, and closes, counted as commands (not where
   a message only names the script), and what each close printed: closed, open, or
   not in the output;
 - tool calls (cooperator, agents, total);
-- model requests;
+- model requests, and the model's seconds per request for the cooperator, the
+  workers and the reviewer: from the input a request answers to its response,
+  without tool runs and waits for agents. It shows the API's speed on the day of
+  the run, so a slow day is visible;
 - input without cache, cache writes, cache reads, total input, input per request;
-- output and thinking tokens;
+- output and thinking tokens (in a Claude cell, the session's thinking plus the
+  reasoning of the Codex runs it started);
 - handoffs;
 - messages to and from agents;
 - `sleep`/`wait_agent`; for a Codex cooperator, the waits that ended on their

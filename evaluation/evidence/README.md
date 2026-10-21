@@ -15,7 +15,10 @@ It recomputes the price of every model request from its token counts at the
 list prices in [`prices.mjs`](../bench/prices.mjs). It checks each agent's and
 each cell's sums and the cold-start prices. Then it rebuilds `METRICS.md` and
 `COMPARISON.md` from the published files in a copy and compares them byte for
-byte.
+byte. It also recomputes what the long-prompt tiers added to each agent's price.
+
+It checks the arithmetic and the tables, not the contract verdicts: those come
+from the private project's hidden tests, which are not published.
 
 ## What is here
 
@@ -47,6 +50,9 @@ path, or a commit of the private repository would be published.
   On the large task it also needs the hidden contract test (`Контракт
   выполнен`): the defensive checks on database and JSON data must stay.
 - Prices are API list prices. For Codex they are the lower bound, because its
-  logs do not report cache writes. The cold-start price assumes an empty prompt
-  cache at the start (see `evaluation/BENCHMARK.md`).
+  logs do not report cache writes. The cold-start price reprices a prompt an
+  earlier session had cached: the part beyond the prefix every cell of the run
+  shares counts as a cache write (see `evaluation/BENCHMARK.md`).
+- Seconds per request are the model's response time without tool runs and waits
+  for agents: the API's speed on the day of the run.
 - The tables are in Russian, like the bench's own output.

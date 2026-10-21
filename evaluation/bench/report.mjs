@@ -30,17 +30,22 @@ const ROWS = [
   ['Цена, верхняя оценка, $', (c) => c.totals.usdHigh ?? null, usd],
   ['Цена: кооператор, $', role('cooperator'), usd], ['Цена: воркеры, $', role('worker'), usd],
   ['Цена: аудиторы, $', role('auditor'), usd], ['Цена: ревьюер, $', role('reviewer'), usd],
+  ['Цена: свои fork-агенты сессии, $', role('other'), usd],
+  ['Надбавка за длинный промпт, $', (c) => c.totals.tierPremium ?? null, usd],
   ['Запросы кооператора', (c) => c.totals.cooperatorRequests ?? null, k],
   // Only a Codex cooperator waits with wait_agent; a Claude one is notified.
   ['Ожиданий кооператора, кончившихся таймаутом', (c) => (c.model === 'opus' ? null : c.waits.timedOut ?? null), k],
   ['Цена запросов после таймаута ожидания, $', (c) => (c.model === 'opus' ? null : c.waits.wakeUsd ?? null), usd],
   ['Условий accepted_if закрыто без ревьюера', (c) => c.accept?.closed ?? null, k],
-  ['Ходов воркеров', (c) => c.totals.workerTurns ?? null, k], ['Кругов исправлений', (c) => c.totals.fixRounds ?? null, k],
+  ['Ходов воркеров', (c) => c.totals.workerTurns ?? null, k], ['Продолжений воркеров', (c) => c.totals.workerContinuations ?? null, k],
   ['Наибольший промпт воркера', (c) => c.totals.workerMaxPrompt || null, k],
   ['Запросов воркеров выше тарифного порога', (c) => c.totals.workerOverTier ?? null, k],
   ['Ходов аудиторов', (c) => c.totals.auditorTurns ?? null, k], ['Ходов ревьюера', (c) => c.totals.reviewerTurns ?? null, k],
   ['Вызовы инструментов: кооператор', (c) => c.totals.toolCallsCooperator, k], ['Вызовы инструментов: агенты', (c) => c.totals.toolCallsAgents, k],
   ['Вызовы инструментов', (c) => c.totals.toolCalls, k], ['Запросы к модели', (c) => c.totals.requests, k],
+  ['Секунд на запрос: кооператор', (c) => c.totals.secPerRequest?.cooperator ?? null, k],
+  ['Секунд на запрос: воркеры', (c) => c.totals.secPerRequest?.worker ?? null, k],
+  ['Секунд на запрос: ревьюер', (c) => c.totals.secPerRequest?.reviewer ?? null, k],
   ['Вход без кэша', (c) => c.totals.input, k], ['Запись в кэш', (c) => c.totals.cacheWrite, k], ['Чтение кэша', (c) => c.totals.cacheRead, k],
   ['Вход всего', (c) => c.totals.inputTotal, k], ['Вход на запрос', (c) => (c.totals.requests ? c.totals.inputTotal / c.totals.requests : null), k],
   ['Выход', (c) => c.totals.output, k], ['Мышление', (c) => c.totals.thinking, k],
@@ -58,8 +63,11 @@ const TEXT = [
   ['Режим ревью (MODE ревьюера)', (c) => (c.reviewModes?.length ? c.reviewModes.join(', ') : '—')],
   ['accept.mjs: закрытий / закрыто / открыто / не разобрано', (c) => (c.accept?.closes ? `${c.accept.closes} / ${c.accept.closed} / ${c.accept.open} / ${c.accept.unknown ?? 0}` : '—')],
   ['Кэш промпта на старте (Claude)', (c) => (c.warmStart ? `прогрет, ${k(c.warmStart.tokens)}` : c.warmStart === false ? 'холодный' : '—')],
+  ['Файлов результата записано после начала последнего ревью', (c) => (c.postReview ? `${c.postReview.files} из ${c.postReview.total}` : '—')],
 ];
-const ROUTE = { solo: 'сам', worker: 'воркер без ревью', 'worker+review': 'воркер + ревью', 'solo+review': 'сам + ревью' };
+const ROUTE = { solo: 'сам', worker: 'воркер без ревью', 'worker+review': 'воркер + ревью', 'solo+review': 'сам + ревью', fork: 'сам + свои fork', 'fork+review': 'сам + свои fork + ревью' };
+// A text row whose every cell is empty says nothing for these cells.
+const emptyText = (v) => /^—( · —)*$/.test(v);
 const route = (c) => {
   const agents = c.actors.filter((a) => a.role !== 'cooperator');
   if (!agents.length) return 'сам';
@@ -96,6 +104,7 @@ const useful = (title, get, cs) => {
   if (vals.every((v) => v == null)) return false;
   if (title === 'Цена, верхняя оценка, $') return cs.some((c) => Math.abs((c.totals.usdHigh ?? 0) - (c.totals.usd ?? 0)) > 0.005);
   if (title === 'Цена с холодным стартом кэша, $') return cs.some((c) => c.warmStart);
+  if (title === 'Цена: свои fork-агенты сессии, $' || title === 'Надбавка за длинный промпт, $') return cs.some((c) => (get(c) ?? 0) > 0.005);
   return true;
 };
 // Group rows. The spend of all the group's cells per cell that kept the contract: what one correct
@@ -128,7 +137,7 @@ const tasks = [...new Set(data.cells.map((c) => c.task))].sort((a, b) => (order.
 const models = [...new Set(data.cells.map((c) => c.model))];
 const modelName = (m) => (m === 'opus' ? 'Opus 5.5' : m === 'sol' ? 'GPT-6.1 Sol' : m);
 
-const legend = 'Значения — по ячейкам с чистой изоляцией; группа без таких ячеек помечена * (фактический расход), её разницы не считаются. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс). Цена — по API-прайсу (prices.mjs); у Codex нижняя оценка, верхняя — отдельной строкой, если отличается. Цена с холодным стартом кэша — как если бы кэш промпта на старте был пуст: если первый запрос кооператора Claude нашёл весь свой префикс уже в кэше (его записала более ранняя сессия с тем же префиксом, например прерванный запуск тех же путей), этот префикс оценён как запись в кэш; строка есть, только когда такие ячейки были. Цена корректного результата — расход всех ячеек группы, делённый на число ячеек с выполненным контрактом.';
+const legend = 'Значения — по ячейкам с чистой изоляцией; группа без таких ячеек помечена * (фактический расход), её разницы не считаются. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс). Цена — по API-прайсу (prices.mjs); у Codex нижняя оценка, верхняя — отдельной строкой, если отличается. Цена с холодным стартом кэша — без чужого прогрева: если первый запрос кооператора Claude нашёл весь свой префикс уже в кэше (его записала более ранняя сессия с тем же префиксом, например прерванный запуск тех же путей), часть префикса сверх общей для всех ячеек прогона (определения инструментов) оценена как запись в кэш; общая часть остаётся чтением; строка есть, только когда такие ячейки были. Цена корректного результата — расход всех ячеек группы, делённый на число ячеек с выполненным контрактом. Надбавка за длинный промпт — что добавили запросы выше тарифного порога (Haiku выше 100k, OpenAI выше 272k) против тех же токенов по базовому тарифу. Секунд на запрос — время ответа модели на один запрос без работы инструментов и ожидания агентов: скорость API в день прогона. Продолжения воркеров — ходы воркеров сверх первого задания: исправления, уточнения и продолжения вместе. Файлов результата записано после начала последнего ревью — файлы итогового диффа, время последней записи которых позже начала последнего хода ревьюера.';
 const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.variants.join(', ')}. Полные данные — metrics.json. ${legend}`, '', `Источники: ${sources()}.`, ''];
 const comparison = [`# Сравнение: ${data.run}`, '', `Без кита | ${prev ?? '—'} | ${next}${extras.length ? ` | ${extras.join(' | ')}` : ''}. ${legend}`, '', `Источники: ${sources()}.`, ''];
 // Cells taken from earlier runs ran on another day and under those runs' conditions.
@@ -149,7 +158,7 @@ for (const task of tasks) for (const model of models) {
   }
   for (const [title, get] of GROUP) if (groupUseful(title, all)) rowsAll.push([title, ...groups.map((cs) => showGroup(cs, get))]);
   rowsAll.push(['Цена по типу маршрута, холодный старт, $', ...groups.map((cs) => (cs.length ? byRoute(cs) : '—'))]);
-  for (const [title, get] of TEXT) rowsAll.push([title, ...groups.map((cs) => perCell(cs, get))]);
+  for (const [title, get] of TEXT) { const vals = groups.map((cs) => perCell(cs, get)); if (!vals.every(emptyText)) rowsAll.push([title, ...vals]); }
   for (const q of qkeys) rowsAll.push([q, ...groups.map((cs) => perCell(cs, (c) => c.quality?.[q]))]);
   metrics.push(`## ${task} — ${modelName(model)}`, '', table(['Метрика', ...names.map(label)], rowsAll), '');
 
@@ -172,7 +181,7 @@ for (const task of tasks) for (const model of models) {
   }
   const blanks = [...(prev ? [''] : []), '', ...(prev ? [''] : []), ...ex.map(() => '')];
   rows.push(['Цена по типу маршрута, холодный старт, $', ...cols.map(([, cs]) => (cs.length ? byRoute(cs) : '—')), ...blanks]);
-  for (const [title, get] of TEXT) rows.push([title, ...cols.map(([, cs]) => perCell(cs, get)), ...blanks]);
+  for (const [title, get] of TEXT) { const vals = cols.map(([, cs]) => perCell(cs, get)); if (!vals.every(emptyText)) rows.push([title, ...vals, ...blanks]); }
   for (const q of qkeys) rows.push([q, ...cols.map(([, cs]) => perCell(cs, (c) => c.quality?.[q])), ...blanks]);
   comparison.push(`## ${task} — ${modelName(model)}`, '', table(head, rows), '');
 }

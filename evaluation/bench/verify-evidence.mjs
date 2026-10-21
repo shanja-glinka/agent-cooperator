@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Checks published evidence (evidence.mjs) without the private suite. It recomputes the price of
 // every model request from its tokens at the list prices in prices.mjs, and checks each agent's and
-// each cell's sums in metrics.json and in the earlier columns. It recomputes the cold-start prices.
+// each cell's sums in metrics.json and in the earlier columns, and what the long-prompt tiers added.
+// It recomputes the cold-start prices.
 // Then it rebuilds METRICS.md and COMPARISON.md from the published files with report.mjs in a copy
 // and compares them byte for byte with the published ones.
 // usage: verify-evidence.mjs <evidence-run-dir>   e.g. evaluation/evidence/2026-10-20-v9
@@ -9,7 +10,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { claudeReadAsWrite, claudeUsd, openaiUsd } from './prices.mjs';
+import { claudeReadAsWrite, claudeUsd, claudeUsdBaseTier, openaiUsd, openaiUsdBaseTier } from './prices.mjs';
 
 const dir = path.resolve(process.argv[2] ?? '');
 if (!fs.existsSync(path.join(dir, 'metrics.json'))) { console.error('usage: verify-evidence.mjs <evidence-run-dir>'); process.exit(64); }
@@ -32,19 +33,24 @@ function verify(label, metricsFile, requestsFile) {
     let cellUsd = 0;
     c.actors.forEach((a, i) => {
       const list = by.get(`${c.id}#${i}`) ?? [];
-      const s = { usd: 0, input: 0, cacheRead: 0, output: 0, cacheWrite: 0 };
+      const s = { usd: 0, input: 0, cacheRead: 0, output: 0, cacheWrite: 0, tierPremium: 0 };
       for (const r of list) {
         if ('in' in r) {
-          s.usd += claudeUsd({ model: r.model, in: r.in, w5: r.w5, w1: r.w1, hit: r.cr, out: r.out }) ?? 0;
+          const req = { model: r.model, in: r.in, w5: r.w5, w1: r.w1, hit: r.cr, out: r.out };
+          const usd = claudeUsd(req) ?? 0;
+          s.usd += usd; s.tierPremium += usd - (claudeUsdBaseTier(req) ?? usd);
           s.input += r.in; s.cacheWrite += r.w5 + r.w1; s.cacheRead += r.cr; s.output += r.out;
         } else {
-          s.usd += openaiUsd(r.model, { input_tokens: r.input, cached_input_tokens: r.cached, cache_write_input_tokens: r.cacheWrite, output_tokens: r.output })?.low ?? 0;
+          const u = { input_tokens: r.input, cached_input_tokens: r.cached, cache_write_input_tokens: r.cacheWrite, output_tokens: r.output };
+          const usd = openaiUsd(r.model, u)?.low ?? 0;
+          s.usd += usd; s.tierPremium += usd - (openaiUsdBaseTier(r.model, u) ?? usd);
           s.input += r.input - r.cached; s.cacheRead += r.cached; s.output += r.output;
         }
       }
       const where = `${label} ${c.id} actor ${i} (${a.role})`;
       if (list.length !== a.requests) problems.push(`${where}: ${list.length} requests published, metrics say ${a.requests}`);
       if (!close(s.usd, a.usd)) problems.push(`${where}: price recomputes to $${s.usd.toFixed(6)}, metrics say $${(a.usd ?? 0).toFixed(6)}`);
+      if (a.tierPremium != null && !close(s.tierPremium, a.tierPremium)) problems.push(`${where}: long-prompt surcharge recomputes to $${s.tierPremium.toFixed(6)}, metrics say $${a.tierPremium.toFixed(6)}`);
       for (const f of ['input', 'cacheRead', 'output']) if (s[f] !== (a[f] ?? 0)) problems.push(`${where}: ${f} ${s[f]} published, metrics say ${a[f]}`);
       if (a.cacheWrite != null && s.cacheWrite !== a.cacheWrite) problems.push(`${where}: cache writes ${s.cacheWrite} published, metrics say ${a.cacheWrite}`);
       if (i === 0 && a.role === 'cooperator' && list[0] && 'in' in list[0]) firsts.set(c.id, { read: list[0].cr, write: list[0].w5 + list[0].w1, ttl: list[0].w1 > 0 ? '1h' : '5m', model: list[0].model });

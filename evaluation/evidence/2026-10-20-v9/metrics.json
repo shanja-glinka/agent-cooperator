@@ -35,6 +35,8 @@
      "usdHigh": 1.3530536,
      "maxPrompt": 86443,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 183.80800000000005,
      "firstRequest": {
       "read": 10728,
       "write": 19371,
@@ -64,6 +66,8 @@
      "usdHigh": 0.16297612,
      "maxPrompt": 120239,
      "overTier": 10,
+     "tierPremium": 0.09191114,
+     "modelSeconds": 310.981,
      "thinking": null
     },
     {
@@ -87,6 +91,8 @@
      "usdHigh": 0.183553195,
      "maxPrompt": 127878,
      "overTier": 11,
+     "tierPremium": 0.10059012,
+     "modelSeconds": 399.133,
      "thinking": null
     },
     {
@@ -111,6 +117,8 @@
      "usdHigh": 0.30326917999999997,
      "maxPrompt": 147807,
      "overTier": 18,
+     "tierPremium": 0.19960476,
+     "modelSeconds": 430.07599999999996,
      "thinking": null
     },
     {
@@ -134,7 +142,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.702866,
-     "usdHigh": 0.7698485
+     "usdHigh": 0.7698485,
+     "tierPremium": 0,
+     "modelSeconds": 442.4749999999999
     }
    ],
    "skills": [
@@ -172,7 +182,7 @@
    ],
    "exitCode": 0,
    "wallSeconds": 1185,
-   "thinking": 201903,
+   "thinking": 212713,
    "modelUsage": {
     "claude-opus-5-5": {
      "inputTokens": 62,
@@ -214,7 +224,7 @@
     "cacheWrite": 458512,
     "cacheRead": 12177398,
     "output": 297915,
-    "thinking": 201903,
+    "thinking": 212713,
     "usd": 2.705718095,
     "usdHigh": 2.772700595,
     "usdAgents": 1.352664495,
@@ -230,7 +240,13 @@
     "workerTurns": 6,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 3,
+    "workerContinuations": 3,
+    "tierPremium": 0.39210602,
+    "secPerRequest": {
+     "cooperator": 5.929290322580647,
+     "worker": 10.460458715596332,
+     "reviewer": 18.43645833333333
+    },
     "cooperatorRequests": 31,
     "cooperatorTurns": 6,
     "workerMaxPrompt": 147807,
@@ -241,6 +257,7 @@
     "usdCold": 2.705718095
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -308,6 +325,8 @@
      "usdHigh": 1.3602122,
      "maxPrompt": 88385,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 458.527,
      "firstRequest": {
       "read": 10728,
       "write": 19371,
@@ -339,6 +358,8 @@
      "usdHigh": 0.27202294499999996,
      "maxPrompt": 126652,
      "overTier": 15,
+     "tierPremium": 0.17627259999999997,
+     "modelSeconds": 332.045,
      "thinking": null
     },
     {
@@ -362,6 +383,8 @@
      "usdHigh": 0.5156801849999999,
      "maxPrompt": 190628,
      "overTier": 33,
+     "tierPremium": 0.3728252799999999,
+     "modelSeconds": 571.835,
      "thinking": null
     },
     {
@@ -385,6 +408,8 @@
      "usdHigh": 0.294871365,
      "maxPrompt": 137276,
      "overTier": 25,
+     "tierPremium": 0.19079158,
+     "modelSeconds": 416.38799999999986,
      "thinking": null
     },
     {
@@ -408,7 +433,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.48830400000000007,
-     "usdHigh": 0.5373684999999999
+     "usdHigh": 0.5373684999999999,
+     "tierPremium": 0,
+     "modelSeconds": 362.53999999999996
     }
    ],
    "skills": [
@@ -446,7 +473,7 @@
    ],
    "exitCode": 0,
    "wallSeconds": 1594,
-   "thinking": 219911,
+   "thinking": 229388,
    "modelUsage": {
     "claude-opus-5-5": {
      "inputTokens": 60,
@@ -488,7 +515,7 @@
     "cacheWrite": 638670,
     "cacheRead": 16259777,
     "output": 317256,
-    "thinking": 219911,
+    "thinking": 229388,
     "usd": 2.931090695,
     "usdHigh": 2.980155195,
     "usdAgents": 1.5708784949999999,
@@ -504,7 +531,13 @@
     "workerTurns": 7,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 4,
+    "workerContinuations": 4,
+    "tierPremium": 0.7398894599999999,
+    "secPerRequest": {
+     "cooperator": 15.284233333333333,
+     "worker": 8.981414965986394,
+     "reviewer": 20.14111111111111
+    },
     "cooperatorRequests": 30,
     "cooperatorTurns": 7,
     "workerMaxPrompt": 190628,
@@ -515,6 +548,7 @@
     "usdCold": 2.931090695
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -581,6 +615,8 @@
      "usdHigh": 1.5050168,
      "maxPrompt": 87327,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 261.9119999999999,
      "firstRequest": {
       "read": 10728,
       "write": 19371,
@@ -610,6 +646,8 @@
      "usdHigh": 0.21168189000000004,
      "maxPrompt": 126936,
      "overTier": 16,
+     "tierPremium": 0.12472184,
+     "modelSeconds": 350.5420000000001,
      "thinking": null
     },
     {
@@ -636,6 +674,8 @@
      "usdHigh": 0.5737178100000001,
      "maxPrompt": 191757,
      "overTier": 38,
+     "tierPremium": 0.41097014,
+     "modelSeconds": 624.9909999999999,
      "thinking": null
     },
     {
@@ -659,6 +699,8 @@
      "usdHigh": 0.24624361000000003,
      "maxPrompt": 134365,
      "overTier": 18,
+     "tierPremium": 0.15597216000000003,
+     "modelSeconds": 383.218,
      "thinking": null
     },
     {
@@ -682,7 +724,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.7061736000000001,
-     "usdHigh": 0.7670151000000001
+     "usdHigh": 0.7670151000000001,
+     "tierPremium": 0,
+     "modelSeconds": 435.162
     }
    ],
    "skills": [
@@ -720,7 +764,7 @@
    ],
    "exitCode": 0,
    "wallSeconds": 1341,
-   "thinking": 213170,
+   "thinking": 224829,
    "modelUsage": {
     "claude-opus-5-5": {
      "inputTokens": 80,
@@ -762,7 +806,7 @@
     "cacheWrite": 520903,
     "cacheRead": 18944702,
     "output": 329815,
-    "thinking": 213170,
+    "thinking": 224829,
     "usd": 3.24283371,
     "usdHigh": 3.30367521,
     "usdAgents": 1.7378169100000003,
@@ -778,7 +822,13 @@
     "workerTurns": 6,
     "auditorTurns": 0,
     "reviewerTurns": 2,
-    "fixRounds": 3,
+    "workerContinuations": 3,
+    "tierPremium": 0.69166414,
+    "secPerRequest": {
+     "cooperator": 6.547799999999998,
+     "worker": 8.439447204968944,
+     "reviewer": 15.5415
+    },
     "cooperatorRequests": 40,
     "cooperatorTurns": 9,
     "workerMaxPrompt": 191757,
@@ -789,6 +839,7 @@
     "usdCold": 3.24283371
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 2,
@@ -858,7 +909,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.5103011999999999,
-     "usdHigh": 0.5549097000000001
+     "usdHigh": 0.5549097000000001,
+     "tierPremium": 0,
+     "modelSeconds": 250.35199999999998
     },
     {
      "role": "worker",
@@ -884,7 +937,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.10864874000000001,
-     "usdHigh": 0.112853815
+     "usdHigh": 0.112853815,
+     "tierPremium": 0,
+     "modelSeconds": 516.822
     },
     {
      "role": "worker",
@@ -908,7 +963,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.0603973,
-     "usdHigh": 0.06280497500000001
+     "usdHigh": 0.06280497500000001,
+     "tierPremium": 0,
+     "modelSeconds": 371.439
     },
     {
      "role": "worker",
@@ -932,7 +989,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.056373,
-     "usdHigh": 0.05842019999999999
+     "usdHigh": 0.05842019999999999,
+     "tierPremium": 0,
+     "modelSeconds": 348.03599999999994
     },
     {
      "role": "reviewer",
@@ -956,7 +1015,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.3498664,
-     "usdHigh": 0.39359789999999995
+     "usdHigh": 0.39359789999999995,
+     "tierPremium": 0,
+     "modelSeconds": 201.80399999999997
     }
    ],
    "skills": [],
@@ -1024,7 +1085,13 @@
     "workerTurns": 5,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 2,
+    "workerContinuations": 2,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 6.4192820512820505,
+     "worker": 8.526186206896552,
+     "reviewer": 14.414571428571426
+    },
     "cooperatorRequests": 39,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 156051,
@@ -1035,6 +1102,7 @@
     "usdCold": 1.0855866399999998
    },
    "route": "worker+review",
+   "postReview": null,
    "review": null,
    "warmStart": null,
    "quality": {
@@ -1095,7 +1163,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.4543499999999999,
-     "usdHigh": 0.4939845000000001
+     "usdHigh": 0.4939845000000001,
+     "tierPremium": 0,
+     "modelSeconds": 205.91799999999995
     },
     {
      "role": "worker",
@@ -1118,7 +1188,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.05100050000000001,
-     "usdHigh": 0.05373642499999999
+     "usdHigh": 0.05373642499999999,
+     "tierPremium": 0,
+     "modelSeconds": 343.804
     },
     {
      "role": "worker",
@@ -1142,7 +1214,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.04233433999999999,
-     "usdHigh": 0.04416096500000001
+     "usdHigh": 0.04416096500000001,
+     "tierPremium": 0,
+     "modelSeconds": 307.88399999999996
     },
     {
      "role": "worker",
@@ -1166,7 +1240,9 @@
      "overTier": 0,
      "compactions": 1,
      "usd": 0.13460087999999995,
-     "usdHigh": 0.13924102999999993
+     "usdHigh": 0.13924102999999993,
+     "tierPremium": 0,
+     "modelSeconds": 830.0829999999999
     },
     {
      "role": "reviewer",
@@ -1190,7 +1266,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.43386680000000005,
-     "usdHigh": 0.48168079999999996
+     "usdHigh": 0.48168079999999996,
+     "tierPremium": 0,
+     "modelSeconds": 247.539
     }
    ],
    "skills": [],
@@ -1258,7 +1336,13 @@
     "workerTurns": 5,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 2,
+    "workerContinuations": 2,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.418894736842104,
+     "worker": 10.58407857142857,
+     "reviewer": 11.787571428571429
+    },
     "cooperatorRequests": 38,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 171909,
@@ -1269,6 +1353,7 @@
     "usdCold": 1.11615252
    },
    "route": "worker+review",
+   "postReview": null,
    "review": null,
    "warmStart": null,
    "quality": {
@@ -1332,7 +1417,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.4698292,
-     "usdHigh": 0.5046146999999999
+     "usdHigh": 0.5046146999999999,
+     "tierPremium": 0,
+     "modelSeconds": 250.97200000000004
     },
     {
      "role": "worker",
@@ -1356,7 +1443,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.03612354,
-     "usdHigh": 0.038499240000000004
+     "usdHigh": 0.038499240000000004,
+     "tierPremium": 0,
+     "modelSeconds": 226.867
     },
     {
      "role": "worker",
@@ -1380,7 +1469,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.07347537999999999,
-     "usdHigh": 0.07612157999999998
+     "usdHigh": 0.07612157999999998,
+     "tierPremium": 0,
+     "modelSeconds": 485.791
     },
     {
      "role": "reviewer",
@@ -1404,7 +1495,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.45093079999999996,
-     "usdHigh": 0.49878230000000007
+     "usdHigh": 0.49878230000000007,
+     "tierPremium": 0,
+     "modelSeconds": 306.406
     }
    ],
    "skills": [],
@@ -1472,7 +1565,13 @@
     "workerTurns": 3,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 1,
+    "workerContinuations": 1,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.703909090909092,
+     "worker": 10.797848484848485,
+     "reviewer": 18.023882352941175
+    },
     "cooperatorRequests": 44,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 126553,
@@ -1483,6 +1582,7 @@
     "usdCold": 1.0303589199999998
    },
    "route": "worker+review",
+   "postReview": null,
    "review": null,
    "warmStart": null,
    "quality": {
@@ -1539,6 +1639,8 @@
      "usdHigh": 0.40144860000000004,
      "maxPrompt": 40048,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 41.701,
      "firstRequest": {
       "read": 10728,
       "write": 19356,
@@ -1625,7 +1727,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 3.791,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 11,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -1636,6 +1744,7 @@
     "usdCold": 0.40144860000000004
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -1688,6 +1797,8 @@
      "usdHigh": 0.4450554,
      "maxPrompt": 42678,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 53.683,
      "firstRequest": {
       "read": 10728,
       "write": 19356,
@@ -1774,7 +1885,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.3683,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 10,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -1785,6 +1902,7 @@
     "usdCold": 0.4450554
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -1837,6 +1955,8 @@
      "usdHigh": 0.4399538,
      "maxPrompt": 42396,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 56.848,
      "firstRequest": {
       "read": 10728,
       "write": 19356,
@@ -1923,7 +2043,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 7.106,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 8,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -1934,6 +2060,7 @@
     "usdCold": 0.4399538
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -1989,7 +2116,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.2568528,
-     "usdHigh": 0.28830279999999997
+     "usdHigh": 0.28830279999999997,
+     "tierPremium": 0,
+     "modelSeconds": 101.148
     },
     {
      "role": "worker",
@@ -2013,7 +2142,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.01702708,
-     "usdHigh": 0.018481555
+     "usdHigh": 0.018481555,
+     "tierPremium": 0,
+     "modelSeconds": 129.588
     },
     {
      "role": "reviewer",
@@ -2037,7 +2168,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.19973,
-     "usdHigh": 0.2316295
+     "usdHigh": 0.2316295,
+     "tierPremium": 0,
+     "modelSeconds": 87.842
     }
    ],
    "skills": [],
@@ -2105,7 +2238,13 @@
     "workerTurns": 1,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.3235789473684205,
+     "worker": 9.968307692307691,
+     "reviewer": 10.98025
+    },
     "cooperatorRequests": 19,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 59852,
@@ -2116,6 +2255,7 @@
     "usdCold": 0.4736098799999999
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -2179,7 +2319,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.2661452,
-     "usdHigh": 0.29625770000000007
+     "usdHigh": 0.29625770000000007,
+     "tierPremium": 0,
+     "modelSeconds": 120.751
     },
     {
      "role": "worker",
@@ -2203,7 +2345,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.02191742,
-     "usdHigh": 0.023454970000000006
+     "usdHigh": 0.023454970000000006,
+     "tierPremium": 0,
+     "modelSeconds": 118.39500000000002
     },
     {
      "role": "reviewer",
@@ -2226,7 +2370,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.21267760000000002,
-     "usdHigh": 0.24913059999999998
+     "usdHigh": 0.24913059999999998,
+     "tierPremium": 0,
+     "modelSeconds": 85.247
     }
    ],
    "skills": [],
@@ -2295,7 +2441,13 @@
     "workerTurns": 2,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 1,
+    "workerContinuations": 1,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 6.355315789473685,
+     "worker": 5.919750000000001,
+     "reviewer": 12.178142857142857
+    },
     "cooperatorRequests": 19,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 64879,
@@ -2306,6 +2458,7 @@
     "usdCold": 0.5007402200000001
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -2369,7 +2522,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.24027279999999995,
-     "usdHigh": 0.2702278000000001
+     "usdHigh": 0.2702278000000001,
+     "tierPremium": 0,
+     "modelSeconds": 99.938
     },
     {
      "role": "worker",
@@ -2393,7 +2548,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.029746639999999998,
-     "usdHigh": 0.031617665
+     "usdHigh": 0.031617665,
+     "tierPremium": 0,
+     "modelSeconds": 157.998
     },
     {
      "role": "reviewer",
@@ -2416,7 +2573,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.22308999999999998,
-     "usdHigh": 0.258777
+     "usdHigh": 0.258777,
+     "tierPremium": 0,
+     "modelSeconds": 85.76400000000001
     }
    ],
    "skills": [],
@@ -2484,7 +2643,13 @@
     "workerTurns": 1,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 6.246125,
+     "worker": 5.642785714285714,
+     "reviewer": 9.529333333333334
+    },
     "cooperatorRequests": 16,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 69963,
@@ -2495,6 +2660,7 @@
     "usdCold": 0.4931094399999999
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -2556,6 +2722,8 @@
      "usdHigh": 0.8873551999999998,
      "maxPrompt": 69396,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 101.017,
      "firstRequest": {
       "read": 10728,
       "write": 19371,
@@ -2586,6 +2754,8 @@
      "usdHigh": 0.05635027999999998,
      "maxPrompt": 90642,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 246.62,
      "thinking": null
     },
     {
@@ -2609,7 +2779,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.27592599999999995,
-     "usdHigh": 0.30687250000000005
+     "usdHigh": 0.30687250000000005,
+     "tierPremium": 0,
+     "modelSeconds": 190.276
     }
    ],
    "skills": [
@@ -2647,7 +2819,7 @@
    ],
    "exitCode": 0,
    "wallSeconds": 612,
-   "thinking": 37391,
+   "thinking": 42625,
    "modelUsage": {
     "claude-opus-5-5": {
      "inputTokens": 42,
@@ -2689,7 +2861,7 @@
     "cacheWrite": 149306,
     "cacheRead": 3640424,
     "output": 69425,
-    "thinking": 37391,
+    "thinking": 42625,
     "usd": 1.2196314799999997,
     "usdHigh": 1.2505779799999999,
     "usdAgents": 0.33227627999999987,
@@ -2705,7 +2877,13 @@
     "workerTurns": 2,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 1,
+    "workerContinuations": 1,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 4.810333333333333,
+     "worker": 7.046285714285714,
+     "reviewer": 17.297818181818183
+    },
     "cooperatorRequests": 21,
     "cooperatorTurns": 5,
     "workerMaxPrompt": 90642,
@@ -2716,6 +2894,7 @@
     "usdCold": 1.2196314799999997
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -2774,6 +2953,8 @@
      "usdHigh": 0.6037224,
      "maxPrompt": 50321,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 82.39500000000001,
      "firstRequest": {
       "read": 10728,
       "write": 19371,
@@ -2860,7 +3041,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.493,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 15,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -2871,6 +3058,7 @@
     "usdCold": 0.6037224
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -2922,6 +3110,8 @@
      "usdHigh": 0.8235925999999998,
      "maxPrompt": 62372,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 97.86500000000001,
      "firstRequest": {
       "read": 10728,
       "write": 19371,
@@ -2954,6 +3144,8 @@
      "usdHigh": 0.03847831,
      "maxPrompt": 70669,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 182.133,
      "thinking": null
     },
     {
@@ -2977,7 +3169,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.3499768,
-     "usdHigh": 0.3920563
+     "usdHigh": 0.3920563,
+     "tierPremium": 0,
+     "modelSeconds": 230.10000000000002
     }
    ],
    "skills": [
@@ -3018,7 +3212,7 @@
    ],
    "exitCode": 0,
    "wallSeconds": 588,
-   "thinking": 25785,
+   "thinking": 31800,
    "modelUsage": {
     "claude-opus-5-5": {
      "inputTokens": 46,
@@ -3060,7 +3254,7 @@
     "cacheWrite": 117936,
     "cacheRead": 2850287,
     "output": 59269,
-    "thinking": 25785,
+    "thinking": 31800,
     "usd": 1.2120477099999998,
     "usdHigh": 1.2541272099999998,
     "usdAgents": 0.38845511,
@@ -3076,7 +3270,13 @@
     "workerTurns": 2,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 1,
+    "workerContinuations": 1,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 4.255000000000001,
+     "worker": 7.005115384615385,
+     "reviewer": 19.175
+    },
     "cooperatorRequests": 23,
     "cooperatorTurns": 4,
     "workerMaxPrompt": 70669,
@@ -3087,6 +3287,7 @@
     "usdCold": 1.2120477099999998
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -3148,7 +3349,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.1738008,
-     "usdHigh": 0.19603279999999995
+     "usdHigh": 0.19603279999999995,
+     "tierPremium": 0,
+     "modelSeconds": 92.337
     },
     {
      "role": "worker",
@@ -3173,7 +3376,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.042623360000000006,
-     "usdHigh": 0.04485181
+     "usdHigh": 0.04485181,
+     "tierPremium": 0,
+     "modelSeconds": 230.04999999999995
     },
     {
      "role": "reviewer",
@@ -3196,7 +3401,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.2388276,
-     "usdHigh": 0.2771806
+     "usdHigh": 0.2771806,
+     "tierPremium": 0,
+     "modelSeconds": 104.018
     }
    ],
    "skills": [],
@@ -3264,7 +3471,13 @@
     "workerTurns": 1,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 7.102846153846154,
+     "worker": 7.189062499999999,
+     "reviewer": 13.00225
+    },
     "cooperatorRequests": 13,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 90613,
@@ -3275,6 +3488,7 @@
     "usdCold": 0.45525176
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -3338,7 +3552,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.2943875999999999,
-     "usdHigh": 0.3223191
+     "usdHigh": 0.3223191,
+     "tierPremium": 0,
+     "modelSeconds": 158.15200000000002
     },
     {
      "role": "worker",
@@ -3362,7 +3578,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.049087519999999996,
-     "usdHigh": 0.05177847000000001
+     "usdHigh": 0.05177847000000001,
+     "tierPremium": 0,
+     "modelSeconds": 274.31699999999995
     },
     {
      "role": "reviewer",
@@ -3385,7 +3603,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.258096,
-     "usdHigh": 0.296565
+     "usdHigh": 0.296565,
+     "tierPremium": 0,
+     "modelSeconds": 123.741
     }
    ],
    "skills": [],
@@ -3453,7 +3673,13 @@
     "workerTurns": 1,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 6.589666666666667,
+     "worker": 9.143899999999999,
+     "reviewer": 12.3741
+    },
     "cooperatorRequests": 24,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 109228,
@@ -3464,6 +3690,7 @@
     "usdCold": 0.6015711199999999
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -3525,7 +3752,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.3035812,
-     "usdHigh": 0.33865420000000007
+     "usdHigh": 0.33865420000000007,
+     "tierPremium": 0,
+     "modelSeconds": 135.491
     },
     {
      "role": "worker",
@@ -3549,7 +3778,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.0466348,
-     "usdHigh": 0.049585124999999994
+     "usdHigh": 0.049585124999999994,
+     "tierPremium": 0,
+     "modelSeconds": 231.02599999999998
     },
     {
      "role": "reviewer",
@@ -3572,7 +3803,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.38748879999999997,
-     "usdHigh": 0.43582480000000007
+     "usdHigh": 0.43582480000000007,
+     "tierPremium": 0,
+     "modelSeconds": 170.73999999999998
     }
    ],
    "skills": [],
@@ -3640,7 +3873,13 @@
     "workerTurns": 1,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 6.7745500000000005,
+     "worker": 8.25092857142857,
+     "reviewer": 9.485555555555555
+    },
     "cooperatorRequests": 20,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 113398,
@@ -3651,6 +3890,7 @@
     "usdCold": 0.7377047999999999
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -3709,6 +3949,8 @@
      "usdHigh": 0.4640374,
      "maxPrompt": 43555,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 55.054,
      "firstRequest": {
       "read": 10728,
       "write": 19237,
@@ -3795,7 +4037,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 4.234923076923077,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 13,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -3806,6 +4054,7 @@
     "usdCold": 0.4640374
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -3856,6 +4105,8 @@
      "usdHigh": 0.44018339999999995,
      "maxPrompt": 42884,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 50.158,
      "firstRequest": {
       "read": 10728,
       "write": 19237,
@@ -3942,7 +4193,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 4.179833333333334,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 12,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -3953,6 +4210,7 @@
     "usdCold": 0.44018339999999995
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -4003,6 +4261,8 @@
      "usdHigh": 0.4522770000000001,
      "maxPrompt": 43221,
      "overTier": 0,
+     "tierPremium": 0,
+     "modelSeconds": 60.267,
      "firstRequest": {
       "read": 10728,
       "write": 19237,
@@ -4089,7 +4349,13 @@
     "workerTurns": 0,
     "auditorTurns": 0,
     "reviewerTurns": 0,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 4.635923076923077,
+     "worker": null,
+     "reviewer": null
+    },
     "cooperatorRequests": 13,
     "cooperatorTurns": 2,
     "workerMaxPrompt": 0,
@@ -4100,6 +4366,7 @@
     "usdCold": 0.4522770000000001
    },
    "route": "solo",
+   "postReview": null,
    "review": null,
    "warmStart": false,
    "quality": {
@@ -4155,7 +4422,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.19754200000000005,
-     "usdHigh": 0.21969799999999998
+     "usdHigh": 0.21969799999999998,
+     "tierPremium": 0,
+     "modelSeconds": 100.74499999999998
     },
     {
      "role": "worker",
@@ -4179,7 +4448,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.01860568,
-     "usdHigh": 0.019938755
+     "usdHigh": 0.019938755,
+     "tierPremium": 0,
+     "modelSeconds": 109.19200000000001
     },
     {
      "role": "reviewer",
@@ -4203,7 +4474,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.2285356,
-     "usdHigh": 0.26406260000000004
+     "usdHigh": 0.26406260000000004,
+     "tierPremium": 0,
+     "modelSeconds": 93.44900000000001
     }
    ],
    "skills": [],
@@ -4271,7 +4544,13 @@
     "workerTurns": 1,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 0,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.596944444444443,
+     "worker": 6.066222222222223,
+     "reviewer": 8.495363636363637
+    },
     "cooperatorRequests": 18,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 57309,
@@ -4282,6 +4561,7 @@
     "usdCold": 0.44468328000000007
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -4344,7 +4624,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.20306159999999998,
-     "usdHigh": 0.2260491
+     "usdHigh": 0.2260491,
+     "tierPremium": 0,
+     "modelSeconds": 102.35800000000002
     },
     {
      "role": "worker",
@@ -4369,7 +4651,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.02392072,
-     "usdHigh": 0.02550212
+     "usdHigh": 0.02550212,
+     "tierPremium": 0,
+     "modelSeconds": 138.618
     },
     {
      "role": "reviewer",
@@ -4393,7 +4677,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.21895959999999998,
-     "usdHigh": 0.2540326
+     "usdHigh": 0.2540326,
+     "tierPremium": 0,
+     "modelSeconds": 98.72200000000001
     }
    ],
    "skills": [],
@@ -4462,7 +4748,13 @@
     "workerTurns": 2,
     "auditorTurns": 0,
     "reviewerTurns": 1,
-    "fixRounds": 1,
+    "workerContinuations": 1,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 5.6865555555555565,
+     "worker": 6.6008571428571425,
+     "reviewer": 10.969111111111111
+    },
     "cooperatorRequests": 18,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 68097,
@@ -4473,6 +4765,7 @@
     "usdCold": 0.44594192
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 1,
@@ -4536,7 +4829,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.2872003999999999,
-     "usdHigh": 0.3135154
+     "usdHigh": 0.3135154,
+     "tierPremium": 0,
+     "modelSeconds": 131.929
     },
     {
      "role": "worker",
@@ -4561,7 +4856,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.047216100000000004,
-     "usdHigh": 0.049410375000000006
+     "usdHigh": 0.049410375000000006,
+     "tierPremium": 0,
+     "modelSeconds": 243.076
     },
     {
      "role": "reviewer",
@@ -4585,7 +4882,9 @@
      "overTier": 0,
      "compactions": 0,
      "usd": 0.3253384,
-     "usdHigh": 0.36200089999999996
+     "usdHigh": 0.36200089999999996,
+     "tierPremium": 0,
+     "modelSeconds": 216.575
     }
    ],
    "skills": [],
@@ -4653,7 +4952,13 @@
     "workerTurns": 3,
     "auditorTurns": 0,
     "reviewerTurns": 3,
-    "fixRounds": 2,
+    "workerContinuations": 2,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 4.549275862068965,
+     "worker": 6.396736842105263,
+     "reviewer": 14.438333333333333
+    },
     "cooperatorRequests": 29,
     "cooperatorTurns": 1,
     "workerMaxPrompt": 93944,
@@ -4664,6 +4969,7 @@
     "usdCold": 0.6597548999999999
    },
    "route": "worker+review",
+   "postReview": null,
    "review": {
     "blocks": 1,
     "rounds": 3,

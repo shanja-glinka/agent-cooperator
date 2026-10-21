@@ -27,9 +27,10 @@ Four tasks in one private TypeScript project (a Telegram bot), three runs per
 task and model, each in its own clean checkout: the same task text and the same
 model, once with the kit (1.4.1, default profiles: Claude Code Hybrid with an
 Opus cooperator, Codex Economy with a Sol cooperator) and once without it. Price
-is at API list prices, as if every run started with an empty prompt cache (one
-run without the kit found its prompt already cached); for Codex it is the lower
-bound. A run met the contract when the task's own checks passed and, on the
+is at API list prices; for Codex it is the lower bound. One run without the kit
+found its whole prompt already cached by an earlier session: the part beyond the
+prefix every run shares is priced as a cache write, as if that session had not
+run. A run met the contract when the task's own checks passed and, on the
 large task, a hidden test confirmed that the defensive checks on database and
 JSON data were kept.
 
@@ -69,7 +70,7 @@ a clean comparison.
   with the kit it meets the same contracts at about 1.7 times the price and 2.4
   times the time.
 - **Against the previous kit version (1.4.0)** on the same tasks, 1.4.1 met the
-  contract in 24 runs of 24 instead of 23. It was cheaper on both lines (Opus
+  contract, by the checks above, in 24 runs of 24 instead of 23. It was cheaper on both lines (Opus
   −6%, Sol −5%) and faster (−14% and −26%).
 - One project, four tasks, three runs per cell: an indication, not a guarantee.
   Method: [benchmark](evaluation/BENCHMARK.md); history: [research](docs/research.md).
@@ -95,6 +96,9 @@ git clone https://github.com/shanja-glinka/agent-cooperator.git
 cd agent-cooperator
 node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-20-v9
 ```
+
+It checks the arithmetic and the tables. The contract verdicts come from hidden
+tests of the private project, and those are not published.
 
 ### Measure your own project
 

@@ -5,10 +5,12 @@
 // cooperator received, waits, messages, handoffs, the cooperator's REVIEW lines, the reviewer's
 // MODE, accept.mjs calls and what each close printed, the route, a prompt cache an earlier session
 // warmed (with the price at a cold start), the suite's quality check, and what the agent committed.
+// Also what the long-prompt tiers added to the price, the model's seconds per request (the API's
+// speed that day), and how many files of the result were written after the last review turn began.
 // usage: metrics.mjs <run-dir> [<out-file>]   writes <out-file>, by default <run-dir>/metrics.json
 import fs from 'node:fs';
 import path from 'node:path';
-import { claudeReadAsWrite, claudeUsd, openaiUsd } from './prices.mjs';
+import { claudeReadAsWrite, claudeUsd, claudeUsdBaseTier, openaiUsd, openaiUsdBaseTier } from './prices.mjs';
 
 const out = process.argv[2];
 const target = process.argv[3] ?? path.join(out, 'metrics.json');
@@ -16,6 +18,7 @@ const textLength = (v) => (typeof v === 'string' ? v.length : Array.isArray(v) ?
 const jsonl = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').split('\n').filter(Boolean).flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } }) : []);
 const read = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').trim() : '');
 const secs = (a, b) => Math.round((new Date(b) - new Date(a)) / 1000);
+const ms = (t) => (t ? Date.parse(t) : null);
 const ROLE_EFFORT = { 'workforce-worker': 'high', 'workforce-worker-lite': 'high', 'workforce-probe': 'medium', 'workforce-auditor': 'xhigh', 'workforce-reviewer': 'high' };
 // A Codex run the Claude kit starts through codex-run.mjs opens with the role's skill.
 const CODEX_RUN_ROLE = [[/^# Audit one lens/, 'auditor'], [/^# Review the actual result/, 'reviewer'], [/^# Complete the owned block/, 'worker'], [/^# Answer one question/, 'probe']];
@@ -96,15 +99,19 @@ function claude(logs, res) {
     // The cooperator's briefs: each Agent prompt, together with any brief file it wrote and the
     // prompt names (a packet in a file is still the brief).
     const prompts = []; const written = [];
+    // Model time of each response: from the input it answers (a prompt, a tool result, or the end of
+    // the previous response) to its last entry. Tool runs and waits for agents fall outside it.
+    const times = new Map(); let lastInput = null; let lastEnd = null; let lastTurnAt = null;
     const model = meta ? (meta.model === 'inherit' ? init?.model : meta.model) : init?.model;
     for (const l of jsonl(path.join(tdir, file))) {
       if (l.timestamp) { first ??= l.timestamp; last = l.timestamp; }
       // The effort each request was sent with, as Claude Code recorded the request.
       if (l.type === 'api-request-blob' && l.message?.output_config?.effort) efforts.add(l.message.output_config.effort);
       if (l.type === 'user') {
+        lastInput = ms(l.timestamp) ?? lastInput;
         const content = Array.isArray(l.message?.content) ? l.message.content : [{ type: 'text', text: String(l.message?.content ?? '') }];
         // A turn starts with a prompt or a message to the agent, not with a tool result.
-        if (content.some((c) => c.type === 'text' && c.text?.trim()) && !content.some((c) => c.type === 'tool_result')) turns += 1;
+        if (content.some((c) => c.type === 'text' && c.text?.trim()) && !content.some((c) => c.type === 'tool_result')) { turns += 1; lastTurnAt = l.timestamp ?? lastTurnAt; }
         // The cooperator's kit text: a skill Claude Code inserts into the context, and kit files it reads.
         if (!meta) for (const c of content) {
           if (c.type === 'text' && /^Base directory for this skill: .*\/skills\/workforce-/.test(c.text ?? '')) res.kitChars += c.text.length;
@@ -114,6 +121,12 @@ function claude(logs, res) {
       }
       if (l.type !== 'assistant') continue;
       const u = l.message?.usage; const id = l.message?.id;
+      const now = ms(l.timestamp);
+      if (id && now != null) {
+        const t = times.get(id);
+        if (t) t[1] = now; else times.set(id, [Math.max(lastInput ?? now, lastEnd ?? 0), now]);
+        lastEnd = now;
+      }
       if (id && u && !(seen.has(id) && !msgs.has(id))) {
         const w1 = u.cache_creation?.ephemeral_1h_input_tokens; const w5 = u.cache_creation?.ephemeral_5m_input_tokens;
         msgs.set(id, {
@@ -147,20 +160,22 @@ function claude(logs, res) {
       if (/CONSTRAINTS/.test(text)) res.briefs.withConstraints += 1;
       if (/CONTRACT/.test(text)) res.briefs.withContract += 1;
     }
-    const sum = { requests: msgs.size, input: 0, cacheWrite: 0, cacheRead: 0, output: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
-    for (const m of msgs.values()) {
+    const sum = { requests: msgs.size, input: 0, cacheWrite: 0, cacheRead: 0, output: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0, tierPremium: 0, modelSeconds: 0 };
+    for (const [id, m] of msgs) {
       sum.input += m.in; sum.cacheWrite += m.cw; sum.cacheRead += m.cr; sum.output += m.out;
       const prompt = m.in + m.cr + m.cw;
       sum.maxPrompt = Math.max(sum.maxPrompt, prompt);
       if (/haiku/.test(m.model ?? '') && prompt > 100000) sum.overTier += 1;
-      const usd = claudeUsd({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, hit: m.cr, out: m.out });
-      if (usd == null) sum.unpriced = true; else { sum.usd += usd; sum.usdHigh += usd; }
+      const req = { model: m.model, in: m.in, w5: m.w5, w1: m.w1, hit: m.cr, out: m.out };
+      const usd = claudeUsd(req);
+      if (usd == null) sum.unpriced = true; else { sum.usd += usd; sum.usdHigh += usd; sum.tierPremium += usd - (claudeUsdBaseTier(req) ?? usd); }
+      const t = times.get(id); if (t) sum.modelSeconds += Math.max(0, t[1] - t[0]) / 1000;
     }
     // The cooperator's first request, to tell a cold prompt cache from one an earlier session warmed.
     const firstMsg = meta ? null : msgs.values().next().value;
     if (firstMsg) sum.firstRequest = { read: firstMsg.cr, write: firstMsg.cw, ttl: firstMsg.w1 > 0 ? '1h' : '5m', model: firstMsg.model };
     return { role: meta ? meta.agentType : 'cooperator', task: meta?.description ?? '', model, effort: efforts.size ? [...efforts].join('/') : meta ? ROLE_EFFORT[meta.agentType] ?? '?' : 'medium', effortSource: efforts.size ? 'request' : 'role default', background: meta ? meta.requestShape === 'background' : false, seconds: first && last ? secs(first, last) : null, turns: meta && msgs.size ? Math.max(turns, 1) : turns, toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools, ...sum, thinking: null,
-      _requests: [...msgs.values()].map((m) => ({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, cr: m.cr, out: m.out })) };
+      _lastTurnAt: lastTurnAt, _requests: [...msgs.values()].map((m) => ({ model: m.model, in: m.in, w5: m.w5, w1: m.w1, cr: m.cr, out: m.out })) };
   };
   if (files.includes('main.jsonl')) res.actors.push(actor('main.jsonl', null));
   for (const f of files.filter((n) => n.startsWith('agent-') && n.endsWith('.jsonl')).sort()) {
@@ -175,6 +190,7 @@ function claude(logs, res) {
 // Codex threads: in a Codex cell the cooperator `codex exec` started and its agents; in a Claude
 // cell the Codex runs the kit started (auditors, reviewers, escalated workers).
 function codex(logs, res, inClaudeCell) {
+  const before = res.actors.length;
   const mainId = jsonl(path.join(logs, 'codex.events.jsonl')).find((e) => e.type === 'thread.started')?.thread_id;
   const dir = path.join(logs, 'rollouts');
   const threads = new Map();
@@ -198,11 +214,16 @@ function codex(logs, res, inClaudeCell) {
     const seenUsage = new Set(); const seenCalls = new Set(); const tools = {}; const kitReads = new Set();
     const waitIds = new Set(); let afterTimeout = false; let classify = false; const closeIds = new Map();
     const byResponse = lines.some((l) => l.type === 'token_usage_record');
-    const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0 };
+    const sum = { requests: 0, input: 0, cacheRead: 0, output: 0, thinking: 0, usd: 0, usdHigh: 0, maxPrompt: 0, overTier: 0, tierPremium: 0, modelSeconds: 0 };
     const detail = [];
     const add = (k, n = 1) => { tools[k] = (tools[k] ?? 0) + n; };
+    // Model time of each request: from the input it answers (a turn's start, a message, a tool's
+    // output, or the end of the previous request) to its usage record.
+    let lastInput = null; let lastEnd = null; let lastTurnAt = null;
     for (const l of lines) {
       const p = l.payload ?? {};
+      if ((l.type === 'event_msg' && p.type === 'task_started') || (l.type === 'response_item' && (/_call_output$/.test(p.type ?? '') || (p.type === 'message' && p.role === 'user')))) lastInput = ms(l.timestamp) ?? lastInput;
+      if (l.type === 'event_msg' && p.type === 'task_started') lastTurnAt = l.timestamp ?? lastTurnAt;
       const info = !byResponse && l.type === 'event_msg' && p.type === 'token_count' ? p.info : null;
       const record = byResponse && l.type === 'token_usage_record' && p.usage && (!p.thread_id || p.thread_id === meta.id) ? p : null;
       if (record || (info?.total_token_usage && info.last_token_usage)) {
@@ -215,7 +236,10 @@ function codex(logs, res, inClaudeCell) {
           sum.maxPrompt = Math.max(sum.maxPrompt, u.input_tokens ?? 0);
           if ((u.input_tokens ?? 0) > 272000) sum.overTier += 1;
           const usd = openaiUsd(ctx.model, u);
-          if (usd == null) sum.unpriced = true; else { sum.usd += usd.low; sum.usdHigh += usd.high; }
+          if (usd == null) sum.unpriced = true; else { sum.usd += usd.low; sum.usdHigh += usd.high; sum.tierPremium += usd.low - (openaiUsdBaseTier(ctx.model, u) ?? usd.low); }
+          const now = ms(l.timestamp);
+          if (now != null && (lastInput != null || lastEnd != null)) sum.modelSeconds += Math.max(0, now - Math.max(lastInput ?? 0, lastEnd ?? 0)) / 1000;
+          if (now != null) lastEnd = now;
           detail.push({ model: ctx.model, input: u.input_tokens ?? 0, cached: u.cached_input_tokens ?? 0, cacheWrite: u.cache_write_input_tokens ?? 0, output: u.output_tokens ?? 0, reasoning: u.reasoning_output_tokens ?? 0 });
           if (afterTimeout) { res.waits.wakeRequests += 1; res.waits.wakeUsd += usd?.low ?? 0; afterTimeout = false; }
         }
@@ -276,13 +300,16 @@ function codex(logs, res, inClaudeCell) {
       toolCalls: Object.values(tools).reduce((a, b) => a + b, 0), tools,
       requests: sum.requests, input: sum.input, cacheWrite: null, cacheRead: sum.cacheRead, output: sum.output, thinking: sum.thinking,
       maxPrompt: sum.maxPrompt, overTier: sum.overTier, compactions: lines.filter((l) => l.type === 'compacted').length,
-      usd: sum.usd, usdHigh: sum.usdHigh, ...(sum.unpriced ? { unpriced: true } : {}),
-      _requests: detail,
+      usd: sum.usd, usdHigh: sum.usdHigh, tierPremium: sum.tierPremium, modelSeconds: sum.modelSeconds, ...(sum.unpriced ? { unpriced: true } : {}),
+      _lastTurnAt: lastTurnAt, _requests: detail,
     });
   }
   if (!inClaudeCell) {
     res.thinking = res.actors.reduce((a, x) => a + (x.thinking ?? 0), 0);
     res.finalReport = read(path.join(logs, 'codex.last.md'));
+  } else {
+    // A Claude session reports its own thinking; the reasoning of the Codex runs it started is added.
+    res.thinking = (res.thinking ?? 0) + res.actors.slice(before).reduce((a, x) => a + (x.thinking ?? 0), 0);
   }
 }
 
@@ -309,7 +336,13 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
     // Turns: an agent's first assignment and every message that continued it.
     workers: of('worker').length, workerTurns: sum('turns', of('worker')), auditorTurns: sum('turns', of('auditor')), reviewerTurns: sum('turns', of('reviewer')),
   };
-  res.totals.fixRounds = Math.max(0, res.totals.workerTurns - res.totals.workers);
+  // Turns of the workers beyond their first assignment: fixes, follow-ups, continuations alike.
+  res.totals.workerContinuations = Math.max(0, res.totals.workerTurns - res.totals.workers);
+  // What the long-prompt tiers added (Haiku above 100k, OpenAI above 272k), and the model's seconds
+  // per request by role: the API's speed on the day of the run.
+  res.totals.tierPremium = sum('tierPremium');
+  const perRequest = (list) => { const n = sum('requests', list); return n ? sum('modelSeconds', list) / n : null; };
+  res.totals.secPerRequest = { cooperator: coop ? perRequest([coop]) : null, worker: perRequest(of('worker')), reviewer: perRequest(of('reviewer')) };
   // What the organization costs the cooperator, and how large the workers' requests grew.
   res.totals.cooperatorRequests = coop?.requests ?? 0;
   res.totals.cooperatorTurns = coop?.turns ?? 0;
@@ -318,9 +351,19 @@ for (const id of fs.readdirSync(path.join(out, 'cells')).sort()) {
   res.totals.workerRequests = sum('requests', of('worker'));
   res.totals.compactions = sum('compactions');
   res.totals.inputTotal = res.totals.input + (res.totals.cacheWrite ?? 0) + res.totals.cacheRead;
-  // Route: the cooperator alone, with workers, and with or without a reviewer.
+  // Route: the cooperator alone, with workers, with its own forks (Claude Code's generic agents,
+  // not the kit's roles), and with or without a reviewer.
   const worked = of('worker').length + of('probe').length > 0; const reviewed = of('reviewer').length > 0;
-  res.route = worked ? (reviewed ? 'worker+review' : 'worker') : reviewed ? 'solo+review' : 'solo';
+  const forked = res.actors.some((a) => a.role === 'fork');
+  res.route = worked ? (reviewed ? 'worker+review' : 'worker') : forked ? (reviewed ? 'fork+review' : 'fork') : reviewed ? 'solo+review' : 'solo';
+  // Files of the result written after the last review turn began: cell.sh records when each file
+  // was last written, before the check builds. A review that started after the last write read it.
+  const lastReview = Math.max(...of('reviewer').map((a) => ms(a._lastTurnAt) ?? -Infinity));
+  const mtimes = read(path.join(dir, 'result-mtimes.txt'));
+  res.postReview = reviewed && Number.isFinite(lastReview) && fs.existsSync(path.join(dir, 'result-mtimes.txt'))
+    ? (() => { const rows = mtimes.split('\n').filter(Boolean).map((l) => Number(l.split(' ')[0])); return { files: rows.filter((t) => t * 1000 > lastReview).length, total: rows.length }; })()
+    : null;
+  for (const a of res.actors) delete a._lastTurnAt;
   res.review = reviewLines(res.finalReport);
   res.quality = fs.existsSync(path.join(dir, 'check.json')) ? JSON.parse(read(path.join(dir, 'check.json')) || '{}') : {};
   if (fs.existsSync(path.join(dir, 'git.json'))) Object.assign(res.quality, JSON.parse(read(path.join(dir, 'git.json')) || '{}'));

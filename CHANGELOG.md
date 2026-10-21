@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+- Bench counters, after an external audit of the 1.4.1 measurements:
+  - a Claude cell's thinking now includes the reasoning of the Codex runs it
+    started (the 1.4.1 Opus cells missed 43,195 tokens; prices were right);
+  - a session's own fork agents are a route of their own, not "alone", and
+    their price has its own row;
+  - "fix rounds" are now workers' continuations: they count every turn beyond
+    the first assignment, not only fixes;
+  - new rows: the long-prompt surcharge (Haiku above 100k tokens, OpenAI above
+    272k), the model's seconds per request by role (the API's speed on the day
+    of the run), and the files of the result written after the last review turn
+    began (`cell.sh` records when each file was last written);
+  - the cold-start price is described as what it is: the part beyond the prefix
+    every run shares is repriced as a cache write. Text rows without data are
+    left out.
+- README: the cold-start wording, "by the checks above", and what
+  `verify-evidence.mjs` checks: the arithmetic and the tables, not the contract
+  verdicts. The 1.4.1 evidence is rebuilt with these counters; no price changed.
+
 ## 1.4.1 — 2026-10-21
 
 - Measured on the same four tasks as 1.4.0, three runs per task and model: the

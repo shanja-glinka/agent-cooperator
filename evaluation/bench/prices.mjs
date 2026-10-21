@@ -25,6 +25,14 @@ export function claudeUsd(m) {
   return (m.in * p.in + m.w5 * p.w5 + m.w1 * p.w1 + m.hit * p.hit + m.out * p.out) / 1e6;
 }
 
+// The same Claude request at the model's first tier: what the long-prompt tier added is the difference.
+export function claudeUsdBaseTier(m) {
+  const tiers = CLAUDE[ALIAS[m.model] ?? m.model];
+  if (!tiers) return null;
+  const p = tiers[0];
+  return (m.in * p.in + m.w5 * p.w5 + m.w1 * p.w1 + m.hit * p.hit + m.out * p.out) / 1e6;
+}
+
 // What `tokens` read from the prompt cache would have cost more as a cache write with that TTL.
 export function claudeReadAsWrite(model, tokens, ttl = '1h') {
   const tiers = CLAUDE[ALIAS[model] ?? model];
@@ -44,4 +52,14 @@ export function openaiUsd(model, u) {
     low: (fresh * p.in + write * p.in * 1.25 + hit * p.hit + out * p.out) / 1e6,
     high: ((fresh + write) * p.in * 1.25 + hit * p.hit + out * p.out) / 1e6,
   };
+}
+
+// The lower bound of the same Codex request at the model's first tier.
+export function openaiUsdBaseTier(model, u) {
+  const tiers = OPENAI[model];
+  if (!tiers) return null;
+  const p = tiers[0];
+  const hit = u.cached_input_tokens ?? 0; const write = u.cache_write_input_tokens ?? 0;
+  const fresh = (u.input_tokens ?? 0) - hit - write;
+  return (fresh * p.in + write * p.in * 1.25 + hit * p.hit + (u.output_tokens ?? 0) * p.out) / 1e6;
 }

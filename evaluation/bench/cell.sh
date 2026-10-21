@@ -156,6 +156,11 @@ if [[ -z ${DRY:-} ]]; then
   node $BENCH/tmpclean.mjs $CELL $OUT/running > $CELL/tmp-cleaned.json 2> $CELL/tmp-cleaned.stderr
   # What the agent left: commits on top of the base and uncommitted files, before the check builds.
   printf '{"Коммитов":%d,"Незакоммичено файлов":%d}\n' $(git -C $WT rev-list --count $BASE..HEAD) $(git -C $WT status --porcelain | wc -l) > $CELL/git.json
+  # When each file of the result was last written (seconds since the epoch, then the path), before
+  # the check builds: the metrics count the files written after the last review turn began.
+  { git -C $WT diff --name-only $BASE; git -C $WT ls-files --others --exclude-standard; } | sort -u | while read -r f; do
+    [[ -f $WT/$f ]] && print -r -- "$(stat -f %Fm $WT/$f) $f"
+  done > $CELL/result-mtimes.txt
   printf '{"base":"%s","head":"%s","claude":"%s","codex":"%s","tmpJail":true,"kitDelivery":"%s","taskAsFile":%s,"codexLaunch":"%s","policySets":"%s","setup":"%s"}\n' $BASE $(git -C $WT rev-parse HEAD) \
     "$(${CLAUDE_BIN:-claude} --version 2>/dev/null)" "$(${CODEX_BIN:-codex} --version 2>/dev/null)" $KIT_DELIVERY \
     $([[ $MODEL == opus && -d $KIT ]] && echo true || echo false) "$([[ $MODEL == sol && -d $KIT ]] && echo ${CODEX_LAUNCH:-workforce-standard})" "${(j:,:)${(@)SETS:#--set}}" \
