@@ -34,9 +34,9 @@ test('every code change after a review goes back to the same reviewer as a delta
   }
 });
 
-test('a haiku block is sized to finish before its prompt passes the 100k tier', () => {
-  assert.match(skill('claude'), /`haiku` block is sized to finish in about 25 requests/);
-  assert.match(delegation('claude'), /size\s+each `haiku` block to finish in about 25 requests/);
+test('a haiku block is not split only to stay under the 100k tier', () => {
+  for (const text of [skill('claude'), delegation('claude'), read('claude/profiles.json')]) assert.doesNotMatch(text, /about 25 requests/);
+  assert.match(delegation('claude'), /so blocks are not split only to stay under it/);
 });
 
 test('the Codex launch layers set the models for delegation, not delegation itself', () => {

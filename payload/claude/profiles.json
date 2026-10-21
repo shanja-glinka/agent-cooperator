@@ -9,7 +9,7 @@
   },
   "workClasses": {
     "direct": "Work whose route would cost more than doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly, and a task of about 20 turns (a small fix, a bug with a clear symptom, a patch review), which cost about twice as much through a worker and a review in the measurements. Done inline with the project's checks; no agents.",
-    "build": "One verifiable block inside a clear write set for a light worker: work several times larger than a task of about 20 turns, such as a feature, a mechanical change over many files or sites, or a bug whose cause needs long tracing. A haiku block is sized to finish in about 25 requests, before its prompt passes 100k tokens. The cooperator briefs it with the goal, boundaries, sources, the constraints that can change how it is done, and the check, without solving it first; the block is reviewed before it is accepted.",
+    "build": "One verifiable block inside a clear write set for a light worker: work several times larger than a task of about 20 turns, such as a feature, a mechanical change over many files or sites, or a bug whose cause needs long tracing. The cooperator briefs it with the goal, boundaries, sources, the constraints that can change how it is done, and the check, without solving it first; the block is reviewed before it is accepted.",
     "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage review only for an integration part no block review covered."
   },
   "profiles": {

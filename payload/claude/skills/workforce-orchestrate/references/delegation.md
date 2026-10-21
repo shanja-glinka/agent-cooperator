@@ -68,13 +68,9 @@ Required checks passed → report (stage review is off in this install)
    Tell it to keep in its context what the next decision needs: long output
    goes to a file and is read where it matters, code is read by the functions
    it changes and the conditions they depend on. A `haiku` worker's prompt
-   grows while it works and costs five times more above 100k tokens, so size
-   each `haiku` block to finish in about 25 requests: in the measurements the
-   prompt passed 100k after 18 to 35 requests, and those requests made 64% of
-   Haiku's price. For a mechanical sweep that is about 30 sites; split a
-   larger area into more blocks with disjoint WRITE_SETs and run them in
-   parallel. Start a fresh worker for the rest of a block only when that is
-   cheaper than the knowledge it would have to rebuild. Decide
+   grows while it works and costs five times more above 100k tokens; targeted
+   reading keeps it lower. Start a fresh worker for the rest of a block only
+   when that is cheaper than the knowledge it would have to rebuild. Decide
    open design questions before briefing. Set `model` on every Agent call.
    Independent blocks launch in one message. In a pipeline, keep the OPEN list
    in the task state file and reread it after compaction.
@@ -117,9 +113,10 @@ Required checks passed → report (stage review is off in this install)
    one yourself; either way resume the same reviewer thread with the delta,
    so it checks the fixes and what they touch without rereading everything (a
    delta round costs about a quarter of the first review). The same finding
-   twice without progress stops the loop for your decision. A reviewer's "accepted" does not replace
-   a required check that has not passed: when only that check is left, the
-   reviewer ends with `accepted_if <check> on tree:<hash>`, and you close it
+   twice without progress stops the loop for your decision. A reviewer's
+   "accepted" does not replace a required check that has not passed: when
+   only that check is left, the reviewer ends with `accepted_if <check> on
+   tree:<hash>`, and you close it
    with `accept.mjs close` once a recorded run passed on that tree (tools); no
    reviewer run is needed to read an exit code. Any code change after the
    review, by a worker or by you, a fix for a failed check included, goes to
@@ -205,13 +202,14 @@ results instead of waking up. Cheap work still needs a strong check: the
 reviewer found real defects in light workers' results in 3 of 6 large tasks
 and in 2 of 3 small ones with `haiku`. Haiku requests over 100k tokens of
 prompt gave 80% of Haiku's price, so a worker keeps its context to what the
-next decision needs; in v9 they still made 64% of it, so a block is sized to
-finish before its prompt gets there. In v9 two of three large tasks also
-accepted a fix after the review without the reviewer, though a delta round
-costs about a quarter of the first review, so every change after a review
-goes back to it; and a task of about 20 turns cost about twice as much
-through a worker and a review as done directly, so such a task is done
-directly. Constraints found only when CI failed made workers redo
+next decision needs. In v10, blocks sized to stay under that tier halved the
+surcharge but doubled the briefs, the acceptances, and the review passes, and
+the large task cost 24% more; so blocks are not split only to stay under it.
+In v9 two of three large tasks accepted a fix after the review without the
+reviewer, though a delta round costs about a quarter of the first review, so
+every change after a review goes back to it; and a task of about 20 turns
+cost about twice as much through a worker and a review as done directly, so
+such a task is done directly. Constraints found only when CI failed made workers redo
 blocks, so the brief names them with their source. In the v7 measurement the
 brief left out the file-size limit in four of six large tasks, and the reviewer
 missed a fallback change that broke a database constraint in one of three;

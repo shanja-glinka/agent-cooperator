@@ -46,9 +46,8 @@ your head to dictate it.
   symptom, a patch review.
 - **Worker blocks:** work several times that size: a feature, a mechanical
   change over many files or sites, a bug whose cause needs long tracing;
-  verifiable inside a clear WRITE_SET, when the route is cheaper or sooner. A
-  `haiku` block is sized to finish in about 25 requests (delegation). Parts
-  with disjoint WRITE_SETs run in parallel; decide open design first.
+  verifiable inside a clear WRITE_SET, when the route is cheaper or sooner.
+  Parts with disjoint WRITE_SETs run in parallel; decide open design first.
 - **A probe:** a bounded lookup whose answer you need before you brief.
 
 The work class records the route: `direct` you did it, `build` one worker
@@ -163,18 +162,17 @@ authorization.
 
 **Mechanical change.** "Clear 120 lint warnings in four directories without
 changing behavior." You read the rules, the CI script, and one file of each
-kind, split the directories into four blocks of about 30 warnings with
-disjoint WRITE_SETs, and brief four `haiku` workers with the rules, the
-CONTRACT from the task (behavior stays; defensive checks on database and JSON
-data stay), the size limit of the one large file they will grow with its
-current length, the trap you saw (`||` to `??` changes behavior for an empty
-string), and the lint and test commands. They run in parallel{{#reviewBlock}}; the
-submissions go to one review run at one snapshot; the reviewer lists the 14
-changed fallbacks, finds one that no longer maps an empty string to NULL, and
-you restore that one line yourself; the reviewer checks the delta and ends
-with `accepted_if npm run ci`, which you close with `accept.mjs` once CI
-passed on that tree{{/reviewBlock}}{{^reviewBlock}}; you read the diffs, send one finding back, and
-check the fix{{/reviewBlock}}; the blocks are accepted.
+kind, split the directories into two blocks with disjoint WRITE_SETs, and
+brief two `haiku` workers with the rules, the CONTRACT from the task (behavior
+stays; defensive checks on database and JSON data stay), the size limit of the
+one large file they will grow with its current length, the trap you saw (`||`
+to `??` changes behavior for an empty string), and the lint and test commands.
+They run in parallel{{#reviewBlock}}; both submissions go to one review run at one
+snapshot; the reviewer lists the 14 changed fallbacks, finds one that no
+longer maps an empty string to NULL, and you restore that one line yourself;
+the reviewer checks the delta and ends with `accepted_if npm run ci`, which you
+close with `accept.mjs` once CI passed on that tree{{/reviewBlock}}{{^reviewBlock}}; you read both diffs, send one
+finding back, and check the fix{{/reviewBlock}}; both blocks are accepted.
 
 **Unknown cause.** "`--total` double-counts tax." The report names the
 command and the symptom: you reproduce it, find the cause in the tax module,

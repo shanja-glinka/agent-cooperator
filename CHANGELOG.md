@@ -9,9 +9,6 @@
   times larger goes to workers. In 1.4.1 the Sol cooperator delegated all twelve
   measured tasks. The Codex launch layers now set the models for delegation and
   no longer read as an order to delegate. Policy: Claude 1.11.0, Codex 1.13.0.
-- Hybrid: a `haiku` block is sized to finish in about 25 requests (about 30
-  sites of a mechanical sweep). In 1.4.1 its prompt passed 100k tokens after 18
-  to 35 requests, and those requests made 64% of Haiku's price.
 - Every code change after a review, by a worker or by the cooperator, goes back
   to the same reviewer as a delta; a delta round costs about a quarter of the
   first review. The cooperator may fix a small finding itself instead of a worker
