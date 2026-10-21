@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="266" viewBox="0 0 960 266" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
-<title id="t">All four tasks: the kit against the same model without it</title><desc id="d">Sum of the per-task means, three runs per task; one private TypeScript project, 2026-10-19 and 2026-10-20. The same values are in the table under the chart.</desc>
+<title id="t">All four tasks: the kit against the same model without it</title><desc id="d">Sum of the per-task means, three runs per task; one private TypeScript project; kit: Opus 1.5.0, Sol 1.4.1. The same values are in the table under the chart.</desc>
 <rect width="960" height="266" rx="8" fill="#fcfcfb"/>
 <text x="16" y="28" font-size="17" font-weight="600" fill="#0b0b0b">All four tasks: the kit against the same model without it</text>
-<text x="16" y="48" font-size="12.5" fill="#52514e">Sum of the per-task means, three runs per task; one private TypeScript project, 2026-10-19 and 2026-10-20</text>
+<text x="16" y="48" font-size="12.5" fill="#52514e">Sum of the per-task means, three runs per task; one private TypeScript project; kit: Opus 1.5.0, Sol 1.4.1</text>
 <rect x="16" y="62" width="12" height="12" rx="3" fill="#2a78d6"/>
 <text x="34" y="72.5" font-size="12.5" fill="#0b0b0b">Without the kit</text>
 <rect x="168.5" y="62" width="12" height="12" rx="3" fill="#eb6834"/>
-<text x="186.5" y="72.5" font-size="12.5" fill="#0b0b0b">With the kit 1.4.1</text>
+<text x="186.5" y="72.5" font-size="12.5" fill="#0b0b0b">With the kit</text>
 <text x="16" y="136" font-size="12.5" fill="#0b0b0b">All four tasks · Opus</text>
 <text x="16" y="176" font-size="12.5" fill="#0b0b0b">All four tasks · Sol</text>
 <text x="190" y="100" font-size="12" font-weight="600" fill="#52514e">Price, US$</text>
@@ -21,8 +21,8 @@
 <line x1="190" y1="112" x2="190" y2="192" stroke="#c3c2b7" stroke-width="1"/>
 <path d="M190,121 h177.85333333333332 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-177.85333333333332 z" fill="#2a78d6"/>
 <text x="376.85333333333335" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$5.93</text>
-<path d="M190,133 h144.73333333333332 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-144.73333333333332 z" fill="#eb6834"/>
-<text x="343.73333333333335" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$4.85</text>
+<path d="M190,133 h140.13333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-140.13333333333333 z" fill="#eb6834"/>
+<text x="339.1333333333333" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$4.70</text>
 <path d="M190,161 h44.760000000000005 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-44.760000000000005 z" fill="#2a78d6"/>
 <text x="243.76" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$1.59*</text>
 <path d="M190,173 h78.18666666666668 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-78.18666666666668 z" fill="#eb6834"/>
@@ -39,8 +39,8 @@
 <line x1="448" y1="112" x2="448" y2="192" stroke="#c3c2b7" stroke-width="1"/>
 <path d="M448,121 h62.54666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-62.54666666666667 z" fill="#2a78d6"/>
 <text x="519.5466666666666" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">21.7</text>
-<path d="M448,133 h102.41333333333334 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-102.41333333333334 z" fill="#eb6834"/>
-<text x="559.4133333333333" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">34.7</text>
+<path d="M448,133 h104.25333333333332 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-104.25333333333332 z" fill="#eb6834"/>
+<text x="561.2533333333333" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">35.3</text>
 <path d="M448,161 h47.21333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-47.21333333333333 z" fill="#2a78d6"/>
 <text x="504.2133333333333" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">16.7*</text>
 <path d="M448,173 h117.44000000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-117.44000000000001 z" fill="#eb6834"/>

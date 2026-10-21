@@ -1,7 +1,22 @@
 # Changelog
 
-## Unreleased
+## 1.5.0 — 2026-10-21
 
+- Measured on the same four tasks as 1.4.1, three runs per task and model:
+  - the contract held in 24 runs of 24, as in 1.4.1;
+  - the Opus line cost $4.70 (1.4.1: $4.85; without the kit: $5.93);
+  - on Sol, the bug hunt and the patch review cost about half, and the whole
+    line 12% less ($2.37 against $2.68).
+
+  On that day the OpenAI API answered 20–60% slower per request, so Sol's
+  wall time is not comparable, and the README keeps 1.4.1's Sol numbers. One
+  Opus run was repeated after its model looped on one reply up to the 128k
+  output limit ($7.49). With that run the Opus line would be $6.30. The
+  evidence is in `evaluation/evidence/2026-10-21-v11/`.
+- An intermediate version also split Haiku blocks to stay under the 100k
+  tier. That halved the long-prompt surcharge, but doubled the briefs,
+  acceptances and review passes, and the large task cost 24% more. The split
+  is not in this release.
 - The route is chosen from measured anchors instead of "compare in words; do
   not invent numbers". A task of about 20 turns (a small fix, a bug with a clear
   symptom, a patch review) is done directly: through a worker and a review it

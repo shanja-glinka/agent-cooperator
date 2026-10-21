@@ -1,0 +1,122 @@
+{
+ "big-v11-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-v11-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-v11-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-v11-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-v11-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-v11-sol-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-v11-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-v11-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-v11-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-v11-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-v11-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-v11-sol-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-v11-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-v11-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-v11-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-v11-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-v11-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-v11-sol-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-v11-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-v11-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-v11-opus-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-v11-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-v11-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-v11-sol-r3": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ }
+}

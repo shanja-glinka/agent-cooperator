@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="506" viewBox="0 0 960 506" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
-<title id="t">Per task: the kit against the same model without it</title><desc id="d">Mean of three runs per task and model; Opus is Claude Code (Hybrid), Sol is Codex (Economy). The same values are in the table under the chart.</desc>
+<title id="t">Per task: the kit against the same model without it</title><desc id="d">Mean of three runs per task and model; Opus is Claude Code (Hybrid, kit 1.5.0), Sol is Codex (Economy, kit 1.4.1). The same values are in the table under the chart.</desc>
 <rect width="960" height="506" rx="8" fill="#fcfcfb"/>
 <text x="16" y="28" font-size="17" font-weight="600" fill="#0b0b0b">Per task: the kit against the same model without it</text>
-<text x="16" y="48" font-size="12.5" fill="#52514e">Mean of three runs per task and model; Opus is Claude Code (Hybrid), Sol is Codex (Economy)</text>
+<text x="16" y="48" font-size="12.5" fill="#52514e">Mean of three runs per task and model; Opus is Claude Code (Hybrid, kit 1.5.0), Sol is Codex (Economy, kit 1.4.1)</text>
 <rect x="16" y="62" width="12" height="12" rx="3" fill="#2a78d6"/>
 <text x="34" y="72.5" font-size="12.5" fill="#0b0b0b">Without the kit</text>
 <rect x="168.5" y="62" width="12" height="12" rx="3" fill="#eb6834"/>
-<text x="186.5" y="72.5" font-size="12.5" fill="#0b0b0b">With the kit 1.4.1</text>
+<text x="186.5" y="72.5" font-size="12.5" fill="#0b0b0b">With the kit</text>
 <text x="16" y="136" font-size="12.5" fill="#0b0b0b">Small fix · Opus</text>
 <text x="16" y="176" font-size="12.5" fill="#0b0b0b">Small fix · Sol</text>
 <text x="16" y="216" font-size="12.5" fill="#0b0b0b">Large cleanup · Opus</text>
@@ -31,24 +31,24 @@
 <line x1="190" y1="112" x2="190" y2="432" stroke="#c3c2b7" stroke-width="1"/>
 <path d="M190,121 h21.391999999999996 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-21.391999999999996 z" fill="#2a78d6"/>
 <text x="220.392" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.69</text>
-<path d="M190,133 h33.168 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-33.168 z" fill="#eb6834"/>
-<text x="232.168" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$1.01</text>
+<path d="M190,133 h29.488 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-29.488 z" fill="#eb6834"/>
+<text x="228.488" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.91</text>
 <path d="M190,161 h10.352 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.352 z" fill="#2a78d6"/>
 <text x="209.352" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.39*</text>
 <path d="M190,173 h18.08 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-18.08 z" fill="#eb6834"/>
 <text x="217.07999999999998" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.60</text>
 <path d="M190,201 h159.02399999999997 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-159.02399999999997 z" fill="#2a78d6"/>
 <text x="358.024" y="210" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$4.43</text>
-<path d="M190,213 h104.928 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-104.928 z" fill="#eb6834"/>
-<text x="303.928" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$2.96</text>
+<path d="M190,213 h103.08800000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-103.08800000000001 z" fill="#eb6834"/>
+<text x="302.088" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$2.91</text>
 <path d="M190,241 h23.232 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-23.232 z" fill="#2a78d6"/>
 <text x="222.232" y="250" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.74*</text>
 <path d="M190,253 h35.74400000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-35.74400000000001 z" fill="#eb6834"/>
 <text x="234.744" y="262" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$1.08</text>
 <path d="M190,281 h11.823999999999998 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.823999999999998 z" fill="#2a78d6"/>
 <text x="210.824" y="290" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.43</text>
-<path d="M190,293 h12.559999999999999 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-12.559999999999999 z" fill="#eb6834"/>
-<text x="211.56" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.45</text>
+<path d="M190,293 h12.928 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-12.928 z" fill="#eb6834"/>
+<text x="211.928" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.46</text>
 <path d="M190,321 h3.727999999999999 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-3.727999999999999 z" fill="#2a78d6"/>
 <text x="202.728" y="330" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">$0.21</text>
 <path d="M190,333 h15.136000000000003 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-15.136000000000003 z" fill="#eb6834"/>
@@ -73,32 +73,32 @@
 <line x1="448" y1="112" x2="448" y2="432" stroke="#c3c2b7" stroke-width="1"/>
 <path d="M448,121 h22.863999999999997 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-22.863999999999997 z" fill="#2a78d6"/>
 <text x="479.864" y="130" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">4:23</text>
-<path d="M448,133 h44.576 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-44.576 z" fill="#eb6834"/>
-<text x="501.576" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">7:55</text>
+<path d="M448,133 h38.19733333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-38.19733333333333 z" fill="#eb6834"/>
+<text x="495.19733333333335" y="142" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">6:53</text>
 <path d="M448,161 h20.22666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-20.22666666666667 z" fill="#2a78d6"/>
 <text x="477.2266666666667" y="170" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3:57*</text>
 <path d="M448,173 h51.199999999999996 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-51.199999999999996 z" fill="#eb6834"/>
 <text x="508.2" y="182" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">9:00</text>
 <path d="M448,201 h72.05333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-72.05333333333333 z" fill="#2a78d6"/>
 <text x="529.0533333333333" y="210" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">12:24</text>
-<path d="M448,213 h136.33066666666664 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-136.33066666666664 z" fill="#eb6834"/>
-<text x="593.3306666666666" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">22:53</text>
+<path d="M448,213 h143.20000000000002 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-143.20000000000002 z" fill="#eb6834"/>
+<text x="600.2" y="222" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">24:00</text>
 <path d="M448,241 h42.49066666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-42.49066666666666 z" fill="#2a78d6"/>
 <text x="499.49066666666664" y="250" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">7:35*</text>
 <path d="M448,253 h103.76266666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-103.76266666666666 z" fill="#eb6834"/>
 <text x="560.7626666666666" y="262" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">17:34</text>
 <path d="M448,281 h11.210666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.210666666666667 z" fill="#2a78d6"/>
 <text x="468.21066666666667" y="290" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:29</text>
-<path d="M448,293 h8.389333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-8.389333333333333 z" fill="#eb6834"/>
-<text x="465.38933333333335" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:01</text>
+<path d="M448,293 h10.352 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.352 z" fill="#eb6834"/>
+<text x="467.352" y="302" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:20</text>
 <path d="M448,321 h9.616000000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-9.616000000000001 z" fill="#2a78d6"/>
 <text x="466.616" y="330" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:13</text>
 <path d="M448,333 h42.184 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-42.184 z" fill="#eb6834"/>
 <text x="499.18399999999997" y="342" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">7:32</text>
 <path d="M448,361 h10.904 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.904 z" fill="#2a78d6"/>
 <text x="467.904" y="370" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:26</text>
-<path d="M448,373 h7.653333333333332 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-7.653333333333332 z" fill="#eb6834"/>
-<text x="464.6533333333333" y="382" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">1:54</text>
+<path d="M448,373 h8.757333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-8.757333333333333 z" fill="#eb6834"/>
+<text x="465.75733333333335" y="382" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">2:05</text>
 <path d="M448,401 h14.400000000000002 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-14.400000000000002 z" fill="#2a78d6"/>
 <text x="471.4" y="410" font-size="10.5" fill="#52514e" style="font-variant-numeric: tabular-nums">3:00*</text>
 <path d="M448,413 h29.54933333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-29.54933333333333 z" fill="#eb6834"/>

@@ -1,12 +1,55 @@
 # Research and routing rationale
 
-The v9, v8, v7, v6, and v5 sections below were prepared on 2026-10-20 and the
-Route Decision synthesis on 2026-10-19, all for both editions.
+The v10 and v11 sections below were prepared on 2026-10-21, the v9, v8, v7, v6,
+and v5 sections on 2026-10-20, and the Route Decision synthesis on 2026-10-19,
+all for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v10 and v11 (release 1.5.0) — 2026-10-21: route by measured anchors
+
+Claude policy 1.11.0, Codex policy 1.13.0.
+
+The 1.4.1 cells were broken down by role, cost component, and input source:
+
+- **Route choice.** The Opus cooperator did the bug hunt and the patch review
+  itself in 6 of 6 runs. The Sol cooperator delegated all 12 of its tasks, at
+  about twice the price of doing them directly. The Codex launch layer told it
+  to use Luna workers, and both editions forbade numbers in the route choice.
+- **Haiku tier.** Haiku requests above the 100k tier made 64% of Haiku's
+  price: $0.61 per large Claude task.
+- **Re-review.** A delta round of review cost about $0.08, a quarter of the
+  first review. Two of three large Claude tasks had accepted a fix after the
+  review without one.
+- **Sol cooperator input.** Code reading was 3–13% of its input. Most of it
+  went to the kit text (27–55%) and the first prompt (36–44%), carried through
+  about 25 requests.
+
+v10 changed three things: route anchors (a task of about 20 turns is done
+directly), Haiku blocks sized to stay under the tier, and a delta review of
+every change after a review.
+
+- **Contract:** 24 of 24.
+- **Route:** the tasks of about 20 turns cost 31–53% less.
+- **Haiku blocks:** six blocks instead of three halved the surcharge. But the
+  cooperator and the reviewer did more work, the large Claude task cost 24%
+  more, and the Opus line 9% more.
+
+v11 is v10 without the block sizing.
+
+- **Contract:** 24 of 24.
+- **Opus line:** $4.70 against $4.85.
+- **Sol line:** $2.37 against $2.68.
+- **Bug hunt and patch review on Sol:** about half the price.
+- **Re-review:** no file of a result was written after the last review began.
+- **Repeated run:** one Opus run was repeated after its model looped on one
+  reply up to the output limit.
+
+The OpenAI API was 20–60% slower per request that day, so Sol's wall time is
+not compared, and the README keeps 1.4.1's Sol numbers.
 
 ## v9 (release 1.4.1) — 2026-10-20: the basis of a kept verdict
 
