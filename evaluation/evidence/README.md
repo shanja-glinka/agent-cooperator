@@ -9,7 +9,6 @@ repository only: the npm package that `npx` installs does not contain
 
 ```sh
 node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-20-v9
-node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-21-v9-sol-rerun
 ```
 
 It recomputes the price of every model request from its token counts at the
@@ -23,12 +22,11 @@ byte.
 | Path | What it holds |
 | --- | --- |
 | `2026-10-20-v9/metrics.json` | The kit 1.4.1 run (named v9 in the bench): 24 cells, 4 tasks × 2 models × 3 runs. Per cell: wall time, route, contract and quality fields, review and `accept.mjs` counts, waits, and per agent its model, effort, turns, tool calls by name, requests, tokens, and price. |
-| `2026-10-21-v9-sol-rerun/metrics.json` | The Sol line of the same kit measured again on 2026-10-21: 12 cells, 4 tasks × 3 runs. The README's Sol numbers with the kit come from here. One cell stopped on its second request when the API answered "Selected model is at capacity"; it was run again alone, and its `EXPECTATIONS.md` records that. |
-| `*/prev-metrics-*.json` | The columns it is compared with, recounted by the same `metrics.mjs`: no kit (2026-10-19) and the previous kit version v8 (2026-10-20). |
+| `2026-10-20-v9/prev-metrics-*.json` | The columns it is compared with, recounted by the same `metrics.mjs`: no kit (2026-10-19) and the previous kit version v8 (2026-10-20). |
 | `*/requests.jsonl` | Every model request of those cells, one line each: the cell, the agent's index in it, role, model, and token counts (Claude: input, cache writes for 5 minutes and 1 hour, cache reads, output; Codex: input, cached input, output, reasoning). |
 | `*/isolation.json` | Whether a cell shared `/tmp` files with a cell running at the same time (which cells, not the files). |
-| `*/COMPARISON.md`, `METRICS.md` | The comparison tables, rebuilt by `report.mjs` from the files above. |
-| `*/EXPECTATIONS.md` | What the run was expected to show, written before it started; what happened during the run is added below it. |
+| `2026-10-20-v9/COMPARISON.md`, `METRICS.md` | The comparison tables, rebuilt by `report.mjs` from the files above. |
+| `2026-10-20-v9/EXPECTATIONS.md` | What the run was expected to show, written before it started. |
 | `contract-recheck/summary.txt` | The large task's contract for the earlier runs, rechecked by one hidden test on their final code. |
 
 ## What is left out

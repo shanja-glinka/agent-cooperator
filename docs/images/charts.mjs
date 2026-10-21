@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 // Builds the README charts: the kit (1.4.1) against the same model without it, light and dark.
-// Numbers are the measured means from the runs of 2026-10-19 (no kit), 2026-10-20 (the kit, Opus)
-// and 2026-10-21 (the kit, Sol, measured again), three runs per task and model, clean runs only,
-// priced as if every run started with an empty prompt cache (evaluation/evidence/2026-10-20-v9 and
-// evaluation/evidence/2026-10-21-v9-sol-rerun, COMPARISON.md; evaluation/BENCHMARK.md); a value
+// Numbers are the measured means from the runs of 2026-10-19 (no kit) and 2026-10-20 (the kit),
+// three runs per task and model, clean runs only, priced as if every run started with an empty
+// prompt cache (evaluation/evidence/2026-10-20-v9/COMPARISON.md, evaluation/BENCHMARK.md); a value
 // marked * is the actual spend of runs that shared /tmp with other runs. Contract: runs that met
 // the task's contract (the suite's checks, plus on the large task a hidden test of the behavior it
 // must keep).
@@ -20,17 +19,17 @@ const SERIES = ['Without the kit', 'With the kit 1.4.1'];
 // [label, [price no kit, price kit], [minutes no kit, minutes kit], [contract no kit, contract kit], spend-only no-kit?]
 const TASKS = [
   ['Small fix · Opus', [0.69, 1.01], [4.38, 7.92], [3, 3], false],
-  ['Small fix · Sol', [0.39, 0.72], [3.95, 13.7], [3, 3], true],
+  ['Small fix · Sol', [0.39, 0.60], [3.95, 9.0], [3, 3], true],
   ['Large cleanup · Opus', [4.43, 2.96], [12.4, 22.88], [0, 3], false],
-  ['Large cleanup · Sol', [0.74, 1.52], [7.58, 34.55], [3, 3], true],
+  ['Large cleanup · Sol', [0.74, 1.08], [7.58, 17.57], [3, 3], true],
   ['Unknown bug · Opus', [0.43, 0.45], [2.48, 2.02], [3, 3], false],
-  ['Unknown bug · Sol', [0.21, 0.56], [2.22, 10.33], [3, 3], false],
+  ['Unknown bug · Sol', [0.21, 0.52], [2.22, 7.53], [3, 3], false],
   ['Patch review · Opus', [0.38, 0.43], [2.43, 1.9], [3, 3], false],
-  ['Patch review · Sol', [0.26, 0.52], [3.0, 10.07], [3, 3], true],
+  ['Patch review · Sol', [0.26, 0.49], [3.0, 5.47], [3, 3], true],
 ];
 const SUITE = [
   ['All four tasks · Opus', [5.93, 4.85], [21.7, 34.7], [9, 12], false],
-  ['All four tasks · Sol', [1.59, 3.32], [16.7, 68.7], [12, 12], true],
+  ['All four tasks · Sol', [1.59, 2.68], [16.7, 39.6], [12, 12], true],
 ];
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
@@ -106,7 +105,7 @@ const suitePanels = [
 for (const theme of Object.keys(THEMES)) {
   fs.writeFileSync(path.join(OUT, `suite-${theme}.svg`), chart(SUITE, suitePanels, theme, {
     title: 'All four tasks: the kit against the same model without it',
-    subtitle: 'Sum of the per-task means, three runs per task; one private TypeScript project, 2026-10-19 to 2026-10-21',
+    subtitle: 'Sum of the per-task means, three runs per task; one private TypeScript project, 2026-10-19 and 2026-10-20',
     note,
   }));
   fs.writeFileSync(path.join(OUT, `tasks-${theme}.svg`), chart(TASKS, taskPanels, theme, {

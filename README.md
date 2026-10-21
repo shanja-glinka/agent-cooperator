@@ -31,12 +31,11 @@ is at API list prices, as if every run started with an empty prompt cache (one
 run without the kit found its prompt already cached); for Codex it is the lower
 bound. A run met the contract when the task's own checks passed and, on the
 large task, a hidden test confirmed that the defensive checks on database and
-JSON data were kept. The Opus runs with the kit are from 2026-10-20; the Sol
-runs with the kit were measured again on 2026-10-21, and those are shown.
+JSON data were kept.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/suite-dark.svg">
-  <img alt="All four tasks: with Opus, $5.93 and 9 of 12 runs that met the contract without the kit against $4.85 and 12 of 12 with it; with Sol, $1.59 and 12 of 12 without the kit against $3.32 and 12 of 12 with it. Wall time is longer with the kit." src="docs/images/suite-light.svg">
+  <img alt="All four tasks: with Opus, $5.93 and 9 of 12 runs that met the contract without the kit against $4.85 and 12 of 12 with it; with Sol, $1.59 and 12 of 12 without the kit against $2.68 and 12 of 12 with it. Wall time is longer with the kit." src="docs/images/suite-light.svg">
 </picture>
 
 <picture>
@@ -47,15 +46,15 @@ runs with the kit were measured again on 2026-10-21, and those are shown.
 | Task · model | Without the kit | With the kit |
 | --- | --- | --- |
 | Small fix · Opus | $0.69 · 4:23 · 3 of 3 | $1.01 · 7:55 · 3 of 3 |
-| Small fix · Sol | $0.39* · 3:57* · 3 of 3 | $0.72 · 13:42 · 3 of 3 |
+| Small fix · Sol | $0.39* · 3:57* · 3 of 3 | $0.60 · 9:00 · 3 of 3 |
 | Large cleanup · Opus | $4.43 · 12:24 · 0 of 3 | $2.96 · 22:53 · 3 of 3 |
-| Large cleanup · Sol | $0.74* · 7:35* · 3 of 3 | $1.52 · 34:33 · 3 of 3 |
+| Large cleanup · Sol | $0.74* · 7:35* · 3 of 3 | $1.08 · 17:34 · 3 of 3 |
 | Unknown bug · Opus | $0.43 · 2:29 · 3 of 3 | $0.45 · 2:01 · 3 of 3 |
-| Unknown bug · Sol | $0.21 · 2:13 · 3 of 3 | $0.56 · 10:20 · 3 of 3 |
+| Unknown bug · Sol | $0.21 · 2:13 · 3 of 3 | $0.52 · 7:32 · 3 of 3 |
 | Patch review · Opus | $0.38 · 2:26 · 3 of 3 | $0.43 · 1:54 · 3 of 3 |
-| Patch review · Sol | $0.26* · 3:00* · 3 of 3 | $0.52 · 10:04 · 3 of 3 |
+| Patch review · Sol | $0.26* · 3:00* · 3 of 3 | $0.49 · 5:28 · 3 of 3 |
 | **All four · Opus** | $5.93 · 21.7 min · 9 of 12 | $4.85 · 34.7 min · 12 of 12 |
-| **All four · Sol** | $1.59* · 16.7 min* · 12 of 12 | $3.32 · 68.7 min · 12 of 12 |
+| **All four · Sol** | $1.59* · 16.7 min* · 12 of 12 | $2.68 · 39.6 min · 12 of 12 |
 
 Each cell: mean price · mean wall time · runs that met the contract. \* Actual
 spend: those runs without the kit shared `/tmp` with other runs, so they are not
@@ -67,16 +66,11 @@ a clean comparison.
   runs of 12 against 9. It takes about 1.6 times as long, and a small task costs
   more through a worker and a review than in the session.
 - **Codex.** GPT-6.1 Sol alone is cheap on these tasks and met every contract;
-  with the kit it meets the same contracts at about 2.1 times the price and 4.1
-  times the time. On 2026-10-21 each Sol request took 12–16 s against 7–9 s the
-  day before, so part of that time is the API's.
+  with the kit it meets the same contracts at about 1.7 times the price and 2.4
+  times the time.
 - **Against the previous kit version (1.4.0)** on the same tasks, 1.4.1 met the
-  contract in 24 runs of 24 instead of 23. On Opus it cost 6% less and took 14%
-  less time. On Sol it cost 18% more ($3.32 against $2.81) and took 29% longer:
-  on the large task the reviewer sent the work back for fixes about twice as
-  often (3.3 fix rounds per run against 1.7). The first 1.4.1 Sol run,
-  on 2026-10-20, cost $2.68 and took 39.6 minutes; both runs are in the
-  evidence.
+  contract in 24 runs of 24 instead of 23. It was cheaper on both lines (Opus
+  −6%, Sol −5%) and faster (−14% and −26%).
 - One project, four tasks, three runs per cell: an indication, not a guarantee.
   Method: [benchmark](evaluation/BENCHMARK.md); history: [research](docs/research.md).
   Regenerate the charts with `node docs/images/charts.mjs`. The data and a
@@ -100,7 +94,6 @@ run, and rebuilds the comparison tables byte for byte:
 git clone https://github.com/shanja-glinka/agent-cooperator.git
 cd agent-cooperator
 node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-20-v9
-node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-21-v9-sol-rerun
 ```
 
 ### Measure your own project

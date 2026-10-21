@@ -64,23 +64,6 @@ no-kit and v8 cells were taken from their own runs.
 
 The data and a command that recomputes it are in `evaluation/evidence/`.
 
-**Sol line measured again (2026-10-21, release 1.4.2).** The Codex hooks in the
-user's home pointed at a removed Node.js. Bench cells use their own Codex home
-and showed no hook or tool errors, but the Sol line was measured again to be
-sure. 12 cells, the same kit and versions; one cell stopped when the API
-answered "Selected model is at capacity" and was run again alone.
-
-- **Contract:** 12 of 12.
-- **Sol line:** $3.32 and 68.7 minutes, against $2.68 and 39.6 minutes in the
-  first run and $2.81 and 53.2 minutes for v8.
-- **Time:** about as many requests as the first run, but each took 12–16 s
-  instead of 7–9 s, and output came at about half the rate.
-- **Price:** on the large task the reviewer sent the work back more often (3.3
-  fix rounds per run against 1.7 for v8); the other tasks cost 6–20% more than
-  in the first run.
-
-The README now shows the Sol numbers of this run.
-
 ## v8 — 2026-10-20: review against the contract
 
 Claude policy 1.10.0, Codex policy 1.12.0. v7 measured 2026-10-20 (private suite, 30

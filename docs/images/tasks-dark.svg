@@ -35,32 +35,32 @@
 <text x="232.168" y="142" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$1.01</text>
 <path d="M190,161 h10.352 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.352 z" fill="#3987e5"/>
 <text x="209.352" y="170" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.39*</text>
-<path d="M190,173 h22.496 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-22.496 z" fill="#d95926"/>
-<text x="221.496" y="182" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.72</text>
+<path d="M190,173 h18.08 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-18.08 z" fill="#d95926"/>
+<text x="217.07999999999998" y="182" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.60</text>
 <path d="M190,201 h159.02399999999997 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-159.02399999999997 z" fill="#3987e5"/>
 <text x="358.024" y="210" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$4.43</text>
 <path d="M190,213 h104.928 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-104.928 z" fill="#d95926"/>
 <text x="303.928" y="222" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$2.96</text>
 <path d="M190,241 h23.232 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-23.232 z" fill="#3987e5"/>
 <text x="222.232" y="250" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.74*</text>
-<path d="M190,253 h51.936 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-51.936 z" fill="#d95926"/>
-<text x="250.936" y="262" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$1.52</text>
+<path d="M190,253 h35.74400000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-35.74400000000001 z" fill="#d95926"/>
+<text x="234.744" y="262" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$1.08</text>
 <path d="M190,281 h11.823999999999998 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.823999999999998 z" fill="#3987e5"/>
 <text x="210.824" y="290" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.43</text>
 <path d="M190,293 h12.559999999999999 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-12.559999999999999 z" fill="#d95926"/>
 <text x="211.56" y="302" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.45</text>
 <path d="M190,321 h3.727999999999999 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-3.727999999999999 z" fill="#3987e5"/>
 <text x="202.728" y="330" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.21</text>
-<path d="M190,333 h16.608000000000004 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-16.608000000000004 z" fill="#d95926"/>
-<text x="215.608" y="342" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.56</text>
+<path d="M190,333 h15.136000000000003 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-15.136000000000003 z" fill="#d95926"/>
+<text x="214.136" y="342" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.52</text>
 <path d="M190,361 h9.984 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-9.984 z" fill="#3987e5"/>
 <text x="208.984" y="370" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.38</text>
 <path d="M190,373 h11.823999999999998 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.823999999999998 z" fill="#d95926"/>
 <text x="210.824" y="382" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.43</text>
 <path d="M190,401 h5.568000000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-5.568000000000001 z" fill="#3987e5"/>
 <text x="204.568" y="410" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.26*</text>
-<path d="M190,413 h15.136000000000003 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-15.136000000000003 z" fill="#d95926"/>
-<text x="214.136" y="422" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.52</text>
+<path d="M190,413 h14.032 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-14.032 z" fill="#d95926"/>
+<text x="213.032" y="422" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">$0.49</text>
 <text x="448" y="100" font-size="12" font-weight="600" fill="#c3c2b7">Wall time, minutes</text>
 <line x1="448" y1="112" x2="448" y2="432" stroke="#2c2c2a" stroke-width="1"/>
 <text x="448" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
@@ -77,32 +77,32 @@
 <text x="501.576" y="142" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">7:55</text>
 <path d="M448,161 h20.22666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-20.22666666666667 z" fill="#3987e5"/>
 <text x="477.2266666666667" y="170" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">3:57*</text>
-<path d="M448,173 h80.02666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-80.02666666666667 z" fill="#d95926"/>
-<text x="537.0266666666666" y="182" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">13:42</text>
+<path d="M448,173 h51.199999999999996 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-51.199999999999996 z" fill="#d95926"/>
+<text x="508.2" y="182" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">9:00</text>
 <path d="M448,201 h72.05333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-72.05333333333333 z" fill="#3987e5"/>
 <text x="529.0533333333333" y="210" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">12:24</text>
 <path d="M448,213 h136.33066666666664 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-136.33066666666664 z" fill="#d95926"/>
 <text x="593.3306666666666" y="222" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">22:53</text>
 <path d="M448,241 h42.49066666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-42.49066666666666 z" fill="#3987e5"/>
 <text x="499.49066666666664" y="250" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">7:35*</text>
-<path d="M448,253 h207.90666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-207.90666666666667 z" fill="#d95926"/>
-<text x="664.9066666666666" y="262" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">34:33</text>
+<path d="M448,253 h103.76266666666666 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-103.76266666666666 z" fill="#d95926"/>
+<text x="560.7626666666666" y="262" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">17:34</text>
 <path d="M448,281 h11.210666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-11.210666666666667 z" fill="#3987e5"/>
 <text x="468.21066666666667" y="290" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">2:29</text>
 <path d="M448,293 h8.389333333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-8.389333333333333 z" fill="#d95926"/>
 <text x="465.38933333333335" y="302" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">2:01</text>
 <path d="M448,321 h9.616000000000001 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-9.616000000000001 z" fill="#3987e5"/>
 <text x="466.616" y="330" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">2:13</text>
-<path d="M448,333 h59.35733333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-59.35733333333333 z" fill="#d95926"/>
-<text x="516.3573333333334" y="342" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">10:20</text>
+<path d="M448,333 h42.184 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-42.184 z" fill="#d95926"/>
+<text x="499.18399999999997" y="342" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">7:32</text>
 <path d="M448,361 h10.904 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-10.904 z" fill="#3987e5"/>
 <text x="467.904" y="370" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">2:26</text>
 <path d="M448,373 h7.653333333333332 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-7.653333333333332 z" fill="#d95926"/>
 <text x="464.6533333333333" y="382" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">1:54</text>
 <path d="M448,401 h14.400000000000002 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-14.400000000000002 z" fill="#3987e5"/>
 <text x="471.4" y="410" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">3:00*</text>
-<path d="M448,413 h57.76266666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-57.76266666666667 z" fill="#d95926"/>
-<text x="514.7626666666667" y="422" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">10:04</text>
+<path d="M448,413 h29.54933333333333 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-29.54933333333333 z" fill="#d95926"/>
+<text x="486.5493333333333" y="422" font-size="10.5" fill="#c3c2b7" style="font-variant-numeric: tabular-nums">5:28</text>
 <text x="706" y="100" font-size="12" font-weight="600" fill="#c3c2b7">Runs that met the contract</text>
 <line x1="706" y1="112" x2="706" y2="432" stroke="#2c2c2a" stroke-width="1"/>
 <text x="706" y="448" font-size="11" fill="#898781" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>

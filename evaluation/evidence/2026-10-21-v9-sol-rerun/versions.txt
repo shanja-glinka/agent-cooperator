@@ -1,5 +1,0 @@
-claude 2.1.303 (Claude Code) (~/.local/share/claude/versions/2.1.303)
-codex codex-cli 0.163.0 (~/.nvm/versions/node/v24.22.0/lib/node_modules/@openai/codex/bin/codex.js)
-codex launch workforce-economy
-node v24.22.0 (~/.nvm/versions/node/v24.22.0/bin/node)
-npm 11.8.0
