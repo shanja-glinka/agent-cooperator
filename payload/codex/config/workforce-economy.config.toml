@@ -4,7 +4,8 @@ model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 The user explicitly launched the workforce-economy config profile.
-Use PROFILE=economy for this task: Luna workers at xhigh with the escalation ladder.
+Use PROFILE=economy for this task: when you delegate, Luna workers at xhigh with the escalation ladder.
+Whether to delegate follows the skill; doing a step yourself is part of the profile.
 Apply {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for implementation work.
 The user's later explicit profile choice takes precedence; verify runtime settings.
 """

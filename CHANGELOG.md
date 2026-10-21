@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- The route is chosen from measured anchors instead of "compare in words; do
+  not invent numbers". A task of about 20 turns (a small fix, a bug with a clear
+  symptom, a patch review) is done directly: through a worker and a review it
+  cost about twice as much and took two to three times as long. Work several
+  times larger goes to workers. In 1.4.1 the Sol cooperator delegated all twelve
+  measured tasks. The Codex launch layers now set the models for delegation and
+  no longer read as an order to delegate. Policy: Claude 1.11.0, Codex 1.13.0.
+- Hybrid: a `haiku` block is sized to finish in about 25 requests (about 30
+  sites of a mechanical sweep). In 1.4.1 its prompt passed 100k tokens after 18
+  to 35 requests, and those requests made 64% of Haiku's price.
+- Every code change after a review, by a worker or by the cooperator, goes back
+  to the same reviewer as a delta; a delta round costs about a quarter of the
+  first review. The cooperator may fix a small finding itself instead of a worker
+  round. Its own reading accepts only work that never went to review. In 1.4.1
+  two of three large Claude tasks accepted such a fix without the reviewer.
 - Bench counters, after an external audit of the 1.4.1 measurements:
   - a Claude cell's thinking now includes the reasoning of the Codex runs it
     started (the 1.4.1 Opus cells missed 43,195 tokens; prices were right);

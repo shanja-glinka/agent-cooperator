@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.12.0",
+  "policyVersion": "1.13.0",
   "selection": "contextual",
   "policy": {
     "reviewBlock": true,
@@ -167,8 +167,8 @@
     "note": "Codex efforts: Sol and Luna medium by default; ultra enables Codex-native subagents. Config values are low|medium|high|xhigh|max|ultra. Requests over 272k input tokens cost about twice; cache writes cost 1.25x input."
   },
   "workClasses": {
-    "direct": "Work whose packet would cost as much as doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly. Done inline with the project's checks; no agents.",
-    "build": "One verifiable block inside a clear write set for a light worker: a fix, a feature, a mechanical change of any size, reproducing a bug or tracing a cause. The cooperator briefs it with the goal, boundaries, sources, the constraints that can change how it is done, and the check, without solving it first; the block is reviewed before it is accepted.",
+    "direct": "Work whose route would cost more than doing it: a question, an analysis, a config or doc edit, a change of a few lines the cooperator already knows exactly, and a task of about 20 turns (a small fix, a bug with a clear symptom, a patch review), which cost about twice as much through a worker and a review in the measurements. Done inline with the project's checks; no agents.",
+    "build": "One verifiable block inside a clear write set for a light worker: work several times larger than a task of about 20 turns, such as a feature, a mechanical change over many files or sites, or a bug whose cause needs long tracing. The cooperator briefs it with the goal, boundaries, sources, the constraints that can change how it is done, and the check, without solving it first; the block is reviewed before it is accepted.",
     "pipeline": "Several blocks with disjoint write sets that need no decision from each other, run in parallel after open design decisions are made. Stage review only for an integration part no block review covered."
   },
   "judging": {
@@ -200,10 +200,10 @@
     "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
     "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol at xhigh; blocks ready together go to one review. With it off, the cooperator accepts on its own reading of the diff.",
     "contract": "The review packet names CONTRACT: what the change must keep, quoted with its source (the task, the project's rules). The reviewer lists from the diff itself every changed protective site (a removed or changed condition, a changed fallback, a normalization, null becoming undefined, a changed order of evaluation) and gives each one verdict: kept, with a checkable basis; violated, with the difference and the fix; not established, with the missing fact. Sites with one basis are grouped with their locations. The site list is part of checking the contract, not all of it: every other requirement in CONTRACT is checked on the paths the change touches.",
-    "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and a change that bears on the review goes to the same reviewer. No reviewer call only to read an exit code.",
+    "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and every code change after the review goes to the same reviewer as a delta. No reviewer call only to read an exit code.",
     "stage": "Stage review (gpt-6.1-sol at xhigh) runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract. One review that read the final merged diff and those interactions closes both.",
-    "loop": "Real findings go to the same worker; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
-    "smallLocal": "A small local change with a clear contract and passing checks may be accepted on the cooperator's own reading of the diff.",
+    "loop": "Real findings go to the same worker, or the cooperator fixes a small one itself; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
+    "smallLocal": "On a direct route, a small local change with a clear contract and passing checks is accepted on the cooperator's own reading of the diff. After a review, every code change, whoever writes it, goes to the same reviewer as a delta, which costs about a quarter of the first review.",
     "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",
     "report": "One line per reviewed block: the reviewer's REVIEW: block=<label> rounds=<n> findings=<n> sites=<n> open=<n>, with real=<n> (the findings the cooperator took as real) added after findings."
   }

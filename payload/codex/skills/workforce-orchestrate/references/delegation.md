@@ -110,17 +110,18 @@ Required checks passed → report (stage review is off in this install)
    check or a concrete scenario; a change that breaks an explicit requirement
    needs no proof that the bad input already occurred. Suggestions and work
    outside SCOPE are not taken. Real findings go to their workers as one
-   bundle each; then continue the same reviewer with `followup_task` and the
-   delta, so it checks the fixes and what they touch without rereading
-   everything. The same finding twice without progress stops the loop for
-   your decision. A reviewer's "accepted" does not replace a required check
+   bundle each, or you fix a small one yourself; either way continue the same
+   reviewer with `followup_task` and the delta, so it checks the fixes and
+   what they touch without rereading everything (a delta round costs about a
+   quarter of the first review). The same finding twice without progress
+   stops the loop for your decision. A reviewer's "accepted" does not replace a required check
    that has not passed: when only that check is left, the reviewer ends with
    `accepted_if <check> on tree:<hash>`, and you close it with `accept.mjs
    close` once a recorded run passed on that tree (tools); no reviewer call is
-   needed to read an exit code. If the fix for a failed check changes code,
-   that delta goes to the same reviewer. A small local change with a clear
-   contract and passing checks you may accept on your own reading of the
-   diff.
+   needed to read an exit code. Any code change after the review, by a worker
+   or by you, a fix for a failed check included, goes to the same reviewer as
+   a delta before you accept; your own reading accepts only work that never
+   went to review.
 {{/reviewBlock}}
 {{^reviewBlock}}
    Block review is off in this install. Read the whole diff yourself and take
@@ -165,7 +166,7 @@ Required checks passed → report (stage review is off in this install)
 {{#reviewBlock}}
 | The reviewer brings the same finding again | Stop the loop: read the code and the finding yourself, then decide (accept with a reason, fix the packet, or escalate). |
 | Sol is unavailable for a review that must run | The block is not independently reviewed: say so and ask the user. Your own reading is not an independent review, and no other model stands in for Sol. |
-| The reviewer accepts, but a required check is missing or stale | `accepted_if <check> on tree:<hash>`: run the check through `accept.mjs` and close it; no new review round unless the code changed in a way that bears on the review. |
+| The reviewer accepts, but a required check is missing or stale | `accepted_if <check> on tree:<hash>`: run the check through `accept.mjs` and close it; no new review round while the tree is unchanged, and any code change goes to the same reviewer as a delta. |
 {{/reviewBlock}}
 | Findings for block A arrive while A's worker is on block B | Keep them under A and send them when that worker finishes its current step, never as a second assignment at once. |
 | The next block may change what an acceptance reads | Use a snapshot ([tools](tools.md)) or wait for the writer. Disjoint WRITE_SETs do not freeze imports. |
@@ -206,7 +207,12 @@ woke 72 times on one-minute waits, mostly to write a status or look at the
 workers' files; so the constraints of the touched areas are in the brief
 before the work starts, the review checks the contract site by site, a check
 that passed on the reviewed tree closes its condition without a new round,
-and the wait is long. The same worker and reviewer continue
+and the wait is long. In the v9 measurement the Sol cooperator delegated all
+twelve tasks, those of about 20 turns too, which cost about twice as much that
+way as done directly; so such a task is done directly. In v9 two of three
+large Claude tasks also accepted a fix after the review without the reviewer,
+though a delta round costs about a quarter of the first review; so every
+change after a review goes back to it. The same worker and reviewer continue
 across rounds because a round then costs only the delta. A block that
 exhausts a tier is a signal about the block, so the next tier gets your
 analysis and a handoff instead of a pile of transcripts. Only a run that fails
