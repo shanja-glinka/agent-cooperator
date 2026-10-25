@@ -13,6 +13,7 @@ Read the record only to route outside the defaults below.
 | Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6.1-sol`, xhigh |
 | Worker ladder | Luna → Sol | Sol |
 | Audit lens (`workforce_auditor`, on demand) | `gpt-6-luna`, xhigh | same |
+| Progress critic (`workforce_progress_critic`, build/pipeline from 45 minutes) | `gpt-6.1-sol`, xhigh | same |
 | Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, xhigh | same |
 | Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.1-sol`, xhigh, only for an integration part no block review covered | same |
 | Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | same |
@@ -26,15 +27,19 @@ is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{
 `codex -p workforce-standard` set the cooperator's model and effort for that
 launch and the wait limits (tools); a prompt never changes the running model,
 so report a mismatch instead of claiming one. No model above Sol is in this
-kit. If Sol is unavailable for a review that must run, the block is not
-independently reviewed: say so and ask the user; your own reading of the diff
-is not an independent review.
+kit. The progress critic is a separate goal monitor, not a reviewer; it does
+not accept blocks or replace required reviews. If Sol is
+unavailable for a required review, say the block is not independently reviewed
+and ask the user; your own reading of the diff is not an independent review.
+If Sol is unavailable for the progress critic, report that missing capability
+instead of claiming independent coverage.
 
 Prices per MTok (checked 2026-10-20): GPT-6.1 Sol $2 in / $10 out, cached
 $0.10; GPT-6 Luna $0.10 / $0.50, cached $0.01 (effort up to xhigh); above 272k
 input tokens a request costs about twice. Role files omit model and effort on
 purpose: the spawn sets them. Sol and Luna default to medium, so set effort on
-every spawn: workers, auditors, and reviewers run at xhigh.
+every spawn: workers, auditors, reviewers, and the progress critic run at
+xhigh.
 
 ## Selection
 
@@ -114,6 +119,15 @@ FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: pa
 BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff
 ```
+
+The separate critic packet carries the exact original `USER_OUTCOME`, the
+latest user corrections, every still-open acceptance criterion, the task state
+file, the smallest authoritative evidence sources, and `PROGRESS_SINCE_LAST`:
+criteria closed, compactions, repeated reads or commands, failed runs, hours,
+and requests or spend when known. It must not replace that outcome with the
+cooperator's chosen `GOAL` or a narrower contract. Keep the critic's task name
+and next due time in the task state file across compaction. See
+[tools](tools.md) for the spawn and follow-up shapes.
 
 Agents share the checkout; use worktrees only for a concrete write conflict. An
 audit beside a running writer follows step 4 of [delegation](delegation.md).

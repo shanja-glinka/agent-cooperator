@@ -3,8 +3,9 @@
 This is the Claude Code edition of the kit. It installs five subagent roles, six
 skills, a routing policy, and a managed block in the user `CLAUDE.md`. The workflow
 is the same brain/worker pattern the [research](research.md) found in live public
-configurations; the roles and skill names match the Codex edition so both can be
-used side by side.
+configurations; the shared worker, probe, auditor, and reviewer roles match the
+Codex edition so both can be used side by side. Codex has a separate progress
+critic; it is not installed in this Claude Code edition.
 
 ## Install
 

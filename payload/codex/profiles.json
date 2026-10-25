@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.13.0",
+  "policyVersion": "1.14.0",
   "selection": "contextual",
   "policy": {
     "reviewBlock": true,
@@ -54,6 +54,12 @@
         "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors).",
         "mode": "on-demand: only for an area the checks and the review do not cover"
       },
+      "progressCritic": {
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "when": "One critic per build or pipeline goal: first after 45 minutes of work, then every 45 minutes while the outcome is open, and at once after a cooperator compaction, a third identical failure, a block's third continuation or spent budget, or a check period with nothing closed; the cooperator reads the clock at its turns and continues the same critic, nothing sleeps",
+        "scope": "Read-only check of progress against the user's request and corrections: what closed since the last check, the loop shape (repeater, wanderer, looper), detours, blockers; one remedy the cooperator must apply or answer; not a block reviewer"
+      },
       "workerLadder": [
         "gpt-6.1-sol"
       ]
@@ -104,6 +110,12 @@
         "rerun": "on real findings",
         "coverage": "A lens's round ends only when its auditor returns STATUS: complete (every assigned file read). An auditor that returns STATUS: partial or stops at its limit is continued on its NOT_REACHED files; nothing goes to the worker until every lens in the round is complete. At the token ceiling the lens moves to the next audit tier (workerBudgets.auditors).",
         "mode": "on-demand: only for an area the checks and the review do not cover"
+      },
+      "progressCritic": {
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "when": "One critic per build or pipeline goal: first after 45 minutes of work, then every 45 minutes while the outcome is open, and at once after a cooperator compaction, a third identical failure, a block's third continuation or spent budget, or a check period with nothing closed; the cooperator reads the clock at its turns and continues the same critic, nothing sleeps",
+        "scope": "Read-only check of progress against the user's request and corrections: what closed since the last check, the loop shape (repeater, wanderer, looper), detours, blockers; one remedy the cooperator must apply or answer; not a block reviewer"
       },
       "workerLadder": [
         "gpt-6-luna",

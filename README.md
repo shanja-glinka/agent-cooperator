@@ -260,10 +260,10 @@ re-scope the block, and gives the next tier a fresh packet with that APPROACH
 and the HANDOFF. Earlier reports, review rounds, and transcripts stay with the
 cooperator.
 
-**While agents work.** The cooperator waits for their results: no polling,
-sleeping, or scheduled wake-ups, because each of its turns rereads its context.
-Workers send their packet, a blocker, or a contract question, not progress
-messages.
+**While agents work.** The cooperator waits for their results without polling
+or sleeping. Workers send their packet, a blocker, or a contract question, not
+progress messages. In Codex, the cooperator also reads the clock at its turns
+to know when the progress critic is due; nothing sleeps for it.
 
 ## Claude Code
 
@@ -299,6 +299,7 @@ Details: [docs/claude-code.md](docs/claude-code.md).
 | Worker | Luna xhigh | Sol xhigh |
 | Worker ladder | Luna → Sol | Sol |
 | Audit lens (on demand) | Luna xhigh | same |
+| Progress critic (build/pipeline, from 45 minutes) | Sol xhigh | same |
 | Block review | Sol xhigh | same |
 | Stage acceptance | Sol xhigh, only for an integration part no block review covered | same |
 
@@ -309,14 +310,21 @@ a stored or launched choice of it runs as Standard. Native launch layers:
 `codex -p workforce-economy` and `workforce-standard`. Both set the agent wait: a
 wait returns as soon as an agent sends a message or finishes, and otherwise lasts 20
 minutes. A prompt never changes the running model. No profile uses GPT-6 Astra.
+A build or pipeline gets one read-only progress critic after 45 minutes of work,
+then every 45 minutes and at once after a compaction, a third identical failure,
+or a check period with nothing closed. It checks with a fresh context whether the
+work still moves toward your outcome or has dug in (the same action repeated, a
+detour that closes nothing you asked for, a context compacted again and again)
+and names one remedy, which the cooperator applies or answers. It does not
+replace block or stage review. Claude's workflow is unchanged.
 Details: [docs/profiles.md](docs/profiles.md).
 
 ## What gets installed
 
 | | Claude Code (`~/.claude`) | Codex (`~/.codex`) |
 | --- | --- | --- |
-| Roles | `agents/workforce-{worker,worker-lite,probe,auditor,reviewer}.md` | `agents/workforce_{worker,probe,auditor,reviewer}.toml` |
-| Skills | `skills/workforce-*/` | `skills/workforce-*/`, linked into `~/.agents/skills` |
+| Roles | `agents/workforce-{worker,worker-lite,probe,auditor,reviewer}.md` | `agents/workforce_{worker,probe,auditor,reviewer,progress_critic}.toml` |
+| Skills | `skills/workforce-*/` | `skills/workforce-*/` (including `workforce-progress-critic`), linked into `~/.agents/skills` |
 | Launch layers | none | `workforce-{standard,economy}.config.toml` |
 | Policy and manifest | `claude-workforce/profiles.json`, `manifest.json` | `codex-workforce/profiles.json`, `manifest.json` |
 | Instructions | marked block in `CLAUDE.md` | marked block in `AGENTS.md` (or `AGENTS.override.md`) |

@@ -52,11 +52,13 @@ CODEX_HOME/
   agents/workforce_worker.toml
   agents/workforce_auditor.toml
   agents/workforce_reviewer.toml
+  agents/workforce_progress_critic.toml
   skills/workforce-orchestrate/...
   skills/workforce-worker/...
   skills/workforce-probe/...
   skills/workforce-audit/...
   skills/workforce-review/...
+  skills/workforce-progress-critic/...
   skills/workforce-smoke/...
   workforce-standard.config.toml
   workforce-economy.config.toml
@@ -172,8 +174,8 @@ does not silently enable them. You must resolve that runtime setting yourself.
 
 Run `status` to verify owned files, links, and the effective instruction block. It also
 prints a `routing:` section: the policy version, the default profile's worker, block and
-stage reviewers, and ladder, and for Codex each launch layer's wait limits. This is a
-file-level check. It does not prove account model access, runtime dispatch,
+stage reviewers, and ladder; for Codex it also lists the progress critic and the
+launch-layer wait limits. This is a file-level check. It does not prove account model access, runtime dispatch,
 instruction-following quality, or a successful product implementation.
 
 For native CLI profile layers, current Codex supports:

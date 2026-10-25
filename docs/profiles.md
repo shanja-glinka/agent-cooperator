@@ -2,12 +2,15 @@
 
 The product name and role names are independent of model generations. The current
 release uses GPT-6.1 Sol and GPT-6 Luna for Codex. The Claude Code edition uses the
-same roles with Claude model tiers; see [claude-code.md](claude-code.md) for its
-profile table and [research.md](research.md) for the evidence behind it. Future
+shared worker, probe, auditor, and reviewer roles with Claude model tiers; see
+[claude-code.md](claude-code.md) for its profile table and [research.md](research.md)
+for the evidence behind it. The progress critic is Codex-only.
+Future
 releases can update model policy without changing the install command or renaming
 your agents. Codex policy 1.12.0 removes GPT-6 Astra and the Enhanced profile. The
 escalation ceiling is Sol xhigh, and stage review runs only for an integration part no
-block review covered. Claude policy 1.10.0 keeps Hybrid as its default.
+block review covered. Codex policy 1.14.0 adds a separate progress critic for active
+implementation tasks; Claude policy 1.11.0 is unchanged by this Codex-only workflow.
 
 [`payload/codex/profiles.json`](../payload/codex/profiles.json) is the machine-readable routing
 policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
@@ -29,9 +32,11 @@ make those settings mandatory. Keep review independence and verification require
 Standard is the user's choice. Use it when the requirements and solution are
 sufficiently described. GPT-6.1 Sol high owns orchestration, GPT-6 Luna owns
 read-only lookups (Sol when judgment is needed), Sol implements at xhigh, and Sol at
-xhigh independently reviews complete blocks. Stage review, also Sol at xhigh, runs
-only for an integration part no block review covered. The Sol orchestrator is a
-deliberate cost choice for the longest context.
+xhigh independently reviews complete blocks. A build or pipeline gets one Sol
+xhigh progress critic from 45 minutes of work on, every 45 minutes and after each
+compaction: it checks whether the work still moves toward the user's outcome.
+Stage review, also Sol at xhigh, runs only for an integration part no block review
+covered. The Sol orchestrator is a deliberate cost choice for the longest context.
 
 ## Enhanced (removed)
 
@@ -45,8 +50,11 @@ unattended runs. You can also launch it explicitly with `codex -p workforce-econ
 or keep it as a standing preference. Sol high is the cooperator: it thinks, judges,
 and integrates. Luna xhigh is the worker, reading and typing at xhigh; Sol at
 xhigh reviews the blocks Luna submits (`reviewBlock` on, the default). Luna also
-runs an audit lens when an area needs one. Sol at xhigh is the stage reviewer, and
-only for an integration part no block review covered (`reviewStage` on). A Luna
+runs an audit lens when an area needs one. A build or pipeline gets one Sol xhigh
+progress critic from 45 minutes of work on, every 45 minutes and after each
+compaction: it checks whether the work still moves toward the user's outcome or
+has dug in. The critic does not replace review. Sol at xhigh is the stage reviewer, and only for an
+integration part no block review covered (`reviewStage` on). A Luna
 worker has 600 tool calls per run, 1800 per block, three attempts, and 400k tokens
 per block; a block that exhausts it moves to Sol xhigh.
 

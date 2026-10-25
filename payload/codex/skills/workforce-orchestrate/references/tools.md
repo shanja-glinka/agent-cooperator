@@ -2,7 +2,7 @@
 
 Read the real tool schema in the session; fields vary by runtime. Roles installed
 by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
-`workforce_reviewer`.
+`workforce_reviewer`, and `workforce_progress_critic`.
 
 ## V2: task_name, fork_turns, followup_task
 
@@ -18,6 +18,18 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
   "fork_turns": "none", "message": "<packet with MODE: block, REVIEW, SNAPSHOT, the audit log>" }
 ```
 
+The progress critic of a build or pipeline is spawned once, when its first
+check comes due (45 minutes of work, or a trigger), with the profile's
+`progressCritic` route; every later check continues the same task with
+`followup_task`. Its packet holds the user's request and corrections, the OPEN
+list, the task state file, evidence sources, and `PROGRESS_SINCE_LAST`.
+
+```json
+{ "task_name": "progress_critic", "agent_type": "workforce_progress_critic",
+  "model": "gpt-6.1-sol", "reasoning_effort": "xhigh",
+  "fork_turns": "none", "message": "<user outcome, corrections, OPEN, state file, evidence, PROGRESS_SINCE_LAST>" }
+```
+
 ```json
 { "task_name": "audit_conventions", "agent_type": "workforce_auditor",
   "model": "gpt-6-luna", "reasoning_effort": "xhigh",
@@ -30,6 +42,14 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
   its NOT_REACHED files), only the auditors whose lens won the last round for
   the next round, the same reviewer for the delta. It does not take model or
   effort overrides; for a different model, spawn a fresh task.
+- The critic's time: at each of your turns read the UTC time (`date -u
+  +%FT%TZ` through `exec_command`, or the session's clock tool when it has one)
+  and compare it with the due time in the task state file. When a check is due
+  and the critic is idle, `followup_task` it with the packet; record the
+  report's time and the next due time, 45 minutes later. A check that comes
+  due while you wait on `wait_agent` runs at your next turn. No agent sleeps
+  for it, and `wait_agent`'s timeout is not a timer. At the goal's end or on
+  the user's stop, `interrupt_agent` the critic.
 - Escalation is a fresh spawn on the next tier (`"model": "gpt-6.1-sol"` after
   Luna) with the escalation packet; Sol is the top tier. Once a worker's
   budget is spent, ask it only for a missing HANDOFF, never for more work.

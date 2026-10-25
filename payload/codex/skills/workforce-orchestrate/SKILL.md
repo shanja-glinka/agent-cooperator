@@ -120,6 +120,50 @@ decision, not with progress. Act at once on a blocker, a contract question, a
 submitted result, a failure, or a spent budget; results that arrive together
 are handled together.
 
+## Progress critic (Codex)
+
+Long tasks fail by digging in: the context fills and compacts, the same files
+are read again, and work goes on without closing anything the user asked for.
+A progress critic is a fresh-context Sol check of that, not a code review. It
+follows [`workforce-progress-critic`](../workforce-progress-critic/SKILL.md).
+
+**When.** A `build` or `pipeline` gets one critic after 45 minutes of
+wall-clock work, and the same critic again every 45 minutes while the user's
+outcome is open; direct, tiny, and analysis-only work gets none. A check is due
+at once after a context compaction of yours, when the same check fails the same
+way a third time, when a worker's block reaches its third continuation or
+spends its budget, and when nothing on the OPEN list closed since the last
+check. You keep the time yourself: at each of your turns, read the UTC clock
+and the due time in the task state note, and when a check is due, continue the
+same critic with `followup_task`. Nothing sleeps or schedules for it; a check
+that comes due while you wait on `wait_agent` runs at your next turn. One
+critic per goal, not per block.
+
+**Packet.** The user's exact request and later corrections, the OPEN list, the
+task state note, the evidence sources, and the progress since the last check:
+criteria closed, your compactions, files or commands you repeated, failed runs,
+hours, and requests or spend when you know them. The critic reads a little
+fresh evidence itself and trusts none of your summaries.
+
+**Its report** gives `PROGRESS: on_track | at_risk | stuck | blocked |
+goal_met`, the loop it sees, and one remedy. On `at_risk` or `stuck`, your next
+turn applies the remedy or writes in the task state note why it does not
+apply:
+
+- the same action with the same result: stop it and name what changes;
+- activity that closes nothing requested: re-plan from the OPEN list and drop
+  the detour;
+- the same few steps in a cycle, or a context compacted again and again: hand
+  the rest of the block to a fresh agent with a written handoff (done, failed
+  and why, next) instead of continuing in the compacted thread.
+
+Two `stuck` reports in a row on the same criterion make the reset mandatory.
+The critic accepts nothing, does not replace block or stage review, and its
+report closes nothing on the OPEN list. Do not turn its findings into
+questions for the user; ask only for what nobody in the task can supply. Keep
+its reports in the task state note, list them and what you did in the final
+report, and interrupt the critic when the goal is done or the user stops it.
+
 ## Checks
 
 Run a check so that its result is its own: through `scripts/accept.mjs run

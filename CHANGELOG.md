@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.6.0 — 2026-10-25 (measurement pending)
+
+- Codex policy 1.14.0 adds a progress critic for build and pipeline tasks, aimed
+  at long tasks that dig in: the context fills and compacts, the same files are
+  read again, and nothing the user asked for gets closer. Real Sol sessions ran
+  25–45 hours and 3,300 requests with 15–16 compactions, and Luna workers 3,000
+  requests with 26.
+  - One Sol xhigh critic per goal, with a fresh context, first after 45 minutes
+    of work, then every 45 minutes, and at once after a cooperator compaction,
+    a third identical failure, a block's third continuation or spent budget, or
+    a period with nothing closed. The cooperator reads the clock at its own
+    turns and continues the same critic; nothing sleeps for it.
+  - The critic reports what closed since the last check, the loop shape
+    (repeater, wanderer, looper), detours, and one remedy. The cooperator
+    applies it or records why not; two `stuck` reports on the same criterion
+    make a reset to a fresh agent with a written handoff mandatory. Findings do
+    not become questions for the user.
+  - The critic is read-only, bounded to 8 tool calls and 250 words, and stays
+    separate from code review. Claude payload and policy are unchanged.
+- `extras/codex-loop-guard`: an optional Codex hook, not installed by the kit.
+  It notes a tool call repeated with the same result, a failure repeated the
+  same way, and context compactions. Tested with synthetic events only.
+- The version has not been measured yet; no performance comparison is claimed.
+
 ## 1.5.0 — 2026-10-21
 
 - Measured on the same four tasks as 1.4.1, three runs per task and model:

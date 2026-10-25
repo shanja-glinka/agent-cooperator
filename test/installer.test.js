@@ -349,7 +349,7 @@ test('update installs the real contextual policy into existing consumers and pre
   assert.equal(policy.selectionRules.default, 'economy');
   assert.deepEqual([policy.profiles.economy.worker.model, policy.profiles.economy.worker.effort], ['gpt-6-luna', 'xhigh']);
   assert.deepEqual([policy.profiles.economy.blockReviewer.model, policy.profiles.economy.blockReviewer.effort], ['gpt-6.1-sol', 'xhigh']);
-  // Policy 1.12.0: no Astra anywhere, Sol xhigh reviews the stage, the ladder ends at Sol, and the
+  // Policy 1.14.0: no Astra anywhere, Sol xhigh owns reviews and progress criticism, the ladder ends at Sol, and the
   // Enhanced launch layer an older install left behind is removed.
   assert.deepEqual(Object.keys(policy.profiles), ['standard', 'economy']);
   assert.deepEqual([policy.profiles.economy.stageReviewer.model, policy.profiles.economy.stageReviewer.effort], ['gpt-6.1-sol', 'xhigh']);
@@ -365,7 +365,7 @@ test('update installs the real contextual policy into existing consumers and pre
     assert.ok(min <= def && def <= max && min >= 1200000, `${layer}: ${min} ${def} ${max}`);
   }
   const routing = (await runCommand('status', options)).routing;
-  assert.ok(routing.includes('economy (default): worker gpt-6-luna xhigh; block review gpt-6.1-sol xhigh; stage review gpt-6.1-sol xhigh; ladder gpt-6-luna → gpt-6.1-sol'), routing.join('\n'));
+  assert.ok(routing.includes('economy (default): worker gpt-6-luna xhigh; block review gpt-6.1-sol xhigh; stage review gpt-6.1-sol xhigh; progress critic gpt-6.1-sol xhigh; ladder gpt-6-luna → gpt-6.1-sol'), routing.join('\n'));
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
 });

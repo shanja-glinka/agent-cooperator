@@ -70,7 +70,10 @@ Required checks passed → report (stage review is off in this install)
    questions before briefing. Set model and reasoning effort on every spawn;
    spawn with an empty fork and the packet. Independent blocks launch in one
    turn. In a pipeline, keep the OPEN list in the task state file and reread
-   it after compaction or resume.
+   it after compaction or resume. A build or pipeline gets one progress critic
+   after 45 minutes of work, again every 45 minutes, and at once on a trigger
+   (SKILL.md, "Progress critic"); keep its due time and reports in the task
+   state file, and reuse the same critic task across the goal.
 3. **Hold the budget and escalate with a handoff.** Each worker tier has a
    budget per block in dispatch: three attempts and a volume (tool calls,
    tokens). An attempt is spent only by a run that ends without a result: the
@@ -86,7 +89,8 @@ Required checks passed → report (stage review is off in this install)
    fix, and write APPROACH. The stronger worker is a new spawn with the
    original packet, APPROACH, and the HANDOFF only. At the top of the ladder
    the next move is yours: re-plan or ask the user.
-4. **While agents work.** Wait with `wait_agent` and no short timeout; the
+4. **While agents work.** The cooperator waits with `wait_agent` and no short
+   timeout; the
    launch layers set its minimum and default to 20 minutes, and it returns at
    once on an agent's message or finish. Never `sleep` or poll, because every
    wake-up rereads your context: without a new substantial event, do not look
@@ -94,7 +98,9 @@ Required checks passed → report (stage review is off in this install)
    write a repeated status; after an event, do what it needs. A worker's
    packet is its report; it sends no progress messages. Act at once on a
    blocker, a contract question, a submitted block, a failed run, or a spent
-   budget. Blocks submitted together are accepted together.
+   budget. Blocks submitted together are accepted together. A progress check
+   that came due while you waited runs at your next turn; nothing sleeps for
+   it.
 5. **Accept the block.**
 {{#reviewBlock}}
    The reviewer (`workforce_reviewer` on GPT-6.1 Sol at xhigh, MODE=block)
@@ -154,7 +160,9 @@ Required checks passed → report (stage review is off in this install)
 {{/reviewStage}}
 8. **Report** also: submitted → accepted per block{{#reviewBlock}}, the `REVIEW:` line{{/reviewBlock}},
    audit lenses you added and what each covered, escalations with their
-   cause, and actual routing when it differed from the plan.
+   cause, actual routing when it differed from the plan, and the progress
+   critic's reports with what you did about each. Interrupt the critic when
+   the goal completes or the user stops or pauses it.
 
 ## Situations
 

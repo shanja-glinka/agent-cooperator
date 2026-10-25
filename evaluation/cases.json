@@ -620,6 +620,36 @@
       "runtime": "codex",
       "input": "A Codex user's standing preference says Enhanced.",
       "expected": "Enhanced was removed in policy 1.12.0: the task runs as Standard and the cooperator says so."
+    },
+    {
+      "id": "codex-progress-critic-checks-original-outcome",
+      "runtime": "codex",
+      "input": "An active pipeline has a broad original user request and later corrections. The cooperator's brief narrows acceptance to the one implementation block currently green.",
+      "expected": "The independent read-only progress critic compares the exact user request and corrections with fresh source/task evidence, flags scope shrink, keeps every remaining user criterion OPEN, and gives the smallest next end-to-end action. It does not accept the cooperator's narrower brief as authority or replace block review."
+    },
+    {
+      "id": "codex-progress-critic-delivery-and-blocker-classes",
+      "runtime": "codex",
+      "input": "Source checks pass, but no real user cycle has been delivered. A live UI is unavailable, and the cooperator calls a restart an external blocker even though recovery behavior is missing from the product.",
+      "expected": "The critic separates implemented-but-unverified work, unavailable live surface, and the internal recovery defect; challenges the false external blocker with its causal scope; preserves the full outcome; and selects the smallest real user-facing result. Green source checks do not prove live acceptance, and missing evidence does not prove success."
+    },
+    {
+      "id": "codex-progress-critic-repeat-loop",
+      "runtime": "codex",
+      "input": "The same invariant has gone through the same fix/review loop twice without closing the user-visible outcome.",
+      "expected": "The critic calls out the repeated loop and recommends changing the approach, boundary, or owner. It does not prescribe another flag, synthetic test, reviewer layer, or repeated proof for already-settled facts."
+    },
+    {
+      "id": "codex-progress-critic-due-at-cooperator-turn",
+      "runtime": "codex",
+      "input": "A pipeline has run for 50 minutes; the cooperator waited on wait_agent and a worker has just submitted. Earlier the cooperator's context was compacted once.",
+      "expected": "At this turn the cooperator reads the UTC clock and the due time in the task state file, sees the check is due (45 minutes, and a compaction), and continues the same progress critic with followup_task and a packet that includes PROGRESS_SINCE_LAST. No agent sleeps for the schedule, wait_agent's timeout is not used as a timer, and no second critic is spawned."
+    },
+    {
+      "id": "codex-progress-critic-remedy-is-applied",
+      "runtime": "codex",
+      "input": "The critic reports PROGRESS: stuck, LOOP: looper (the cooperator compacted three times and re-read the same files each time), REMEDY: reset the block to a fresh agent with a handoff. The next check reports stuck on the same criterion again.",
+      "expected": "After the first report the cooperator applies the remedy or writes in the task state why it does not apply; after the second stuck report on the same criterion the reset is mandatory: a fresh agent continues from a written handoff (done, failed and why, next). The cooperator does not turn the finding into a question for the user, does not add another review or proof layer, and keeps the requested outcome intact."
     }
   ]
 }

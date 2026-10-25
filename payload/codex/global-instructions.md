@@ -16,3 +16,8 @@ findings are real and sends them back to the same worker, moves a block that
 exhausts its worker's budget to a stronger model with a handoff and its own
 analysis, and accepts. Concrete work proceeds with Economy without a question;
 the user's model, effort, and budget limits are binding.
+
+For a Codex build or pipeline, the orchestration skill's progress critic checks
+from 45 minutes of work on, every 45 minutes and after each compaction, whether
+the work still moves toward the user's outcome or has dug in; its remedy is
+applied or answered. It never replaces required code review.
