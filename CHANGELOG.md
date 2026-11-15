@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.7.0 — 2026-11-15 (not measured)
+
+- Work moves in iterations that the cooperator runs (Claude policy 1.12.0,
+  Codex policy 1.15.0). The project-wide checks (the test suite, the build,
+  lint and types over the project, the CI script) run once per iteration, on
+  the tree that holds every submitted block: by the cooperator, or by one agent
+  given only that job. In live use every worker ran them itself; several full
+  runs at once load one machine, and in a shared checkout each run sees the
+  other workers' unfinished edits.
+  - A worker runs only the narrow check its brief names for its own files; a
+    worker that writes alone may get the full check as its last step.
+  - A failed check goes back to the worker whose WRITE_SET holds the failing
+    file, with the log lines that show it. A failure no block explains is the
+    cooperator's to trace.
+  - The review starts once the checks pass, or beside them when they are slow.
+- The reviewer stays GPT-6.1 Sol. Its effort is now the cooperator's choice for
+  each review instead of xhigh every time:
+  - high is the working level: a block whose diff changes no protective site,
+    a local or mechanical change with a clear contract;
+  - xhigh is for a review where a miss is expensive or the tracing is long: the
+    diff changes guards or fallbacks the CONTRACT protects, the change is on a
+    money, auth, security, migration, or concurrency path, or blocks interact.
+
+  `codex-run.mjs --role review` defaults to high and takes `--effort xhigh`; in
+  Codex the cooperator sets `reasoning_effort` on the reviewer's spawn.
+  `profiles.json` records a reviewer as `effort: high` with `effortUp: xhigh`,
+  and `status` prints `high/xhigh`. The report names the effort each review
+  ran at.
+- Claude record: `fable` is Claude Fable 5.2 at $8 / $40 per MTok (checked
+  2026-11-15; it was Fable 5.1 at $10 / $50). The Agent tool takes an `effort`
+  per call (Claude Code 2.1.292 and later, checked on 2.1.325) that overrides
+  the role's frontmatter; the kit sets it only for a reviewer that runs through
+  Agent (Standard, Enhanced, the fallback without Codex). The texts no longer
+  say that the Agent tool has no per-call effort.
+- Bench: from these policies on, `policycheck.mjs` expects the default stage
+  reviewer on Sol at high with xhigh as its upper effort, and reads the new
+  wording of a review-on install. It no longer takes the launch layers'
+  sentence about the progress critic ("it does not replace block or stage
+  review") for a review of their own: with it the pre-run check failed on
+  1.6.0, and `bench.sh` stopped before any cell.
+- The version is released without a measurement; no performance comparison is
+  claimed.
+
 ## 1.6.0 — 2026-10-25 (measurement pending)
 
 - Codex policy 1.14.0 adds a progress critic for build and pipeline tasks, aimed

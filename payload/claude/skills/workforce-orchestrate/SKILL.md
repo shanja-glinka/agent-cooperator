@@ -9,8 +9,8 @@ argument-hint: "[task description or plan path]"
 You are the cooperator: the user's session, the brain and the integrator of
 the task. You decide, brief, integrate, and accept; light models at xhigh
 effort do the reading and the typing. By default (Hybrid) workers and probes
-run on `haiku`{{#reviewBlock}}, and the reviewer of their results on Codex GPT-6.1 Sol at
-xhigh{{/reviewBlock}}. Forwarding results from one agent to the next is not
+run on `haiku`{{#reviewBlock}}, and the reviewer of their results on Codex GPT-6.1 Sol, at
+high or xhigh as you choose{{/reviewBlock}}. Forwarding results from one agent to the next is not
 orchestration. The repository's own rules (`CLAUDE.md`, `AGENTS.md`,
 `.claude/rules/`, `CONTRIBUTING.md`) override this kit; Claude Code loads
 `AGENTS.md` by itself only when the project has no `CLAUDE.md`, so read it
@@ -62,11 +62,11 @@ outside the defaults.
 ## A brief that needs no second pass
 
 Give the worker what it cannot find cheaply and what would otherwise come back
-as rework: the goal, the boundaries, the sources, the checks with their
-expected result, the CONTRACT (what the change must keep, quoted with its
-source), and the constraints of the areas it touches that can change how the
-work is done. A constraint that covers the whole block goes in once, with its
-scope and source (the format check and the files it covers); the limit of one
+as rework: the goal, the boundaries, the sources, the checks it runs itself
+with their expected result, the CONTRACT (what the change must keep, quoted
+with its source), and the constraints of the areas it touches that can change
+how the work is done. A constraint that covers the whole block goes in once,
+with its scope and source (the format check and the files it covers); the limit of one
 large file goes in separately, with its current value (2998 of 3000 lines,
 `scripts/check-architecture.cjs`). A constraint you already hold and that is
 still current needs no new search. One you lack, look up with one targeted
@@ -81,20 +81,31 @@ not have.
 
 {{#reviewBlock}}
 A block a light worker submitted is accepted after an independent review by
-GPT-6.1 Sol at xhigh through Codex; you do not need to have found an error to
-call it. Blocks that are ready together go to one review run. The reviewer
-checks the CONTRACT on the paths the change touches: it lists from the diff
-itself every changed protective site and gives each one verdict (kept,
-violated, or not established), and checks the other requirements too; it does
-not hunt for any error at all, and it does not confirm the worker's account.
-The loop: the worker submits → you take a snapshot (`scripts/accept.mjs`) →
-the reviewer reads the whole diff at that tree → you separate real defects
-from suggestions → the same worker fixes the real ones (a small one you may
-fix yourself instead of a worker round) → the same reviewer checks the fixes
-and what they touch → accept, or the next round. A review that leaves only a
-check to pass ends with `accepted_if <check> on tree:<hash>`: you close it
-with `accept.mjs` when that check passed on that tree, with no reviewer run to
-read an exit code. Every code change after the review, whoever writes it,
+GPT-6.1 Sol through Codex; you do not need to have found an error to call it.
+Blocks that are ready together go to one review run. Choose the effort of
+each review. `high` is the working level: a block whose diff changes no
+protective site, a local or mechanical change with a clear contract. `xhigh`
+is for a review where a miss is
+expensive or the tracing is long: the diff changes guards or fallbacks the
+CONTRACT protects (the worker's SITES names them), the change is on a money,
+auth, security, migration, or concurrency path, or blocks interact. xhigh costs more, takes longer, and
+reports more that is not real, so it is a decision for that review, not a
+habit. The reviewer checks the CONTRACT on the paths the change touches: it
+lists from the diff itself every changed protective site and gives each one
+verdict (kept, violated, or not established), and checks the other
+requirements too; it does not hunt for any error at all, and it does not
+confirm the worker's account. The loop is an iteration you run: the workers
+submit → you run the project's checks once on the whole tree (Checks) and
+take a snapshot (`scripts/accept.mjs`) → the reviewer reads the whole diff at
+that tree, once the checks pass, or beside them when they are slow → you
+separate real defects from suggestions → each failed check and real finding
+goes back to the worker that caused it, as one bundle (a small one you may
+fix yourself instead of a worker round) → you run the affected checks again,
+and the same reviewer checks the fixes and what they touch → accept, or the
+next iteration. A review that leaves only a check to pass ends with
+`accepted_if <check> on tree:<hash>`: you close it with `accept.mjs` when
+that check passed on that tree, with no reviewer run to read an exit code.
+Every code change after the review, whoever writes it,
 goes back to the same reviewer as a delta before you accept; a delta round
 costs about a quarter of the first review. A round for a real defect is
 useful work; the same finding twice without progress stops the loop for your
@@ -103,12 +114,15 @@ never record another model's review as Sol's.
 {{/reviewBlock}}
 {{^reviewBlock}}
 Block review is off in this install. A block a light worker submitted is
-accepted on its checks and your own reading of the whole diff; real findings
-go back to the same worker, and you check its fixes yourself.
+accepted on the project's checks, which you run once on the whole tree
+(Checks), and your own reading of the whole diff; failed checks and real
+findings go back to the worker that caused them, and you check its fixes
+yourself.
 {{/reviewBlock}}
 Audit lenses do not run by default: add one only for an area that the checks
 {{#reviewBlock}}and the review {{/reviewBlock}}do not cover (dispatch). A review the project, the user, or the
-task requires always runs.{{#reviewStage}} A stage review (Sol at xhigh) runs only for an
+task requires always runs.{{#reviewStage}} A stage review (Sol, its effort chosen the same
+way) runs only for an
 integration part that no block review covered: blocks that interact, your own
 integration edits, a shared contract; one review that read the final merged
 diff and those interactions closes both.{{/reviewStage}}
@@ -124,6 +138,18 @@ once on a blocker, a contract question, a submitted result, a failure, or a
 spent budget; results that arrive together are handled together.
 
 ## Checks
+
+The project-wide checks (the test suite, the build, lint and types over the
+project, the CI script) are yours. They run once per iteration, on the tree
+that holds every submitted block: run them yourself, or give that one job to
+a single agent when the log is long to read. Workers do not each run them:
+several runs at once load the machine, and in a shared checkout each run sees
+the other workers' unfinished edits. A worker runs the narrow check its brief
+names for its own files (one test file, the types of what it touched); a
+worker that writes alone may get the full check as its last step. A failed
+check goes to the worker whose WRITE_SET holds the failing file, with the log
+lines that show it; a failure that no block explains is yours to trace: the
+brief, the way the blocks meet, the environment.
 
 Run a check so that its result is its own: through `scripts/accept.mjs run
 "<cmd>"` when a review condition may need it (it keeps the log, the exit code,
@@ -151,7 +177,7 @@ cheaper.
 ## Report
 
 What was done and its evidence; the route: who did which block on which
-model, and why; {{#reviewBlock}}for each reviewed block the reviewer's line `REVIEW:
+model and effort, and why; {{#reviewBlock}}for each reviewed block the reviewer's line `REVIEW:
 block=<label> rounds=<n> findings=<n> sites=<n> open=<n>` with `real=<n>`, the
 findings you took as real, added after `findings`; {{/reviewBlock}}findings rejected as not real; escalations and their
 cause; follow-ups; the usage you know and what you could not measure. Commit,
@@ -166,12 +192,16 @@ kind, split the directories into two blocks with disjoint WRITE_SETs, and
 brief two `haiku` workers with the rules, the CONTRACT from the task (behavior
 stays; defensive checks on database and JSON data stay), the size limit of the
 one large file they will grow with its current length, the trap you saw (`||`
-to `??` changes behavior for an empty string), and the lint and test commands.
-They run in parallel{{#reviewBlock}}; both submissions go to one review run at one
-snapshot; the reviewer lists the 14 changed fallbacks, finds one that no
-longer maps an empty string to NULL, and you restore that one line yourself;
-the reviewer checks the delta and ends with `accepted_if npm run ci`, which you
-close with `accept.mjs` once CI passed on that tree{{/reviewBlock}}{{^reviewBlock}}; you read both diffs, send one
+to `??` changes behavior for an empty string), and the one check each runs
+itself: lint on its own directories. They run in parallel and leave the test
+suite alone. When both have submitted, you run `npm run ci` once; one test
+fails in the second block's directory and goes back to that worker with the
+log lines{{#reviewBlock}}. With CI green, both blocks go to one review run at one snapshot,
+at xhigh, because the diff changes fallbacks the CONTRACT protects; the
+reviewer lists the 14 changed fallbacks, finds one that no longer maps an
+empty string to NULL, and you restore that one line yourself; the reviewer
+checks the delta and ends with `accepted_if npm run ci`, which you close with
+`accept.mjs` once CI passed on that tree{{/reviewBlock}}{{^reviewBlock}}. With CI green, you read both diffs, send one
 finding back, and check the fix{{/reviewBlock}}; both blocks are accepted.
 
 **Unknown cause.** "`--total` double-counts tax." The report names the

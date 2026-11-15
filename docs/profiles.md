@@ -11,6 +11,9 @@ your agents. Codex policy 1.12.0 removes GPT-6 Astra and the Enhanced profile. T
 escalation ceiling is Sol xhigh, and stage review runs only for an integration part no
 block review covered. Codex policy 1.14.0 adds a separate progress critic for active
 implementation tasks; Claude policy 1.11.0 is unchanged by this Codex-only workflow.
+Codex policy 1.15.0 and Claude policy 1.12.0: the cooperator runs the project-wide
+checks once per iteration and sends each failure to the worker that owns the failing
+file, and it chooses the reviewer's effort, high or xhigh, for each review.
 
 [`payload/codex/profiles.json`](../payload/codex/profiles.json) is the machine-readable routing
 policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
@@ -31,11 +34,11 @@ make those settings mandatory. Keep review independence and verification require
 
 Standard is the user's choice. Use it when the requirements and solution are
 sufficiently described. GPT-6.1 Sol high owns orchestration, GPT-6 Luna owns
-read-only lookups (Sol when judgment is needed), Sol implements at xhigh, and Sol at
-xhigh independently reviews complete blocks. A build or pipeline gets one Sol
+read-only lookups (Sol when judgment is needed), Sol implements at xhigh, and Sol
+independently reviews complete blocks, at high or xhigh as the cooperator chooses. A build or pipeline gets one Sol
 xhigh progress critic from 45 minutes of work on, every 45 minutes and after each
 compaction: it checks whether the work still moves toward the user's outcome.
-Stage review, also Sol at xhigh, runs only for an integration part no block review
+Stage review, also on Sol, runs only for an integration part no block review
 covered. The Sol orchestrator is a deliberate cost choice for the longest context.
 
 ## Enhanced (removed)
@@ -48,12 +51,13 @@ Standard.
 Economy is the default preset. It applies when nothing else does, including
 unattended runs. You can also launch it explicitly with `codex -p workforce-economy`
 or keep it as a standing preference. Sol high is the cooperator: it thinks, judges,
-and integrates. Luna xhigh is the worker, reading and typing at xhigh; Sol at
-xhigh reviews the blocks Luna submits (`reviewBlock` on, the default). Luna also
+and integrates. Luna xhigh is the worker, reading and typing at xhigh; Sol
+reviews the blocks Luna submits (`reviewBlock` on, the default), at high or xhigh
+as the cooperator chooses for each review. Luna also
 runs an audit lens when an area needs one. A build or pipeline gets one Sol xhigh
 progress critic from 45 minutes of work on, every 45 minutes and after each
 compaction: it checks whether the work still moves toward the user's outcome or
-has dug in. The critic does not replace review. Sol at xhigh is the stage reviewer, and only for an
+has dug in. The critic does not replace review. Sol is the stage reviewer, and only for an
 integration part no block review covered (`reviewStage` on). A Luna
 worker has 600 tool calls per run, 1800 per block, three attempts, and 400k tokens
 per block; a block that exhausts it moves to Sol xhigh.
@@ -145,6 +149,10 @@ work. After a worker submits a block, the cooperator chooses what happens next.
 Worker submits a block
   │
   ▼
+Cooperator runs the project's checks once for the blocks submitted together;
+a failed check goes back to the worker that owns the failing file
+  │
+  ▼
 Cooperator (the orchestrator) chooses:
   a) review this block              → one review run for the blocks ready
                                       together (with reviewBlock off, the
@@ -155,7 +163,7 @@ Cooperator (the orchestrator) chooses:
                                      parallel (only if that block changes
                                      nothing the review reads; else a snapshot)
 
-Review: the block reviewer (GPT-6.1 Sol, xhigh) reads the whole diff. Real
+Review: the block reviewer (GPT-6.1 Sol, high or xhigh) reads the whole diff. Real
 findings go to the same worker as one bundle; the same reviewer checks the
 fixes and what they touch.
 ```
@@ -194,7 +202,7 @@ With `reviewBlock` on (the default), every block a light worker submits is
 reviewed before it is accepted, and blocks ready together share one review run;
 the review reads the whole diff. With `reviewBlock` off, the cooperator accepts
 the block on its checks and its own reading of the whole diff. A stage review on
-Sol at xhigh runs only when `reviewStage` is on and an integration part (blocks that
+Sol runs only when `reviewStage` is on and an integration part (blocks that
 interact, the cooperator's own integration edits, or a shared contract) was not covered
 by a block review; one review of the final merged diff closes both.
 

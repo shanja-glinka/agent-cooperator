@@ -25,7 +25,9 @@ suite has run.
    checks, before any cell runs, that every installed text of each variant
    delivers that policy; from Claude policy 1.10.0 and Codex 1.12.0 it also
    fails when any installed file can assign `gpt-6-astra`, when the default
-   profile's stage reviewer is not Sol xhigh, or when a launch layer's waits break
+   profile's stage reviewer is not Sol xhigh (from Claude policy 1.12.0 and
+   Codex 1.15.0: not Sol at high with xhigh as its upper effort), or when a
+   launch layer's waits break
    Codex's min ≤ default ≤ max. Two narrow checks run by hand before a new
    version's series: `waitcheck.sh` (three live Codex waits: a worker's finish, its
    message, and a short timeout raised to the layer's minimum) and

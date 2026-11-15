@@ -118,16 +118,16 @@ applies.
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides architecture, block boundaries, and interactions before briefing; the worker keeps bounded search, reproduction, and the local way to implement |
 | Audit lens (on demand) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
-| Block review (MODE=block) | `opus` high (`workforce-reviewer`) | `opus` high (`workforce-reviewer`) | Codex GPT-6.1 Sol xhigh |
-| Stage review (MODE=stage), only for an integration part no block review covered | `opus` high (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
+| Block review (MODE=block) | `opus` high or xhigh (`workforce-reviewer`) | `opus` high or xhigh (`workforce-reviewer`) | Codex GPT-6.1 Sol high or xhigh |
+| Stage review (MODE=stage), only for an integration part no block review covered | `opus` high or xhigh (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol high or xhigh |
 
 The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
 `modelResolution`:
 
-| Alias | Resolves to (Claude API provider, checked 2026-10-20) | Price in/out per MTok | Default effort |
+| Alias | Resolves to (Claude API provider, checked 2026-11-15) | Price in/out per MTok | Default effort |
 | --- | --- | --- | --- |
-| `fable` | Claude Fable 5.1 (`claude-fable-5-1`) | $10 / $50 | `high` |
+| `fable` | Claude Fable 5.2 (`claude-fable-5-2`) | $8 / $40 | `high` |
 | `opus` | Claude Opus 5.5 (`claude-opus-5-5`) | $4 / $20 | `medium` |
 | `sonnet` | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | $2 / $10 | `high` |
 | `haiku` | Claude Haiku 5.5 (`claude-haiku-5-5`) | $0.10 / $0.50 up to 100k prompt tokens; $0.50 / $2.50 above | `medium` (up to `xhigh`) |
@@ -135,7 +135,7 @@ provider; the current resolution is recorded in `profiles.json` under
 
 Opus 5.5 replaced Opus 5 behind the `opus` alias at a lower price and with a
 `medium` default effort, so the reviewer role pins `effort: high` and a brain on
-`opus` runs at `medium` unless you set `/effort`. `fable` costs about 2.5x `opus`
+`opus` runs at `medium` unless you set `/effort`. `fable` costs about 2x `opus`
 per token. Sonnet 5.5 and Haiku 5.5 arrived on 2026-10-07; Haiku 5.5 supports
 effort up to `xhigh`, which is what the auditor role runs at. Legacy models
 (Sonnet 5, Haiku 4.5, Opus 5, Fable 5) are reachable only by full id.
@@ -157,12 +157,18 @@ decides design questions before briefing, judges every finding, integrates, and
 accepts. `haiku` workers implement at xhigh; a block that exhausts a `haiku`
 worker moves to a Codex GPT-6.1 Sol xhigh worker, then to `opus`.
 An audit lens, when one runs, uses Codex GPT-6 Luna at xhigh; block and stage
-review use Codex GPT-6.1 Sol at xhigh; all are read-only. Luna costs $0.10 /
+review use Codex GPT-6.1 Sol at high or xhigh, as the brain chooses for each
+review; all are read-only. Luna costs $0.10 /
 $0.50 and Sol $2 / $10 per MTok (checked 2026-10-20), so the expensive model only
 thinks. Claude policy 1.10.0 keeps the models and prices; the reviewer now
 checks each block against its CONTRACT site by site, a review can end with a
 condition that `scripts/accept.mjs` closes on the reviewed tree, and a stage
-review runs only for an integration part no block review covered.
+review runs only for an integration part no block review covered. Claude
+policy 1.12.0 keeps the models too: the brain runs the project-wide checks once
+per iteration instead of every worker running them, sends each failure to the
+worker that owns the failing file, and chooses the reviewer's effort: high is
+the working level, xhigh is for a review where a miss is expensive or the
+tracing is long.
 
 Hybrid needs the `codex` CLI on PATH and logged in; the Codex edition of the kit
 is not required. Without the CLI, or if Codex is unavailable or a run fails
@@ -236,7 +242,8 @@ has the details, including the auditor handoff at 400k.
   and the cooperator judges, integrates, and accepts.
 - Review is one path for delegated work. With `reviewBlock` on (the default),
   every block a light worker submits is reviewed before it is accepted: GPT-6.1
-  Sol at xhigh in Hybrid, opus high through Agent in Standard and Enhanced. Blocks
+  Sol in Hybrid, opus through Agent in Standard and Enhanced, at high or xhigh
+  as the cooperator chooses for that review. Blocks
   that are ready together share one review run. A small local change with a clear
   contract and passing checks may be accepted on the cooperator's own reading of
   the diff. A review that the project, the user, or the task requires always
@@ -246,7 +253,15 @@ has the details, including the auditor handoff at 400k.
 - The repository's own rules come first: `CLAUDE.md`, `AGENTS.md`,
   `.claude/rules/`, `CONTRIBUTING.md` (Claude Code reads `AGENTS.md` only when the
   project has no `CLAUDE.md`). They go to every agent as PROJECT_RULES.
-- Every Agent call sets `model`. Effort comes from the role frontmatter.
+- Every Agent call sets `model`. Effort comes from the role frontmatter; an
+  `effort` on the call overrides it (Claude Code 2.1.292 and later), and the kit
+  sets it only for a reviewer that runs through Agent.
+- The project-wide checks (the test suite, the build, lint and types over the
+  project, the CI script) run once per iteration, by the cooperator, on the
+  tree that holds every submitted block. A worker runs only the narrow check
+  its brief names for its own files; a worker that writes alone may get the
+  full check as its last step. A failed check goes back to the worker whose
+  write set holds the failing file.
 - A worker gets a complete packet with SCOPE, OUT_OF_SCOPE, WRITE_SET, and
   CHECKS, and edits only its write set.
 - Fixes go back to the same worker, and the delta goes to the same reviewer (or
@@ -264,6 +279,10 @@ has the details, including the auditor handoff at 400k.
 
 ```text
 Worker submits a block
+  │
+  ▼
+Cooperator runs the project's checks once for the blocks submitted together;
+a failed check goes back to the worker that owns the failing file
   │
   ▼
 Cooperator (the orchestrator) chooses:

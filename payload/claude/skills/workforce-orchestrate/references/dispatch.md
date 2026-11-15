@@ -13,19 +13,20 @@ Read the record only to route outside the defaults below.
 | Worker | `haiku`, xhigh (`workforce-worker-lite`) | `sonnet`, high (`workforce-worker`) | `sonnet`; `opus` for non-trivial blocks |
 | Worker ladder | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` | `sonnet` → `opus` | `sonnet` → `opus` |
 | Audit lens (on demand) | Codex `gpt-6-luna`, xhigh | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) |
-| Block reviewer (MODE=block) | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `opus`, high (Agent) |
-| Stage reviewer (MODE=stage), only for an integration part no block review covered | Codex `gpt-6.1-sol`, xhigh | `opus`, high (Agent) | `fable`, high (Agent) |
+| Block reviewer (MODE=block) | Codex `gpt-6.1-sol`, high or xhigh | `opus`, high or xhigh (Agent) | `opus`, high or xhigh (Agent) |
+| Stage reviewer (MODE=stage), only for an integration part no block review covered | Codex `gpt-6.1-sol`, high or xhigh | `opus`, high or xhigh (Agent) | `fable`, high (Agent) |
 | Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | targeted `opus` help | bounded `fable` block |
 
 Presets are starting recommendations. A named profile is an approach preference;
-the user's explicit model, effort, and budget limits are binding. Sol at xhigh
-reviews blocks and stages in Hybrid; Standard and Enhanced keep the reviewers
-declared above and run only when the user chooses them, never as a silent
-replacement for Hybrid. If `fable` is unavailable, use `opus` at high and say
-so.
+the user's explicit model, effort, and budget limits are binding. Sol reviews
+blocks and stages in Hybrid, at high or xhigh as the cooperator chooses for
+each review (SKILL.md, "Acceptance of delegated blocks"); Standard and
+Enhanced keep the reviewers declared above and run only when the user chooses
+them, never as a silent replacement for Hybrid. If `fable` is unavailable,
+use `opus` at high and say so.
 
 Hybrid is the default: `opus` thinks, judges, and integrates, and `haiku` reads
-and types at xhigh{{#reviewBlock}}; GPT-6.1 Sol at xhigh reviews the blocks light workers
+and types at xhigh{{#reviewBlock}}; GPT-6.1 Sol reviews the blocks light workers
 submit{{/reviewBlock}}{{^reviewBlock}}; block review is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{/reviewStage}}. Audit lenses run only on
 demand (delegation, step 6). Codex runs go through the wrapper in
 [tools](tools.md), never through the Agent tool; they need the `codex` CLI on
@@ -35,17 +36,19 @@ through Agent, mark that review as the fallback, and say so once. Hybrid
 wants the session at high effort: if it runs at medium, say so once and
 suggest `/effort high`.
 
-Prices per MTok (checked 2026-10-20): `opus` Claude Opus 5.5 $4 in / $20 out,
+Prices per MTok (checked 2026-11-15): `opus` Claude Opus 5.5 $4 in / $20 out,
 cache read $0.20, 1-hour cache write $8 (default effort medium); `sonnet`
 Claude Sonnet 5.5 $2 / $10, cache read $0.10; `haiku` Claude Haiku 5.5 $0.10 /
 $0.50, cache read $0.01, while a request's prompt stays at or under 100k
 tokens, and $0.50 / $2.50, cache read $0.05, above (effort up to xhigh);
-`fable` Claude Fable 5.1 $10 / $50. Codex: GPT-6 Luna $0.10 / $0.50, cached
-$0.01; GPT-6.1 Sol $2 / $10, cached $0.10. Role files use `model: inherit` so
-the model on the Agent call is what runs. The Agent tool has no per-call
-effort; effort comes from the role frontmatter (light worker xhigh, worker
-high, probe medium, auditor xhigh, reviewer high) or the session. A
-cooperator on `opus` runs at medium unless `/effort` is set.
+`fable` Claude Fable 5.2 $8 / $40, cache read $0.20. Codex (checked
+2026-10-20): GPT-6 Luna $0.10 / $0.50, cached $0.01; GPT-6.1 Sol $2 / $10,
+cached $0.10. Role files use `model: inherit` so the model on the Agent call
+is what runs. Effort comes from the role frontmatter (light worker xhigh,
+worker high, probe medium, auditor xhigh, reviewer high); an `effort` on the
+Agent call overrides it (Claude Code 2.1.292 and later), and the kit sets it
+only for a reviewer that runs through Agent. A cooperator on `opus` runs at
+medium unless `/effort` is set.
 
 ## Selection
 
@@ -105,7 +108,6 @@ cooperator. A lens with nothing real is retired for the block.
 `fable` high is for a stated unresolved design question and its expected
 benefit: architecture, a money or auth path, a security boundary. When the
 account cannot use `fable`, the high-effort roles run on `opus` high; say so.
-The Agent tool has no per-call effort: effort comes from the role.
 
 Turn limits per run: worker 60, light worker 130, probe 20, auditor 50,
 reviewer 30; up to three workers in parallel. Codex runs are bounded by the
@@ -129,7 +131,7 @@ PROJECT_RULES: repository instruction files to read first
 CONTRACT: what the change must keep (behavior, interfaces, data at the boundaries), quoted with its source (the task, a rule file)
 INPUTS / SNAPSHOT: exact sources, revision, relevant dirty diff; the tree to read (reviewer: tree:<hash> from scripts/accept.mjs snapshot)
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
-CHECKS: commands with cwd and expected result
+CHECKS: the commands this worker runs itself, with cwd and expected result: the narrow check of its own files; the project-wide checks only when it writes alone and the packet assigns them (otherwise the cooperator runs those once for all blocks)
 CONSTRAINTS: the limits of the touched areas that can change how the work is done, each once with its scope and source: a check and the files it covers; a size limit with the file's current value (bot.ts 2998 of 3000 lines, scripts/check-architecture.cjs:351); a limit still to find, as the worker's first step
 TRAPS: what you saw that can go wrong (a behavior-changing rewrite)
 RETURN: concise result, evidence, gaps

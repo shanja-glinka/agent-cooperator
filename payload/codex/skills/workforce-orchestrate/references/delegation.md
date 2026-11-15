@@ -15,24 +15,27 @@ wait calls. Product code in a delegated block is written by its worker.
 │   → HANDOFF → you find the cause and decide the approach →       │
 │   next tier gets packet + APPROACH + HANDOFF only (dispatch)     │
 │                                                                  │
+│ submitted blocks ready together → you run the project's checks   │
+│   once on the whole tree; a failed check goes to the worker      │
+│   whose WRITE_SET holds the failing file                         │
 {{#reviewBlock}}
-│ submitted blocks ready together → snapshot → one Sol xhigh       │
-│   review of the CONTRACT on the touched paths                    │
+│ checks pass (or beside slow checks) → snapshot → one Sol review  │
+│   (high or xhigh) of the CONTRACT on the touched paths           │
 │   real findings → the same worker → the same reviewer checks     │
-│   the fixes and what they touch → next round or accept           │
+│   the fixes and what they touch → next iteration or accept       │
 │   accepted_if <check> → accept.mjs closes it on the same tree    │
 {{/reviewBlock}}
 {{^reviewBlock}}
-│ submitted → you read the whole diff → real findings → the same   │
-│   worker → you check the fixes → accept                          │
+│ checks pass → you read the whole diff → real findings → the      │
+│   same worker → you check the fixes → accept                     │
 {{/reviewBlock}}
 │ audit lens: only for an area nothing else covers (step 6)        │
 └──────────────────────────────────────────────────────────────────┘
   │
   ▼
 {{#reviewStage}}
-Stage review (Sol xhigh), only for an integration part no block review
-covered → required checks → report
+Stage review (Sol, high or xhigh), only for an integration part no block
+review covered → required checks → report
 {{/reviewStage}}
 {{^reviewStage}}
 Required checks passed → report (stage review is off in this install)
@@ -43,14 +46,15 @@ Required checks passed → report (stage review is off in this install)
 
 1. **Profile.** Reuse an explicit choice, native launch profile, or standing
    preference; otherwise Economy: you on Sol, workers and probes on Luna{{#reviewBlock}},
-   the reviewer on Sol at xhigh{{/reviewBlock}}. Standard (Sol workers) on the user's
+   the reviewer on Sol at high or xhigh{{/reviewBlock}}. Standard (Sol workers) on the user's
    choice; a stored choice of Enhanced, removed in policy 1.12.0, runs as
    Standard. Say which applies. Ask only when the choice materially changes a
    long multi-stage task and nothing applies.
 2. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
    SCOPE and OUT_OF_SCOPE, exact inputs and what you already found, WRITE_SET,
-   CHECKS with cwd and the expected result, PROJECT_RULES (every applicable
-   rule file), CONTRACT (what the change must keep, quoted with its source),
+   CHECKS (the narrow checks this worker runs itself, with cwd and the
+   expected result; the project-wide checks are yours, step 5), PROJECT_RULES
+   (every applicable rule file), CONTRACT (what the change must keep, quoted with its source),
    and CONSTRAINTS. Before you send the brief, the constraints of the touched
    areas that can change how the work is done are in it, with their source: a
    rule for the whole block once, with its scope (the format check and the
@@ -101,9 +105,17 @@ Required checks passed → report (stage review is off in this install)
    budget. Blocks submitted together are accepted together. A progress check
    that came due while you waited runs at your next turn; nothing sleeps for
    it.
-5. **Accept the block.**
+5. **Check and accept the block.** When the blocks of an iteration are
+   submitted, run the project-wide checks once on the whole tree (SKILL.md,
+   "Checks"), yourself or through one agent that gets only that job. Each
+   failure goes to the worker whose WRITE_SET holds the failing file, with
+   the log lines that show it, bundled with that block's review findings
+   when both are in hand; a failure no block explains is yours to trace.
+   After the fixes, run again the checks they affect.
 {{#reviewBlock}}
-   The reviewer (`workforce_reviewer` on GPT-6.1 Sol at xhigh, MODE=block)
+   The review starts once the checks pass, or beside them when they are slow.
+   The reviewer (`workforce_reviewer` on GPT-6.1 Sol, MODE=block; reasoning
+   effort `high` or `xhigh`, chosen as SKILL.md says and set on the spawn)
    gets the packet with `REVIEW: acceptance of a light worker's block`, or
    `required (<rule or request>)`, or `question (<what is in doubt>)`, the
    CONTRACT, SNAPSHOT `tree:<hash>` from `accept.mjs snapshot`, what is
@@ -130,9 +142,9 @@ Required checks passed → report (stage review is off in this install)
    went to review.
 {{/reviewBlock}}
 {{^reviewBlock}}
-   Block review is off in this install. Read the whole diff yourself and take
-   the defects you find to the same worker as one bundle; check its fixes
-   yourself. A review that the project, the user, or the task requires still
+   Block review is off in this install. When the checks pass, read the whole
+   diff yourself and take the defects you find to the same worker as one
+   bundle; check its fixes yourself. A review that the project, the user, or the task requires still
    runs, as dispatch describes.
 {{/reviewBlock}}
 6. **Audit lenses on demand.** No lens runs by default. Add one (docs, task,
@@ -146,7 +158,8 @@ Required checks passed → report (stage review is off in this install)
    findings may check the fix.
 7. **Accept the stage.**
 {{#reviewStage}}
-   A stage review (`workforce_reviewer` on Sol at xhigh, MODE=stage) runs only
+   A stage review (`workforce_reviewer` on Sol, MODE=stage, effort chosen as
+   for a block) runs only
    for an integration part no block review covered: blocks that interact
    (a format one block produces and another reads), your own integration
    edits, a shared contract. It checks the original outcome on those paths and
@@ -158,7 +171,8 @@ Required checks passed → report (stage review is off in this install)
    Stage review is off in this install: when the blocks are accepted and the
    project's required checks pass on the whole change, report.
 {{/reviewStage}}
-8. **Report** also: submitted → accepted per block{{#reviewBlock}}, the `REVIEW:` line{{/reviewBlock}},
+8. **Report** also: submitted → accepted per block{{#reviewBlock}}, the `REVIEW:` line
+   and the effort each review ran at{{/reviewBlock}},
    audit lenses you added and what each covered, escalations with their
    cause, actual routing when it differed from the plan, and the progress
    critic's reports with what you did about each. Interrupt the critic when
@@ -170,6 +184,7 @@ Required checks passed → report (stage review is off in this install)
 | --- | --- |
 | A block is submitted, but its worker's budget is spent | Verify it as it is. A later fix goes to the next tier; never redo the block only to change tiers. |
 | Work is left and the worker's budget is spent | Get the HANDOFF, find the cause, restore what is missing (a dependency, a database, a design decision), write APPROACH, then start the next tier. |
+| The project-wide check fails after the blocks were submitted | Send each failure to the worker whose WRITE_SET holds the failing file, with the log lines, in one bundle with that block's review findings. Trace yourself a failure no block explains. Run the affected checks again after the fixes. |
 | A CI or project check fails on a limit the brief did not name | Name the limit and its source in the bundle to the worker, and in later briefs. |
 {{#reviewBlock}}
 | The reviewer brings the same finding again | Stop the loop: read the code and the finding yourself, then decide (accept with a reason, fix the packet, or escalate). |
@@ -183,9 +198,12 @@ Required checks passed → report (stage review is off in this install)
 
 **two blocks, one acceptance.** Two Luna workers at xhigh own `src/a` and
 `src/b`; both briefs name the CI's file-size check (`scripts/check-size.cjs`,
-3000 lines). Both submit close together{{#reviewBlock}}: one Sol review reads both diffs,
-finds one real defect in `src/b`, its worker fixes it, and the same reviewer
-checks the fix. `REVIEW: rounds=2 findings=1 real=1`{{/reviewBlock}}{{^reviewBlock}}: you read both diffs,
+3000 lines) and give each worker one check of its own: the tests of its
+directory. Both submit close together. You run `npm run ci` once; its one
+failing test is in `src/a` and goes back to that worker with the log lines{{#reviewBlock}}.
+With CI green, one Sol review at high reads both diffs, finds one real defect
+in `src/b`, its worker fixes it, and the same reviewer checks the fix.
+`REVIEW: rounds=2 findings=1 real=1`{{/reviewBlock}}{{^reviewBlock}}. With CI green, you read both diffs,
 find one real defect in `src/b`, its worker fixes it, and you check the fix{{/reviewBlock}}.
 
 **escalation.** Block "rewrite the date parser". The Luna worker returns
@@ -221,7 +239,15 @@ way as done directly; so such a task is done directly. In v9 two of three
 large Claude tasks also accepted a fix after the review without the reviewer,
 though a delta round costs about a quarter of the first review; so every
 change after a review goes back to it. The same worker and reviewer continue
-across rounds because a round then costs only the delta. A block that
+across rounds because a round then costs only the delta. In live use
+(reported 2026-11-15) every worker ran the project's checks itself, and the
+reviewer ran at xhigh on every block. Several full runs at once load one
+machine, and in a shared checkout each run sees the other workers' unfinished
+edits; so the project-wide checks run once per iteration, by the cooperator,
+and a failure goes to the worker that owns the failing file. The review alone
+cost about as much as a small task done directly, and published comparisons
+of reviewers show that more effort finds more and also reports more that is
+not real; so the reviewer's effort is chosen for each review. A block that
 exhausts a tier is a signal about the block, so the next tier gets your
 analysis and a handoff instead of a pile of transcripts. Only a run that fails
 spends an attempt, because a fix that lands is progress.

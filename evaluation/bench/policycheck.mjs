@@ -12,7 +12,8 @@ import path from 'node:path';
 const out = process.argv[2];
 const kits = path.join(out, 'kits');
 // Text that only a review-on install may contain, and what an off install must say instead.
-const BLOCK_ON = [/independent review by\s+GPT-6\.1 Sol/, /reviewed \((Codex )?GPT-6\.1 Sol/, /reviewed against that\s+contract \((Codex )?GPT-6\.1 Sol/, /one Sol xhigh review/, /Sol at xhigh reviews the blocks/];
+// The first pattern is in every review-on install; the rest cover the wording of each kit version.
+const BLOCK_ON = [/independent review by\s+GPT-6\.1 Sol/, /reviewed \((Codex )?GPT-6\.1 Sol/, /reviewed against that\s+contract \((Codex )?GPT-6\.1 Sol/, /one Sol xhigh review/, /snapshot → one Sol review/, /Sol (at xhigh )?reviews the blocks/];
 const STAGE_ON = [/Stage acceptance \(pipeline/];
 const texts = (dir) => {
   const found = [];
@@ -42,19 +43,25 @@ for (const name of fs.existsSync(kits) ? fs.readdirSync(kits).sort() : []) {
       for (const [p, t] of all) {
         const rel = path.relative(home, p);
         if (/\{\{[#^/][A-Za-z]\w*\}\}/.test(t)) fail(`${name} ${edition}: unrendered section in ${rel}`);
-        if (/\.config\.toml$/.test(p) && /review/i.test(t)) fail(`${name} ${edition}: launch layer ${rel} names a review of its own`);
+        // From 1.6.0 the layers say what the progress critic is not; that sentence asks for no review.
+        if (/\.config\.toml$/.test(p) && /review/i.test(t.replace(/it does not replace block or stage review\./g, ''))) fail(`${name} ${edition}: launch layer ${rel} names a review of its own`);
         if (!profiles.policy.reviewBlock) for (const re of BLOCK_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a block review (${re})`);
         if (!profiles.policy.reviewStage) for (const re of STAGE_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a stage review (${re})`);
       }
       // From policy 1.12.0 (Codex) and 1.10.0 (Claude): no route can assign GPT-6 Astra (its model
       // id in any installed file), the default profile's stage reviewer is Sol xhigh, and every
-      // launch layer's waits satisfy Codex's min <= default <= max.
+      // launch layer's waits satisfy Codex's min <= default <= max. From 1.15.0 (Codex) and 1.12.0
+      // (Claude) the cooperator chooses the reviewer's effort: the default stage reviewer is Sol at
+      // high, with xhigh as its upper effort.
       const atLeast = (v, min) => { const [a, b] = [v, min].map((s) => String(s).split('.').map(Number)); for (let i = 0; i < 3; i += 1) if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0); return true; };
       const v8 = atLeast(profiles.policyVersion, edition === 'codex' ? '1.12.0' : '1.10.0');
       if (v8) {
         for (const [p, t] of all) if (/gpt-6-astra/.test(t)) fail(`${name} ${edition}: ${path.relative(home, p)} can assign gpt-6-astra`);
         const def = profiles.profiles?.[profiles.selectionRules?.default];
-        if (!(def?.stageReviewer?.model === 'gpt-6.1-sol' && def.stageReviewer.effort === 'xhigh')) fail(`${name} ${edition}: default stage reviewer is ${JSON.stringify(def?.stageReviewer)}`);
+        const chosen = atLeast(profiles.policyVersion, edition === 'codex' ? '1.15.0' : '1.12.0');
+        const wantStage = chosen ? ['gpt-6.1-sol', 'high', 'xhigh'] : ['gpt-6.1-sol', 'xhigh', undefined];
+        const stage = def?.stageReviewer;
+        if (!(stage?.model === wantStage[0] && stage.effort === wantStage[1] && stage.effortUp === wantStage[2])) fail(`${name} ${edition}: default stage reviewer is ${JSON.stringify(stage)}`);
         for (const [p, t] of all.filter(([q]) => /\.config\.toml$/.test(q))) {
           const [min, d, max] = ['min', 'default', 'max'].map((k) => Number(t.match(new RegExp(`^${k}_wait_timeout_ms\\s*=\\s*(\\d+)`, 'm'))?.[1]));
           if (!(min <= d && d <= max)) fail(`${name} ${edition}: ${path.relative(home, p)} waits min ${min}, default ${d}, max ${max}`);

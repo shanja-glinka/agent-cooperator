@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.11.0",
+  "policyVersion": "1.12.0",
   "runtime": "claude-code",
   "selection": "contextual",
   "policy": {
@@ -33,11 +33,13 @@
       },
       "blockReviewer": {
         "model": "opus",
-        "effort": "high"
+        "effort": "high",
+        "effortUp": "xhigh"
       },
       "stageReviewer": {
         "model": "opus",
-        "effort": "high"
+        "effort": "high",
+        "effortUp": "xhigh"
       },
       "design": {
         "model": "opus",
@@ -83,7 +85,8 @@
       },
       "blockReviewer": {
         "model": "opus",
-        "effort": "high"
+        "effort": "high",
+        "effortUp": "xhigh"
       },
       "stageReviewer": {
         "model": "fable",
@@ -145,13 +148,15 @@
       "blockReviewer": {
         "runtime": "codex-cli",
         "model": "gpt-6.1-sol",
-        "effort": "xhigh",
+        "effort": "high",
+        "effortUp": "xhigh",
         "sandbox": "read-only"
       },
       "stageReviewer": {
         "runtime": "codex-cli",
         "model": "gpt-6.1-sol",
-        "effort": "xhigh",
+        "effort": "high",
+        "effortUp": "xhigh",
         "sandbox": "read-only",
         "when": "only for an integration part no block review covered"
       },
@@ -212,7 +217,7 @@
     "reuse": "Explicit task choice, active task context, or an applicable standing preference.",
     "autonomous": "Hybrid for described work, Enhanced for substantial unresolved design; proceed without asking. Applies to unattended runs.",
     "askOnly": "Long multi-stage work where the choice materially changes the approach and nothing applies.",
-    "runtimeMismatch": "Model is set per Agent call; effort per role frontmatter or session. Report material deviations; explicit strict model, effort, and budget requirements remain binding.",
+    "runtimeMismatch": "Model is set per Agent call; effort per role frontmatter, per Agent call for a reviewer that runs through Agent, or session. Report material deviations; explicit strict model, effort, and budget requirements remain binding.",
     "hybrid": "Default; Standard on the user's choice or when Codex is unavailable."
   },
   "activation": {
@@ -225,18 +230,18 @@
     "otherwise": "Normal single session; no agents spawned; the global block adds no other behavior."
   },
   "modelResolution": {
-    "checkedOn": "2026-10-20",
+    "checkedOn": "2026-11-15",
     "provider": "Claude API (Pro/Max/Team/Enterprise/API); other providers differ",
     "aliases": {
       "fable": {
-        "model": "claude-fable-5-1",
-        "name": "Claude Fable 5.1",
+        "model": "claude-fable-5-2",
+        "name": "Claude Fable 5.2",
         "priceInOutPerMTok": [
-          10,
-          50
+          8,
+          40
         ],
         "defaultEffort": "high",
-        "cacheReadPerMTok": 0.25
+        "cacheReadPerMTok": 0.2
       },
       "opus": {
         "model": "claude-opus-5-5",
@@ -282,7 +287,8 @@
       "claude-sonnet-5",
       "claude-haiku-4-5",
       "claude-opus-5",
-      "claude-fable-5"
+      "claude-fable-5",
+      "claude-fable-5-1"
     ],
     "note": "Aliases are what the kit routes on; Claude Code and the provider decide the concrete model. A model release updates this record, not the workflow."
   },
@@ -291,7 +297,7 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, all through SendMessage (in Hybrid, the Codex thread is resumed). A fresh agent is for independence or a different model tier.",
+  "continuity": "Fixes and failed checks go back to the worker that caused them, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, all through SendMessage (in Hybrid, the Codex thread is resumed). A fresh agent is for independence or a different model tier.",
   "workerBudgets": {
     "haiku": {
       "role": "workforce-worker-lite",
@@ -323,11 +329,13 @@
   },
   "review": {
     "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
-    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol at xhigh; blocks ready together go to one review. With it off, the cooperator accepts on its own reading of the diff.",
+    "checks": "The project-wide checks (the test suite, the build, lint and types over the project, the CI script) run once per iteration on the tree that holds every submitted block: by the cooperator, or by one agent given only that job. A worker runs the narrow check its brief names for its own files; a worker that writes alone may be assigned the full check as its last step. A failed check goes to the worker whose WRITE_SET holds the failing file, with the log lines that show it; a failure no block explains is the cooperator's to trace.",
+    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol, at high or xhigh as the cooperator chooses. It starts once the project-wide checks pass, or beside them when they are slow; blocks ready together go to one review. With it off, the cooperator accepts on the checks and its own reading of the diff.",
+    "effort": "The cooperator chooses the reviewer's effort for each review. high is the working level: a block whose diff changes no protective site, a local or mechanical change with a clear contract. xhigh is for a review where a miss is expensive or the tracing is long: the diff changes guards or fallbacks the CONTRACT protects (the worker's SITES names them), the change is on a money, auth, security, migration, or concurrency path, or blocks interact. Through Codex the effort is passed as --effort; through Agent it is set on the call.",
     "contract": "The review packet names CONTRACT: what the change must keep, quoted with its source (the task, the project's rules). The reviewer lists from the diff itself every changed protective site (a removed or changed condition, a changed fallback, a normalization, null becoming undefined, a changed order of evaluation) and gives each one verdict: kept, with a checkable basis; violated, with the difference and the fix; not established, with the missing fact. Sites with one basis are grouped with their locations. The site list is part of checking the contract, not all of it: every other requirement in CONTRACT is checked on the paths the change touches.",
     "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and every code change after the review goes to the same reviewer as a delta. No reviewer call only to read an exit code.",
-    "stage": "Stage review runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract; in Hybrid on gpt-6.1-sol at xhigh through Codex, in the other profiles on their declared stageReviewer. One review that read the final merged diff and those interactions closes both.",
-    "loop": "Real findings go to the same worker, or the cooperator fixes a small one itself; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
+    "stage": "Stage review runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract; in Hybrid on gpt-6.1-sol through Codex, in the other profiles on their declared stageReviewer, with the effort chosen as for a block. One review that read the final merged diff and those interactions closes both.",
+    "loop": "Failed checks and real findings go to the worker that caused them, or the cooperator fixes a small one itself; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
     "smallLocal": "On a direct route, a small local change with a clear contract and passing checks is accepted on the cooperator's own reading of the diff. After a review, every code change, whoever writes it, goes to the same reviewer as a delta, which costs about a quarter of the first review.",
     "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",
     "report": "One line per reviewed block: the reviewer's REVIEW: block=<label> rounds=<n> findings=<n> sites=<n> open=<n>, with real=<n> (the findings the cooperator took as real) added after findings."

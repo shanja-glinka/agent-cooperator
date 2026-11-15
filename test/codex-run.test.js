@@ -84,6 +84,19 @@ test('codex-run work role runs an escalated worker on Sol with a writable worksp
   assert.ok(!recorded.args.includes('read-only'));
 });
 
+test('codex-run reviews at high unless the cooperator asks for xhigh', async (t) => {
+  const byDefault = await runFake(t, 'ok', [], 'review');
+  assert.equal(byDefault.summary.model, 'gpt-6.1-sol');
+  assert.equal(byDefault.summary.effort, 'high');
+  assert.ok(byDefault.recorded.args.includes('model_reasoning_effort="high"'));
+  assert.ok(byDefault.recorded.args.includes('read-only'));
+  const chosen = await runFake(t, 'ok', ['--effort', 'xhigh'], 'review');
+  assert.equal(chosen.summary.effort, 'xhigh');
+  assert.ok(chosen.recorded.args.includes('model_reasoning_effort="xhigh"'));
+  const worker = await runFake(t, 'ok', [], 'work');
+  assert.equal(worker.summary.effort, 'xhigh');
+});
+
 test('codex-run resumes a thread with the packet only and the sandbox as config', async (t) => {
   const { summary, recorded } = await runFake(t, 'ok', ['--resume', 'thread-123']);
   assert.equal(summary.status, 'ok');

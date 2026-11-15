@@ -14,9 +14,13 @@ by this kit: `workforce_worker`, `workforce_probe`, `workforce_auditor`,
 
 ```json
 { "task_name": "review_consumer_cutover", "agent_type": "workforce_reviewer",
-  "model": "gpt-6.1-sol", "reasoning_effort": "xhigh",
+  "model": "gpt-6.1-sol", "reasoning_effort": "high",
   "fork_turns": "none", "message": "<packet with MODE: block, REVIEW, SNAPSHOT, the audit log>" }
 ```
+
+The reviewer's `reasoning_effort` is `high` or `xhigh`, chosen for each review
+as the skill says; `followup_task` keeps the effort the reviewer was spawned
+with.
 
 The progress critic of a build or pipeline is spawned once, when its first
 check comes due (45 minutes of work, or a trigger), with the profile's

@@ -14,14 +14,16 @@ Read the record only to route outside the defaults below.
 | Worker ladder | Luna → Sol | Sol |
 | Audit lens (`workforce_auditor`, on demand) | `gpt-6-luna`, xhigh | same |
 | Progress critic (`workforce_progress_critic`, build/pipeline from 45 minutes) | `gpt-6.1-sol`, xhigh | same |
-| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, xhigh | same |
-| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.1-sol`, xhigh, only for an integration part no block review covered | same |
+| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, high or xhigh | same |
+| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.1-sol`, high or xhigh, only for an integration part no block review covered | same |
 | Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | same |
 
 Presets are starting recommendations. A named profile is an approach preference;
 the user's explicit model, effort, and budget limits are binding. Economy is the
 default: Sol thinks, judges, and integrates, and Luna reads and types at
-xhigh{{#reviewBlock}}; Sol at xhigh reviews the blocks light workers submit{{/reviewBlock}}{{^reviewBlock}}; block review
+xhigh{{#reviewBlock}}; Sol reviews the blocks light workers submit, at high or xhigh as the
+cooperator chooses for each review (SKILL.md, "Acceptance of delegated
+blocks"){{/reviewBlock}}{{^reviewBlock}}; block review
 is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{/reviewStage}}. Audit lenses run only on demand
 (delegation, step 6). The native launch layers `codex -p workforce-economy` and
 `codex -p workforce-standard` set the cooperator's model and effort for that
@@ -38,8 +40,8 @@ Prices per MTok (checked 2026-10-20): GPT-6.1 Sol $2 in / $10 out, cached
 $0.10; GPT-6 Luna $0.10 / $0.50, cached $0.01 (effort up to xhigh); above 272k
 input tokens a request costs about twice. Role files omit model and effort on
 purpose: the spawn sets them. Sol and Luna default to medium, so set effort on
-every spawn: workers, auditors, reviewers, and the progress critic run at
-xhigh.
+every spawn: workers, auditors, and the progress critic run at xhigh, a
+reviewer at high or xhigh, chosen for each review.
 
 ## Selection
 
@@ -109,7 +111,7 @@ PROJECT_RULES: repository instruction files to read first
 CONTRACT: what the change must keep (behavior, interfaces, data at the boundaries), quoted with its source (the task, a rule file)
 INPUTS / SNAPSHOT: exact sources, revision, relevant dirty diff; the tree to read (reviewer: tree:<hash> from scripts/accept.mjs snapshot)
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
-CHECKS: commands with cwd and expected result
+CHECKS: the commands this worker runs itself, with cwd and expected result: the narrow check of its own files; the project-wide checks only when it writes alone and the packet assigns them (otherwise the cooperator runs those once for all blocks)
 CONSTRAINTS: the limits of the touched areas that can change how the work is done, each once with its scope and source: a check and the files it covers; a size limit with the file's current value (bot.ts 2998 of 3000 lines, scripts/check-architecture.cjs:351); a limit still to find, as the worker's first step
 TRAPS: what you saw that can go wrong (a behavior-changing rewrite)
 RETURN: concise result, evidence, gaps

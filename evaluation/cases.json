@@ -35,7 +35,7 @@
     {
       "id": "specified-complexity",
       "input": "Default profile task with a large but fully specified algorithm.",
-      "expected": "A light worker (haiku xhigh in Claude Code, gpt-6-luna xhigh in Codex) owns the implementation block with the specification in its packet; size alone does not escalate the task. The block is audited and reviewed by gpt-6.1-sol xhigh before it is accepted."
+      "expected": "A light worker (haiku xhigh in Claude Code, gpt-6-luna xhigh in Codex) owns the implementation block with the specification in its packet; size alone does not escalate the task. The block is reviewed by gpt-6.1-sol before it is accepted, at the effort the cooperator chooses; no audit lens by default."
     },
     {
       "id": "open-design",
@@ -127,7 +127,7 @@
       "id": "claude-build-class",
       "runtime": "claude-code",
       "input": "/workforce-orchestrate: fix a validation bug with a known cause across three files.",
-      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, the check, and the CONSTRAINTS with their source files. On submission the gpt-6.1-sol xhigh review (no audit lens by default); the cooperator judges the findings, reads the diff, and accepts."
+      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, the check, and the CONSTRAINTS with their source files. On submission the cooperator runs the project's checks once, then the gpt-6.1-sol review at the effort it chooses (no audit lens by default); the cooperator judges the findings, reads the diff, and accepts."
     },
     {
       "id": "claude-fix-round-continuity",
@@ -186,7 +186,7 @@
     {
       "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Economy workers use gpt-6-luna xhigh, Standard workers gpt-6.1-sol xhigh; block and stage review are Sol xhigh and lookup is Luna medium. No tier above Sol exists."
+      "expected": "Economy workers use gpt-6-luna xhigh, Standard workers gpt-6.1-sol xhigh; block and stage review are Sol at high, at xhigh only where the review criteria call for it, and lookup is Luna medium. No tier above Sol exists."
     },
     {
       "id": "codex-probe-tier",
@@ -198,7 +198,7 @@
       "id": "codex-standard-brain",
       "runtime": "codex",
       "input": "Standard profile, concrete migration; orchestrator session runs gpt-6.1-sol.",
-      "expected": "That is the Standard recommendation; no mismatch to report. A stage review, when an integration part needs one, runs on gpt-6.1-sol xhigh."
+      "expected": "That is the Standard recommendation; no mismatch to report. A stage review, when an integration part needs one, runs on gpt-6.1-sol, at high or xhigh as the cooperator chooses."
     },
     {
       "id": "claude-haiku-55",
@@ -238,7 +238,7 @@
     {
       "id": "hybrid-default",
       "input": "Claude Code: '/workforce-orchestrate Implement the described export pagination.' No profile named; Codex is installed and logged in.",
-      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, and the review on gpt-6.1-sol xhigh through codex-run.mjs in the background; audit lenses only on demand. Standard only on the user's choice or when Codex is unavailable."
+      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, and the review on gpt-6.1-sol through codex-run.mjs in the background, at high or xhigh (--effort) as the cooperator chooses for that review; audit lenses only on demand. Standard only on the user's choice or when Codex is unavailable."
     },
     {
       "id": "hybrid-codex-stall",
@@ -277,7 +277,7 @@
       "id": "codex-standard-workers",
       "runtime": "codex",
       "input": "Codex Standard, implementation block.",
-      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers Sol xhigh for blocks and, when an integration part needs it, for the stage."
+      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers Sol, at high or xhigh, for blocks and, when an integration part needs it, for the stage."
     },
     {
       "id": "submitted-at-ceiling",
@@ -475,7 +475,7 @@
       "id": "delegated-block-reviewed",
       "runtime": "both",
       "input": "A light worker submits a delegated block; no project rule requires independent review; the required checks pass.",
-      "expected": "With reviewBlock on, the block goes to the gpt-6.1-sol xhigh review before it is accepted, no audit lens by default; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
+      "expected": "With reviewBlock on, the block goes to the gpt-6.1-sol review, at the effort the cooperator chooses, before it is accepted, no audit lens by default; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
     },
     {
       "id": "required-independence-own-change",
@@ -571,7 +571,32 @@
       "id": "blocks-ready-together-one-review",
       "runtime": "both",
       "input": "Two independent blocks are submitted within a minute.",
-      "expected": "One review run reads both diffs; findings go back to their own workers; the same reviewer checks the fixes."
+      "expected": "The cooperator runs the project's checks once on the tree that holds both blocks; then one review run reads both diffs; findings go back to their own workers; the same reviewer checks the fixes."
+    },
+    {
+      "id": "checks-once-per-iteration",
+      "input": "Three light workers with disjoint WRITE_SETs work in one checkout; each wants to run the project's test suite to know its block works.",
+      "expected": "Each brief names only the narrow check of that worker's own files, and none of them runs the suite: three full runs at once load the machine, and each would see the other workers' unfinished edits. When the blocks are submitted, the cooperator runs the suite once on the whole tree, itself through accept.mjs run, or through one agent given only that job when the log is long. Paired with lone-worker-full-check."
+    },
+    {
+      "id": "lone-worker-full-check",
+      "input": "One light worker owns the only block of the task; nobody else writes in the checkout.",
+      "expected": "The brief may assign the full check to that worker as its last step: one writer, one run. The rule against workers running the project-wide checks is about several writers in one checkout."
+    },
+    {
+      "id": "failed-check-to-owner",
+      "input": "The cooperator's one CI run after two blocks were submitted fails twice: a test in src/b, which block B's WRITE_SET holds, and a type error in a file neither block owns.",
+      "expected": "The test failure goes to block B's worker with the log lines that show it, bundled with B's review findings when both are in hand; that worker fixes it in its own context. The type error no block explains is the cooperator's to trace: the brief, the way the blocks meet, the environment. The affected checks run again after the fixes. Nothing goes to block A's worker."
+    },
+    {
+      "id": "review-effort-high",
+      "input": "A light worker's block renames a helper and updates its 30 call sites. The diff changes no guard, fallback, or normalization; the contract is that behavior stays.",
+      "expected": "The review runs on gpt-6.1-sol at high: a mechanical change with a clear contract and no protective site. xhigh would cost more, take longer, and report more that is not real. Paired with review-effort-xhigh."
+    },
+    {
+      "id": "review-effort-xhigh",
+      "input": "Same task, but the worker's SITES lists four changed fallbacks on database rows, and the CONTRACT keeps defensive checks on database and JSON data.",
+      "expected": "The review runs on gpt-6.1-sol at xhigh: the diff changes guards or fallbacks the CONTRACT protects, so a miss is expensive. The same holds for a money, auth, security, migration, or concurrency path and for blocks that interact. The report names the effort each review ran at."
     },
     {
       "id": "brief-names-constraints",
@@ -607,7 +632,7 @@
       "id": "stage-review-scope",
       "runtime": "both",
       "input": "Two blocks were each reviewed; afterwards the cooperator edited the shared serializer both of them use.",
-      "expected": "A stage review on Sol xhigh for that integration edit and the interaction it touches. When one review already read the final merged diff and the interactions, it closes both duties and no second review runs."
+      "expected": "A stage review on Sol, at xhigh because blocks interact, for that integration edit and the interaction it touches. When one review already read the final merged diff and the interactions, it closes both duties and no second review runs."
     },
     {
       "id": "no-tier-above-sol",

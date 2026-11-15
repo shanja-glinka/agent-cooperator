@@ -1,13 +1,45 @@
 # Research and routing rationale
 
-The v10 and v11 sections below were prepared on 2026-10-21, the v9, v8, v7, v6,
-and v5 sections on 2026-10-20, and the Route Decision synthesis on 2026-10-19,
+The v12 section below was prepared on 2026-11-15, the v10 and v11 sections on
+2026-10-21, the v9, v8, v7, v6, and v5 sections on 2026-10-20, and the Route Decision synthesis on 2026-10-19,
 all for both editions.
 The earlier Claude Code configuration survey was recorded on 2026-09-17; later
 project observations carry their own dates. Those historical reports are not
 current routing instructions or independently repeated benchmarks for this kit.
 The authoritative workflow is the [Codex orchestration skill](../payload/codex/skills/workforce-orchestrate/SKILL.md)
 and its [Claude counterpart](../payload/claude/skills/workforce-orchestrate/SKILL.md).
+
+## v12 (release 1.7.0) — 2026-11-15: iterations and the reviewer's effort
+
+Claude policy 1.12.0, Codex policy 1.15.0. Not measured.
+
+Two reports from live use (the maintainer, 2026-11-15):
+
+- **Every worker ran the project's checks itself.** With several workers in
+  one checkout, the same suite ran several times at once on one machine, and
+  each run saw the other workers' unfinished edits. v12 gives the project-wide
+  checks to the cooperator: one run per iteration on the tree that holds every
+  submitted block, a worker's own check narrowed to its files, and each
+  failure sent to the worker whose WRITE_SET holds the failing file.
+- **The reviewer ran at xhigh on every block.** In the v11 cells the reviewer
+  took $0.66 of the large Claude task's $2.91 and $0.26 of the small Sol
+  task's $0.65. v12 keeps GPT-6.1 Sol as the reviewer and makes its effort the
+  cooperator's choice: high as the working level, xhigh where a miss is
+  expensive or the tracing is long.
+
+Neither change has a measurement of its own. The bench does not yet count who
+ran the project's checks or how often.
+
+| Source | What it reports, as read | Use here and its boundary |
+| --- | --- | --- |
+| [Effective Strategies for Asynchronous Software Engineering Agents](https://arxiv.org/html/2603.21489v1) (Geng and Neubig, 2026-03) | A manager with engineers in separate git worktrees; changes enter main "only through explicit merge and test validation". A shared workspace with instruction-level separation scored below worktrees: 55.5 against 63.3 on PaperBench, 56.1 against 59.1 on Commit0-Lite. Higher API cost; runtime not substantially lower | Integration is validated in one place, by whoever merges. The kit keeps a shared checkout, so that run happens when the writers are done. The ablation numbers come from a model-written summary of the page's second half. |
+| [Multi-agent Collaboration with State Management](https://arxiv.org/html/2605.20563) (STORM, 2026-05) | One shared workspace with a version counter per file: a write is rejected when a file the agent read has changed. Commit0-Lite with Sonnet 4.6: 82.5 against 63.8 for worktrees and 66.4 for one agent. Concurrent shell commands are not serialized | Concurrent runs in a shared workspace stay open even where concurrent writes are handled. The limitation is from a model-written summary. |
+| [Which Agent Causes Task Failures and When?](https://arxiv.org/abs/2505.00212) (2025; abstract only) | Automatic attribution of a failure from logs: the best method names the responsible agent in 53.5% of cases and the step in 14.2%; some methods are below random | A failed check goes to its owner by the failing file's WRITE_SET, not by reading transcripts; what no block explains stays with the cooperator. |
+| [Which LLM should review your code?](https://www.qodo.ai/?p=22396) (Qodo, 2026-10-12; a vendor's blog) | 125 internal PRs with 703 known bugs, scored by an LLM judge. "More reasoning is not always better": a higher level usually raises recall and lowers precision. Claude Opus 5.5: F1 56.8% at high and 54.0% at xhigh. GPT-6 Sol: F1 48.7% at medium for $0.18 per PR, 48.4% at xhigh for $0.51, with recall 49.3% against 41.4% | xhigh is for a review where a miss costs more than extra findings to judge. Internal data, some configurations run once, GPT-6 Sol and not 6.1, no high level for Sol; the Sonnet figures in its text and table disagree. |
+| [GPT-5.5 reasoning curve](https://www.stet.sh/blog/gpt-55-codex-graphql-reasoning-curve) (stet.sh, 2026-05-07, updated 2026-11-11) | 26 Go tasks, one run each, GPT-5.5 in Codex 0.128.0. At high and at xhigh: tests pass 96% and 92%, review-quality score 2.82 and 3.37, $4.49 and $9.77 per task. The author keeps high as the default and xhigh for ambiguous or high-risk work | The same shape for a model that implements: xhigh buys depth at about twice the price. An older model and one seed; the author calls it inspect-grade. |
+| [Reasoning effort, not tool access, buys first-try reliability](https://arxiv.org/abs/2607.02436) (Mehta, 2026-07; abstract only) | 90 runs building one app from one specification: first-try perfect runs 28% at high and 89% at xhigh, corrective prompts cut about five times, 9–29% more cost | Why light workers stay at xhigh. It is not a study of review. |
+| Claude Code [sub-agents](https://code.claude.com/docs/en/sub-agents.md) and [changelog](https://code.claude.com/docs/en/changelog.md) (read 2026-11-15) | The Agent call takes `effort` from 2.1.292 on; the order is `CLAUDE_CODE_EFFORT_LEVEL`, the call, the role's frontmatter, the session. 2.1.317: a subagent on another model uses that model's saved effort. 2.1.321: reports from background subagents that wait together are answered in one model call | The texts no longer say the Agent tool has no per-call effort. Checked on 2.1.325: one role on one model answered the same question with no tool call in 5 seconds at `low` and with ten in 18 seconds at `xhigh`. The changelog entries were read as a summary. |
+| [Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing) (read 2026-11-15) | Claude Fable 5.2 $8 / $40, cache read $0.20; Fable 5.1 $10 / $50; Opus 5.5, Sonnet 5.5, and Haiku 5.5 as recorded | `fable` in the record is Fable 5.2; an Agent call with `model: "fable"` resolved to `claude-fable-5-2`. |
 
 ## v10 and v11 (release 1.5.0) — 2026-10-21: route by measured anchors
 

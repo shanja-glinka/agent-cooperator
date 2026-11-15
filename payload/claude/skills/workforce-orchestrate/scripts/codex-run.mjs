@@ -14,13 +14,16 @@ const USAGE = `usage: codex-run.mjs --role audit|review|work --name NAME --packe
   [--keep-user-config] [--codex-bin PATH]`;
 
 const DEFAULT_MODEL = { audit: 'gpt-6-luna', review: 'gpt-6.1-sol', work: 'gpt-6.1-sol' };
+// A review runs at high unless the cooperator asks for xhigh (--effort); light auditors and an
+// escalated worker run at xhigh.
+const DEFAULT_EFFORT = { audit: 'xhigh', review: 'high', work: 'xhigh' };
 const SKILL = { audit: 'workforce-audit', review: 'workforce-review', work: 'workforce-worker' };
 // Auditors and reviewers only read; a worker escalated from haiku edits its WRITE_SET.
 const SANDBOX = { audit: 'read-only', review: 'read-only', work: 'workspace-write' };
 const INPUT_REQUEST = /approval|request_user_input|user_input|elicitation/i;
 
 function parseArgs(argv) {
-  const options = { idleMinutes: 15, timeoutMinutes: 60, effort: 'xhigh', keepUserConfig: false, codexBin: 'codex' };
+  const options = { idleMinutes: 15, timeoutMinutes: 60, keepUserConfig: false, codexBin: 'codex' };
   const names = {
     '--role': 'role', '--name': 'name', '--packet': 'packet', '--cd': 'cd', '--out': 'out',
     '--model': 'model', '--effort': 'effort', '--resume': 'resume', '--codex-bin': 'codexBin',
@@ -47,6 +50,7 @@ function parseArgs(argv) {
   if (!/^[\w.-]+$/.test(options.name)) fail('--name may contain letters, digits, dot, dash, underscore');
   if (options.baseline && !options.resume) fail('--baseline needs --resume');
   options.model ??= DEFAULT_MODEL[options.role];
+  options.effort ??= DEFAULT_EFFORT[options.role];
   options.out = path.resolve(options.out);
   options.cd = path.resolve(options.cd);
   options.idleMinutes = Number(options.idleMinutes);

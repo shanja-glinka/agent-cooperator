@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.14.0",
+  "policyVersion": "1.15.0",
   "selection": "contextual",
   "policy": {
     "reviewBlock": true,
@@ -29,11 +29,13 @@
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "xhigh"
+        "effort": "high",
+        "effortUp": "xhigh"
       },
       "stageReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "xhigh",
+        "effort": "high",
+        "effortUp": "xhigh",
         "when": "only for an integration part no block review covered"
       },
       "design": {
@@ -68,7 +70,7 @@
       "orchestrator": {
         "model": "gpt-6.1-sol",
         "effort": "high",
-        "note": "Sol thinks, judges, and integrates; Luna reads and types at xhigh; Sol at xhigh reviews."
+        "note": "Sol thinks, judges, and integrates, and runs the project-wide checks once per iteration; Luna reads and types at xhigh; Sol reviews at high or xhigh, chosen for each review."
       },
       "probe": {
         "model": "gpt-6-luna",
@@ -86,11 +88,13 @@
       },
       "blockReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "xhigh"
+        "effort": "high",
+        "effortUp": "xhigh"
       },
       "stageReviewer": {
         "model": "gpt-6.1-sol",
-        "effort": "xhigh",
+        "effort": "high",
+        "effortUp": "xhigh",
         "when": "only for an integration part no block review covered"
       },
       "design": {
@@ -145,7 +149,7 @@
           2,
           10
         ],
-        "role": "cooperator, block and stage review at xhigh, escalated implementation",
+        "role": "cooperator, block and stage review at high or xhigh, escalated implementation",
         "succeeds": "gpt-6-sol",
         "cachedInputPerMTok": 0.1
       },
@@ -188,7 +192,7 @@
     "notReal": "Theoretical risk, hypothetical input, work outside SCOPE, taste without a rule, duplicate of a rejected finding; anything the auditor filed under NOTES.",
     "who": "The cooperator (orchestrator) judges; auditors and reviewers report everything."
   },
-  "continuity": "Fixes go back to the same worker, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model.",
+  "continuity": "Fixes and failed checks go back to the worker that caused them, the next audit round only to the auditors whose lens won the last round, the delta to the same reviewer, through followup_task. A fresh agent is for independence or a different model.",
   "workerBudgets": {
     "gpt-6-luna": {
       "toolCallsPerRun": 600,
@@ -210,11 +214,13 @@
   },
   "review": {
     "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
-    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol at xhigh; blocks ready together go to one review. With it off, the cooperator accepts on its own reading of the diff.",
+    "checks": "The project-wide checks (the test suite, the build, lint and types over the project, the CI script) run once per iteration on the tree that holds every submitted block: by the cooperator, or by one agent given only that job. A worker runs the narrow check its brief names for its own files; a worker that writes alone may be assigned the full check as its last step. A failed check goes to the worker whose WRITE_SET holds the failing file, with the log lines that show it; a failure no block explains is the cooperator's to trace.",
+    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol. It starts once the project-wide checks pass, or beside them when they are slow; blocks ready together go to one review. With it off, the cooperator accepts on the checks and its own reading of the diff.",
+    "effort": "The cooperator chooses the reviewer's effort for each review and sets it on the spawn. high is the working level: a block whose diff changes no protective site, a local or mechanical change with a clear contract. xhigh is for a review where a miss is expensive or the tracing is long: the diff changes guards or fallbacks the CONTRACT protects (the worker's SITES names them), the change is on a money, auth, security, migration, or concurrency path, or blocks interact.",
     "contract": "The review packet names CONTRACT: what the change must keep, quoted with its source (the task, the project's rules). The reviewer lists from the diff itself every changed protective site (a removed or changed condition, a changed fallback, a normalization, null becoming undefined, a changed order of evaluation) and gives each one verdict: kept, with a checkable basis; violated, with the difference and the fix; not established, with the missing fact. Sites with one basis are grouped with their locations. The site list is part of checking the contract, not all of it: every other requirement in CONTRACT is checked on the paths the change touches.",
     "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and every code change after the review goes to the same reviewer as a delta. No reviewer call only to read an exit code.",
-    "stage": "Stage review (gpt-6.1-sol at xhigh) runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract. One review that read the final merged diff and those interactions closes both.",
-    "loop": "Real findings go to the same worker, or the cooperator fixes a small one itself; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
+    "stage": "Stage review (gpt-6.1-sol, effort chosen as for a block) runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract. One review that read the final merged diff and those interactions closes both.",
+    "loop": "Failed checks and real findings go to the worker that caused them, or the cooperator fixes a small one itself; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
     "smallLocal": "On a direct route, a small local change with a clear contract and passing checks is accepted on the cooperator's own reading of the diff. After a review, every code change, whoever writes it, goes to the same reviewer as a delta, which costs about a quarter of the first review.",
     "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",
     "report": "One line per reviewed block: the reviewer's REVIEW: block=<label> rounds=<n> findings=<n> sites=<n> open=<n>, with real=<n> (the findings the cooperator took as real) added after findings."

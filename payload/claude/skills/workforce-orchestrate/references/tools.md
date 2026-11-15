@@ -24,6 +24,12 @@ ones. Roles installed by this kit: `workforce-worker`, `workforce-worker-lite`
   "prompt": "<packet with LENS, SNAPSHOT, SCOPE, PROJECT_RULES, prior rounds>" }
 ```
 
+```json
+{ "subagent_type": "workforce-reviewer", "model": "opus", "effort": "xhigh",
+  "description": "Review: export pagination block",
+  "prompt": "<packet with MODE: block, REVIEW, CONTRACT, SNAPSHOT tree:<hash>>" }
+```
+
 - Independent agents go in one message; `run_in_background: true` for anything
   longer than about half a minute. You are notified on completion: do not
   poll, `sleep`, or use ScheduleWakeup while agents run, since every turn
@@ -31,6 +37,12 @@ ones. Roles installed by this kit: `workforce-worker`, `workforce-worker-lite`
 - The packet is the agent's whole context: exact sources, not your history.
   `subagent_type: "fork"` is for the rare case where the child needs everything
   you have seen.
+- `effort` on the call overrides the role's frontmatter effort (Claude Code
+  2.1.292 and later; checked on 2.1.325). Set it for a reviewer that runs
+  through Agent (Standard, Enhanced, the fallback without Codex), `high` or
+  `xhigh`, as the skill says; the other roles keep their own. If the schema in
+  the session has no `effort` field, that reviewer runs at its role's `high`:
+  say so when the review needed xhigh.
 - The reviewer is never the author. Stage review is a separate agent.
 
 ## SendMessage
@@ -96,8 +108,8 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   or MODE). The wrapper prepends the `workforce-audit` or `workforce-review`
   skill, feeds the packet on stdin from that file, and runs read-only with
   approvals off and the user's Codex config ignored (no MCP servers that ask for
-  approval). Defaults: `audit` → `gpt-6-luna`, `review` → `gpt-6.1-sol`, effort
-  `xhigh`.
+  approval). Defaults: `audit` → `gpt-6-luna` at `xhigh`, `review` →
+  `gpt-6.1-sol` at `high`; add `--effort xhigh` for a review that needs it.
 - Run each call with Bash `run_in_background: true`; runs that are independent
   go in one message. Do not sleep or poll: the completion notification arrives, because
   the wrapper ends the run when it finishes, goes silent for 15 minutes
@@ -121,7 +133,8 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   `--baseline <previous result.json>` while its budget lasts.
 - Next round for a winning lens, or the delta for the same reviewer: same
   command with a new `--name`, the round packet, `--resume <threadId>`, and
-  `--baseline <previous result.json>`. A lens that lost is not resumed.
+  `--baseline <previous result.json>`; a resumed review takes `--effort`
+  again. A lens that lost is not resumed.
 - Never hand Codex a task that needs a reply mid-run. If a result says Codex
   needed something, answer it in the next round's packet.
 

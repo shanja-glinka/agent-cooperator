@@ -19,9 +19,12 @@ parent with evidence and a proposal. Send the parent nothing but your packet,
 a blocker, or such a question: progress messages cost the parent a turn. Do not ask the user, spawn agents, switch
 branches, push, or commit unless the packet assigns a commit.
 
-Run CHECKS and report each exit code; keep it with the output
-(`cmd > log 2>&1; echo "exit=$?"`, then read from the log what you need; the
-full log stays in the file), since a pipe to `tail` hides it. Keep in your
+Run the CHECKS your packet gives you, and only those, and report each exit
+code; keep it with the output (`cmd > log 2>&1; echo "exit=$?"`, then read
+from the log what you need; the full log stays in the file), since a pipe to
+`tail` hides it. The project's whole test suite, build, and CI are not yours
+unless the packet assigns them: the parent runs them once for all blocks and
+sends you the failures that are yours. Keep in your
 context what the next decision needs: read code by the functions you change
 and the conditions they depend on, and do not reread what you already have.
 Honor CONSTRAINTS from the start: a limit the project checks is cheaper to
@@ -32,8 +35,9 @@ you found. Keep the CONTRACT: a defensive check or fallback on data from a
 database, a message, or JSON stays even when the type says the bad value cannot
 come; list every protective site you changed under SITES, as a help for the
 reviewer, not as proof. If a required check could not run, say so and why: a check you did
-not run is not a pass. When the parent sends findings, fix them in this same
-context and re-run the affected checks.
+not run is not a pass. When the parent sends findings or failed checks, fix
+them in this same context and re-run the checks of your packet that they
+affect.
 
 When the packet gives a BUDGET (tool calls per run), stop at it; your turn
 limit is separate, so leave room to write the packet. Stop also when

@@ -190,9 +190,11 @@ per block:
   worker stuck (3 attempts without a result, or its volume spent)
      → HANDOFF → cooperator finds the cause and decides the approach
      → next tier starts fresh with packet + APPROACH + HANDOFF only
-  submitted, then the cooperator chooses:
+  submitted blocks → the cooperator runs the project's checks once on the
+     whole tree; a failed check goes back to the worker that owns the file
+  then the cooperator chooses:
      a) review this block                → one review run for blocks ready
-                                           together
+                                           together, at high or xhigh
      b) small local change, clear contract, checks passed
                                          → accept on its own reading
      c) next block to the worker         → review runs in parallel
@@ -219,10 +221,25 @@ an OPEN list (the outcome, required checks, accepted findings); an item closes
 only with evidence, never because work changed hands or a round limit was
 reached.
 
+**Iterations and checks.** Delegated work moves in iterations that the
+cooperator runs: the workers write, the cooperator runs the project-wide checks
+(the test suite, the build, lint and types over the project, the CI script)
+once on the tree that holds every submitted block, then the review, and each
+failed check and real finding goes back to the worker that caused it. Workers
+do not each run those checks: several runs at once load the machine, and in a
+shared checkout each run sees the other workers' unfinished edits. A worker
+runs only the narrow check its brief names for its own files; a worker that
+writes alone may get the full check as its last step. A failure no block
+explains is the cooperator's to trace.
+
 **Review.** With the default policy (`reviewBlock` on), every block a light
-worker submits is reviewed before it is accepted. The reviewer is GPT-6.1 Sol at
-xhigh in the Codex presets and in Claude Hybrid (through the Codex CLI from
-Claude Code), or opus at high in Claude Standard and Enhanced. Blocks that are
+worker submits is reviewed before it is accepted. The reviewer is GPT-6.1 Sol
+in the Codex presets and in Claude Hybrid (through the Codex CLI from Claude
+Code), or opus in Claude Standard and Enhanced. The cooperator chooses its
+effort for each review: high is the working level, and xhigh is for a review
+where a miss is expensive or the tracing is long (the diff changes guards or
+fallbacks the contract protects, a money, auth, security, migration, or
+concurrency path, blocks that interact). Blocks that are
 ready together go to one review run. The reviewer reads the whole diff and
 checks it against CONTRACT (what the change must keep, quoted from the task or
 the project's rules with its source): every changed protective site (a removed
@@ -234,7 +251,7 @@ progress stops the loop for the cooperator's decision. A small local change with
 a clear contract and passing checks may be accepted on the cooperator's own
 reading of the diff. A review that the project, the user, or the task requires
 always runs. With `reviewBlock` off, the cooperator accepts a light worker's
-block on its checks and its own reading of the whole diff. If Sol is
+block on the project's checks and its own reading of the whole diff. If Sol is
 unavailable, the fallback review is marked as such. The report has one line per
 reviewed block: `REVIEW: block=<label> rounds=<n> findings=<n> real=<n>
 sites=<n> open=<n>`; the reviewer writes it and the cooperator adds `real`. A
@@ -274,8 +291,8 @@ to know when the progress critic is due; nothing sleeps for it.
 | Worker | `sonnet` high | `sonnet`, `opus` for non-trivial blocks | `haiku` xhigh |
 | Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
 | Audit lens (on demand) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
-| Block review | `opus` high | `opus` high | Codex GPT-6.1 Sol xhigh |
-| Stage acceptance | `opus` high | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol xhigh |
+| Block review | `opus` high or xhigh | `opus` high or xhigh | Codex GPT-6.1 Sol high or xhigh |
+| Stage acceptance | `opus` high or xhigh | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol high or xhigh |
 
 Worker budgets per block: `haiku` 120 tool calls per run and 360 per block,
 3 attempts, 400k tokens; `sonnet` and Codex Sol 3 attempts, 500k tokens; `opus`
@@ -287,7 +304,7 @@ without it, Hybrid keeps `haiku` workers and runs the reviews on `opus` high
 through Agent, marked as the fallback. Standard and Enhanced run only when you
 choose them, never as an automatic replacement for Hybrid. Codex runs go through the bundled
 `codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns nothing.
-Claude policy 1.10.0 is the current routing policy.
+Claude policy 1.12.0 is the current routing policy.
 Details: [docs/claude-code.md](docs/claude-code.md).
 
 ## Codex
@@ -300,8 +317,8 @@ Details: [docs/claude-code.md](docs/claude-code.md).
 | Worker ladder | Luna → Sol | Sol |
 | Audit lens (on demand) | Luna xhigh | same |
 | Progress critic (build/pipeline, from 45 minutes) | Sol xhigh | same |
-| Block review | Sol xhigh | same |
-| Stage acceptance | Sol xhigh, only for an integration part no block review covered | same |
+| Block review | Sol high or xhigh | same |
+| Stage acceptance | Sol high or xhigh, only for an integration part no block review covered | same |
 
 Worker budgets per block: Luna 600 tool calls per run, 1800 per block, 3 attempts,
 400k tokens, then Sol xhigh; Sol 3 attempts, 500k tokens, then the cooperator
