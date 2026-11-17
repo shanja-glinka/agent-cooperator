@@ -638,7 +638,7 @@
       "id": "no-tier-above-sol",
       "runtime": "codex",
       "input": "A Codex Sol xhigh worker spends its third attempt on a block without a result.",
-      "expected": "There is no tier above Sol: the cooperator finds the cause (the stop, the brief, the split, the way of checking) and re-plans or asks the user. It never launches GPT-6 Astra."
+      "expected": "There is no tier above Sol: the cooperator finds the cause (the stop, the brief, the split, the way of checking) and re-plans or asks the user. It never launches GPT-6.2 Astra."
     },
     {
       "id": "enhanced-removed",

@@ -48,7 +48,7 @@ for (const name of fs.existsSync(kits) ? fs.readdirSync(kits).sort() : []) {
         if (!profiles.policy.reviewBlock) for (const re of BLOCK_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a block review (${re})`);
         if (!profiles.policy.reviewStage) for (const re of STAGE_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a stage review (${re})`);
       }
-      // From policy 1.12.0 (Codex) and 1.10.0 (Claude): no route can assign GPT-6 Astra (its model
+      // From policy 1.12.0 (Codex) and 1.10.0 (Claude): no route can assign GPT-6.2 Astra or GPT-6 Astra (its model
       // id in any installed file), the default profile's stage reviewer is Sol xhigh, and every
       // launch layer's waits satisfy Codex's min <= default <= max. From 1.15.0 (Codex) and 1.12.0
       // (Claude) the cooperator chooses the reviewer's effort: the default stage reviewer is Sol at
@@ -56,7 +56,7 @@ for (const name of fs.existsSync(kits) ? fs.readdirSync(kits).sort() : []) {
       const atLeast = (v, min) => { const [a, b] = [v, min].map((s) => String(s).split('.').map(Number)); for (let i = 0; i < 3; i += 1) if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) > (b[i] ?? 0); return true; };
       const v8 = atLeast(profiles.policyVersion, edition === 'codex' ? '1.12.0' : '1.10.0');
       if (v8) {
-        for (const [p, t] of all) if (/gpt-6-astra/.test(t)) fail(`${name} ${edition}: ${path.relative(home, p)} can assign gpt-6-astra`);
+        for (const [p, t] of all) if (/gpt-6(\.\d+)?-astra/.test(t)) fail(`${name} ${edition}: ${path.relative(home, p)} can assign ${t.match(/gpt-6(\.\d+)?-astra/)[0]}`);
         const def = profiles.profiles?.[profiles.selectionRules?.default];
         const chosen = atLeast(profiles.policyVersion, edition === 'codex' ? '1.15.0' : '1.12.0');
         // From 1.16.0 (Codex) and 1.13.0 (Claude) the Sol reviewer is gpt-6.2-sol.

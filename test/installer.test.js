@@ -360,7 +360,7 @@ test('update installs the real contextual policy into existing consumers and pre
   const installed = [];
   const walk = async (dir) => { for (const e of await fs.readdir(dir, { withFileTypes: true })) { const p = path.join(dir, e.name); if (e.isDirectory()) await walk(p); else installed.push([p, await fs.readFile(p, 'utf8')]); } };
   await walk(fixture.codexHome);
-  assert.deepEqual(installed.filter(([, text]) => /gpt-6-astra/.test(text)).map(([p]) => p), []);
+  assert.deepEqual(installed.filter(([, text]) => /gpt-6(\.\d+)?-astra/.test(text)).map(([p]) => p), []);
   for (const layer of ['workforce-economy.config.toml', 'workforce-standard.config.toml']) {
     const text = await fs.readFile(path.join(fixture.codexHome, layer), 'utf8');
     const [min, def, max] = ['min', 'default', 'max'].map((k) => Number(text.match(new RegExp(`^${k}_wait_timeout_ms = (\\d+)`, 'm'))?.[1]));

@@ -326,7 +326,7 @@ re-plans or asks you. Economy is the default. Enhanced was removed in policy 1.1
 a stored or launched choice of it runs as Standard. Native launch layers:
 `codex -p workforce-economy` and `workforce-standard`. Both set the agent wait: a
 wait returns as soon as an agent sends a message or finishes, and otherwise lasts 20
-minutes. A prompt never changes the running model. No profile uses GPT-6 Astra.
+minutes. A prompt never changes the running model. No profile uses GPT-6.2 Astra.
 A build or pipeline gets one read-only progress critic after 45 minutes of work,
 then every 45 minutes and at once after a compaction, a third identical failure,
 or a check period with nothing closed. It checks with a fresh context whether the

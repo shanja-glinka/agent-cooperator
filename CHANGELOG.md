@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.1 — 2026-11-17
+
+- Astra is named GPT-6.2 Astra (`gpt-6.2-astra`) where the kit says that no
+  profile uses it. No route assigns Astra, as before; the installed roles,
+  skills, and profiles are unchanged. `policycheck.mjs` and the installer test
+  now fail on `gpt-6.2-astra` as well as `gpt-6-astra` in any installed file.
+  Records of past versions and measurements keep the name GPT-6 Astra.
+
 ## 1.8.0 — 2026-11-17 (not measured)
 
 - The Sol model is GPT-6.2 Sol (`gpt-6.2-sol`) everywhere GPT-6.1 Sol was

@@ -24,7 +24,7 @@ suite has run.
    (`v7nr=<commit>@big+reviewBlock=off,reviewStage=off`), and `policycheck.mjs`
    checks, before any cell runs, that every installed text of each variant
    delivers that policy; from Claude policy 1.10.0 and Codex 1.12.0 it also
-   fails when any installed file can assign `gpt-6-astra`, when the default
+   fails when any installed file can assign `gpt-6.2-astra` (or the older `gpt-6-astra`), when the default
    profile's stage reviewer is not Sol xhigh (from Claude policy 1.12.0 and
    Codex 1.15.0: not Sol at high with xhigh as its upper effort), or when a
    launch layer's waits break
