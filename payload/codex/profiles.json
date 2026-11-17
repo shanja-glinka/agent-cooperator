@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policyVersion": "1.15.0",
+  "policyVersion": "1.16.0",
   "selection": "contextual",
   "policy": {
     "reviewBlock": true,
@@ -9,7 +9,7 @@
   "profiles": {
     "standard": {
       "orchestrator": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "note": "Cost choice: Sol is Codex's recommended default."
       },
@@ -18,28 +18,28 @@
         "effort": "medium",
         "scope": "read-only lookups: symbols, consumers, contracts",
         "escalateTo": {
-          "model": "gpt-6.1-sol",
+          "model": "gpt-6.2-sol",
           "effort": "medium",
           "when": "the question needs judgment, not search"
         }
       },
       "worker": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "xhigh"
       },
       "blockReviewer": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "effortUp": "xhigh"
       },
       "stageReviewer": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "effortUp": "xhigh",
         "when": "only for an integration part no block review covered"
       },
       "design": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "scope": "the cooperator decides architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses"
       },
@@ -57,18 +57,18 @@
         "mode": "on-demand: only for an area the checks and the review do not cover"
       },
       "progressCritic": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "xhigh",
         "when": "One critic per build or pipeline goal: first after 45 minutes of work, then every 45 minutes while the outcome is open, and at once after a cooperator compaction, a third identical failure, a block's third continuation or spent budget, or a check period with nothing closed; the cooperator reads the clock at its turns and continues the same critic, nothing sleeps",
         "scope": "Read-only check of progress against the user's request and corrections: what closed since the last check, the loop shape (repeater, wanderer, looper), detours, blockers; one remedy the cooperator must apply or answer; not a block reviewer"
       },
       "workerLadder": [
-        "gpt-6.1-sol"
+        "gpt-6.2-sol"
       ]
     },
     "economy": {
       "orchestrator": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "note": "Sol thinks, judges, and integrates, and runs the project-wide checks once per iteration; Luna reads and types at xhigh; Sol reviews at high or xhigh, chosen for each review."
       },
@@ -77,7 +77,7 @@
         "effort": "medium",
         "scope": "read-only lookups: symbols, consumers, contracts",
         "escalateTo": {
-          "model": "gpt-6.1-sol",
+          "model": "gpt-6.2-sol",
           "effort": "medium",
           "when": "the question needs judgment, not search"
         }
@@ -87,18 +87,18 @@
         "effort": "xhigh"
       },
       "blockReviewer": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "effortUp": "xhigh"
       },
       "stageReviewer": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "effortUp": "xhigh",
         "when": "only for an integration part no block review covered"
       },
       "design": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "scope": "the cooperator decides architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses"
       },
@@ -116,21 +116,21 @@
         "mode": "on-demand: only for an area the checks and the review do not cover"
       },
       "progressCritic": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "xhigh",
         "when": "One critic per build or pipeline goal: first after 45 minutes of work, then every 45 minutes while the outcome is open, and at once after a cooperator compaction, a third identical failure, a block's third continuation or spent budget, or a check period with nothing closed; the cooperator reads the clock at its turns and continues the same critic, nothing sleeps",
         "scope": "Read-only check of progress against the user's request and corrections: what closed since the last check, the loop shape (repeater, wanderer, looper), detours, blockers; one remedy the cooperator must apply or answer; not a block reviewer"
       },
       "workerLadder": [
         "gpt-6-luna",
-        "gpt-6.1-sol"
+        "gpt-6.2-sol"
       ],
       "selection": "Default."
     }
   },
   "escalation": {
-    "ceiling": "gpt-6.1-sol",
-    "rule": "No tier above gpt-6.1-sol. When Sol at xhigh does not finish a block, the cooperator re-plans (the cause of the stop, the brief, the split, the way of checking) or asks the user; it does not buy a pricier run. Explicit user model, effort, and budget limits remain binding."
+    "ceiling": "gpt-6.2-sol",
+    "rule": "No tier above gpt-6.2-sol. When Sol at xhigh does not finish a block, the cooperator re-plans (the cause of the stop, the brief, the split, the way of checking) or asks the user; it does not buy a pricier run. Explicit user model, effort, and budget limits remain binding."
   },
   "selectionRules": {
     "default": "economy",
@@ -142,23 +142,27 @@
   },
   "profileSemantics": "Optional, non-exhaustive recommendations. A named choice expresses approach preference, not strict model/effort/team requirements. Custom or unnamed routing is allowed; separately explicit constraints remain binding.",
   "modelResolution": {
-    "checkedOn": "2026-10-20",
+    "checkedOn": "2026-11-17",
     "models": {
+      "gpt-6.2-sol": {
+        "role": "cooperator, block and stage review at high or xhigh, escalated implementation",
+        "succeeds": "gpt-6.1-sol",
+        "price": "no published API price found on 2026-11-17; the bench prices it as gpt-6.1-sol"
+      },
       "gpt-6.1-sol": {
         "priceInOutPerMTok": [
           2,
           10
         ],
-        "role": "cooperator, block and stage review at high or xhigh, escalated implementation",
-        "succeeds": "gpt-6-sol",
-        "cachedInputPerMTok": 0.1
+        "cachedInputPerMTok": 0.1,
+        "status": "still served; superseded by gpt-6.2-sol in this policy"
       },
       "gpt-6-sol": {
         "priceInOutPerMTok": [
           2,
           10
         ],
-        "status": "still served; superseded by gpt-6.1-sol in this policy"
+        "status": "still served; superseded by gpt-6.2-sol in this policy"
       },
       "gpt-6-luna": {
         "priceInOutPerMTok": [
@@ -200,7 +204,7 @@
       "attempts": 3,
       "tokenCeiling": 400000
     },
-    "gpt-6.1-sol": {
+    "gpt-6.2-sol": {
       "effort": "xhigh",
       "attempts": 3,
       "tokenCeiling": 500000,
@@ -215,11 +219,11 @@
   "review": {
     "switch": "policy.reviewBlock and policy.reviewStage, set at install (--set reviewBlock=off); every installed text renders from them.",
     "checks": "The project-wide checks (the test suite, the build, lint and types over the project, the CI script) run once per iteration on the tree that holds every submitted block: by the cooperator, or by one agent given only that job. A worker runs the narrow check its brief names for its own files; a worker that writes alone may be assigned the full check as its last step. A failed check goes to the worker whose WRITE_SET holds the failing file, with the log lines that show it; a failure no block explains is the cooperator's to trace.",
-    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.1-sol. It starts once the project-wide checks pass, or beside them when they are slow; blocks ready together go to one review. With it off, the cooperator accepts on the checks and its own reading of the diff.",
+    "delegatedBlocks": "With reviewBlock on, a block a light worker submitted is accepted after an independent review by gpt-6.2-sol. It starts once the project-wide checks pass, or beside them when they are slow; blocks ready together go to one review. With it off, the cooperator accepts on the checks and its own reading of the diff.",
     "effort": "The cooperator chooses the reviewer's effort for each review and sets it on the spawn. high is the working level: a block whose diff changes no protective site, a local or mechanical change with a clear contract. xhigh is for a review where a miss is expensive or the tracing is long: the diff changes guards or fallbacks the CONTRACT protects (the worker's SITES names them), the change is on a money, auth, security, migration, or concurrency path, or blocks interact.",
     "contract": "The review packet names CONTRACT: what the change must keep, quoted with its source (the task, the project's rules). The reviewer lists from the diff itself every changed protective site (a removed or changed condition, a changed fallback, a normalization, null becoming undefined, a changed order of evaluation) and gives each one verdict: kept, with a checkable basis; violated, with the difference and the fix; not established, with the missing fact. Sites with one basis are grouped with their locations. The site list is part of checking the contract, not all of it: every other requirement in CONTRACT is checked on the paths the change touches.",
     "conditions": "A review may end with ACCEPTANCE: accepted_if <check> on tree:<hash>: the substantive review is done and acceptance waits for that check. The cooperator closes the condition with scripts/accept.mjs (close) when a recorded run of the check passed on the reviewed tree; a changed tree keeps it open, and every code change after the review goes to the same reviewer as a delta. No reviewer call only to read an exit code.",
-    "stage": "Stage review (gpt-6.1-sol, effort chosen as for a block) runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract. One review that read the final merged diff and those interactions closes both.",
+    "stage": "Stage review (gpt-6.2-sol, effort chosen as for a block) runs only for an integration part no block review covered: blocks that interact, the cooperator's own integration edits, a shared contract. One review that read the final merged diff and those interactions closes both.",
     "loop": "Failed checks and real findings go to the worker that caused them, or the cooperator fixes a small one itself; the same reviewer (or, with review off, the cooperator) checks the fixes and what they touch; the same finding twice without progress stops the loop for the cooperator's decision.",
     "smallLocal": "On a direct route, a small local change with a clear contract and passing checks is accepted on the cooperator's own reading of the diff. After a review, every code change, whoever writes it, goes to the same reviewer as a delta, which costs about a quarter of the first review.",
     "required": "An independent review the project, the user, or the task requires runs whatever the switches say.",

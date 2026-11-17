@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.8.0 — 2026-11-17 (not measured)
+
+- The Sol model is GPT-6.2 Sol (`gpt-6.2-sol`) everywhere GPT-6.1 Sol was
+  (Claude policy 1.13.0, Codex policy 1.16.0): the block and stage reviewer,
+  the Hybrid escalation tier and `codex-run.mjs` defaults, the Codex cooperator,
+  Standard worker, probe escalation, progress critic and the launch layers
+  `workforce-economy.config.toml` and `workforce-standard.config.toml`. Efforts
+  and the rest of the routing are unchanged.
+- Codex record: `gpt-6.2-sol` succeeds `gpt-6.1-sol`, which stays served. No
+  published API price for `gpt-6.2-sol` was found on 2026-11-17; the bench
+  prices it as `gpt-6.1-sol` ($2 / $10, cached $0.10) until one is.
+- Bench: `cell.sh` and `waitcheck.sh` run Sol as `gpt-6.2-sol`;
+  `policycheck.mjs` expects the default stage reviewer on `gpt-6.2-sol` from
+  these policies on. The measurements in the README and `docs/research.md`
+  were taken with GPT-6.1 Sol and still name it.
+
 ## 1.7.0 — 2026-11-15 (not measured)
 
 - Work moves in iterations that the cooperator runs (Claude policy 1.12.0,

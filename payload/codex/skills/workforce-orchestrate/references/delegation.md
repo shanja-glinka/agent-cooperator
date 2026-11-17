@@ -114,7 +114,7 @@ Required checks passed → report (stage review is off in this install)
    After the fixes, run again the checks they affect.
 {{#reviewBlock}}
    The review starts once the checks pass, or beside them when they are slow.
-   The reviewer (`workforce_reviewer` on GPT-6.1 Sol, MODE=block; reasoning
+   The reviewer (`workforce_reviewer` on GPT-6.2 Sol, MODE=block; reasoning
    effort `high` or `xhigh`, chosen as SKILL.md says and set on the spawn)
    gets the packet with `REVIEW: acceptance of a light worker's block`, or
    `required (<rule or request>)`, or `question (<what is in doubt>)`, the

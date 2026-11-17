@@ -231,7 +231,7 @@ Claude Code: `--claude-home PATH` (опция, затем
 которое не объясняет ни один блок, кооператор разбирает сам.
 
 **Ревью.** При политике по умолчанию (`reviewBlock` включён) каждый блок, который
-сдал лёгкий исполнитель, проходит ревью до приёмки. Ревьюер — GPT-6.1 Sol в
+сдал лёгкий исполнитель, проходит ревью до приёмки. Ревьюер — GPT-6.2 Sol в
 пресетах Codex и в Hybrid для Claude (через CLI Codex из Claude Code), либо opus
 в Standard и Enhanced для Claude. Effort каждого ревью выбирает кооператор: high
 это рабочий уровень, xhigh нужен там, где пропуск дорог или трассировка длинная
@@ -287,10 +287,10 @@ Claude Code: `--claude-home PATH` (опция, затем
 | Кооператор (ваша сессия) | `opus` medium | `opus` high | `opus` high |
 | Разведка | `haiku`, `sonnet` если нужна оценка | `sonnet` | `haiku` |
 | Исполнитель | `sonnet` high | `sonnet`, `opus` для нетривиальных блоков | `haiku` xhigh |
-| Лестница исполнителя | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
+| Лестница исполнителя | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.2 Sol xhigh → `opus` |
 | Аудиторская линза (по запросу) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
-| Ревью блока | `opus` high или xhigh | `opus` high или xhigh | Codex GPT-6.1 Sol high или xhigh |
-| Приёмка этапа | `opus` high или xhigh | `fable` high (запасной `opus` high) | Codex GPT-6.1 Sol high или xhigh |
+| Ревью блока | `opus` high или xhigh | `opus` high или xhigh | Codex GPT-6.2 Sol high или xhigh |
+| Приёмка этапа | `opus` high или xhigh | `fable` high (запасной `opus` high) | Codex GPT-6.2 Sol high или xhigh |
 
 Бюджеты исполнителя на блок: `haiku` 120 вызовов инструментов за запуск и 360
 на блок, 3 попытки, 400k токенов; `sonnet` и Codex Sol 3 попытки, 500k токенов;
@@ -310,7 +310,7 @@ Hybrid автоматически. Вызовы Codex идут через `codex
 
 | Роль | Economy (по умолчанию) | Standard |
 | --- | --- | --- |
-| Кооператор (ваша сессия) | GPT-6.1 Sol high | GPT-6.1 Sol high |
+| Кооператор (ваша сессия) | GPT-6.2 Sol high | GPT-6.2 Sol high |
 | Разведка | Luna medium, Sol если нужна оценка | так же |
 | Исполнитель | Luna xhigh | Sol xhigh |
 | Лестница исполнителя | Luna → Sol | Sol |

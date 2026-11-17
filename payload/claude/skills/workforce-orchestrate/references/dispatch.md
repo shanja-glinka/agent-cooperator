@@ -11,10 +11,10 @@ Read the record only to route outside the defaults below.
 | Cooperator (this session) | `opus`, high | `opus`, medium | `opus`, high |
 | Probe (`workforce-probe`) | `haiku`; `sonnet` when judgment is needed | `haiku`; `sonnet` when judgment is needed | `sonnet` |
 | Worker | `haiku`, xhigh (`workforce-worker-lite`) | `sonnet`, high (`workforce-worker`) | `sonnet`; `opus` for non-trivial blocks |
-| Worker ladder | `haiku` → Codex `gpt-6.1-sol` xhigh → `opus` | `sonnet` → `opus` | `sonnet` → `opus` |
+| Worker ladder | `haiku` → Codex `gpt-6.2-sol` xhigh → `opus` | `sonnet` → `opus` | `sonnet` → `opus` |
 | Audit lens (on demand) | Codex `gpt-6-luna`, xhigh | `haiku`, xhigh (Agent) | `haiku`, xhigh (Agent) |
-| Block reviewer (MODE=block) | Codex `gpt-6.1-sol`, high or xhigh | `opus`, high or xhigh (Agent) | `opus`, high or xhigh (Agent) |
-| Stage reviewer (MODE=stage), only for an integration part no block review covered | Codex `gpt-6.1-sol`, high or xhigh | `opus`, high or xhigh (Agent) | `fable`, high (Agent) |
+| Block reviewer (MODE=block) | Codex `gpt-6.2-sol`, high or xhigh | `opus`, high or xhigh (Agent) | `opus`, high or xhigh (Agent) |
+| Stage reviewer (MODE=stage), only for an integration part no block review covered | Codex `gpt-6.2-sol`, high or xhigh | `opus`, high or xhigh (Agent) | `fable`, high (Agent) |
 | Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | targeted `opus` help | bounded `fable` block |
 
 Presets are starting recommendations. A named profile is an approach preference;
@@ -26,7 +26,7 @@ them, never as a silent replacement for Hybrid. If `fable` is unavailable,
 use `opus` at high and say so.
 
 Hybrid is the default: `opus` thinks, judges, and integrates, and `haiku` reads
-and types at xhigh{{#reviewBlock}}; GPT-6.1 Sol reviews the blocks light workers
+and types at xhigh{{#reviewBlock}}; GPT-6.2 Sol reviews the blocks light workers
 submit{{/reviewBlock}}{{^reviewBlock}}; block review is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{/reviewStage}}. Audit lenses run only on
 demand (delegation, step 6). Codex runs go through the wrapper in
 [tools](tools.md), never through the Agent tool; they need the `codex` CLI on
@@ -43,7 +43,7 @@ $0.50, cache read $0.01, while a request's prompt stays at or under 100k
 tokens, and $0.50 / $2.50, cache read $0.05, above (effort up to xhigh);
 `fable` Claude Fable 5.2 $8 / $40, cache read $0.20. Codex (checked
 2026-10-20): GPT-6 Luna $0.10 / $0.50, cached $0.01; GPT-6.1 Sol $2 / $10,
-cached $0.10. Role files use `model: inherit` so the model on the Agent call
+cached $0.10; GPT-6.2 Sol had no published price on 2026-11-17. Role files use `model: inherit` so the model on the Agent call
 is what runs. Effort comes from the role frontmatter (light worker xhigh,
 worker high, probe medium, auditor xhigh, reviewer high); an `effort` on the
 Agent call overrides it (Claude Code 2.1.292 and later), and the kit sets it
@@ -70,9 +70,9 @@ Worker budgets per block, counted by the cooperator:
 
 | Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
-| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Codex `gpt-6.1-sol` xhigh; without Codex `sonnet` |
+| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Codex `gpt-6.2-sol` xhigh; without Codex `sonnet` |
 | `sonnet` | role turn limit | 3 | 500k | `opus` |
-| Codex `gpt-6.1-sol` (Hybrid) | runner time limits | 3 | 500k | `opus` |
+| Codex `gpt-6.2-sol` (Hybrid) | runner time limits | 3 | 500k | `opus` |
 | `opus` | role turn limit | 3 | none | the cooperator re-plans or asks the user |
 
 An attempt is spent only by a run that ends without a result: the worker hit

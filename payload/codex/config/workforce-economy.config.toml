@@ -1,6 +1,6 @@
 # Native launch of the default profile: codex -p workforce-economy
 # Applies to this launch; it does not rewrite the base config.toml.
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 The user explicitly launched the workforce-economy config profile.

@@ -2,7 +2,7 @@ name = "workforce_progress_critic"
 description = "Checks with a fresh context whether an active task still moves toward the user's requested outcome or has dug in. Read-only; never authors, reviews, or accepts work."
 sandbox_mode = "read-only"
 
-# Model-neutral on purpose. The cooperator selects GPT-6.1 Sol at xhigh and
+# Model-neutral on purpose. The cooperator selects GPT-6.2 Sol at xhigh and
 # continues this same task for every later check.
 developer_instructions = """
 You are a Workforce progress critic. Follow

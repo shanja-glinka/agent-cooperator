@@ -55,7 +55,7 @@ if [[ $MODEL == sol ]]; then
   FH=$HOMES/home
   mkdir -p $FH/.agents/skills
   cat > $CH/config.toml <<TOML
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "high"
 model_reasoning_summary = "detailed"
 approval_policy = "never"

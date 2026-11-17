@@ -115,11 +115,11 @@ applies.
 | Brain (this session) | `opus` medium | `opus` high | `opus` high |
 | Bounded research (`workforce-probe`) | `haiku` medium, `sonnet` when judgment is needed | `sonnet` medium | `haiku` medium |
 | Implementation | `sonnet` high (`workforce-worker`) | `sonnet` high, `opus` for non-trivial blocks | `haiku` xhigh (`workforce-worker-lite`) |
-| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
+| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.2 Sol xhigh → `opus` |
 | Unresolved design or algorithm | targeted `opus` high | bounded `fable` high block (fallback `opus` high) | the brain decides architecture, block boundaries, and interactions before briefing; the worker keeps bounded search, reproduction, and the local way to implement |
 | Audit lens (on demand) | `haiku` xhigh (`workforce-auditor`) | `haiku` xhigh (`workforce-auditor`) | Codex GPT-6 Luna xhigh |
-| Block review (MODE=block) | `opus` high or xhigh (`workforce-reviewer`) | `opus` high or xhigh (`workforce-reviewer`) | Codex GPT-6.1 Sol high or xhigh |
-| Stage review (MODE=stage), only for an integration part no block review covered | `opus` high or xhigh (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol high or xhigh |
+| Block review (MODE=block) | `opus` high or xhigh (`workforce-reviewer`) | `opus` high or xhigh (`workforce-reviewer`) | Codex GPT-6.2 Sol high or xhigh |
+| Stage review (MODE=stage), only for an integration part no block review covered | `opus` high or xhigh (`workforce-reviewer`) | `fable` high (fallback `opus` high) | Codex GPT-6.2 Sol high or xhigh |
 
 The kit routes on aliases. What they run is decided by Claude Code and the
 provider; the current resolution is recorded in `profiles.json` under
@@ -155,9 +155,9 @@ setting or an accepted fallback before dependent work.
 Hybrid is the default preset. `opus` at high effort is the brain: it plans,
 decides design questions before briefing, judges every finding, integrates, and
 accepts. `haiku` workers implement at xhigh; a block that exhausts a `haiku`
-worker moves to a Codex GPT-6.1 Sol xhigh worker, then to `opus`.
+worker moves to a Codex GPT-6.2 Sol xhigh worker, then to `opus`.
 An audit lens, when one runs, uses Codex GPT-6 Luna at xhigh; block and stage
-review use Codex GPT-6.1 Sol at high or xhigh, as the brain chooses for each
+review use Codex GPT-6.2 Sol at high or xhigh, as the brain chooses for each
 review; all are read-only. Luna costs $0.10 /
 $0.50 and Sol $2 / $10 per MTok (checked 2026-10-20), so the expensive model only
 thinks. Claude policy 1.10.0 keeps the models and prices; the reviewer now
@@ -212,9 +212,9 @@ exhausts it to a stronger model:
 
 | Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
-| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Hybrid: Codex GPT-6.1 Sol xhigh; otherwise `sonnet` |
+| `haiku` (`workforce-worker-lite`) | 120 per run, 360 per block | 3 | 400k | Hybrid: Codex GPT-6.2 Sol xhigh; otherwise `sonnet` |
 | `sonnet` | role turn limit | 3 | 500k | `opus` |
-| Codex GPT-6.1 Sol (Hybrid) | runner time limits | 3 | 500k | `opus` |
+| Codex GPT-6.2 Sol (Hybrid) | runner time limits | 3 | 500k | `opus` |
 | `opus` | role turn limit | 3 | none | the cooperator re-plans or asks you |
 
 Only a run that ends without a result spends an attempt: the worker hit its
@@ -241,7 +241,7 @@ has the details, including the auditor handoff at 400k.
   work itself; any other verifiable block goes to a light worker with a brief,
   and the cooperator judges, integrates, and accepts.
 - Review is one path for delegated work. With `reviewBlock` on (the default),
-  every block a light worker submits is reviewed before it is accepted: GPT-6.1
+  every block a light worker submits is reviewed before it is accepted: GPT-6.2
   Sol in Hybrid, opus through Agent in Standard and Enhanced, at high or xhigh
   as the cooperator chooses for that review. Blocks
   that are ready together share one review run. A small local change with a clear

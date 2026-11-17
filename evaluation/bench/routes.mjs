@@ -160,7 +160,7 @@ const tasks = [...new Set(cells.map((c) => c.task))].sort((a, b) => (order.index
 for (const task of tasks) for (const model of [...new Set(cells.map((c) => c.model))]) {
   const group = cells.filter((c) => c.task === task && c.model === model);
   if (!group.length) continue;
-  md.push(`## ${task} — ${model === 'opus' ? 'Opus 5.5' : 'GPT-6.1 Sol'}`, '', '| Ячейка | Решено | Маршрут |', '|---|---|---|');
+  md.push(`## ${task} — ${model === 'opus' ? 'Opus 5.5' : 'GPT-6.2 Sol'}`, '', '| Ячейка | Решено | Маршрут |', '|---|---|---|');
   for (const c of group) {
     const route = c.spawns.length ? `сам + ${c.spawns.map((s) => `${s.role} (${s.model}${s.effort ? `:${s.effort}` : ''})`).join(', ')}` : 'сам, без агентов';
     md.push(`| ${c.variant} r${c.repeat} | ${c.quality['Решено'] ?? '—'} | ${route.replace(/\|/g, '\\|')} |`);

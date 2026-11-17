@@ -1,7 +1,7 @@
 # Profiles, models, and task ownership
 
 The product name and role names are independent of model generations. The current
-release uses GPT-6.1 Sol and GPT-6 Luna for Codex. The Claude Code edition uses the
+release uses GPT-6.2 Sol and GPT-6 Luna for Codex. The Claude Code edition uses the
 shared worker, probe, auditor, and reviewer roles with Claude model tiers; see
 [claude-code.md](claude-code.md) for its profile table and [research.md](research.md)
 for the evidence behind it. The progress critic is Codex-only.
@@ -33,7 +33,7 @@ without a named profile. Only separately explicit model/effort/budget constraint
 make those settings mandatory. Keep review independence and verification requirements.
 
 Standard is the user's choice. Use it when the requirements and solution are
-sufficiently described. GPT-6.1 Sol high owns orchestration, GPT-6 Luna owns
+sufficiently described. GPT-6.2 Sol high owns orchestration, GPT-6 Luna owns
 read-only lookups (Sol when judgment is needed), Sol implements at xhigh, and Sol
 independently reviews complete blocks, at high or xhigh as the cooperator chooses. A build or pipeline gets one Sol
 xhigh progress critic from 45 minutes of work on, every 45 minutes and after each
@@ -163,7 +163,7 @@ Cooperator (the orchestrator) chooses:
                                      parallel (only if that block changes
                                      nothing the review reads; else a snapshot)
 
-Review: the block reviewer (GPT-6.1 Sol, high or xhigh) reads the whole diff. Real
+Review: the block reviewer (GPT-6.2 Sol, high or xhigh) reads the whole diff. Real
 findings go to the same worker as one bundle; the same reviewer checks the
 fixes and what they touch.
 ```

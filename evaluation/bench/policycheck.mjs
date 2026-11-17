@@ -13,7 +13,7 @@ const out = process.argv[2];
 const kits = path.join(out, 'kits');
 // Text that only a review-on install may contain, and what an off install must say instead.
 // The first pattern is in every review-on install; the rest cover the wording of each kit version.
-const BLOCK_ON = [/independent review by\s+GPT-6\.1 Sol/, /reviewed \((Codex )?GPT-6\.1 Sol/, /reviewed against that\s+contract \((Codex )?GPT-6\.1 Sol/, /one Sol xhigh review/, /snapshot → one Sol review/, /Sol (at xhigh )?reviews the blocks/];
+const BLOCK_ON = [/independent review by\s+GPT-6\.[12] Sol/, /reviewed \((Codex )?GPT-6\.[12] Sol/, /reviewed against that\s+contract \((Codex )?GPT-6\.[12] Sol/, /one Sol xhigh review/, /snapshot → one Sol review/, /Sol (at xhigh )?reviews the blocks/];
 const STAGE_ON = [/Stage acceptance \(pipeline/];
 const texts = (dir) => {
   const found = [];
@@ -59,7 +59,9 @@ for (const name of fs.existsSync(kits) ? fs.readdirSync(kits).sort() : []) {
         for (const [p, t] of all) if (/gpt-6-astra/.test(t)) fail(`${name} ${edition}: ${path.relative(home, p)} can assign gpt-6-astra`);
         const def = profiles.profiles?.[profiles.selectionRules?.default];
         const chosen = atLeast(profiles.policyVersion, edition === 'codex' ? '1.15.0' : '1.12.0');
-        const wantStage = chosen ? ['gpt-6.1-sol', 'high', 'xhigh'] : ['gpt-6.1-sol', 'xhigh', undefined];
+        // From 1.16.0 (Codex) and 1.13.0 (Claude) the Sol reviewer is gpt-6.2-sol.
+        const sol = atLeast(profiles.policyVersion, edition === 'codex' ? '1.16.0' : '1.13.0') ? 'gpt-6.2-sol' : 'gpt-6.1-sol';
+        const wantStage = chosen ? [sol, 'high', 'xhigh'] : [sol, 'xhigh', undefined];
         const stage = def?.stageReviewer;
         if (!(stage?.model === wantStage[0] && stage.effort === wantStage[1] && stage.effortUp === wantStage[2])) fail(`${name} ${edition}: default stage reviewer is ${JSON.stringify(stage)}`);
         for (const [p, t] of all.filter(([q]) => /\.config\.toml$/.test(q))) {

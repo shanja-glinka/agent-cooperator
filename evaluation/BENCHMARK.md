@@ -13,7 +13,7 @@ suite has run.
    and is then run for every variant.
 2. **Full grid in one run.** Every task × model × variant × repeat runs in the same
    batch: no kit, the previous version, and the new version, on both runtimes
-   (Opus 5.5 in Claude Code, GPT-6.1 Sol in Codex). No partial runs, no filling of
+   (Opus 5.5 in Claude Code, GPT-6.2 Sol in Codex). No partial runs, no filling of
    gaps afterwards. When the user decides so, a run measures only the new version
    on the full grid and takes the no-kit and previous-version cells from earlier
    runs of the same suite (`PREV_RUNS`); the comparison then names those runs, and

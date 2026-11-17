@@ -8,14 +8,14 @@ Read the record only to route outside the defaults below.
 
 | Role | Economy (default) | Standard |
 | --- | --- | --- |
-| Cooperator (user-facing session) | `gpt-6.1-sol`, high | `gpt-6.1-sol`, high |
-| Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.1-sol` when judgment is needed | same |
-| Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6.1-sol`, xhigh |
+| Cooperator (user-facing session) | `gpt-6.2-sol`, high | `gpt-6.2-sol`, high |
+| Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.2-sol` when judgment is needed | same |
+| Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6.2-sol`, xhigh |
 | Worker ladder | Luna → Sol | Sol |
 | Audit lens (`workforce_auditor`, on demand) | `gpt-6-luna`, xhigh | same |
-| Progress critic (`workforce_progress_critic`, build/pipeline from 45 minutes) | `gpt-6.1-sol`, xhigh | same |
-| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.1-sol`, high or xhigh | same |
-| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.1-sol`, high or xhigh, only for an integration part no block review covered | same |
+| Progress critic (`workforce_progress_critic`, build/pipeline from 45 minutes) | `gpt-6.2-sol`, xhigh | same |
+| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.2-sol`, high or xhigh | same |
+| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.2-sol`, high or xhigh, only for an integration part no block review covered | same |
 | Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | same |
 
 Presets are starting recommendations. A named profile is an approach preference;
@@ -37,7 +37,7 @@ If Sol is unavailable for the progress critic, report that missing capability
 instead of claiming independent coverage.
 
 Prices per MTok (checked 2026-10-20): GPT-6.1 Sol $2 in / $10 out, cached
-$0.10; GPT-6 Luna $0.10 / $0.50, cached $0.01 (effort up to xhigh); above 272k
+$0.10 (GPT-6.2 Sol had no published price on 2026-11-17); GPT-6 Luna $0.10 / $0.50, cached $0.01 (effort up to xhigh); above 272k
 input tokens a request costs about twice. Role files omit model and effort on
 purpose: the spawn sets them. Sol and Luna default to medium, so set effort on
 every spawn: workers, auditors, and the progress critic run at xhigh, a

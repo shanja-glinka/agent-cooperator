@@ -154,7 +154,7 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.equal(policy.selectionRules.default, 'hybrid');
   assert.deepEqual(Object.keys(policy.workClasses), ['direct', 'build', 'pipeline']);
   assert.equal(policy.profiles.standard.worker.model, 'sonnet');
-  assert.deepEqual(policy.profiles.hybrid.workerLadder, ['haiku', 'codex:gpt-6.1-sol', 'opus']);
+  assert.deepEqual(policy.profiles.hybrid.workerLadder, ['haiku', 'codex:gpt-6.2-sol', 'opus']);
   assert.equal(policy.workerBudgets.haiku.tokenCeiling, 400000);
   assert.equal(policy.workerBudgets.sonnet.tokenCeiling, 500000);
   const lite = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-worker-lite.md'), 'utf8');
@@ -170,15 +170,15 @@ test('update installs the real Claude payload and preserves user CLAUDE.md text'
   assert.equal(hybrid.worker.effort, 'xhigh');
   // Policy 1.12.0: the reviewer stays Sol; the cooperator chooses its effort, high or xhigh, for each review.
   assert.deepEqual([hybrid.blockReviewer.effort, hybrid.blockReviewer.effortUp], ['high', 'xhigh']);
-  assert.ok(policy.review.delegatedBlocks.includes('gpt-6.1-sol'));
+  assert.ok(policy.review.delegatedBlocks.includes('gpt-6.2-sol'));
   assert.deepEqual([hybrid.auditor.runtime, hybrid.auditor.model, hybrid.auditor.effort], ['codex-cli', 'gpt-6-luna', 'xhigh']);
-  assert.deepEqual([hybrid.blockReviewer.model, hybrid.stageReviewer.model], ['gpt-6.1-sol', 'gpt-6.1-sol']);
+  assert.deepEqual([hybrid.blockReviewer.model, hybrid.stageReviewer.model], ['gpt-6.2-sol', 'gpt-6.2-sol']);
   assert.equal(hybrid.codexRunner.script, `${portable(fixture.home)}/skills/workforce-orchestrate/scripts/codex-run.mjs`);
   await fs.access(path.join(fixture.home, 'skills', 'workforce-orchestrate', 'scripts', 'codex-run.mjs'));
   await fs.access(path.join(fixture.home, 'skills', 'workforce-orchestrate', 'scripts', 'accept.mjs'));
   assert.deepEqual([hybrid.stageReviewer.effort, hybrid.stageReviewer.effortUp], ['high', 'xhigh']);
   assert.ok(policy.review.contract.includes('CONTRACT') && policy.review.conditions.includes('accepted_if'));
-  assert.deepEqual((await runCommand('status', options)).routing.slice(1), ['hybrid (default): worker haiku xhigh; block review gpt-6.1-sol high/xhigh; stage review gpt-6.1-sol high/xhigh; ladder haiku → codex:gpt-6.1-sol → opus']);
+  assert.deepEqual((await runCommand('status', options)).routing.slice(1), ['hybrid (default): worker haiku xhigh; block review gpt-6.2-sol high/xhigh; stage review gpt-6.2-sol high/xhigh; ladder haiku → codex:gpt-6.2-sol → opus']);
   const auditor = await fs.readFile(path.join(fixture.home, 'agents', 'workforce-auditor.md'), 'utf8');
   assert.match(auditor, /\neffort: xhigh\n/);
   assert.match(auditor, /\ndisallowedTools: Agent, Edit, Write, NotebookEdit\n/);
@@ -207,9 +207,9 @@ test('claude install renders the review switches into every installed text', asy
   assert.equal((await runCommand('install', { target: 'claude', home: off, packageRoot, set: { reviewBlock: 'off', reviewStage: 'off' } })).exitCode, 0);
   const [textOn, textOff] = [await texts(on), await texts(off)];
   for (const text of [textOn, textOff]) assert.doesNotMatch(text, /\{\{[#^/][A-Za-z]/);
-  assert.match(textOn, /independent review by\nGPT-6\.1 Sol through Codex/);
+  assert.match(textOn, /independent review by\nGPT-6\.2 Sol through Codex/);
   assert.doesNotMatch(textOn, /Sol at xhigh/);
-  assert.doesNotMatch(textOff, /reviewed against that contract \(|independent review by\nGPT-6\.1 Sol|snapshot → one Sol review|GPT-6\.1 Sol reviews the blocks|Stage acceptance \(pipeline/);
+  assert.doesNotMatch(textOff, /reviewed against that contract \(|independent review by\nGPT-6\.2 Sol|snapshot → one Sol review|GPT-6\.2 Sol reviews the blocks|Stage acceptance \(pipeline/);
   assert.match(textOff, /Block review is off in this install/);
   assert.match(textOff, /Stage review is off in this install/);
   const policy = JSON.parse(await fs.readFile(path.join(off, 'claude-workforce', 'profiles.json'), 'utf8')).policy;

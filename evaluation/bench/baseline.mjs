@@ -27,7 +27,7 @@ const route = (c) => {
   for (const a of agents) { const key = `${a.role} ${a.model ?? ''}`.trim(); counts[key] = (counts[key] ?? 0) + 1; }
   return `сам + ${Object.entries(counts).map(([r, n]) => (n > 1 ? `${n}× ${r}` : r)).join(', ')}`;
 };
-const modelName = (m) => (m === 'opus' ? 'Opus 5.5 (Claude Code)' : m === 'sol' ? 'GPT-6.1 Sol (Codex)' : m);
+const modelName = (m) => (m === 'opus' ? 'Opus 5.5 (Claude Code)' : m === 'sol' ? 'GPT-6.2 Sol (Codex)' : m);
 const cell = (v) => String(v).replace(/\|/g, '\\|');
 const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.map(cell).join(' | ')} |`)].join('\n');
 

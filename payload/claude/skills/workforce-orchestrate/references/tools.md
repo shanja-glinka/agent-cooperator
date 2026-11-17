@@ -109,7 +109,7 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   skill, feeds the packet on stdin from that file, and runs read-only with
   approvals off and the user's Codex config ignored (no MCP servers that ask for
   approval). Defaults: `audit` → `gpt-6-luna` at `xhigh`, `review` →
-  `gpt-6.1-sol` at `high`; add `--effort xhigh` for a review that needs it.
+  `gpt-6.2-sol` at `high`; add `--effort xhigh` for a review that needs it.
 - Run each call with Bash `run_in_background: true`; runs that are independent
   go in one message. Do not sleep or poll: the completion notification arrives, because
   the wrapper ends the run when it finishes, goes silent for 15 minutes
@@ -127,7 +127,7 @@ node {{CLAUDE_HOME}}/skills/workforce-orchestrate/scripts/codex-run.mjs \
   if it fails again, run that lens on the Agent fallback from dispatch and say
   so in the report.
 - A block escalated from `haiku` runs as a Codex worker: the same
-  command with `--role work` (defaults: `gpt-6.1-sol`, effort `xhigh`, sandbox
+  command with `--role work` (defaults: `gpt-6.2-sol`, effort `xhigh`, sandbox
   `workspace-write`, the `workforce-worker` skill prepended) and the escalation
   packet. Continue the same worker with `--resume <threadId>` and
   `--baseline <previous result.json>` while its budget lasts.

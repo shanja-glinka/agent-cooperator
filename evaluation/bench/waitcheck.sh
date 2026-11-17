@@ -18,7 +18,7 @@ for name in finish message short; do
   CH=$W/home
   ln -sf ${BENCH_CODEX_AUTH:-$HOME/.codex/auth.json} $CH/auth.json
   cat > $CH/config.toml <<TOML
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "high"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"

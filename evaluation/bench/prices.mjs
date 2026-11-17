@@ -11,6 +11,8 @@ const CLAUDE = {
 };
 const OPENAI = {
   'gpt-6.1-sol': [{ in: 2, hit: 0.1, out: 10 }, { above: 272000, in: 4, hit: 0.2, out: 15 }],
+  // No published API price for gpt-6.2-sol on 2026-11-17; priced as gpt-6.1-sol until one is.
+  'gpt-6.2-sol': [{ in: 2, hit: 0.1, out: 10 }, { above: 272000, in: 4, hit: 0.2, out: 15 }],
   'gpt-6-luna': [{ in: 0.1, hit: 0.01, out: 0.5 }, { above: 272000, in: 0.2, hit: 0.02, out: 0.75 }],
   'gpt-6-astra': [{ in: 10, hit: 1, out: 50 }, { above: 272000, in: 20, hit: 2, out: 75 }],
 };

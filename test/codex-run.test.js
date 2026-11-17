@@ -78,7 +78,7 @@ test('codex-run work role runs an escalated worker on Sol with a writable worksp
   const { result, summary, recorded } = await runFake(t, 'ok', [], 'work');
   assert.equal(result.status, 0, result.stderr);
   assert.equal(summary.role, 'work');
-  assert.equal(summary.model, 'gpt-6.1-sol');
+  assert.equal(summary.model, 'gpt-6.2-sol');
   assert.match(recorded.stdin, /# Complete the owned block/);
   assert.ok(recorded.args.includes('workspace-write'));
   assert.ok(!recorded.args.includes('read-only'));
@@ -86,7 +86,7 @@ test('codex-run work role runs an escalated worker on Sol with a writable worksp
 
 test('codex-run reviews at high unless the cooperator asks for xhigh', async (t) => {
   const byDefault = await runFake(t, 'ok', [], 'review');
-  assert.equal(byDefault.summary.model, 'gpt-6.1-sol');
+  assert.equal(byDefault.summary.model, 'gpt-6.2-sol');
   assert.equal(byDefault.summary.effort, 'high');
   assert.ok(byDefault.recorded.args.includes('model_reasoning_effort="high"'));
   assert.ok(byDefault.recorded.args.includes('read-only'));

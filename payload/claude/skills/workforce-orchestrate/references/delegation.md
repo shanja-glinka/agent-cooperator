@@ -47,7 +47,7 @@ Required checks passed → report (stage review is off in this install)
 
 1. **Profile.** Reuse an explicit choice or standing preference; otherwise
    Hybrid: you on `opus`, workers and probes on `haiku` at xhigh{{#reviewBlock}}, the
-   reviewer on Codex GPT-6.1 Sol at high or xhigh{{/reviewBlock}}. Enhanced (Sonnet workers, Fable
+   reviewer on Codex GPT-6.2 Sol at high or xhigh{{/reviewBlock}}. Enhanced (Sonnet workers, Fable
    stage review) and Standard (Sonnet workers, Agent reviewers) only on the
    user's choice; when Codex is unavailable, Hybrid keeps its `haiku` workers
    and uses the fallback in dispatch. Say which applies. Ask only when the
@@ -109,7 +109,7 @@ Required checks passed → report (stage review is off in this install)
    After the fixes, run again the checks they affect.
 {{#reviewBlock}}
    The review starts once the checks pass, or beside them when they are slow.
-   The reviewer (GPT-6.1 Sol through Codex, MODE=block; effort `high` or
+   The reviewer (GPT-6.2 Sol through Codex, MODE=block; effort `high` or
    `xhigh`, chosen as SKILL.md says and passed as `--effort`) gets the
    packet with `REVIEW: acceptance of a light worker's block`, or `required
    (<rule or request>)`, or `question (<what is in doubt>)`, the CONTRACT,
@@ -206,7 +206,7 @@ run ends without a submitted block (the third). Its HANDOFF says the parser
 passes 14 of 19 cases, regex-based, and the remaining five are mixed time
 zones. You decide the regex route is the problem, write APPROACH: "replace the
 regex with a token scanner; keep the 14 passing tests green", and hand the
-block to Codex GPT-6.1 Sol with the original packet, APPROACH, and the HANDOFF.
+block to Codex GPT-6.2 Sol with the original packet, APPROACH, and the HANDOFF.
 
 ## Why
 

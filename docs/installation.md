@@ -155,7 +155,7 @@ tool_output_token_limit = 4000
 model_auto_compact_token_limit = 200000
 # Safety net if a spawn omits an explicit model: use the cheap default, not the root model
 [agents]
-default_subagent_model = "gpt-6.1-sol"
+default_subagent_model = "gpt-6.2-sol"
 default_subagent_reasoning_effort = "medium"
 max_concurrent_threads_per_session = 3
 ```

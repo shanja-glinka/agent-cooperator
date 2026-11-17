@@ -13,7 +13,7 @@ const USAGE = `usage: codex-run.mjs --role audit|review|work --name NAME --packe
   [--idle-minutes 15] [--timeout-minutes 60]
   [--keep-user-config] [--codex-bin PATH]`;
 
-const DEFAULT_MODEL = { audit: 'gpt-6-luna', review: 'gpt-6.1-sol', work: 'gpt-6.1-sol' };
+const DEFAULT_MODEL = { audit: 'gpt-6-luna', review: 'gpt-6.2-sol', work: 'gpt-6.2-sol' };
 // A review runs at high unless the cooperator asks for xhigh (--effort); light auditors and an
 // escalated worker run at xhigh.
 const DEFAULT_EFFORT = { audit: 'xhigh', review: 'high', work: 'xhigh' };

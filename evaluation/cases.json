@@ -35,7 +35,7 @@
     {
       "id": "specified-complexity",
       "input": "Default profile task with a large but fully specified algorithm.",
-      "expected": "A light worker (haiku xhigh in Claude Code, gpt-6-luna xhigh in Codex) owns the implementation block with the specification in its packet; size alone does not escalate the task. The block is reviewed by gpt-6.1-sol before it is accepted, at the effort the cooperator chooses; no audit lens by default."
+      "expected": "A light worker (haiku xhigh in Claude Code, gpt-6-luna xhigh in Codex) owns the implementation block with the specification in its packet; size alone does not escalate the task. The block is reviewed by gpt-6.2-sol before it is accepted, at the effort the cooperator chooses; no audit lens by default."
     },
     {
       "id": "open-design",
@@ -89,7 +89,7 @@
     },
     {
       "id": "strict-runtime-limit",
-      "input": "Autonomous execution, but user explicitly requires GPT-6.1 Sol only and it is unavailable.",
+      "input": "Autonomous execution, but user explicitly requires GPT-6.2 Sol only and it is unavailable.",
       "expected": "Autonomy does not override the explicit strict model restriction. Report missing capability and request an acceptable fallback before dependent work."
     },
     {
@@ -127,7 +127,7 @@
       "id": "claude-build-class",
       "runtime": "claude-code",
       "input": "/workforce-orchestrate: fix a validation bug with a known cause across three files.",
-      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, the check, and the CONSTRAINTS with their source files. On submission the cooperator runs the project's checks once, then the gpt-6.1-sol review at the effort it chooses (no audit lens by default); the cooperator judges the findings, reads the diff, and accepts."
+      "expected": "WORK_CLASS=build: one workforce-worker-lite with explicit model haiku (role effort xhigh), a WRITE_SET, the cause, the check, and the CONSTRAINTS with their source files. On submission the cooperator runs the project's checks once, then the gpt-6.2-sol review at the effort it chooses (no audit lens by default); the cooperator judges the findings, reads the diff, and accepts."
     },
     {
       "id": "claude-fix-round-continuity",
@@ -186,19 +186,19 @@
     {
       "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Economy workers use gpt-6-luna xhigh, Standard workers gpt-6.1-sol xhigh; block and stage review are Sol at high, at xhigh only where the review criteria call for it, and lookup is Luna medium. No tier above Sol exists."
+      "expected": "Economy workers use gpt-6-luna xhigh, Standard workers gpt-6.2-sol xhigh; block and stage review are Sol at high, at xhigh only where the review criteria call for it, and lookup is Luna medium. No tier above Sol exists."
     },
     {
       "id": "codex-probe-tier",
       "runtime": "codex",
       "input": "Orchestrator needs to know which modules import the legacy DTO.",
-      "expected": "workforce_probe on gpt-6-luna medium; escalate to gpt-6.1-sol only if the question needs judgment rather than search."
+      "expected": "workforce_probe on gpt-6-luna medium; escalate to gpt-6.2-sol only if the question needs judgment rather than search."
     },
     {
       "id": "codex-standard-brain",
       "runtime": "codex",
-      "input": "Standard profile, concrete migration; orchestrator session runs gpt-6.1-sol.",
-      "expected": "That is the Standard recommendation; no mismatch to report. A stage review, when an integration part needs one, runs on gpt-6.1-sol, at high or xhigh as the cooperator chooses."
+      "input": "Standard profile, concrete migration; orchestrator session runs gpt-6.2-sol.",
+      "expected": "That is the Standard recommendation; no mismatch to report. A stage review, when an integration part needs one, runs on gpt-6.2-sol, at high or xhigh as the cooperator chooses."
     },
     {
       "id": "claude-haiku-55",
@@ -207,10 +207,10 @@
       "expected": "Route on the haiku alias using the role's actual effort (light worker xhigh, probe medium, auditor xhigh). The policy records Haiku 5.5 prices as checked on 2026-10-20, with the higher tier above 100k prompt tokens; the runtime/provider determines actual resolution, which must not be claimed from instruction text alone."
     },
     {
-      "id": "codex-sol-61",
+      "id": "codex-sol-62",
       "runtime": "codex",
       "input": "Standard profile implementation block.",
-      "expected": "The recorded Standard implementation policy is gpt-6.1-sol xhigh; gpt-6-sol is not the default in this policy. Do not infer actual runtime identity from a prompt."
+      "expected": "The recorded Standard implementation policy is gpt-6.2-sol xhigh; gpt-6.1-sol and gpt-6-sol are not the default in this policy. Do not infer actual runtime identity from a prompt."
     },
     {
       "id": "cooperator-choice",
@@ -238,7 +238,7 @@
     {
       "id": "hybrid-default",
       "input": "Claude Code: '/workforce-orchestrate Implement the described export pagination.' No profile named; Codex is installed and logged in.",
-      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, and the review on gpt-6.1-sol through codex-run.mjs in the background, at high or xhigh (--effort) as the cooperator chooses for that review; audit lenses only on demand. Standard only on the user's choice or when Codex is unavailable."
+      "expected": "Hybrid by default: Opus cooperator (suggests /effort high once if the session is at medium), workforce-worker-lite on haiku through Agent, and the review on gpt-6.2-sol through codex-run.mjs in the background, at high or xhigh (--effort) as the cooperator chooses for that review; audit lenses only on demand. Standard only on the user's choice or when Codex is unavailable."
     },
     {
       "id": "hybrid-codex-stall",
@@ -259,7 +259,7 @@
       "id": "worker-ladder-runs",
       "runtime": "both",
       "input": "A haiku (Claude Hybrid) or Luna (Codex Economy) worker ends its third run on a block without submitting it.",
-      "expected": "The cooperator asks for the HANDOFF if it is missing, reads it, decides an APPROACH, and starts the next tier (Hybrid: Codex GPT-6.1 Sol xhigh; Economy: Sol xhigh) as a fresh worker with the original packet, APPROACH, and HANDOFF only. No fourth run on the same tier."
+      "expected": "The cooperator asks for the HANDOFF if it is missing, reads it, decides an APPROACH, and starts the next tier (Hybrid: Codex GPT-6.2 Sol xhigh; Economy: Sol xhigh) as a fresh worker with the original packet, APPROACH, and HANDOFF only. No fourth run on the same tier."
     },
     {
       "id": "worker-ladder-tokens",
@@ -277,7 +277,7 @@
       "id": "codex-standard-workers",
       "runtime": "codex",
       "input": "Codex Standard, implementation block.",
-      "expected": "Cooperator gpt-6.1-sol high; worker gpt-6.1-sol xhigh; reviewers Sol, at high or xhigh, for blocks and, when an integration part needs it, for the stage."
+      "expected": "Cooperator gpt-6.2-sol high; worker gpt-6.2-sol xhigh; reviewers Sol, at high or xhigh, for blocks and, when an integration part needs it, for the stage."
     },
     {
       "id": "submitted-at-ceiling",
@@ -475,7 +475,7 @@
       "id": "delegated-block-reviewed",
       "runtime": "both",
       "input": "A light worker submits a delegated block; no project rule requires independent review; the required checks pass.",
-      "expected": "With reviewBlock on, the block goes to the gpt-6.1-sol review, at the effort the cooperator chooses, before it is accepted, no audit lens by default; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
+      "expected": "With reviewBlock on, the block goes to the gpt-6.2-sol review, at the effort the cooperator chooses, before it is accepted, no audit lens by default; the cooperator needs no error found first. The report has its REVIEW: rounds/findings/real line."
     },
     {
       "id": "required-independence-own-change",
@@ -591,12 +591,12 @@
     {
       "id": "review-effort-high",
       "input": "A light worker's block renames a helper and updates its 30 call sites. The diff changes no guard, fallback, or normalization; the contract is that behavior stays.",
-      "expected": "The review runs on gpt-6.1-sol at high: a mechanical change with a clear contract and no protective site. xhigh would cost more, take longer, and report more that is not real. Paired with review-effort-xhigh."
+      "expected": "The review runs on gpt-6.2-sol at high: a mechanical change with a clear contract and no protective site. xhigh would cost more, take longer, and report more that is not real. Paired with review-effort-xhigh."
     },
     {
       "id": "review-effort-xhigh",
       "input": "Same task, but the worker's SITES lists four changed fallbacks on database rows, and the CONTRACT keeps defensive checks on database and JSON data.",
-      "expected": "The review runs on gpt-6.1-sol at xhigh: the diff changes guards or fallbacks the CONTRACT protects, so a miss is expensive. The same holds for a money, auth, security, migration, or concurrency path and for blocks that interact. The report names the effort each review ran at."
+      "expected": "The review runs on gpt-6.2-sol at xhigh: the diff changes guards or fallbacks the CONTRACT protects, so a miss is expensive. The same holds for a money, auth, security, migration, or concurrency path and for blocks that interact. The report names the effort each review ran at."
     },
     {
       "id": "brief-names-constraints",

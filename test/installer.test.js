@@ -350,12 +350,12 @@ test('update installs the real contextual policy into existing consumers and pre
   assert.deepEqual([policy.profiles.economy.worker.model, policy.profiles.economy.worker.effort], ['gpt-6-luna', 'xhigh']);
   // Policy 1.15.0: the cooperator chooses the reviewer's effort, high or xhigh, for each review.
   const reviewer = policy.profiles.economy.blockReviewer;
-  assert.deepEqual([reviewer.model, reviewer.effort, reviewer.effortUp], ['gpt-6.1-sol', 'high', 'xhigh']);
+  assert.deepEqual([reviewer.model, reviewer.effort, reviewer.effortUp], ['gpt-6.2-sol', 'high', 'xhigh']);
   // Policy 1.14.0: no Astra anywhere, Sol owns reviews and progress criticism, the ladder ends at Sol, and the
   // Enhanced launch layer an older install left behind is removed.
   assert.deepEqual(Object.keys(policy.profiles), ['standard', 'economy']);
-  assert.deepEqual([policy.profiles.economy.stageReviewer.model, policy.profiles.economy.stageReviewer.effort, policy.profiles.economy.stageReviewer.effortUp], ['gpt-6.1-sol', 'high', 'xhigh']);
-  assert.deepEqual(policy.profiles.economy.workerLadder, ['gpt-6-luna', 'gpt-6.1-sol']);
+  assert.deepEqual([policy.profiles.economy.stageReviewer.model, policy.profiles.economy.stageReviewer.effort, policy.profiles.economy.stageReviewer.effortUp], ['gpt-6.2-sol', 'high', 'xhigh']);
+  assert.deepEqual(policy.profiles.economy.workerLadder, ['gpt-6-luna', 'gpt-6.2-sol']);
   assert.equal(fssync.existsSync(path.join(fixture.codexHome, 'workforce-enhanced.config.toml')), false);
   const installed = [];
   const walk = async (dir) => { for (const e of await fs.readdir(dir, { withFileTypes: true })) { const p = path.join(dir, e.name); if (e.isDirectory()) await walk(p); else installed.push([p, await fs.readFile(p, 'utf8')]); } };
@@ -367,7 +367,7 @@ test('update installs the real contextual policy into existing consumers and pre
     assert.ok(min <= def && def <= max && min >= 1200000, `${layer}: ${min} ${def} ${max}`);
   }
   const routing = (await runCommand('status', options)).routing;
-  assert.ok(routing.includes('economy (default): worker gpt-6-luna xhigh; block review gpt-6.1-sol high/xhigh; stage review gpt-6.1-sol high/xhigh; progress critic gpt-6.1-sol xhigh; ladder gpt-6-luna → gpt-6.1-sol'), routing.join('\n'));
+  assert.ok(routing.includes('economy (default): worker gpt-6-luna xhigh; block review gpt-6.2-sol high/xhigh; stage review gpt-6.2-sol high/xhigh; progress critic gpt-6.2-sol xhigh; ladder gpt-6-luna → gpt-6.2-sol'), routing.join('\n'));
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
 });

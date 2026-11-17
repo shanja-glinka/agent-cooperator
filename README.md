@@ -233,7 +233,7 @@ writes alone may get the full check as its last step. A failure no block
 explains is the cooperator's to trace.
 
 **Review.** With the default policy (`reviewBlock` on), every block a light
-worker submits is reviewed before it is accepted. The reviewer is GPT-6.1 Sol
+worker submits is reviewed before it is accepted. The reviewer is GPT-6.2 Sol
 in the Codex presets and in Claude Hybrid (through the Codex CLI from Claude
 Code), or opus in Claude Standard and Enhanced. The cooperator chooses its
 effort for each review: high is the working level, and xhigh is for a review
@@ -289,10 +289,10 @@ to know when the progress critic is due; nothing sleeps for it.
 | Cooperator (your session) | `opus` medium | `opus` high | `opus` high |
 | Probe | `haiku`, `sonnet` for judgment | `sonnet` | `haiku` |
 | Worker | `sonnet` high | `sonnet`, `opus` for non-trivial blocks | `haiku` xhigh |
-| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.1 Sol xhigh → `opus` |
+| Worker ladder | `sonnet` → `opus` | `sonnet` → `opus` | `haiku` → Codex GPT-6.2 Sol xhigh → `opus` |
 | Audit lens (on demand) | `haiku` xhigh | `haiku` xhigh | Codex GPT-6 Luna xhigh |
-| Block review | `opus` high or xhigh | `opus` high or xhigh | Codex GPT-6.1 Sol high or xhigh |
-| Stage acceptance | `opus` high or xhigh | `fable` high (fallback `opus` high) | Codex GPT-6.1 Sol high or xhigh |
+| Block review | `opus` high or xhigh | `opus` high or xhigh | Codex GPT-6.2 Sol high or xhigh |
+| Stage acceptance | `opus` high or xhigh | `fable` high (fallback `opus` high) | Codex GPT-6.2 Sol high or xhigh |
 
 Worker budgets per block: `haiku` 120 tool calls per run and 360 per block,
 3 attempts, 400k tokens; `sonnet` and Codex Sol 3 attempts, 500k tokens; `opus`
@@ -311,7 +311,7 @@ Details: [docs/claude-code.md](docs/claude-code.md).
 
 | Role | Economy (default) | Standard |
 | --- | --- | --- |
-| Cooperator (your session) | GPT-6.1 Sol high | GPT-6.1 Sol high |
+| Cooperator (your session) | GPT-6.2 Sol high | GPT-6.2 Sol high |
 | Probe | Luna medium, Sol for judgment | same |
 | Worker | Luna xhigh | Sol xhigh |
 | Worker ladder | Luna → Sol | Sol |

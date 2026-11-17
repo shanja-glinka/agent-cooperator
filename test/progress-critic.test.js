@@ -28,7 +28,7 @@ test('the Codex progress critic checks progress, read-only and bounded, separate
   assert.match(orchestration, /does not\s+replace block or stage review/);
   assert.match(orchestration, /after 45 minutes of\s+wall-clock work/);
   assert.match(orchestration, /Two `stuck` reports in a row on the same criterion make the reset mandatory/);
-  assert.match(dispatch, /Progress critic[\s\S]*gpt-6\.1-sol/);
+  assert.match(dispatch, /Progress critic[\s\S]*gpt-6\.2-sol/);
   assert.match(dispatch, /PROGRESS_SINCE_LAST/);
   assert.match(tools, /followup_task/);
   assert.match(delegation, /nothing sleeps for\s+it/);
@@ -41,14 +41,14 @@ test('the Codex progress critic checks progress, read-only and bounded, separate
 test('the Codex routing policy assigns the critic in both profiles and no scheduler', async () => {
   const codex = JSON.parse(await read('codex/profiles.json'));
   const claude = JSON.parse(await read('claude/profiles.json'));
-  assert.equal(codex.policyVersion, '1.15.0');
+  assert.equal(codex.policyVersion, '1.16.0');
   for (const profile of Object.values(codex.profiles)) {
-    assert.equal(profile.progressCritic.model, 'gpt-6.1-sol');
+    assert.equal(profile.progressCritic.model, 'gpt-6.2-sol');
     assert.equal(profile.progressCritic.effort, 'xhigh');
     assert.match(profile.progressCritic.when, /first after 45 minutes of work, then every 45 minutes/);
     assert.equal(profile.criticScheduler, undefined);
   }
-  assert.equal(claude.policyVersion, '1.12.0');
+  assert.equal(claude.policyVersion, '1.13.0');
   assert.ok(Object.values(claude.profiles).every((profile) => !profile.progressCritic));
 });
 
@@ -78,7 +78,7 @@ test('a disposable Codex install contains the progress critic role and skill and
 
   stdout = '';
   assert.equal(await run(['status']), 0);
-  assert.match(stdout, /progress critic gpt-6\.1-sol xhigh; ladder/);
+  assert.match(stdout, /progress critic gpt-6\.2-sol xhigh; ladder/);
 
   stdout = '';
   assert.equal(await run(['uninstall']), 0);

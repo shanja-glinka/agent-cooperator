@@ -12,7 +12,7 @@ Luna at xhigh) when the whole route is cheaper than doing them, briefs each
 with an explicit model and effort, the contract the change must keep, and the
 constraints that apply, runs the project's checks itself, once for the
 submitted blocks, has each block {{#reviewBlock}}reviewed against that
-contract (GPT-6.1 Sol, at high or xhigh as it chooses){{/reviewBlock}}{{^reviewBlock}}checked by its own reading of the diff{{/reviewBlock}}, judges which
+contract (GPT-6.2 Sol, at high or xhigh as it chooses){{/reviewBlock}}{{^reviewBlock}}checked by its own reading of the diff{{/reviewBlock}}, judges which
 findings are real and sends them and the failed checks back to the worker
 that caused them, moves a block that
 exhausts its worker's budget to a stronger model with a handoff and its own

@@ -60,7 +60,7 @@ test('project-wide checks run once per iteration, by the cooperator, and a failu
   }
 });
 
-// The reviewer stays GPT-6.1 Sol; what changed is that its effort is a choice with stated grounds.
+// The reviewer stays GPT-6.2 Sol; what changed is that its effort is a choice with stated grounds.
 test('the cooperator chooses the reviewer\'s effort, high or xhigh, for each review', () => {
   for (const e of editions) {
     const text = skill(e);
@@ -69,18 +69,18 @@ test('the cooperator chooses the reviewer\'s effort, high or xhigh, for each rev
     assert.match(text, /`xhigh`\s+is for a review\s+where a miss is\s+expensive or the tracing is long/);
     assert.match(text, /the worker's SITES names them/);
     for (const t of [text, delegation(e), dispatch(e), read(`${e}/global-instructions.md`)]) {
-      assert.doesNotMatch(t, /independent review by\s+GPT-6\.1 Sol at xhigh|reviewer of their results on (Codex )?GPT-6\.1 Sol at\s+xhigh|Sol at xhigh\s+reviews|stage review \(Sol at xhigh\)/i);
+      assert.doesNotMatch(t, /independent review by\s+GPT-6\.2 Sol at xhigh|reviewer of their results on (Codex )?GPT-6\.2 Sol at\s+xhigh|Sol at xhigh\s+reviews|stage review \(Sol at xhigh\)/i);
     }
     const profiles = JSON.parse(read(`${e}/profiles.json`));
     const byDefault = profiles.profiles[profiles.selectionRules.default];
     for (const reviewer of [byDefault.blockReviewer, byDefault.stageReviewer]) {
-      assert.deepEqual([reviewer.model, reviewer.effort, reviewer.effortUp], ['gpt-6.1-sol', 'high', 'xhigh']);
+      assert.deepEqual([reviewer.model, reviewer.effort, reviewer.effortUp], ['gpt-6.2-sol', 'high', 'xhigh']);
     }
     assert.match(profiles.review.effort, /The cooperator chooses the reviewer's effort for each review/);
   }
   assert.equal(JSON.parse(read('claude/profiles.json')).selectionRules.default, 'hybrid');
   assert.match(read('codex/skills/workforce-orchestrate/references/tools.md'), /The reviewer's `reasoning_effort` is `high` or `xhigh`, chosen for each review/);
-  assert.match(read('claude/skills/workforce-orchestrate/references/tools.md'), /`review` →\s+`gpt-6\.1-sol` at `high`; add `--effort xhigh` for a review that needs it/);
+  assert.match(read('claude/skills/workforce-orchestrate/references/tools.md'), /`review` →\s+`gpt-6\.2-sol` at `high`; add `--effort xhigh` for a review that needs it/);
 });
 
 test('the Codex launch layers set the models for delegation, not delegation itself', () => {
