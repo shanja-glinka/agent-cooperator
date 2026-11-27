@@ -38,10 +38,11 @@ test('the Codex progress critic checks progress, read-only and bounded, separate
   }
 });
 
-test('the Codex routing policy assigns the critic in both profiles and no scheduler', async () => {
+test('the Codex routing policy assigns the critic in every profile and no scheduler', async () => {
   const codex = JSON.parse(await read('codex/profiles.json'));
   const claude = JSON.parse(await read('claude/profiles.json'));
-  assert.equal(codex.policyVersion, '1.16.0');
+  assert.equal(codex.policyVersion, '1.17.2');
+  assert.deepEqual(Object.keys(codex.profiles), ['standard', 'economy', 'complex']);
   for (const profile of Object.values(codex.profiles)) {
     assert.equal(profile.progressCritic.model, 'gpt-6.2-sol');
     assert.equal(profile.progressCritic.effort, 'xhigh');

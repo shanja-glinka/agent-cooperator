@@ -17,6 +17,27 @@ npx --yes github:shanja-glinka/agent-cooperator codex status
 npx --yes github:shanja-glinka/agent-cooperator codex uninstall
 ```
 
+The package also exposes an optional `codex-workforce-owner` command for an
+explicitly selected, single-owner task. From a repository clone, run it as:
+
+```sh
+node bin/codex-workforce-owner.js 'Implement and verify this connected change'
+```
+
+It starts Codex with the `workforce-standard` profile and appends the packaged
+owner route to the task. The exec form accepts native Codex options and one task
+argument after `--`:
+
+```sh
+node bin/codex-workforce-owner.js exec --json -C "$PWD" -- 'Implement and verify this connected change'
+```
+
+The command does not set approval or sandbox options. It is opt-in; the ordinary
+installed workflow chooses the same route from the task's acceptance boundary
+across profiles and in a session without a specified profile. It does not replace required checks or review, and an
+explicit user prohibition on review remains binding. The wrapper is a package
+command, not a file copied into Codex home by the installer.
+
 `install` and `update` also take `--set KEY=on|off`, which sets one install-policy
 switch for that run. `reviewBlock` (review of the blocks light workers submit)
 and `reviewStage` (stage review of interacting pipeline blocks) are both on by
@@ -62,6 +83,7 @@ CODEX_HOME/
   skills/workforce-smoke/...
   workforce-standard.config.toml
   workforce-economy.config.toml
+  workforce-complex.config.toml
   codex-workforce/profiles.json
   codex-workforce/manifest.json
   AGENTS.md                         (or the active AGENTS.override.md)
@@ -183,11 +205,12 @@ For native CLI profile layers, current Codex supports:
 ```sh
 codex -p workforce-standard
 codex -p workforce-economy
+codex -p workforce-complex
 ```
 
-These optional shortcuts explicitly choose a profile and set the root model/effort
-for that launch. They do not permanently select a profile for all future work. Both
-layers also set `[features.multi_agent_v2]` wait limits: a wait returns as soon as an
+These three optional shortcuts explicitly choose a profile and set the root model/effort
+for that launch. Future sessions can choose their own profile.
+All three layers also set `[features.multi_agent_v2]` wait limits: a wait returns as soon as an
 agent sends a message or finishes, and otherwise lasts 20 minutes.
 Each layer also supplies a short `developer_instructions` value identifying the
 explicit choice. As with other Codex config layers, this replaces that configuration

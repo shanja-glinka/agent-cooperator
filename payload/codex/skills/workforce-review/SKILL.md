@@ -12,6 +12,13 @@ look for new changes and regressions everywhere, also in areas audited before.
 Report everything you find, with severity and `file:line`; the cooperator
 decides what goes back to the worker.
 
+For a connected-owner review, the packet must name immutable `BASE` and
+`SNAPSHOT`; inspect the complete `BASE..SNAPSHOT` diff. Check it against the
+original user-observable contract, not a contract rewritten after the edit,
+and use all required project-check results. If BASE, SNAPSHOT, the complete
+diff, original contract, or any required check result is missing, report what
+is not established instead of accepting from a summary.
+
 Your question is whether the change keeps its CONTRACT on the paths it
 touches: not whether you can find some error, and not whether the worker's
 account holds. A change that breaks a CONTRACT requirement is a finding even
@@ -61,6 +68,14 @@ does not cover the scenario. A defect the packet lists as already fixed is not
 a new finding unless the diff brings it back. When an earlier round's findings
 come back fixed, say for each whether the fix closes it, then look at what the
 fix touched.
+
+When a correction changes a behavior path, check both the previously working
+normal input at the actual changed boundary and the edge case that exposed the
+finding. Use affected check results or trace the concrete inputs through that
+boundary; confirm observable values and identity, errors, and propagation where
+applicable. An edge-only regression check does not establish that normal
+behavior stayed intact. If the normal input or evidence is missing, report it
+as not established and name what would settle it.
 
 Block review (MODE=block): the contract, correctness, regressions, real
 consumers of the change, and whether ACCEPTANCE_EXAMPLE and USER_OUTCOME are
