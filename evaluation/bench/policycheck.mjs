@@ -44,7 +44,10 @@ for (const name of fs.existsSync(kits) ? fs.readdirSync(kits).sort() : []) {
         const rel = path.relative(home, p);
         if (/\{\{[#^/][A-Za-z]\w*\}\}/.test(t)) fail(`${name} ${edition}: unrendered section in ${rel}`);
         // From 1.6.0 the layers say what the progress critic is not; that sentence asks for no review.
-        if (/\.config\.toml$/.test(p) && /review/i.test(t.replace(/it does not replace block or stage review\./g, ''))) fail(`${name} ${edition}: launch layer ${rel} names a review of its own`);
+        if (/\.config\.toml$/.test(p)) {
+          const instructions = t.replaceAll(tmp, '<install-dir>').replace(/it does not replace block or stage review\./g, '');
+          if (/review/i.test(instructions)) fail(`${name} ${edition}: launch layer ${rel} names a review of its own`);
+        }
         if (!profiles.policy.reviewBlock) for (const re of BLOCK_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a block review (${re})`);
         if (!profiles.policy.reviewStage) for (const re of STAGE_ON) if (re.test(t)) fail(`${name} ${edition}: ${rel} still asks for a stage review (${re})`);
       }
