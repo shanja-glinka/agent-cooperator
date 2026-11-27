@@ -24,6 +24,6 @@ In both patch-review repeats the release opened the orchestration skill and then
 
 ## Isolation and decision
 
-The original product validator classified 31 cells as clean and 17 as shared. All 17 shared cells used Codex. Its official clean-only table has seven Codex cells and lacks a matched release–candidate pair on the large task. Its clean-only cross-task averages have different task mixes. Preserve this restriction when using the figures to compare policies. An additional path audit investigates the flagged commands separately.
+The original product validator classified 31 cells as clean and 17 as shared. All 17 shared cells used Codex. Its official clean-only table has seven Codex cells and lacks a matched release–candidate pair on the large task. Its clean-only cross-task averages have different task mixes. Preserve this restriction when using the figures to compare policies. A [separate path audit](ISOLATION.md) found a single common hook-fixture name, 25 explicit cell-local missing-path diagnostics and two failed, silent compound commands. It preserves the official classifications.
 
 The candidate has no established suite-wide saving. Its observed large-task spend increased in both repeats with the same preregistered outcome. The next version retains a narrower supplied-patch rule for a fresh test, and introduces the user-requested Complex worker profile as a separate feature. Neither the two repeats nor the behavior replay justify a general claim that every review pays for itself or that a higher worker tier is more efficient.
