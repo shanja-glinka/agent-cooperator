@@ -1,0 +1,10 @@
+{
+  "originalTaskTemplatesSha256": {
+    "big": "525d98e6be588e471518d93526a4c5585138abca157e50c8d33d14d7ac3983e6",
+    "review": "b32fefcd549fb609db036e442f831aaffd08cf58f09967fc677f1dfee6deaaff",
+    "small": "11f3c62325dc6d6008af2bb74e5bea69cbbc14fc0c5bcee564699e312fdbf2eb",
+    "unknown": "8b6e72b2c3ae4e19b899adb2b82becf03f92843a2c2254311dbedd83ed0b0e7f"
+  },
+  "allNonRoutingFixtureFilesByteIdentical": true,
+  "explicitDiagnosticSuffixIncluded": false
+}

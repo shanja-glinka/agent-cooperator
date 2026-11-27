@@ -1,0 +1,29 @@
+{
+  "beforePackageVersion": "1.8.1",
+  "afterPackageVersion": "1.10.0",
+  "sharedDeliveryFiles": 18,
+  "differingDeliveryFiles": [],
+  "manifestFieldDifferences": [
+    "packageVersion"
+  ],
+  "fileSha256": {
+    "CLAUDE.md": "692fba55e7527638341d3e82b08d1971b386f6d61d9029a287f976078dab23bb",
+    "agents/workforce-probe.md": "a1113518821c6050ffae94c7e7f9604e48bf655ff67108aa12f22409bb3ecd7b",
+    "agents/workforce-reviewer.md": "6320a75b02df61fdb461f21677f56fe7776468ff6e557737dc46db8e28ca0e6a",
+    "agents/workforce-worker-lite.md": "efc016243213579d0381205872dbd8187122a45080424a87a5d88b5065897318",
+    "agents/workforce-worker.md": "d1c3f07228b3f7d8c87df5457c41c267bd93a445b3ba3e5ccacc5acde0b26344",
+    "agents/workforce-auditor.md": "aca423735d0ac5b967f36727a3127a2299f233278c03162c700110268fd83496",
+    "claude-workforce/profiles.json": "5c19dbbc486c99784a6f6dc039bc0fdcacdc1c7cc85be167a16be189fb9eae6c",
+    "skills/workforce-worker/SKILL.md": "6d51bdc264db5e6bdabeb0767d31f7bfa6cc94ff9c1d3d758dabf137d2307db6",
+    "skills/workforce-audit/SKILL.md": "28137530ffbd73f8d0cb85ba520d5e8947458508727a7668fa464cd8561c0c3a",
+    "skills/workforce-probe/SKILL.md": "cb596cc310f1784ee13062e948ef171cfb3ca2f3565a2c5045d074b7af29a66d",
+    "skills/workforce-orchestrate/SKILL.md": "5f7ac3c65b1e01436275cd44910e4c883c3c9c070181ecf47c972b6c5debe27e",
+    "skills/workforce-review/SKILL.md": "0aae97a667e5cea8ec7266ca03a8acd74a046133da547d5df41826a665595bc0",
+    "skills/workforce-smoke/SKILL.md": "5ffd886dda994a568bd97d43f3a916023c8a7c5e9f0576230c84c4957d88761e",
+    "skills/workforce-orchestrate/references/delegation.md": "c65edf91d2b424af9a50ea2f951fe1ede56ad19b8efd70f07c1f6bfbd313bee3",
+    "skills/workforce-orchestrate/references/dispatch.md": "ed1145c541fa493ca34a7b44774394421e0c9ecf713e64b13b65da951e7ffaf4",
+    "skills/workforce-orchestrate/references/tools.md": "e5562e43900514cbc2d215fc9ece46b7819af329c84cbfff2f5c2e5ca272a005",
+    "skills/workforce-orchestrate/scripts/accept.mjs": "1a212bfae1e267304fc5bf413554d7bd79d26d9091467b3a9b1a913496d19904",
+    "skills/workforce-orchestrate/scripts/codex-run.mjs": "570a9f4e091459be45aae9fe53ae409321ffbd7a37e6d11f8802084dcfe87dc0"
+  }
+}

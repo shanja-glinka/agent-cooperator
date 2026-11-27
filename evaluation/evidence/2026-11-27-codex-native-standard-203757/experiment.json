@@ -1,0 +1,30 @@
+{
+  "kitCommit": "1cec9f262ef39b8c81d52249e654906a0bf1b2a3",
+  "parentKit": "44a78bd44702046ab3710657823468be4129d50c",
+  "packageVersion": "1.10.0",
+  "codexPolicyVersion": "1.18.0",
+  "testedRuntimeHarnessCommit": "c09d268dba7cb7420e4ef45629acafeae8caca9c",
+  "tasksPerStandard": 4,
+  "repeats": 2,
+  "normalOriginalPrompts": true,
+  "extraComplexTasks": [
+    "big"
+  ],
+  "integrationTestsPassed": 66,
+  "policySwitchesVerified": [
+    "on/on",
+    "off/on",
+    "on/off",
+    "off/off"
+  ],
+  "npmPackDryRunEntries": 59,
+  "independentCodeReview": {
+    "model": "gpt-6.2-sol",
+    "effort": "xhigh",
+    "rounds": 3,
+    "findings": 3,
+    "open": 0
+  },
+  "claudeFilesComparedWithRelease": 18,
+  "benchmarkRepositoryHeadAtLaunch": "a244c51ea5dcdd0ab1a94a9a2f13ff97a3242d08"
+}

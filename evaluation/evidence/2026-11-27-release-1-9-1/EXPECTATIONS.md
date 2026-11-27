@@ -1,0 +1,7 @@
+# Release 1.9.1 · preregistered joint check
+
+Run the frozen big maintenance task once in Codex and once in Claude Code on the same immutable package commit, using the ordinary prompt and normal installed policy. Use the same-day no-kit and released 1.8.1 controls. No retries or additional paid task runs are part of this comparison. The extra verifier and installer tests are offline.
+
+The task requires preserving runtime behavior across all changed directories. For Codex, the expected automatic choice is a GPT-6.2 Sol author and a fresh GPT-6.2 Sol whole-change reviewer. Record actual thread roles, model, effort, edits and diff coverage. Record any departure. The explicit owner command is excluded from the test. For Claude compare the 18 installed file contents against 1.8.1, and count external Sol review separately.
+
+A delivered solution has commits, a clean checkout, green project CI and all four hidden checks. Compare the committed solution with the task base on the same 42 frozen inputs and publish differences. Report elapsed CLI time, isolation and all measured requests. For Codex compare total standard credits with both released repeats. For Claude report the cold USD estimate, external Sol credits separately and wall time. A single new observation per runtime can establish what happened on this task, not a general average. Preserve unfavorable outcomes and account for recorded partial spend separately.

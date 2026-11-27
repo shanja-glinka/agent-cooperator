@@ -1,0 +1,29 @@
+{
+  "sourceVersion": "1.8.1",
+  "targetVersion": "1.9.1",
+  "operation": "Installed release then upgraded Claude only in the same disposable Claude home. Exact bytes compared at every delivered file outside the installer manifest.",
+  "identicalFiles": 18,
+  "manifestFieldsChanged": [
+    "packageVersion"
+  ],
+  "fileSha256": {
+    "CLAUDE.md": "2c702a74107913f6f1aa42fb2f3a8cf8c2517ffddd7c1f476f0edcbe2084fefb",
+    "agents/workforce-probe.md": "a1113518821c6050ffae94c7e7f9604e48bf655ff67108aa12f22409bb3ecd7b",
+    "agents/workforce-reviewer.md": "6320a75b02df61fdb461f21677f56fe7776468ff6e557737dc46db8e28ca0e6a",
+    "agents/workforce-worker-lite.md": "efc016243213579d0381205872dbd8187122a45080424a87a5d88b5065897318",
+    "agents/workforce-worker.md": "d1c3f07228b3f7d8c87df5457c41c267bd93a445b3ba3e5ccacc5acde0b26344",
+    "agents/workforce-auditor.md": "aca423735d0ac5b967f36727a3127a2299f233278c03162c700110268fd83496",
+    "claude-workforce/profiles.json": "b958d802237365645da625e05d1a47c51f842a13089ccc863bbdc5f229f86009",
+    "skills/workforce-worker/SKILL.md": "6d51bdc264db5e6bdabeb0767d31f7bfa6cc94ff9c1d3d758dabf137d2307db6",
+    "skills/workforce-audit/SKILL.md": "28137530ffbd73f8d0cb85ba520d5e8947458508727a7668fa464cd8561c0c3a",
+    "skills/workforce-probe/SKILL.md": "cb596cc310f1784ee13062e948ef171cfb3ca2f3565a2c5045d074b7af29a66d",
+    "skills/workforce-orchestrate/SKILL.md": "658061c64961892c35a527ffca3e3225999872845b3f0a51efd8a9e0c221be25",
+    "skills/workforce-review/SKILL.md": "0aae97a667e5cea8ec7266ca03a8acd74a046133da547d5df41826a665595bc0",
+    "skills/workforce-smoke/SKILL.md": "b19ff80fea32fc8499cb61b9f708566353292e16acfe1d7e10d9e63b94491f8a",
+    "skills/workforce-orchestrate/references/delegation.md": "c65edf91d2b424af9a50ea2f951fe1ede56ad19b8efd70f07c1f6bfbd313bee3",
+    "skills/workforce-orchestrate/references/dispatch.md": "a56b351e6c0cbeaaabae853b01ef123cadb2e604c98d88279ba3dbd40a4377cb",
+    "skills/workforce-orchestrate/references/tools.md": "7741972c29c96623d09749d2159a389b8de0b4c90701b7cb51d96b8f478a967e",
+    "skills/workforce-orchestrate/scripts/accept.mjs": "1a212bfae1e267304fc5bf413554d7bd79d26d9091467b3a9b1a913496d19904",
+    "skills/workforce-orchestrate/scripts/codex-run.mjs": "570a9f4e091459be45aae9fe53ae409321ffbd7a37e6d11f8802084dcfe87dc0"
+  }
+}

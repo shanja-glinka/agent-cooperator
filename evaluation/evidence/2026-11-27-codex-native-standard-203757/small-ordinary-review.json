@@ -1,0 +1,22 @@
+{
+  "schema": "ordinary-error-review-correction-v1",
+  "attempt": "native-standard-small-repeat-1",
+  "evaluation": "Posthoc comparison of one ordinary Error on the exact snapshots before and after an independent review correction. The existing three-case release check has its own results and denominator.",
+  "snapshotVerification": {
+    "initial": "Reconstructed from the original changes to the handler and its test. Rehashing the complete Git tree matched the snapshot recorded at the first review and check.",
+    "final": "Matched the delivered, committed tree named by its provenance and the correction review."
+  },
+  "execution": "Same ordinary Error scenario in separate isolated JavaScript realms with the recorded TypeScript toolchain and a callback spy. No application process, external dependencies, or network traffic.",
+  "beforeCorrection": {
+    "calls": 1,
+    "identity": true,
+    "originalRetainedAsCause": false,
+    "sameMessage": true
+  },
+  "afterCorrection": {
+    "calls": 1,
+    "identity": false,
+    "originalRetainedAsCause": true,
+    "sameMessage": false
+  }
+}

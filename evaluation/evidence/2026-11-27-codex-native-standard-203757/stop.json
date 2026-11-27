@@ -1,0 +1,23 @@
+{
+  "planned": 20,
+  "started": 13,
+  "normalProcessExit": 10,
+  "userScopeStop": 3,
+  "unstarted": 7,
+  "exitCodes": {
+    "big-complex1100-opus-r1": 0,
+    "big-complex1100-opus-r2": 143,
+    "big-complex1100-sol-r1": 0,
+    "big-standard1100-opus-r1": 143,
+    "big-standard1100-sol-r1": 143,
+    "review-standard1100-opus-r1": 0,
+    "review-standard1100-sol-r1": 0,
+    "small-standard1100-opus-r1": 0,
+    "small-standard1100-opus-r2": 0,
+    "small-standard1100-sol-r1": 0,
+    "unknown-standard1100-opus-r1": 0,
+    "unknown-standard1100-sol-r1": 0,
+    "unknown-standard1100-sol-r2": 0
+  },
+  "requestsRecorded": 952
+}
