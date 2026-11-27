@@ -93,7 +93,7 @@ test('interactive launch preserves task bytes and starts normal Codex on workfor
   assert.deepEqual(record.args.slice(0, 3), ['-p', 'workforce-standard', '--']);
   assert.deepEqual(Buffer.from(record.args[3]), expectedPrompt);
   assert.equal(record.args.length, 4);
-  assert.equal(record.cwd, await fs.realpath(f.dir));
+  assert.equal(await fs.realpath(record.cwd), await fs.realpath(f.dir));
   assert.equal(record.marker, 'preserve this environment value');
   assert.equal(record.codexHome, f.codexHome);
 });
@@ -111,7 +111,7 @@ test('exec forwards real native options exactly and adds no permission or sandbo
   assert.deepEqual(record.args.slice(3, -2), options);
   assert.equal(record.args.at(-2), '--');
   assert.equal(record.args.at(-1), `${task}\n\n${route}`);
-  assert.equal(record.cwd, await fs.realpath(f.dir));
+  assert.equal(await fs.realpath(record.cwd), await fs.realpath(f.dir));
   assert.equal(record.marker, 'preserve this environment value');
   assert.ok(!record.args.some((arg) => arg.startsWith('--dangerously-')));
   assert.ok(!record.args.includes('--sandbox'));
