@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TASKS = new Set(['small', 'big', 'unknown', 'review']);
-const VARIANTS = new Set(['nokit', 'current', 'candidate', 'v4', 'v5', 'standard', 'complex']);
+const VARIANTS = new Set(['nokit', 'current', 'candidate', 'v4', 'v5', 'standard', 'complex', 'standard191', 'complex191', 'ownerreview']);
 const MODELS = new Set(['opus', 'sol', 'luna']);
 const STATUSES = new Set(['clean', 'shared', 'crossed', 'stale']);
 const READERS = new Set(['ls', 'rg', 'sed', 'cat']);
@@ -551,7 +551,7 @@ function main() {
     catch { inventory.malformed_cells += 1; }
   }
   const order = ['small', 'big', 'unknown', 'review', 'other'];
-  const variantOrder = ['nokit', 'current', 'candidate', 'v4', 'v5', 'standard', 'complex', 'other'];
+  const variantOrder = ['nokit', 'current', 'candidate', 'v4', 'v5', 'standard', 'complex', 'standard191', 'complex191', 'ownerreview', 'other'];
   byCell.sort((a, b) => order.indexOf(a.task) - order.indexOf(b.task)
     || variantOrder.indexOf(a.variant) - variantOrder.indexOf(b.variant)
     || (a.repeat ?? 99) - (b.repeat ?? 99)

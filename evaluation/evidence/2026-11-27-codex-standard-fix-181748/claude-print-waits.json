@@ -1,0 +1,250 @@
+{
+  "method": "Measure each main-transcript end_turn with nonempty text until the next native root queue wake. Pair each completed worker notification with its final child timestamp and the most recent preceding root end_turn. Worker lifetime across multiple root turns does not measure the print-mode wait ceiling.",
+  "oldCeilingSeconds": 600,
+  "cells": [
+    {
+      "cell": "big-complex191-opus-r1",
+      "completedWorkers": [
+        {
+          "rootLine": 136,
+          "rootEndUtc": "2026-11-27T18:19:43.814Z",
+          "workerFinalUtc": "2026-11-27T18:24:38.222Z",
+          "workerWaitSeconds": 294.408,
+          "rootQueueLine": 181,
+          "rootEnqueueUtc": "2026-11-27T18:24:38.264Z",
+          "completionStreamLine": 285
+        },
+        {
+          "rootLine": 193,
+          "rootEndUtc": "2026-11-27T18:24:41.196Z",
+          "workerFinalUtc": "2026-11-27T18:30:00.841Z",
+          "workerWaitSeconds": 319.645,
+          "rootQueueLine": 214,
+          "rootEnqueueUtc": "2026-11-27T18:30:00.922Z",
+          "completionStreamLine": 384
+        }
+      ],
+      "allPauses": [
+        {
+          "rootLine": 136,
+          "rootEndUtc": "2026-11-27T18:19:43.814Z",
+          "nextQueueLine": 181,
+          "nextEnqueueUtc": "2026-11-27T18:24:38.264Z",
+          "seconds": 294.45
+        },
+        {
+          "rootLine": 193,
+          "rootEndUtc": "2026-11-27T18:24:41.196Z",
+          "nextQueueLine": 214,
+          "nextEnqueueUtc": "2026-11-27T18:30:00.922Z",
+          "seconds": 319.726
+        },
+        {
+          "rootLine": 297,
+          "rootEndUtc": "2026-11-27T18:32:18.206Z",
+          "nextQueueLine": 298,
+          "nextEnqueueUtc": "2026-11-27T18:38:40.463Z",
+          "seconds": 382.257
+        },
+        {
+          "rootLine": 358,
+          "rootEndUtc": "2026-11-27T18:40:12.354Z",
+          "nextQueueLine": 359,
+          "nextEnqueueUtc": "2026-11-27T18:40:51.707Z",
+          "seconds": 39.353
+        }
+      ],
+      "longestWorkerWaitSeconds": 319.645,
+      "longestPauseSeconds": 382.257,
+      "commits": 1,
+      "dirty": 0,
+      "ci": "\u0437\u0435\u043b\u0451\u043d\u044b\u0439",
+      "passedTests": 2079,
+      "hiddenCases": "4 \u0438\u0437 4",
+      "oldThresholdCrossed": false
+    },
+    {
+      "cell": "big-complex191-opus-r2",
+      "completedWorkers": [
+        {
+          "rootLine": 118,
+          "rootEndUtc": "2026-11-27T18:44:11.982Z",
+          "workerFinalUtc": "2026-11-27T18:49:46.593Z",
+          "workerWaitSeconds": 334.611,
+          "rootQueueLine": 173,
+          "rootEnqueueUtc": "2026-11-27T18:49:46.677Z",
+          "completionStreamLine": 297
+        },
+        {
+          "rootLine": 185,
+          "rootEndUtc": "2026-11-27T18:49:49.256Z",
+          "workerFinalUtc": "2026-11-27T18:57:48.603Z",
+          "workerWaitSeconds": 479.347,
+          "rootQueueLine": 224,
+          "rootEnqueueUtc": "2026-11-27T18:57:48.642Z",
+          "completionStreamLine": 476
+        }
+      ],
+      "allPauses": [
+        {
+          "rootLine": 118,
+          "rootEndUtc": "2026-11-27T18:44:11.982Z",
+          "nextQueueLine": 173,
+          "nextEnqueueUtc": "2026-11-27T18:49:46.677Z",
+          "seconds": 334.695
+        },
+        {
+          "rootLine": 185,
+          "rootEndUtc": "2026-11-27T18:49:49.256Z",
+          "nextQueueLine": 224,
+          "nextEnqueueUtc": "2026-11-27T18:57:48.642Z",
+          "seconds": 479.386
+        },
+        {
+          "rootLine": 296,
+          "rootEndUtc": "2026-11-27T19:00:02.168Z",
+          "nextQueueLine": 297,
+          "nextEnqueueUtc": "2026-11-27T19:05:24.429Z",
+          "seconds": 322.261
+        },
+        {
+          "rootLine": 351,
+          "rootEndUtc": "2026-11-27T19:07:02.848Z",
+          "nextQueueLine": 352,
+          "nextEnqueueUtc": "2026-11-27T19:07:45.669Z",
+          "seconds": 42.821
+        }
+      ],
+      "longestWorkerWaitSeconds": 479.347,
+      "longestPauseSeconds": 479.386,
+      "commits": 1,
+      "dirty": 0,
+      "ci": "\u0437\u0435\u043b\u0451\u043d\u044b\u0439",
+      "passedTests": 2079,
+      "hiddenCases": "4 \u0438\u0437 4",
+      "oldThresholdCrossed": false
+    },
+    {
+      "cell": "big-standard191-opus-r1",
+      "completedWorkers": [
+        {
+          "rootLine": 119,
+          "rootEndUtc": "2026-11-27T18:31:51.330Z",
+          "workerFinalUtc": "2026-11-27T18:37:48.505Z",
+          "workerWaitSeconds": 357.175,
+          "rootQueueLine": 174,
+          "rootEnqueueUtc": "2026-11-27T18:37:48.598Z",
+          "completionStreamLine": 298
+        },
+        {
+          "rootLine": 186,
+          "rootEndUtc": "2026-11-27T18:37:50.904Z",
+          "workerFinalUtc": "2026-11-27T18:43:09.734Z",
+          "workerWaitSeconds": 318.83,
+          "rootQueueLine": 207,
+          "rootEnqueueUtc": "2026-11-27T18:43:09.745Z",
+          "completionStreamLine": 405
+        }
+      ],
+      "allPauses": [
+        {
+          "rootLine": 119,
+          "rootEndUtc": "2026-11-27T18:31:51.330Z",
+          "nextQueueLine": 174,
+          "nextEnqueueUtc": "2026-11-27T18:37:48.598Z",
+          "seconds": 357.268
+        },
+        {
+          "rootLine": 186,
+          "rootEndUtc": "2026-11-27T18:37:50.904Z",
+          "nextQueueLine": 207,
+          "nextEnqueueUtc": "2026-11-27T18:43:09.745Z",
+          "seconds": 318.841
+        },
+        {
+          "rootLine": 298,
+          "rootEndUtc": "2026-11-27T18:45:37.479Z",
+          "nextQueueLine": 299,
+          "nextEnqueueUtc": "2026-11-27T18:52:45.701Z",
+          "seconds": 428.222
+        },
+        {
+          "rootLine": 357,
+          "rootEndUtc": "2026-11-27T18:54:23.065Z",
+          "nextQueueLine": 358,
+          "nextEnqueueUtc": "2026-11-27T18:55:57.898Z",
+          "seconds": 94.833
+        }
+      ],
+      "longestWorkerWaitSeconds": 357.175,
+      "longestPauseSeconds": 428.222,
+      "commits": 1,
+      "dirty": 0,
+      "ci": "\u0437\u0435\u043b\u0451\u043d\u044b\u0439",
+      "passedTests": 2079,
+      "hiddenCases": "4 \u0438\u0437 4",
+      "oldThresholdCrossed": false
+    },
+    {
+      "cell": "big-standard191-opus-r2",
+      "completedWorkers": [
+        {
+          "rootLine": 118,
+          "rootEndUtc": "2026-11-27T19:28:48.873Z",
+          "workerFinalUtc": "2026-11-27T19:34:56.591Z",
+          "workerWaitSeconds": 367.718,
+          "rootQueueLine": 179,
+          "rootEnqueueUtc": "2026-11-27T19:34:56.674Z",
+          "completionStreamLine": 338
+        },
+        {
+          "rootLine": 191,
+          "rootEndUtc": "2026-11-27T19:34:59.075Z",
+          "workerFinalUtc": "2026-11-27T19:43:04.342Z",
+          "workerWaitSeconds": 485.267,
+          "rootQueueLine": 214,
+          "rootEnqueueUtc": "2026-11-27T19:43:04.351Z",
+          "completionStreamLine": 450
+        }
+      ],
+      "allPauses": [
+        {
+          "rootLine": 118,
+          "rootEndUtc": "2026-11-27T19:28:48.873Z",
+          "nextQueueLine": 179,
+          "nextEnqueueUtc": "2026-11-27T19:34:56.674Z",
+          "seconds": 367.801
+        },
+        {
+          "rootLine": 191,
+          "rootEndUtc": "2026-11-27T19:34:59.075Z",
+          "nextQueueLine": 214,
+          "nextEnqueueUtc": "2026-11-27T19:43:04.351Z",
+          "seconds": 485.276
+        },
+        {
+          "rootLine": 305,
+          "rootEndUtc": "2026-11-27T19:45:31.313Z",
+          "nextQueueLine": 306,
+          "nextEnqueueUtc": "2026-11-27T19:52:40.161Z",
+          "seconds": 428.848
+        },
+        {
+          "rootLine": 428,
+          "rootEndUtc": "2026-11-27T19:55:08.498Z",
+          "nextQueueLine": 429,
+          "nextEnqueueUtc": "2026-11-27T19:56:55.659Z",
+          "seconds": 107.161
+        }
+      ],
+      "longestWorkerWaitSeconds": 485.267,
+      "longestPauseSeconds": 485.276,
+      "commits": 1,
+      "dirty": 0,
+      "ci": "\u0437\u0435\u043b\u0451\u043d\u044b\u0439",
+      "passedTests": 2079,
+      "hiddenCases": "4 \u0438\u0437 4",
+      "oldThresholdCrossed": false
+    }
+  ]
+}

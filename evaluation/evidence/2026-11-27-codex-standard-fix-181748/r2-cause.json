@@ -1,0 +1,471 @@
+{
+  "disposition": "Completed attempts only. Each runtime measurement below comes from its own terminal capture and attributed per-response token records. Unfinished host-interrupted originals have separate accounting. Blocking time during root wait calls is included in elapsed time and is not a per-second model charge.",
+  "cells": [
+    {
+      "cell": "big-current-sol-r2",
+      "startUtc": "2026-11-27T16:09:10Z",
+      "endUtc": "2026-11-27T16:37:40Z",
+      "wallSeconds": 1710,
+      "ciSnapshots": [
+        {
+          "timeUtc": "2026-11-27T16:30:40.509Z",
+          "rootLine": 294,
+          "exit": 2,
+          "snapshot": "tree-01"
+        },
+        {
+          "timeUtc": "2026-11-27T16:32:20.086Z",
+          "rootLine": 365,
+          "exit": 0,
+          "snapshot": "tree-02"
+        },
+        {
+          "timeUtc": "2026-11-27T16:36:02.859Z",
+          "rootLine": 518,
+          "exit": 0,
+          "snapshot": "tree-03"
+        }
+      ],
+      "actors": [
+        {
+          "actor": 0,
+          "role": "cooperator",
+          "model": "gpt-6.2-sol",
+          "effort": "high",
+          "requests": 74,
+          "fresh": 105677,
+          "cached": 5362432,
+          "output": 20276,
+          "standardCredits": 23.75893,
+          "submissions": [
+            {
+              "utc": "2026-11-27T16:37:36.294Z",
+              "actorLine": 549
+            }
+          ]
+        },
+        {
+          "actor": 1,
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": "xhigh",
+          "requests": 30,
+          "fresh": 106391,
+          "cached": 2135040,
+          "output": 28937,
+          "standardCredits": 1.16145,
+          "submissions": [
+            {
+              "utc": "2026-11-27T16:19:38.678Z",
+              "actorLine": 211
+            },
+            {
+              "utc": "2026-11-27T16:28:38.085Z",
+              "actorLine": 286
+            }
+          ]
+        },
+        {
+          "actor": 2,
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": "xhigh",
+          "requests": 41,
+          "fresh": 143986,
+          "cached": 3736064,
+          "output": 52735,
+          "standardCredits": 1.9531685,
+          "submissions": [
+            {
+              "utc": "2026-11-27T16:28:11.446Z",
+              "actorLine": 368
+            },
+            {
+              "utc": "2026-11-27T16:30:31.011Z",
+              "actorLine": 420
+            }
+          ]
+        },
+        {
+          "actor": 3,
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": "xhigh",
+          "requests": 45,
+          "fresh": 106341,
+          "cached": 3310080,
+          "output": 41807,
+          "standardCredits": 1.61596,
+          "submissions": [
+            {
+              "utc": "2026-11-27T16:26:20.436Z",
+              "actorLine": 416
+            }
+          ]
+        },
+        {
+          "actor": 4,
+          "role": "workforce_reviewer",
+          "model": "gpt-6.2-sol",
+          "effort": "xhigh",
+          "requests": 30,
+          "fresh": 116284,
+          "cached": 2355712,
+          "output": 13565,
+          "standardCredits": 15.09473,
+          "submissions": [
+            {
+              "utc": "2026-11-27T16:36:54.910Z",
+              "actorLine": 225
+            }
+          ]
+        }
+      ],
+      "reviewSummaries": [
+        {
+          "timeUtc": "2026-11-27T16:36:54.910Z",
+          "actorLine": 225,
+          "rounds": 4,
+          "findings": 10,
+          "sites": 174,
+          "open": 0
+        }
+      ],
+      "reviewerDispatchedUtc": "2026-11-27T16:30:52.392Z",
+      "coordination": {
+        "spawn_agent": 4,
+        "wait_agent": 6,
+        "followup_task": 3,
+        "send_message": 5
+      },
+      "blockedWaitSeconds": 1013.8,
+      "credits": 43.5842385,
+      "requests": 220,
+      "outcome": {
+        "task": "да",
+        "ci": "зелёный",
+        "ciTests": 2079,
+        "hiddenCases": "4 из 4",
+        "commits": 1,
+        "uncommittedPaths": 0
+      }
+    },
+    {
+      "cell": "big-complex191-sol-r2",
+      "startUtc": "2026-11-27T19:27:25Z",
+      "endUtc": "2026-11-27T19:42:09Z",
+      "wallSeconds": 884,
+      "ciSnapshots": [
+        {
+          "timeUtc": "2026-11-27T19:38:33.218Z",
+          "rootLine": 295,
+          "exit": 0,
+          "snapshot": "tree-04"
+        }
+      ],
+      "actors": [
+        {
+          "actor": 0,
+          "role": "cooperator",
+          "model": "gpt-6.2-sol",
+          "effort": "high",
+          "requests": 50,
+          "fresh": 114027,
+          "cached": 3932928,
+          "output": 12346,
+          "standardCredits": 18.62017,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:42:07.833Z",
+              "actorLine": 380
+            }
+          ]
+        },
+        {
+          "actor": 1,
+          "role": "workforce_worker",
+          "model": "gpt-6.2-sol",
+          "effort": "medium",
+          "requests": 26,
+          "fresh": 101278,
+          "cached": 1682176,
+          "output": 11017,
+          "standardCredits": 12.02359,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:32:13.808Z",
+              "actorLine": 134
+            },
+            {
+              "utc": "2026-11-27T19:37:18.806Z",
+              "actorLine": 189
+            }
+          ]
+        },
+        {
+          "actor": 2,
+          "role": "workforce_worker",
+          "model": "gpt-6.2-sol",
+          "effort": "medium",
+          "requests": 15,
+          "fresh": 48509,
+          "cached": 771968,
+          "output": 7950,
+          "standardCredits": 6.34287,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:31:57.319Z",
+              "actorLine": 114
+            }
+          ]
+        },
+        {
+          "actor": 3,
+          "role": "workforce_worker",
+          "model": "gpt-6.2-sol",
+          "effort": "high",
+          "requests": 26,
+          "fresh": 95292,
+          "cached": 1791488,
+          "output": 16734,
+          "standardCredits": 13.42682,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:35:40.244Z",
+              "actorLine": 204
+            }
+          ]
+        },
+        {
+          "actor": 4,
+          "role": "workforce_reviewer",
+          "model": "gpt-6.2-sol",
+          "effort": "xhigh",
+          "requests": 22,
+          "fresh": 107851,
+          "cached": 1636096,
+          "output": 9327,
+          "standardCredits": 11.81454,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:41:45.424Z",
+              "actorLine": 166
+            }
+          ]
+        }
+      ],
+      "reviewSummaries": [
+        {
+          "timeUtc": "2026-11-27T19:41:45.424Z",
+          "actorLine": 166,
+          "rounds": 1,
+          "findings": 0,
+          "sites": 248,
+          "open": 0
+        }
+      ],
+      "reviewerDispatchedUtc": "2026-11-27T19:37:45.929Z",
+      "coordination": {
+        "spawn_agent": 4,
+        "wait_agent": 6,
+        "followup_task": 1,
+        "send_message": 2
+      },
+      "blockedWaitSeconds": 435.479,
+      "credits": 62.22799,
+      "requests": 139,
+      "outcome": {
+        "task": "да",
+        "ci": "зелёный",
+        "ciTests": 2079,
+        "hiddenCases": "4 из 4",
+        "commits": 1,
+        "uncommittedPaths": 0
+      }
+    },
+    {
+      "cell": "big-standard191-sol-r2",
+      "startUtc": "2026-11-27T19:27:23Z",
+      "endUtc": "2026-11-27T20:02:00Z",
+      "wallSeconds": 2077,
+      "ciSnapshots": [
+        {
+          "timeUtc": "2026-11-27T19:57:22.777Z",
+          "rootLine": 326,
+          "exit": 2,
+          "snapshot": "tree-05"
+        },
+        {
+          "timeUtc": "2026-11-27T19:59:25.329Z",
+          "rootLine": 408,
+          "exit": 0,
+          "snapshot": "tree-06"
+        }
+      ],
+      "actors": [
+        {
+          "actor": 0,
+          "role": "cooperator",
+          "model": "gpt-6.2-sol",
+          "effort": "high",
+          "requests": 66,
+          "fresh": 124354,
+          "cached": 6035200,
+          "output": 15379,
+          "standardCredits": 25.15045,
+          "submissions": [
+            {
+              "utc": "2026-11-27T20:01:58.110Z",
+              "actorLine": 484
+            }
+          ]
+        },
+        {
+          "actor": 1,
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": "xhigh",
+          "requests": 51,
+          "fresh": 142727,
+          "cached": 4115456,
+          "output": 58819,
+          "standardCredits": 2.120919,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:43:39.035Z",
+              "actorLine": 386
+            },
+            {
+              "utc": "2026-11-27T19:48:40.099Z",
+              "actorLine": 487
+            }
+          ]
+        },
+        {
+          "actor": 2,
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": "xhigh",
+          "requests": 64,
+          "fresh": 167060,
+          "cached": 6608896,
+          "output": 81797,
+          "standardCredits": 3.0923365,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:38:30.846Z",
+              "actorLine": 236
+            },
+            {
+              "utc": "2026-11-27T19:56:39.230Z",
+              "actorLine": 652
+            }
+          ]
+        },
+        {
+          "actor": 3,
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": "xhigh",
+          "requests": 50,
+          "fresh": 102600,
+          "cached": 3751424,
+          "output": 44214,
+          "standardCredits": 1.747031,
+          "submissions": [
+            {
+              "utc": "2026-11-27T19:42:24.457Z",
+              "actorLine": 364
+            },
+            {
+              "utc": "2026-11-27T19:44:29.144Z",
+              "actorLine": 422
+            },
+            {
+              "utc": "2026-11-27T19:58:21.797Z",
+              "actorLine": 457
+            }
+          ]
+        },
+        {
+          "actor": 4,
+          "role": "workforce_reviewer",
+          "model": "gpt-6.2-sol",
+          "effort": "xhigh",
+          "requests": 19,
+          "fresh": 114369,
+          "cached": 1492608,
+          "output": 9338,
+          "standardCredits": 11.78447,
+          "submissions": [
+            {
+              "utc": "2026-11-27T20:01:06.602Z",
+              "actorLine": 166
+            },
+            {
+              "utc": "2026-11-27T20:01:28.651Z",
+              "actorLine": 186
+            }
+          ]
+        }
+      ],
+      "reviewSummaries": [
+        {
+          "timeUtc": "2026-11-27T20:01:06.602Z",
+          "actorLine": 166,
+          "rounds": 1,
+          "findings": 1,
+          "sites": 166,
+          "open": 1
+        },
+        {
+          "timeUtc": "2026-11-27T20:01:28.651Z",
+          "actorLine": 186,
+          "rounds": 2,
+          "findings": 1,
+          "sites": 166,
+          "open": 0
+        }
+      ],
+      "reviewerDispatchedUtc": "2026-11-27T19:57:35.472Z",
+      "coordination": {
+        "spawn_agent": 4,
+        "wait_agent": 10,
+        "followup_task": 5,
+        "send_message": 4
+      },
+      "blockedWaitSeconds": 1514.705,
+      "credits": 43.8952065,
+      "requests": 250,
+      "outcome": {
+        "task": "да",
+        "ci": "зелёный",
+        "ciTests": 2079,
+        "hiddenCases": "4 из 4",
+        "commits": 1,
+        "uncommittedPaths": 0
+      }
+    }
+  ],
+  "interpretation": {
+    "earlyGate": "In Standard R2 the cooperator identified nine inherited full-CI blockers and started fixing its integration scope by 19:29:37 UTC, roughly two minutes after launch. It reported 36 integration tests passing by 19:39:19. The delay in discovering the baseline failures seen in Standard R1 did not recur.",
+    "slowestResubmission": {
+      "worker": "combined application and messaging scope",
+      "initialWorkerResultUtc": "2026-11-27T19:38:30Z",
+      "rootFollowupUtc": "2026-11-27T19:38:50Z",
+      "revisedWorkerResultUtc": "2026-11-27T19:56:39Z",
+      "requestsAfterFollowup": 40,
+      "standardCreditsAfterFollowupRounded": 2.2166,
+      "elapsedSecondsRounded": 1069,
+      "initialToRevisedSuppressions": [
+        27,
+        17
+      ],
+      "notes": "The first result had removed all 54 scoped warnings. Refinement addressed partial inputs, optional array entries, truth-value preservation and the permitted form of lint exceptions. These requests also supplied correction evidence."
+    },
+    "otherCorrections": "The persistence worker restored lazy evaluation in 13 expressions. The core worker preserved falsy and missing-value behavior and fixed three optional regex-group guards after the first full build failed.",
+    "independentReview": "On the original integrated snapshot the reviewer identified one group of three compile failures matching the cooperator’s earlier CI evidence. All other reviewed sites were accepted. The reviewer verified the correction delta in round two. The released comparison had four rounds and ten findings, and the completed Complex comparison had one round and zero findings.",
+    "attributionLimit": "The slower wall time includes additional time the cooperator blocked waiting for concurrent work. It is not itself billed. The expense and quality of omitting or regrouping any corrections are unmeasured; checkout cleanliness is distinct from the official isolation classification."
+  },
+  "snapshotIdentifiers": "Private Git trees have report-local aliases. Repeated aliases within this file denote identical trees."
+}

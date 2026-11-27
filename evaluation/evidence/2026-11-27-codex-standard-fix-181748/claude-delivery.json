@@ -1,0 +1,29 @@
+{
+  "afterPackageVersion": "1.9.1",
+  "beforePackageVersion": "1.9.0",
+  "differingDeliveryFiles": [],
+  "fileSha256": {
+    "CLAUDE.md": "eebd5c7e1975d8e8795d4e5d4b9dcb972891e9b9ba9a6720ab7978451f06c49c",
+    "agents/workforce-auditor.md": "aca423735d0ac5b967f36727a3127a2299f233278c03162c700110268fd83496",
+    "agents/workforce-probe.md": "a1113518821c6050ffae94c7e7f9604e48bf655ff67108aa12f22409bb3ecd7b",
+    "agents/workforce-reviewer.md": "6320a75b02df61fdb461f21677f56fe7776468ff6e557737dc46db8e28ca0e6a",
+    "agents/workforce-worker-lite.md": "efc016243213579d0381205872dbd8187122a45080424a87a5d88b5065897318",
+    "agents/workforce-worker.md": "d1c3f07228b3f7d8c87df5457c41c267bd93a445b3ba3e5ccacc5acde0b26344",
+    "claude-workforce/profiles.json": "873669d7f03010236313cb93880602beb2fbe5b75eae077419ccefade7014140",
+    "skills/workforce-audit/SKILL.md": "28137530ffbd73f8d0cb85ba520d5e8947458508727a7668fa464cd8561c0c3a",
+    "skills/workforce-orchestrate/SKILL.md": "96f8196e97e12db1a0f23c5fd4ffc9e3e4937903f046fd1155efc03a7623192e",
+    "skills/workforce-orchestrate/references/delegation.md": "c65edf91d2b424af9a50ea2f951fe1ede56ad19b8efd70f07c1f6bfbd313bee3",
+    "skills/workforce-orchestrate/references/dispatch.md": "6f63140d7044fc264dc67bf1b79d9bd354b6300f75792d29503fd818f0fb112b",
+    "skills/workforce-orchestrate/references/tools.md": "075935fb3ef87e5b801fa3eaa94a5bd7dab8ac550036e8ef0b64bd1590fa8bb4",
+    "skills/workforce-orchestrate/scripts/accept.mjs": "1a212bfae1e267304fc5bf413554d7bd79d26d9091467b3a9b1a913496d19904",
+    "skills/workforce-orchestrate/scripts/codex-run.mjs": "570a9f4e091459be45aae9fe53ae409321ffbd7a37e6d11f8802084dcfe87dc0",
+    "skills/workforce-probe/SKILL.md": "cb596cc310f1784ee13062e948ef171cfb3ca2f3565a2c5045d074b7af29a66d",
+    "skills/workforce-review/SKILL.md": "0aae97a667e5cea8ec7266ca03a8acd74a046133da547d5df41826a665595bc0",
+    "skills/workforce-smoke/SKILL.md": "970db10206cf383cc3b75e9d7cbc023b5b852d62e40a3a7de416183ffa19f75f",
+    "skills/workforce-worker/SKILL.md": "6d51bdc264db5e6bdabeb0767d31f7bfa6cc94ff9c1d3d758dabf137d2307db6"
+  },
+  "manifestFieldDifferences": [
+    "packageVersion"
+  ],
+  "sharedDeliveryFiles": 18
+}

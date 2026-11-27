@@ -1,0 +1,27 @@
+{
+  "kitCommit": "44a78bd44702046ab3710657823468be4129d50c",
+  "harnessCommit": "fcf6e3ac6ce0addb9c0d259524c45a984923c4e3",
+  "comparedWith": [
+    "cf61bb5f7b9a35a0cce01af3dba0e7373844f8c9",
+    "f1a56530e3a36d660b79741c7d6c3f5dfdf80293"
+  ],
+  "freshCells": 20,
+  "newProfiles": {
+    "standard191": "workforce-standard",
+    "complex191": "workforce-complex"
+  },
+  "runtimeVersions": {
+    "codex": "0.172.0",
+    "claude": "2.1.332"
+  },
+  "printBackgroundWaitCeilingMs": 0,
+  "changedTaskOrCheckFiles": 0,
+  "testMatrix": "Standard covers four tasks on each runtime twice. Complex covers the same big task twice per runtime.",
+  "gitHook": "Local private hook, expected identity, validator and policy within each checkout. No cross-cell path is passed as core.hooksPath.",
+  "protocolFiles": {
+    "EXPECTATIONS.md": "75de3c9af58b0f6b98eddf0fad036e49da6f2de09d67f188f87117227ba6d68d",
+    "CLAUDE-PRINT-PROTOCOL.md": "b0f531a95c582afbb3047143117e3939145aef5dab8d256ea75039d917d75043",
+    "RELEASE-CRITERION.md": "6f45a4c08a02e1a1496768bbd2164b51cb91b20dde55051576e646ed9beb2954",
+    "decision-update.json": "c4c8d64203f3b70c4128f7c722c046c53d883ae539cf2ba9b1129f6f4f0d45fb"
+  }
+}

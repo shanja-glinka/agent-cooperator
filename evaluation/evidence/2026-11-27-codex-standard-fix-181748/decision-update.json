@@ -1,0 +1,17 @@
+{
+  "recordedUtc": "2026-11-27T18:44:27+00:00",
+  "afterFirstCorrectedSmallResult": true,
+  "clarification": "The user accepts a small per-task increase in credits if the result is delivered faster. Compare actual elapsed time and quality beside cost for the same trials. No statement about an exact monetary valuation of time. The matched full-suite comparison to released 1.8.1 remains primary.",
+  "firstSmallMatchedObservation": {
+    "release": {
+      "creditsRounded": 7.9,
+      "wallSeconds": 189,
+      "extraRegistrationCovered": false
+    },
+    "corrected": {
+      "creditsRounded": 8.52,
+      "wallSeconds": 234,
+      "extraRegistrationCovered": true
+    }
+  }
+}

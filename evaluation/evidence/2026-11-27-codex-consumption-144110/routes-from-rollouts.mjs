@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TASKS = new Set(['small', 'big', 'unknown', 'review']);
-const VARIANTS = new Set(['nokit', 'current', 'candidate', 'standard', 'complex', 'standard191', 'complex191']);
+const VARIANTS = new Set(['nokit', 'current', 'candidate', 'standard', 'complex', 'standard191', 'complex191', 'ownerreview']);
 const MODELS = new Set(['gpt-6.2-sol', 'gpt-6.1-sol', 'gpt-6-luna', 'gpt-6.1-luna']);
 const EFFORTS = new Set(['low', 'medium', 'high', 'xhigh']);
 const ROLES = new Map([
@@ -336,7 +336,7 @@ function main() {
     }
   }
   const taskOrder = ['small', 'big', 'unknown', 'review', 'other'];
-  const variantOrder = ['nokit', 'current', 'candidate', 'standard', 'complex', 'standard191', 'complex191', 'other'];
+  const variantOrder = ['nokit', 'current', 'candidate', 'standard', 'complex', 'standard191', 'complex191', 'ownerreview', 'other'];
   cells.sort((a, b) => (taskOrder.indexOf(a.task) - taskOrder.indexOf(b.task))
     || (variantOrder.indexOf(a.variant) - variantOrder.indexOf(b.variant))
     || ((a.repeat ?? 99) - (b.repeat ?? 99)));

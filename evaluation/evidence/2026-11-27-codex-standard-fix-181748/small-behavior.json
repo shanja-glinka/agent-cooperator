@@ -1,0 +1,75 @@
+{
+  "schema": "standard191-small-sanitized-v1",
+  "comparedAgainst": "1.8.1",
+  "fixtureSha256": "2ac9e7403f95633ca72bcf14f96c8382c97a5b6417c8f9765b8b722530a4b97f",
+  "checksPerCell": 3,
+  "allAvailableChecksPassed": true,
+  "cells": [
+    {
+      "id": "standard191-r1",
+      "allThreeChecksPassed": true,
+      "verifiedTree": true,
+      "checks": [
+        {
+          "case": "fulfilled-promise",
+          "passed": true,
+          "nextCalls": 0
+        },
+        {
+          "case": "rejected-error-same-instance",
+          "passed": true,
+          "nextCalls": 1,
+          "sameErrorObject": true
+        },
+        {
+          "case": "undefined-rejection-forwarded-as-error",
+          "passed": true,
+          "nextCalls": 1,
+          "errorWasDefined": true
+        }
+      ],
+      "exceptionalRegistration": {
+        "adapterWrapped": true,
+        "detached": false
+      }
+    },
+    {
+      "id": "standard191-r2",
+      "allThreeChecksPassed": true,
+      "verifiedTree": true,
+      "checks": [
+        {
+          "case": "fulfilled-promise",
+          "passed": true,
+          "nextCalls": 0
+        },
+        {
+          "case": "rejected-error-same-instance",
+          "passed": true,
+          "nextCalls": 1,
+          "sameErrorObject": true
+        },
+        {
+          "case": "undefined-rejection-forwarded-as-error",
+          "passed": true,
+          "nextCalls": 1,
+          "errorWasDefined": true
+        }
+      ],
+      "exceptionalRegistration": {
+        "adapterWrapped": true,
+        "detached": false
+      }
+    }
+  ],
+  "method": {
+    "localPureUnitChecks": true,
+    "fakeRequestResponseArgumentsOnly": true,
+    "runtimeExternalImports": 0,
+    "networkOrServiceCalls": false,
+    "modelInference": false
+  },
+  "limitations": [
+    "The checks cover the adapter Promise contract and one exceptional registration classification; they do not start the application or exercise live HTTP integration."
+  ]
+}

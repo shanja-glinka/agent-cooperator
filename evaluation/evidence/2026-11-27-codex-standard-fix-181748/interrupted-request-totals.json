@@ -1,0 +1,60 @@
+{
+  "requestLedgerSha256": "82023c0a9f0878132a5eb8a5f5ad8cb8995aa472068bd1dba5f59830b8f1c106",
+  "requestRows": 459,
+  "byModel": {
+    "claude-haiku-5-5": {
+      "longHaikuRequests": 24,
+      "fresh": 206,
+      "cacheWrite5m": 374844,
+      "cacheWrite1h": 0,
+      "cached": 6645318,
+      "output": 229330,
+      "requests": 103,
+      "listUsd": "0.523960240"
+    },
+    "claude-opus-5-5": {
+      "longHaikuRequests": 0,
+      "fresh": 26,
+      "cacheWrite5m": 0,
+      "cacheWrite1h": 58494,
+      "cached": 619002,
+      "output": 9962,
+      "requests": 13,
+      "listUsd": "0.7910964"
+    },
+    "gpt-6-luna": {
+      "fresh": 329523,
+      "cached": 11474944,
+      "output": 150710,
+      "reasoningSubset": 94313,
+      "requests": 151,
+      "standardCredits": "5.5764185"
+    },
+    "gpt-6.2-sol": {
+      "fresh": 687594,
+      "cached": 14268288,
+      "output": 90330,
+      "reasoningSubset": 29480,
+      "requests": 192,
+      "standardCredits": "92.63292"
+    }
+  },
+  "byAttempt": {
+    "interrupted-big-complex191-sol-r2": {
+      "requests": 138,
+      "standardCredits": "66.52737"
+    },
+    "interrupted-big-standard191-opus-r2": {
+      "requests": 116,
+      "listUsd": "1.315056640"
+    },
+    "interrupted-big-standard191-sol-r2": {
+      "requests": 205,
+      "standardCredits": "31.6819685"
+    }
+  },
+  "totals": {
+    "standardCredits": "98.2093385",
+    "listUsd": "1.315056640"
+  }
+}

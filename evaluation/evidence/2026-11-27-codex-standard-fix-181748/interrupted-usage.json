@@ -1,0 +1,332 @@
+{
+  "run": "2026-11-27-codex-standard-fix-181748",
+  "disposition": "Infrastructure-interrupted originals, omitted from delivered cells and recorded separately as incurred usage.",
+  "processInventory": {
+    "originalBenchCellProcesses": 0,
+    "condition": "Process table explicitly scoped by the complete BENCH_CELL value; other CLI sessions were not counted.",
+    "observedUtcApproximate": "2026-11-27T19:27:00Z"
+  },
+  "cause": "Original attempt processes were absent and all three stopped producing records in the same interval, before benchmark finalization. The specific process or signal responsible is not identified by these artifacts.",
+  "rates": {
+    "codex": "Standard-speed Codex credits from per-response token usage at the published fresh-input, cached-input and output rates. Reasoning is already included in output.",
+    "claude": "Repository list-price estimate in USD per unique model message from the saved Claude transcripts; no final CLI-reported charge available. Claude USD and Codex credit equivalents are different units."
+  },
+  "cells": [
+    {
+      "cell": "big-complex191-sol-r2",
+      "startUtc": "2026-11-27T19:01:03Z",
+      "lastStreamWriteUtc": "2026-11-27T19:16:45.764Z",
+      "streamRecords": 151,
+      "streamSha256": "12c042bb7335663d0ac715112f54be121f63c003f2e67bd41d8a3c4f6a0c99d4",
+      "finalizerFilesAbsent": [
+        "check.json",
+        "provenance.json",
+        "git.json",
+        "logs/exit.txt",
+        "logs/end.txt"
+      ],
+      "stopReasonRecorded": null,
+      "archivedCheckout": {
+        "baseHeadRetained": true,
+        "dirtyPaths": 51
+      },
+      "officialCheck": null,
+      "officialIsolation": null,
+      "newResultCommits": 0,
+      "recordedCodexUsage": [
+        {
+          "role": "cooperator",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "high"
+          ],
+          "requests": 49,
+          "freshInput": 106191,
+          "cachedInput": 3600000,
+          "output": 12240,
+          "standardCredits": 17.36955,
+          "lastBilledRecordUtc": "2026-11-27T19:16:33.875Z",
+          "lastRecordUtc": "2026-11-27T19:16:45.763Z",
+          "lastRecordType": "response_item",
+          "rolloutSha256": "bb6d37b9f1ea2d558dbdd83f044f69b78679664c7f595f12a20adcb261c79fc8"
+        },
+        {
+          "role": "workforce_worker",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "high"
+          ],
+          "requests": 20,
+          "freshInput": 90704,
+          "cachedInput": 1260288,
+          "output": 9105,
+          "standardCredits": 9.96217,
+          "lastBilledRecordUtc": "2026-11-27T19:06:09.807Z",
+          "lastRecordUtc": "2026-11-27T19:06:09.810Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "41461cd1bdc77da4f893aa3d20fe1a70170768a5f647b279d588edc5f5ca5bf1"
+        },
+        {
+          "role": "workforce_worker",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "high"
+          ],
+          "requests": 26,
+          "freshInput": 88091,
+          "cachedInput": 2006784,
+          "output": 19356,
+          "standardCredits": 14.26051,
+          "lastBilledRecordUtc": "2026-11-27T19:10:15.826Z",
+          "lastRecordUtc": "2026-11-27T19:10:15.830Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "11004a2ae744ae5b2c761ca7ddae2daf89c74895271b16d8bd9b0f9750db02d2"
+        },
+        {
+          "role": "workforce_worker",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "high"
+          ],
+          "requests": 21,
+          "freshInput": 103422,
+          "cachedInput": 1322496,
+          "output": 12868,
+          "standardCredits": 11.69434,
+          "lastBilledRecordUtc": "2026-11-27T19:15:57.080Z",
+          "lastRecordUtc": "2026-11-27T19:15:57.085Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "b6df182c4fed978f8937cd11e22ceb7ef16ce6ff9b7264505758e0257ce2db6c"
+        },
+        {
+          "role": "workforce_reviewer",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "xhigh"
+          ],
+          "requests": 22,
+          "freshInput": 119126,
+          "cachedInput": 1699200,
+          "output": 12146,
+          "standardCredits": 13.2408,
+          "lastBilledRecordUtc": "2026-11-27T19:16:41.348Z",
+          "lastRecordUtc": "2026-11-27T19:16:41.350Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "45c1639c6ac791e0be38ba924876db275cbea5c5666ad3569c55cd82db9125cc"
+        }
+      ],
+      "recordedCodexRequests": 138,
+      "recordedCodexStandardCredits": 66.52737,
+      "internalCiLedger": [
+        {
+          "snapshot": "tree-01",
+          "exit": 0,
+          "recordedUtc": "2026-11-27T19:11:42.201Z"
+        },
+        {
+          "snapshot": "tree-02",
+          "exit": 137,
+          "recordedUtc": "2026-11-27T19:16:46.766Z"
+        }
+      ],
+      "internalCiLedgerSha256": "9c8edf8253b11059fb347b6c62ea2bc6187bb0a3e5e517a6c925e11b74410567",
+      "internalReview": "Independent reviewer closed one finding on a changed tree; subsequent npm run ci on that final tree recorded exit 137. Original benchmark evaluator was never reached."
+    },
+    {
+      "cell": "big-standard191-opus-r2",
+      "startUtc": "2026-11-27T19:07:19Z",
+      "lastStreamWriteUtc": "2026-11-27T19:16:45.733Z",
+      "streamRecords": 513,
+      "streamSha256": "33ea3213c11627f276f81af12a26379047f4047007181cb5feec62ed6e9b33ef",
+      "finalizerFilesAbsent": [
+        "check.json",
+        "provenance.json",
+        "git.json",
+        "logs/exit.txt",
+        "logs/end.txt"
+      ],
+      "stopReasonRecorded": null,
+      "archivedCheckout": {
+        "baseHeadRetained": true,
+        "dirtyPaths": 45
+      },
+      "officialCheck": null,
+      "officialIsolation": null,
+      "newResultCommits": 0,
+      "recordedCodexUsage": [],
+      "recordedCodexRequests": 0,
+      "recordedCodexStandardCredits": 0,
+      "recordedClaudeUsage": [
+        {
+          "role": "cooperator",
+          "model": [
+            "claude-opus-5-5"
+          ],
+          "requests": 13,
+          "listUsd": 0.7910964,
+          "lastTimestampUtc": "2026-11-27T19:15:43.040Z",
+          "workerCompletion": null,
+          "transcriptSha256": "5de24e3fef5d8405fc64b0a09b5581612985582eb5ee0d0fbf90e53870408926"
+        },
+        {
+          "role": "worker",
+          "model": [
+            "claude-haiku-5-5"
+          ],
+          "requests": 22,
+          "listUsd": 0.20701875,
+          "lastTimestampUtc": "2026-11-27T19:16:45.854Z",
+          "workerCompletion": null,
+          "transcriptSha256": "9e756d610204f630ce485f8cad36af6d504aec6aea5b580fb2775c1c509a3228"
+        },
+        {
+          "role": "worker",
+          "model": [
+            "claude-haiku-5-5"
+          ],
+          "requests": 38,
+          "listUsd": 0.133937575,
+          "lastTimestampUtc": "2026-11-27T19:14:19.721Z",
+          "workerCompletion": "completed",
+          "transcriptSha256": "f533aa3507882885540266175843d3cc435b734fd3ee65e7d48ebec3e50abb17"
+        },
+        {
+          "role": "worker",
+          "model": [
+            "claude-haiku-5-5"
+          ],
+          "requests": 43,
+          "listUsd": 0.183003915,
+          "lastTimestampUtc": "2026-11-27T19:15:40.266Z",
+          "workerCompletion": "completed",
+          "transcriptSha256": "7527b447e6d905e36b7a5e52759e9916f627ba7c7cbed666dc7cd27052e1c0ba"
+        }
+      ],
+      "recordedClaudeRequests": 116,
+      "recordedClaudeListUsd": 1.31505664,
+      "cliReportedClaudeUsd": null,
+      "internalCiLedger": [],
+      "internalCiLedgerSha256": null,
+      "internalReview": "Two of three native worker tasks had completed. No final session result in the print stream, no internal CI ledger, no recorded external Codex requests and no print-mode ceiling error in stderr."
+    },
+    {
+      "cell": "big-standard191-sol-r2",
+      "startUtc": "2026-11-27T18:50:36Z",
+      "lastStreamWriteUtc": "2026-11-27T19:16:22.751Z",
+      "streamRecords": 162,
+      "streamSha256": "a5e58f4ca578580eed35372834413d3bcfb77e35c613c0dc65e75827496ec1d1",
+      "finalizerFilesAbsent": [
+        "check.json",
+        "provenance.json",
+        "git.json",
+        "logs/exit.txt",
+        "logs/end.txt"
+      ],
+      "stopReasonRecorded": null,
+      "archivedCheckout": {
+        "baseHeadRetained": true,
+        "dirtyPaths": 50
+      },
+      "officialCheck": null,
+      "officialIsolation": null,
+      "newResultCommits": 0,
+      "recordedCodexUsage": [
+        {
+          "role": "cooperator",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "high"
+          ],
+          "requests": 50,
+          "freshInput": 134573,
+          "cachedInput": 4282880,
+          "output": 23975,
+          "standardCredits": 23.4296,
+          "lastBilledRecordUtc": "2026-11-27T19:16:23.158Z",
+          "lastRecordUtc": "2026-11-27T19:16:23.160Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "df5ea293bc7ec8136457caa438c9a0b4cc820fbde23e00046dc8c4a0f5484eb2"
+        },
+        {
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": [
+            "xhigh"
+          ],
+          "requests": 35,
+          "freshInput": 120193,
+          "cachedInput": 2428544,
+          "output": 45533,
+          "standardCredits": 1.476781,
+          "lastBilledRecordUtc": "2026-11-27T19:06:30.921Z",
+          "lastRecordUtc": "2026-11-27T19:06:30.923Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "f6afc04e1621f9e965b3ab18fb04a6cbe998f10db7e692142f62e08287e5c57d"
+        },
+        {
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": [
+            "xhigh"
+          ],
+          "requests": 64,
+          "freshInput": 130724,
+          "cachedInput": 5808768,
+          "output": 67625,
+          "standardCredits": 2.6243145,
+          "lastBilledRecordUtc": "2026-11-27T19:14:44.106Z",
+          "lastRecordUtc": "2026-11-27T19:14:44.114Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "25ac52e37cacacc4b4e3063a77619fd0cbb880b50a5e2bc24a313f5bbc305134"
+        },
+        {
+          "role": "workforce_worker",
+          "model": "gpt-6-luna",
+          "effort": [
+            "xhigh"
+          ],
+          "requests": 52,
+          "freshInput": 78606,
+          "cachedInput": 3237632,
+          "output": 37552,
+          "standardCredits": 1.475323,
+          "lastBilledRecordUtc": "2026-11-27T19:05:17.591Z",
+          "lastRecordUtc": "2026-11-27T19:05:17.594Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "e35e4dcd5d3682f9c7256af0b9e17a3cfdb87fc689a80fa6b1534338c7c1b79e"
+        },
+        {
+          "role": "workforce_reviewer",
+          "model": "gpt-6.2-sol",
+          "effort": [
+            "xhigh"
+          ],
+          "requests": 4,
+          "freshInput": 45487,
+          "cachedInput": 96640,
+          "output": 640,
+          "standardCredits": 2.67595,
+          "lastBilledRecordUtc": "2026-11-27T19:16:22.673Z",
+          "lastRecordUtc": "2026-11-27T19:16:22.675Z",
+          "lastRecordType": "event_msg",
+          "rolloutSha256": "14f411c2c91b8bf93cb5ee8e7c063e2a1387f72a66a013be9801c957c8947744"
+        }
+      ],
+      "recordedCodexRequests": 205,
+      "recordedCodexStandardCredits": 31.6819685,
+      "internalCiLedger": [
+        {
+          "snapshot": "tree-03",
+          "exit": 2,
+          "recordedUtc": "2026-11-27T19:15:50.722Z"
+        }
+      ],
+      "internalCiLedgerSha256": "066e47c0c3b528dfd518b26ea91e271b933877c4e104f5361c8518c338fc9341",
+      "internalReview": "There is a reviewer rollout but no final reviewer response. Internal CI on the first integrated snapshot exited 2."
+    }
+  ],
+  "totalObservedCodexRequests": 343,
+  "totalObservedCodexStandardCredits": 98.2093385,
+  "requestLedgerSha256": "82023c0a9f0878132a5eb8a5f5ad8cb8995aa472068bd1dba5f59830b8f1c106",
+  "snapshotIdentifiers": "Private Git trees have report-local aliases. Repeated aliases within this file denote identical trees."
+}
