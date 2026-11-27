@@ -1,0 +1,153 @@
+diff --git a/evaluation/BENCHMARK.md b/evaluation/BENCHMARK.md
+index e368b01..a8897d3 100644
+--- a/evaluation/BENCHMARK.md
++++ b/evaluation/BENCHMARK.md
+@@ -238,8 +238,9 @@ A suite directory holds:
+ 
+ - `suite.env` with `REPO`, `BASE`, `TASKS=(…)`, optional `BASE_<task>` for a task
+   with its own base commit, `BENCH_MAXTURNS`, the CLI versions
+-  (`CLAUDE_CODE_VERSION`, `CODEX_VERSION`), the signed-in Claude config dir
+-  (`BENCH_CLAUDE_CONFIG_DIR`; its login stays in the keychain, nothing to create)
++  (`CLAUDE_CODE_VERSION`, `CODEX_VERSION`), an optional signed-in Claude config dir
++  override (`BENCH_CLAUDE_CONFIG_DIR`; when omitted, the caller's `CLAUDE_CONFIG_DIR`
++  is inherited or Claude Code uses its default; login stays in the keychain),
+   and the Codex `auth.json` (`BENCH_CODEX_AUTH`, linked so that a token refresh
+   writes through to the same file);
+ - `setup.sh`, run in each fresh checkout to provide the project's dependencies
+diff --git a/evaluation/bench/baseline.mjs b/evaluation/bench/baseline.mjs
+index 16e682e..a327649 100644
+--- a/evaluation/bench/baseline.mjs
++++ b/evaluation/bench/baseline.mjs
+@@ -27,7 +27,11 @@ const route = (c) => {
+   for (const a of agents) { const key = `${a.role} ${a.model ?? ''}`.trim(); counts[key] = (counts[key] ?? 0) + 1; }
+   return `сам + ${Object.entries(counts).map(([r, n]) => (n > 1 ? `${n}× ${r}` : r)).join(', ')}`;
+ };
+-const modelName = (m) => (m === 'opus' ? 'Opus 5.5 (Claude Code)' : m === 'sol' ? 'GPT-6.2 Sol (Codex)' : m);
++const rootModel = (c) => c.rootModel ?? (c.model === 'opus' ? 'opus' : c.actors.find((a) => a.role === 'cooperator')?.model ?? c.provenance?.rootModel ?? c.model);
++const modelName = (m, cs) => {
++  const root = rootModel(cs[0] ?? { model: m, actors: [] });
++  return ({ opus: 'Opus 5.5 (Claude Code)', sol: 'GPT-6.2 Sol (Codex)', 'gpt-6.2-sol': 'GPT-6.2 Sol (Codex)', 'gpt-6.1-sol': 'GPT-6.1 Sol (Codex)' }[root] ?? root);
++};
+ const cell = (v) => String(v).replace(/\|/g, '\\|');
+ const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.map(cell).join(' | ')} |`)].join('\n');
+ 
+@@ -49,7 +53,7 @@ for (const task of tasks) {
+     ['Как работала', ...groups.map((cs) => cs.map(route).join(' · '))],
+     ...METRICS.map(([title, get, fmt]) => [title, ...groups.map((cs) => show(stat(cs.map(get)), fmt))]),
+   ];
+-  md.push(`## ${task}`, '', table(['', ...models.map(modelName)], rows), '');
++  md.push(`## ${task}`, '', table(['', ...models.map((m, i) => modelName(m, groups[i]))], rows), '');
+   models.forEach((m, i) => {
+     const cs = groups[i];
+     json.tasks[task][m] = {
+diff --git a/evaluation/bench/cell.sh b/evaluation/bench/cell.sh
+index c9228f7..8b8bd57 100755
+--- a/evaluation/bench/cell.sh
++++ b/evaluation/bench/cell.sh
+@@ -32,6 +32,8 @@ KIT=$OUT/kits/$VARIANT
+ SETS=(); [[ -s $OUT/sets/$VARIANT.txt ]] && for kv in $(<$OUT/sets/$VARIANT.txt); do SETS+=(--set $kv); done
+ # Signed-in Claude config dir and Codex auth file; the suite may set both.
+ CLAUDE_DIR=${BENCH_CLAUDE_CONFIG_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}}
++CLAUDE_CONFIG_ENV=()
++[[ -n ${BENCH_CLAUDE_CONFIG_DIR:-} ]] && CLAUDE_CONFIG_ENV=("CLAUDE_CONFIG_DIR=$BENCH_CLAUDE_CONFIG_DIR")
+ CODEX_AUTH=${BENCH_CODEX_AUTH:-${CODEX_HOME:-$HOME/.codex}/auth.json}
+ # The cell's own /tmp: every zsh its agents start reads tmpjail/zshenv first (ZDOTDIR), which
+ # moves /tmp paths of a command into $CTMP; Claude Code's file tools go there through the hook,
+@@ -96,7 +98,7 @@ fi
+ # agent starts inherits BENCH_CELL, so the ones it leaves behind can be found.
+ CLEAN=(-u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_MESSAGING_SOCKET -u CLAUDE_CODE_MESSAGING_TOKEN -u CLAUDE_CODE_SESSION_ATTENDED -u CLAUDE_PID -u CLAUDE_EFFORT -u CLAUDE_CODE_ENTRYPOINT)
+ if [[ $MODEL == opus ]]; then
+-  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=$CLAUDE_DIR CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
++  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 $CLAUDE_CONFIG_ENV CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
+   # A Claude project directory left from an earlier cell with the same path would carry its
+   # sessions and memory into this one.
+   STALE=$CLAUDE_DIR/projects/${WT//[^A-Za-z0-9]/-}
+diff --git a/evaluation/bench/report.mjs b/evaluation/bench/report.mjs
+index bd6cd91..51b927f 100644
+--- a/evaluation/bench/report.mjs
++++ b/evaluation/bench/report.mjs
+@@ -16,9 +16,10 @@ const data = loadRun(out);
+ const names = data.variants.map((v) => v.split('=')[0]);
+ const prevNames = data.prev.flatMap((p) => p.variants.map((v) => v.split('=')[0]));
+ const runKits = data.runVariants.map((v) => v.split('=')[0]).filter((n) => n !== 'nokit');
+-const next = runKits[0];
+-const extras = runKits.slice(1);
+-const prev = prevNames.filter((n) => n !== 'nokit').at(-1) ?? null;
++const fullBatch = data.prev.length === 0 && runKits.length >= 2;
++const prev = fullBatch ? runKits[0] : prevNames.filter((n) => n !== 'nokit').at(-1) ?? null;
++const next = fullBatch ? runKits[1] : runKits[0];
++const extras = fullBatch ? runKits.slice(2) : runKits.slice(1);
+ const label = (n) => (n === 'nokit' ? 'Без кита' : n);
+ const k = (n) => (n == null || Number.isNaN(n) ? '—' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : Number.isInteger(n) || n >= 100 ? String(Math.round(n)) : n.toFixed(1));
+ const usd = (n) => (n == null || Number.isNaN(n) ? '—' : `$${n.toFixed(2)}`);
+@@ -75,7 +76,8 @@ const route = (c) => {
+   for (const a of agents) { const key = `${a.role} ${a.model ?? ''}`.trim(); counts[key] = (counts[key] ?? 0) + 1; }
+   return Object.entries(counts).map(([r, n]) => (n > 1 ? `${n}× ${r}` : r)).join(', ');
+ };
+-const cellsOf = (task, model, name) => data.cells.filter((c) => c.task === task && c.model === model && c.variant === name);
++const rootModel = (c) => c.rootModel ?? (c.model === 'opus' ? 'opus' : c.actors.find((a) => a.role === 'cooperator')?.model ?? c.provenance?.rootModel ?? c.model);
++const cellsOf = (task, model, name) => data.cells.filter((c) => c.task === task && rootModel(c) === model && c.variant === name);
+ const mean = (vals) => (vals.length && vals.every((v) => v != null) ? vals.reduce((a, b) => a + b, 0) / vals.length : null);
+ const admitted = (cs) => { const clean = cs.filter(isClean); return clean.length ? clean : null; };
+ const show = (cs, get, fmt) => {
+@@ -134,8 +136,8 @@ const sources = () => ['metrics.json', ...fs.readdirSync(out).filter((f) => /^pr
+ // Tasks in the suite's order, as bench.sh recorded it.
+ const order = fs.existsSync(path.join(out, 'tasks.txt')) ? fs.readFileSync(path.join(out, 'tasks.txt'), 'utf8').split('\n').filter(Boolean) : [];
+ const tasks = [...new Set(data.cells.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
+-const models = [...new Set(data.cells.map((c) => c.model))];
+-const modelName = (m) => (m === 'opus' ? 'Opus 5.5' : m === 'sol' ? 'GPT-6.2 Sol' : m);
++const models = [...new Set(data.cells.map(rootModel))];
++const modelName = (m) => ({ opus: 'Opus 5.5', sol: 'GPT-6.2 Sol', 'gpt-6.2-sol': 'GPT-6.2 Sol', 'gpt-6.1-sol': 'GPT-6.1 Sol' }[m] ?? m);
+ 
+ const legend = 'Значения — по ячейкам с чистой изоляцией; группа без таких ячеек помечена * (фактический расход), её разницы не считаются. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс). Цена — по API-прайсу (prices.mjs); у Codex нижняя оценка, верхняя — отдельной строкой, если отличается. Цена с холодным стартом кэша — без чужого прогрева: если первый запрос кооператора Claude нашёл весь свой префикс уже в кэше (его записала более ранняя сессия с тем же префиксом, например прерванный запуск тех же путей), часть префикса сверх общей для всех ячеек прогона (определения инструментов) оценена как запись в кэш; общая часть остаётся чтением; строка есть, только когда такие ячейки были. Цена корректного результата — расход всех ячеек группы, делённый на число ячеек с выполненным контрактом. Надбавка за длинный промпт — что добавили запросы выше тарифного порога (Haiku выше 100k, OpenAI выше 272k) против тех же токенов по базовому тарифу. Секунд на запрос — время ответа модели на один запрос без работы инструментов и ожидания агентов: скорость API в день прогона. Продолжения воркеров — ходы воркеров сверх первого задания: исправления, уточнения и продолжения вместе. Файлов результата записано после начала последнего ревью — файлы итогового диффа, время последней записи которых позже начала последнего хода ревьюера.';
+ const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.variants.join(', ')}. Полные данные — metrics.json. ${legend}`, '', `Источники: ${sources()}.`, ''];
+diff --git a/evaluation/bench/routes.mjs b/evaluation/bench/routes.mjs
+index 9ebb452..a5d7a3b 100644
+--- a/evaluation/bench/routes.mjs
++++ b/evaluation/bench/routes.mjs
+@@ -60,13 +60,14 @@ function claude(logs) {
+ function codex(logs) {
+   const mainId = jsonl(path.join(logs, 'codex.events.jsonl')).find((e) => e.type === 'thread.started')?.thread_id;
+   const dir = path.join(logs, 'rollouts');
+-  const entries = []; const spawns = []; let final = '';
++  const entries = []; const spawns = []; let final = ''; let rootModel = null;
+   for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+     const lines = jsonl(path.join(dir, f));
+     const meta = lines.find((l) => l.type === 'session_meta')?.payload;
+     if (!meta || (meta.id !== mainId && meta.session_id !== mainId)) continue;
+     const isMain = meta.id === mainId;
+     const ctx = lines.find((l) => l.type === 'turn_context')?.payload ?? {};
++    if (isMain) rootModel = ctx.model ?? rootModel;
+     const spawn = meta.source?.subagent?.thread_spawn;
+     const who = isMain ? COOP : `${spawn?.agent_role ?? 'agent'} / ${ctx.model}:${ctx.effort ?? ctx.reasoning_effort}`;
+     let last = '';
+@@ -103,7 +104,7 @@ function codex(logs) {
+       if (end) entries.push({ t: end.t, who, kind: 'сдаёт', text: clip(last, 1500) });
+     }
+   }
+-  return { entries, spawns, final };
++  return { entries, spawns, final, rootModel };
+ }
+ 
+ // Codex runs the Claude kit starts through codex-run.mjs (Hybrid auditors, reviewers, escalated
+@@ -152,15 +153,16 @@ const cells = fs.readdirSync(path.join(out, 'cells')).sort().filter((id) => fs.e
+   const at = (t) => { const s = Math.max(0, Math.round((new Date(t) - start) / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+   fs.writeFileSync(path.join(dir, 'timeline.md'), [`# ${id}`, '', ...r.entries.map((e) => `- \`${at(e.t)}\` **${e.who}** ${e.kind}: ${e.text.replace(/\n/g, '\n  ')}`), '', '## Итоговый отчёт', '', r.final, ''].join('\n'));
+   const quality = JSON.parse(read(path.join(dir, 'check.json')) || '{}');
+-  return { id, task, variant, model, repeat, quality, ...r, at };
++  return { id, task, variant, model, repeat, quality, ...r, rootModel: model === 'opus' ? 'opus' : r.rootModel ?? model, at };
+ });
+ // Tasks in the suite's order, as bench.sh recorded it.
+ const order = read(path.join(out, 'tasks.txt')).split('\n').filter(Boolean);
+ const tasks = [...new Set(cells.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
+-for (const task of tasks) for (const model of [...new Set(cells.map((c) => c.model))]) {
+-  const group = cells.filter((c) => c.task === task && c.model === model);
++const modelName = (model) => ({ opus: 'Opus 5.5', sol: 'GPT-6.2 Sol', 'gpt-6.2-sol': 'GPT-6.2 Sol', 'gpt-6.1-sol': 'GPT-6.1 Sol' }[model] ?? model);
++for (const task of tasks) for (const model of [...new Set(cells.map((c) => c.rootModel))]) {
++  const group = cells.filter((c) => c.task === task && c.rootModel === model);
+   if (!group.length) continue;
+-  md.push(`## ${task} — ${model === 'opus' ? 'Opus 5.5' : 'GPT-6.2 Sol'}`, '', '| Ячейка | Решено | Маршрут |', '|---|---|---|');
++  md.push(`## ${task} — ${modelName(model)}`, '', '| Ячейка | Решено | Маршрут |', '|---|---|---|');
+   for (const c of group) {
+     const route = c.spawns.length ? `сам + ${c.spawns.map((s) => `${s.role} (${s.model}${s.effort ? `:${s.effort}` : ''})`).join(', ')}` : 'сам, без агентов';
+     md.push(`| ${c.variant} r${c.repeat} | ${c.quality['Решено'] ?? '—'} | ${route.replace(/\|/g, '\\|')} |`);

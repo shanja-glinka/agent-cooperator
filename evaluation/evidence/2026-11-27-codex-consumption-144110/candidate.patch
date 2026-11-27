@@ -1,0 +1,74 @@
+diff --git a/payload/codex/config/workforce-economy.config.toml b/payload/codex/config/workforce-economy.config.toml
+index 5ad013e..65e23ac 100644
+--- a/payload/codex/config/workforce-economy.config.toml
++++ b/payload/codex/config/workforce-economy.config.toml
+@@ -6,7 +6,8 @@ developer_instructions = """
+ The user explicitly launched the workforce-economy config profile.
+ Use PROFILE=economy for this task: when you delegate, Luna workers at xhigh with the escalation ladder.
+ Whether to delegate follows the skill; doing a step yourself is part of the profile.
+-Apply {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for implementation work.
++Follow any route required by the user or project. Otherwise handle a small change and its checks in this session.
++Load {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for required orchestration, a mechanical migration across many sites, or other substantial delegable work.
+ For a build or pipeline, its progress critic checks progress from 45 minutes of work on;
+ it does not replace block or stage review.
+ The user's later explicit profile choice takes precedence; verify runtime settings.
+diff --git a/payload/codex/config/workforce-standard.config.toml b/payload/codex/config/workforce-standard.config.toml
+index ac267be..ab39bd1 100644
+--- a/payload/codex/config/workforce-standard.config.toml
++++ b/payload/codex/config/workforce-standard.config.toml
+@@ -6,7 +6,8 @@ developer_instructions = """
+ The user explicitly launched the workforce-standard config profile.
+ Use PROFILE=standard for this task; do not ask them to choose the same profile again.
+ Whether to delegate follows the skill; doing a step yourself is part of the profile.
+-Apply {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for implementation work.
++Follow any route required by the user or project. Otherwise handle a small change and its checks in this session.
++Load {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for required orchestration, a mechanical migration across many sites, or other substantial delegable work.
+ For a build or pipeline, its progress critic checks progress from 45 minutes of work on;
+ it does not replace block or stage review.
+ The user's later explicit profile choice takes precedence; verify runtime settings.
+diff --git a/payload/codex/global-instructions.md b/payload/codex/global-instructions.md
+index 63d7445..cd46520 100644
+--- a/payload/codex/global-instructions.md
++++ b/payload/codex/global-instructions.md
+@@ -1,9 +1,15 @@
+ ## Codex Workforce
+ 
+-For a new implementation, refactoring, or automation task, use the installed
+-`workforce-orchestrate` skill at `{{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md`.
+-Direct answers, status reports, analysis-only requests, and tiny fixes do not
+-start orchestration.
++Follow any route the user or project requires. Otherwise inspect the applicable
++rules and a representative site. If a small change has a known check, implement
++and verify it in this session, including the same fix at a few sites.
++Check the requested behavior as well as the project checks before reporting.
++
++Use the installed `workforce-orchestrate` skill at
++`{{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md` when the user or project
++requires orchestration, for a mechanical migration across many sites, or when
++substantial implementation or investigation has an independently verifiable result. Reassess if inspection
++reveals work of that size.
+ 
+ When the kit is in use, this session is the cooperator, the brain and the
+ integrator: it reads the repository's rules (`AGENTS.md`, `CLAUDE.md`,
+diff --git a/payload/codex/skills/workforce-orchestrate/SKILL.md b/payload/codex/skills/workforce-orchestrate/SKILL.md
+index 7102244..82925b3 100644
+--- a/payload/codex/skills/workforce-orchestrate/SKILL.md
++++ b/payload/codex/skills/workforce-orchestrate/SKILL.md
+@@ -1,13 +1,14 @@
+ ---
+ name: workforce-orchestrate
+-description: "Cooperator workflow for implementation, refactoring, and automation in Codex. The cooperator (user-facing session) gives verifiable blocks to light workers when the whole route is cheaper, has their results checked, integrates, and accepts only verified results."
++description: "Coordinate substantial, independently verifiable worker assignments in Codex, or use when orchestration is explicitly required. When the user and project leave the route open, handle small changes directly."
+ ---
+ 
+ # Workforce orchestration
+ 
+ You are the cooperator: the user-facing session, the brain and the integrator
+-of the task. You decide, brief, integrate, and accept; light models at xhigh
+-effort do the reading and the typing. By default (Economy) workers and probes
++of the task. You own the outcome. Follow the route required by the user or project.
++Otherwise handle small changes directly, including a repeated fix at a few sites.
++For substantial worker assignments, you brief, integrate and accept. By default (Economy) workers and probes
+ run on GPT-6 Luna{{#reviewBlock}}, and the reviewer of their results on GPT-6.2 Sol, at
+ high or xhigh as you choose{{/reviewBlock}}. Forwarding results from one agent to the next is not orchestration.
+ The repository's own rules (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`)

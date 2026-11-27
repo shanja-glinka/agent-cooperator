@@ -1,0 +1,355 @@
+{
+ "big-candidate-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-candidate-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-candidate-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-current-sol-r1"
+   },
+   {
+    "with": "review-current-sol-r2"
+   },
+   {
+    "with": "review-nokit-sol-r2"
+   },
+   {
+    "with": "small-current-sol-r1"
+   },
+   {
+    "with": "unknown-nokit-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "big-candidate-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-current-sol-r2"
+   },
+   {
+    "with": "small-candidate-sol-r2"
+   },
+   {
+    "with": "small-current-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "big-current-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-current-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-current-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r1"
+   },
+   {
+    "with": "small-current-sol-r1"
+   },
+   {
+    "with": "small-nokit-sol-r1"
+   },
+   {
+    "with": "unknown-candidate-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "big-current-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r2"
+   },
+   {
+    "with": "small-candidate-sol-r2"
+   },
+   {
+    "with": "small-current-sol-r2"
+   },
+   {
+    "with": "unknown-candidate-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "big-nokit-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-nokit-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "review-candidate-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "big-nokit-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-candidate-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-candidate-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-candidate-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-nokit-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "review-candidate-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "unknown-current-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "review-current-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-current-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-current-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-current-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "review-nokit-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-nokit-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-nokit-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "small-candidate-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-candidate-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-candidate-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-candidate-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r2"
+   },
+   {
+    "with": "big-current-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "small-current-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-current-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-current-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r1"
+   },
+   {
+    "with": "big-current-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "small-current-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r2"
+   },
+   {
+    "with": "big-current-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "small-nokit-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-nokit-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-current-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "small-nokit-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-candidate-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-candidate-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-candidate-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-current-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "unknown-candidate-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-current-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "unknown-current-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-current-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-current-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-current-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "review-candidate-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "unknown-nokit-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-nokit-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-candidate-sol-r1"
+   }
+  ],
+  "crossed": []
+ }
+}

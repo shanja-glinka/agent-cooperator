@@ -1,0 +1,47 @@
+{
+  "kitCommits": {
+    "cf61bb5": "cf61bb5f7b9a35a0cce01af3dba0e7373844f8c9",
+    "e444402": "e444402fe5e00e28f06397c5cf2228e1c668f123"
+  },
+  "measuredHarnessCommit": "3732c49c3b6ce794f4627a3adb50657aef8e6266",
+  "preregistrationSha256": "fa847b60ed3911f9ec9e387383ab84ea21ab4c6917dbd833d46b6dda1be15302",
+  "claudeInstallationComparison": {
+    "files": 19,
+    "excluded": [
+      "manifest.json:installedAt"
+    ],
+    "allEqual": true,
+    "sha256": {
+      "CLAUDE.md": "73f213fec15277b3e28f4b1c02d2560bc78672680e9b9d9cbc7077ffd7b72b13",
+      "agents/workforce-auditor.md": "aca423735d0ac5b967f36727a3127a2299f233278c03162c700110268fd83496",
+      "agents/workforce-probe.md": "a1113518821c6050ffae94c7e7f9604e48bf655ff67108aa12f22409bb3ecd7b",
+      "agents/workforce-reviewer.md": "6320a75b02df61fdb461f21677f56fe7776468ff6e557737dc46db8e28ca0e6a",
+      "agents/workforce-worker-lite.md": "efc016243213579d0381205872dbd8187122a45080424a87a5d88b5065897318",
+      "agents/workforce-worker.md": "d1c3f07228b3f7d8c87df5457c41c267bd93a445b3ba3e5ccacc5acde0b26344",
+      "claude-workforce/manifest.json": "7b1d58a68f902c8658740ae3e48480d8243bbd3a54f00c6ca44d5a20d4d1fdca",
+      "claude-workforce/profiles.json": "fdf26678937ce2c9bba54764e24f1778065ce71673b28a141ea72c4b8e9605e8",
+      "skills/workforce-audit/SKILL.md": "28137530ffbd73f8d0cb85ba520d5e8947458508727a7668fa464cd8561c0c3a",
+      "skills/workforce-orchestrate/SKILL.md": "16e01db44d975bbdc2d17a03c83879ccf6ddc029c7d5955dfc75b1efacfa7c85",
+      "skills/workforce-orchestrate/references/delegation.md": "c65edf91d2b424af9a50ea2f951fe1ede56ad19b8efd70f07c1f6bfbd313bee3",
+      "skills/workforce-orchestrate/references/dispatch.md": "c3f193651e7457527bb236eb3191dfb996170c6f692b58afa5a735a812a75cea",
+      "skills/workforce-orchestrate/references/tools.md": "098bb8715c8d1e12c571afb112b9a6700fade82bdc228a3916e2bce25bb27a5c",
+      "skills/workforce-orchestrate/scripts/accept.mjs": "1a212bfae1e267304fc5bf413554d7bd79d26d9091467b3a9b1a913496d19904",
+      "skills/workforce-orchestrate/scripts/codex-run.mjs": "570a9f4e091459be45aae9fe53ae409321ffbd7a37e6d11f8802084dcfe87dc0",
+      "skills/workforce-probe/SKILL.md": "cb596cc310f1784ee13062e948ef171cfb3ca2f3565a2c5045d074b7af29a66d",
+      "skills/workforce-review/SKILL.md": "0aae97a667e5cea8ec7266ca03a8acd74a046133da547d5df41826a665595bc0",
+      "skills/workforce-smoke/SKILL.md": "e2b34edf227009842b96405ddf1139deb921ff0c057f9b8c3288a314cfd6052b",
+      "skills/workforce-worker/SKILL.md": "6d51bdc264db5e6bdabeb0767d31f7bfa6cc94ff9c1d3d758dabf137d2307db6"
+    }
+  },
+  "baseTree": "1b06c89317efc5bcfd3731d5131020eaaef594c1",
+  "patches": {
+    "candidate.patch": {
+      "sha256": "c549eaaebdbd779b6cb2ab3b6c60015aa509b239df26d3cd5ed0a55ee44133bf",
+      "resultTree": "692f2a156587708438b283059fe1b4bead13f173"
+    },
+    "measured-harness.patch": {
+      "sha256": "610633b08c477747bb682cb367993d15dc63d0956d61db9b78ae5e55b8e5744a",
+      "resultTree": "cbf78292f190f221e572ddf16c230aa3e4819f8a"
+    }
+  }
+}
