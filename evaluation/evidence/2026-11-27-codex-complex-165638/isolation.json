@@ -1,0 +1,164 @@
+{
+ "big-complex-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-complex-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-complex-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-standard-sol-r1"
+   },
+   {
+    "with": "review-standard-sol-r1"
+   },
+   {
+    "with": "small-standard-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "big-complex-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-standard-sol-r2"
+   },
+   {
+    "with": "review-standard-sol-r2"
+   },
+   {
+    "with": "small-standard-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "big-standard-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-standard-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "big-standard-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-complex-sol-r1"
+   },
+   {
+    "with": "small-standard-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "big-standard-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-complex-sol-r2"
+   },
+   {
+    "with": "review-standard-sol-r2"
+   },
+   {
+    "with": "small-standard-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "review-standard-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-standard-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "review-standard-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-complex-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "review-standard-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-complex-sol-r2"
+   },
+   {
+    "with": "big-standard-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "small-standard-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-standard-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "small-standard-sol-r1": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-complex-sol-r1"
+   },
+   {
+    "with": "big-standard-sol-r1"
+   }
+  ],
+  "crossed": []
+ },
+ "small-standard-sol-r2": {
+  "status": "shared",
+  "shared": [
+   {
+    "with": "big-complex-sol-r2"
+   },
+   {
+    "with": "big-standard-sol-r2"
+   }
+  ],
+  "crossed": []
+ },
+ "unknown-standard-opus-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-standard-opus-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-standard-sol-r1": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ },
+ "unknown-standard-sol-r2": {
+  "status": "clean",
+  "shared": [],
+  "crossed": []
+ }
+}

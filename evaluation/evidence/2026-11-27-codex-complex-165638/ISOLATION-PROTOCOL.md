@@ -1,0 +1,5 @@
+# Supplementary isolation check
+
+The original validator stays authoritative for its published clean-only tables. After the first 48-cell series finished, its 32 overlap records pointed to the same top-level temporary directory containing an authorship-check fixture. The second series had started on its frozen kit, tests, profiles and base before this was discovered. The scheduler was briefly held and resumed without changing any cell or test.
+
+Before looking at the second series results, the following separate sensitivity analysis was specified. Examine each shared, stale or crossed path on the original raw run. Keep all ordinary clean cases. For a flagged case, retain separate evidence only for command operands confined to the known fixture, with per-cell redirection established by the recorded commands/output. Calls with suppressed errors must be described separately; a zero final status on a compound command is insufficient. Unknown origins, changes to shared data, or other directories remain unresolved. Preserve the original verdict next to the supplementary evidence. Report spend on all trials, even when a trial is excluded from a comparison.

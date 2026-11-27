@@ -1,0 +1,29 @@
+{
+  "sharedDeliveryFiles": 18,
+  "differingDeliveryFiles": [],
+  "manifestFieldDifferences": [
+    "packageVersion"
+  ],
+  "beforePackageVersion": "1.8.1",
+  "afterPackageVersion": "1.9.0",
+  "filesSha256": {
+    "CLAUDE.md": "11e5abd63ff8190e1134d032de662659ebc942820a229719c388c354092237b2",
+    "agents/workforce-auditor.md": "aca423735d0ac5b967f36727a3127a2299f233278c03162c700110268fd83496",
+    "agents/workforce-probe.md": "a1113518821c6050ffae94c7e7f9604e48bf655ff67108aa12f22409bb3ecd7b",
+    "agents/workforce-reviewer.md": "6320a75b02df61fdb461f21677f56fe7776468ff6e557737dc46db8e28ca0e6a",
+    "agents/workforce-worker-lite.md": "efc016243213579d0381205872dbd8187122a45080424a87a5d88b5065897318",
+    "agents/workforce-worker.md": "d1c3f07228b3f7d8c87df5457c41c267bd93a445b3ba3e5ccacc5acde0b26344",
+    "claude-workforce/profiles.json": "b7419603252150a241e3a9f2711f869bc7f147e38ad0da276835e89726684efa",
+    "skills/workforce-audit/SKILL.md": "28137530ffbd73f8d0cb85ba520d5e8947458508727a7668fa464cd8561c0c3a",
+    "skills/workforce-orchestrate/SKILL.md": "969240c4c6c8da3b46e71f37e8dae30e6103ff4c69bcb7d72348f132cea37df6",
+    "skills/workforce-orchestrate/references/delegation.md": "c65edf91d2b424af9a50ea2f951fe1ede56ad19b8efd70f07c1f6bfbd313bee3",
+    "skills/workforce-orchestrate/references/dispatch.md": "36ad7a2ead29ac646b37a8a25dd56142acc632c3011b93f2afe29728afc3c0c6",
+    "skills/workforce-orchestrate/references/tools.md": "31c6129b8d8d6dd4854014c218770be3217b81de84c967aa45db0d0c06d9f01c",
+    "skills/workforce-orchestrate/scripts/accept.mjs": "1a212bfae1e267304fc5bf413554d7bd79d26d9091467b3a9b1a913496d19904",
+    "skills/workforce-orchestrate/scripts/codex-run.mjs": "570a9f4e091459be45aae9fe53ae409321ffbd7a37e6d11f8802084dcfe87dc0",
+    "skills/workforce-probe/SKILL.md": "cb596cc310f1784ee13062e948ef171cfb3ca2f3565a2c5045d074b7af29a66d",
+    "skills/workforce-review/SKILL.md": "0aae97a667e5cea8ec7266ca03a8acd74a046133da547d5df41826a665595bc0",
+    "skills/workforce-smoke/SKILL.md": "5fa632814cfbfb9d036e3ea700a58fb7d34f9c211f01d07140736633ae662012",
+    "skills/workforce-worker/SKILL.md": "6d51bdc264db5e6bdabeb0767d31f7bfa6cc94ff9c1d3d758dabf137d2307db6"
+  }
+}

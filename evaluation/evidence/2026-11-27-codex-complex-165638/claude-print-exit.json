@@ -1,0 +1,21 @@
+{
+  "cell": "big-standard-opus-r2",
+  "cli": "Claude Code 2.1.332 print mode",
+  "processExit": 0,
+  "lastCooperatorTurnUtc": "2026-11-27T17:57:40.006Z",
+  "lastWorkerCommandUtc": "2026-11-27T18:06:59.081Z",
+  "workerInterruptedUtc": "2026-11-27T18:07:40.131Z",
+  "streamWorkerStatus": "stopped",
+  "stoppedEventLine": 531,
+  "stoppedEventSha256": "8282ef140ec185caf4de4a40192b638c44fe993e8c7b9dbd29caafbadc5dd639",
+  "stderrSha256": "2de8a90e57417068806cbc5b8556aa0db905bb52ae500a95747469b4b5b6f3e5",
+  "reportedDefaultWaitMinutes": 10,
+  "cliSuggestedSetting": "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0",
+  "commits": 0,
+  "uncommittedFiles": 46,
+  "ci": "failed",
+  "lintErrors": 9,
+  "originalHiddenCasesPassed": 3,
+  "originalHiddenCasesTotal": 4,
+  "deliveredTreeForBehaviorReplay": false
+}

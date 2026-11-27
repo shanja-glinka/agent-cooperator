@@ -1,0 +1,23 @@
+{
+  "kitCommit": "f1a56530e3a36d660b79741c7d6c3f5dfdf80293",
+  "harnessCommit": "6ed087ce59efa9aa9e4cf954e377e0826d802ade",
+  "previousKitCommit": "cf61bb5f7b9a35a0cce01af3dba0e7373844f8c9",
+  "reusedControlRun": "2026-11-27-codex-consumption-144110",
+  "reusedVariants": [
+    "nokit",
+    "current"
+  ],
+  "newLaunchProfiles": {
+    "standard": "workforce-standard",
+    "complex": "workforce-complex"
+  },
+  "preregistrationSha256": "e51a4136c441259449859085c637aabb1f6b0aa2500aad26578747b7af5bc3bb",
+  "supplementalInputs": {
+    "effort-probe/task.md": "86aba6719a55e40a4ff3c9cf2b407f46f7d08dbf1ee3ac877f9d669cc57763fb",
+    "effort-probe/expected.json": "2115a330ed6e49455ecefc8db04a1185327a364337e96cd05462522d61a340ab",
+    "effort-probe/result/visible.test.mjs": "e1980fff7fe63592676f4e493802035e0c947b4faad6c860f822303164bd47cf",
+    "effort-probe/result/hidden.test.mjs": "695469458d734809dae072a4355c4854189db255b7c0e3b2ee0e8449496d4560"
+  },
+  "taskAndCheckFilesChanged": 0,
+  "suiteWrapperChange": "Select each native Codex launch profile by variant. Dependencies and task bases are identical to the control series."
+}

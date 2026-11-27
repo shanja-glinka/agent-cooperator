@@ -1,0 +1,58 @@
+{
+  "kit": "f1a56530e3a36d660b79741c7d6c3f5dfdf80293",
+  "cliVersion": "0.172.0",
+  "explicitProfile": null,
+  "expectedWorkerEfforts": {
+    "label.mjs": "low",
+    "intervals.mjs": "medium",
+    "queue.mjs": "high"
+  },
+  "actualActors": [
+    {
+      "actor": "cooperator",
+      "model": "gpt-6.2-sol",
+      "effort": "high",
+      "requests": 35,
+      "standardCredits": 8.60628
+    },
+    {
+      "actor": "intervals.mjs",
+      "model": "gpt-6.2-sol",
+      "effort": "medium",
+      "requests": 7,
+      "standardCredits": 3.10486
+    },
+    {
+      "actor": "label.mjs",
+      "model": "gpt-6.2-sol",
+      "effort": "low",
+      "requests": 5,
+      "standardCredits": 1.45588
+    },
+    {
+      "actor": "queue.mjs",
+      "model": "gpt-6.2-sol",
+      "effort": "high",
+      "requests": 10,
+      "standardCredits": 5.45123
+    },
+    {
+      "actor": "reviewer",
+      "model": "gpt-6.2-sol",
+      "effort": "xhigh",
+      "requests": 11,
+      "standardCredits": 6.26186
+    }
+  ],
+  "allWorkerEffortsMatch": true,
+  "profileNamedInRootMessage": true,
+  "totalRequests": 68,
+  "standardCredits": 24.88011,
+  "visibleTestsPassed": 3,
+  "hiddenTestsPassed": 6,
+  "solutionSha256": {
+    "intervals.mjs": "7097407cc66acd0ad899e85364734f7e75f10e960af6335140bc0394f2ec932c",
+    "label.mjs": "ae5dd3fa694666feaa0507358ac9a6748a4acd0849c907fa092ca85bde03afc9",
+    "queue.mjs": "d85f874d4542a673bbe3c6423c5079f379941d7482e8492d3328633ba82eedb9"
+  }
+}

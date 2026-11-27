@@ -1,0 +1,18 @@
+{
+  "reason": "Paused experimental iteration in response to user feedback; stopped all ablation processes. Original approved full comparison continues.",
+  "partialRequestCounts": {
+    "small-candidate-sol-r1": 9,
+    "small-current-sol-r1": 9
+  },
+  "completeExperiment": false,
+  "observedPartialSpend": {
+    "small-candidate-sol-r1": {
+      "observedRequests": 9,
+      "standardEquivalent": 4.70173
+    },
+    "small-current-sol-r1": {
+      "observedRequests": 9,
+      "standardEquivalent": 4.06515
+    }
+  }
+}

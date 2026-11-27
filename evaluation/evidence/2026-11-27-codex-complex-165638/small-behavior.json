@@ -1,0 +1,112 @@
+{
+  "schema": "small-promise-adapter-oracle-summary-v1",
+  "fixtureSha256": "2ac9e7403f95633ca72bcf14f96c8382c97a5b6417c8f9765b8b722530a4b97f",
+  "testCountPerCell": 3,
+  "allPassed": true,
+  "cells": [
+    {
+      "id": "small-current-sol-r1",
+      "verifiedTree": true,
+      "cases": [
+        {
+          "id": "resolved-promise",
+          "passed": true,
+          "nextCalls": 0
+        },
+        {
+          "id": "rejected-error-identity",
+          "passed": true,
+          "nextCalls": 1,
+          "sameErrorObject": true
+        },
+        {
+          "id": "rejected-undefined-edge",
+          "passed": true,
+          "nextCalls": 1,
+          "errorWasDefined": true
+        }
+      ],
+      "exceptionalRegistration": {
+        "detachesPromise": true
+      }
+    },
+    {
+      "id": "small-current-sol-r2",
+      "verifiedTree": true,
+      "cases": [
+        {
+          "id": "resolved-promise",
+          "passed": true,
+          "nextCalls": 0
+        },
+        {
+          "id": "rejected-error-identity",
+          "passed": true,
+          "nextCalls": 1,
+          "sameErrorObject": true
+        },
+        {
+          "id": "rejected-undefined-edge",
+          "passed": true,
+          "nextCalls": 1,
+          "errorWasDefined": true
+        }
+      ],
+      "exceptionalRegistration": {
+        "detachesPromise": false
+      }
+    },
+    {
+      "id": "small-standard-sol-r1",
+      "verifiedTree": true,
+      "cases": [
+        {
+          "id": "resolved-promise",
+          "passed": true,
+          "nextCalls": 0
+        },
+        {
+          "id": "rejected-error-identity",
+          "passed": true,
+          "nextCalls": 1,
+          "sameErrorObject": true
+        },
+        {
+          "id": "rejected-undefined-edge",
+          "passed": true,
+          "nextCalls": 1,
+          "errorWasDefined": true
+        }
+      ],
+      "exceptionalRegistration": {
+        "detachesPromise": true
+      }
+    },
+    {
+      "id": "small-standard-sol-r2",
+      "verifiedTree": true,
+      "cases": [
+        {
+          "id": "resolved-promise",
+          "passed": true,
+          "nextCalls": 0
+        },
+        {
+          "id": "rejected-error-identity",
+          "passed": true,
+          "nextCalls": 1,
+          "sameErrorObject": true
+        },
+        {
+          "id": "rejected-undefined-edge",
+          "passed": true,
+          "nextCalls": 1,
+          "errorWasDefined": true
+        }
+      ],
+      "exceptionalRegistration": {
+        "detachesPromise": false
+      }
+    }
+  ]
+}

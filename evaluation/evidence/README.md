@@ -30,6 +30,8 @@ from the private project's hidden tests, which are not published.
 
 | Path | What it holds |
 | --- | --- |
+| [2026-11-27 routing comparison](2026-11-27-codex-consumption-144110/TRACE-NOTES.md) | 48 fresh cells on Codex GPT-6.2 Sol and Claude Code. Compare release 1.8.1, the experimental routing prompt, and no kit. The bundle includes per-request metrics, standard-rate credit calculations, the tested prompt diff, an isolation audit and a 42-input behavior replay. |
+| [2026-11-27 Complex profile](2026-11-27-codex-complex-165638/REPORT.md) | New Standard grid plus a Complex ablation on the same large task. Reuses the named same-day controls. The [effort fixture](2026-11-27-codex-complex-165638/effort-probe/README.md) includes the delivered code, nine runnable tests and the actual model requests. |
 | `2026-10-21-v11/metrics.json` | The kit 1.5.0 run (named v11 in the bench): 24 cells, 4 tasks × 2 models × 3 runs. Per cell: wall time, route, contract and quality fields, review and `accept.mjs` counts, waits, the long-prompt surcharge, seconds per request, files written after the last review, and per agent its model, effort, turns, tool calls by name, requests, tokens, and price. One Opus cell was run again after its model looped on one reply up to the 128k-token output limit; its `EXPECTATIONS.md` records that and the price with that cell. |
 | `2026-10-21-v11/prev-metrics-*.json` | The columns it is compared with: no kit (2026-10-19), 1.4.1 (v9, 2026-10-20), and v10 (2026-10-21), an unreleased version that also split Haiku blocks to stay under the 100k tier and cost more on the large task. |
 | `2026-10-20-v9/metrics.json` | The kit 1.4.1 run (named v9): the same fields; the README's Sol numbers come from here. |
