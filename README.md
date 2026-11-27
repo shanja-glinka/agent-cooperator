@@ -26,27 +26,37 @@ Independent community project; not affiliated with Anthropic or OpenAI.
 
 ## Measured: with and without the kit
 
-On 27 November 2026, Claude Code (Opus) and Codex (GPT-6.2 Sol) ran the same large TypeScript cleanup. The task required removing lint warnings while preserving runtime behavior. Each CLI ran twice without the kit and once with release **1.9.1**, using the same starting code, prompt and checks.
+On 27 November 2026, Claude Code (Opus) and Codex (GPT-6.2 Sol) tackled the same large TypeScript cleanup. The task required removing lint warnings while preserving behavior. In the Codex release run, the reviewer checked changes across 50 files and CI ran 2,079 tests. Each row is one run on the same starting code and checks.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/release-1.9.1-dark.svg">
-  <img alt="Time and cost on the large cleanup. Claude Code with 1.9.1 took longer and cost less than either no-kit run. Codex with 1.9.1 took longer and used more credits. The table gives each run and its quality checks." src="docs/images/release-1.9.1-light.svg">
+  <img alt="Time, cost and hidden checks on the large task. Codex 1.9.1 took 16:45, compared with 28:30 and 28:44 for 1.8.1. Two runs with explicitly assigned Sol roles took 12:55 and 13:20. The table gives every result for both CLIs." src="docs/images/release-1.9.1-light.svg">
 </picture>
 
 | CLI | Run | Time | Cost | Hidden checks | Behavior matches |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Claude Code | No kit · 1 | 18:20 | $4.90 | 2/4 | 36/42 |
 | Claude Code | No kit · 2 | 14:49 | $4.17 | 3/4 | 42/42 |
+| Claude Code | 1.8.1 · 1 | 36:59 | $5.03 | 4/4 | 42/42 |
+| Claude Code | 1.8.1 · 2 | 25:09 | $2.81 | 4/4 | 42/42 |
 | Claude Code | **1.9.1** | **29:27** | **$3.95** | **4/4** | **42/42** |
 | Codex | No kit · 1† | 8:44 | 19.76 credits | 4/4 | 42/42 |
 | Codex | No kit · 2 | 9:09 | 21.65 credits | 4/4 | 41/42 |
-| Codex | **1.9.1** | **16:45** | **52.25 credits** | **4/4** | **42/42** |
+| Codex | 1.8.1 · 1† | 28:44 | 42.57 credits | 4/4 | 42/42 |
+| Codex | 1.8.1 · 2† | 28:30 | 43.58 credits | 4/4 | 42/42 |
+| Codex | Research · explicit Sol roles · 1 | 13:20 | 36.51 credits | 4/4 | 42/42 |
+| Codex | Research · explicit Sol roles · 2 | 12:55 | 36.80 credits | 4/4 | 42/42 |
+| Codex | **1.9.1 · automatic routing** | **16:45** | **52.25 credits** | **4/4** | **42/42** |
 
-Claude Code with 1.9.1 passed all four hidden checks at a lower estimated cost than either no-kit run. Codex passed those checks in all three runs. The release took longer and used more credits than either no-kit run. It matched the original behavior on all 42 inputs, as did the first no-kit Codex run. Each release run delivered one clean commit and passed project CI.
+**Codex with release 1.9.1 took 41–42% less time than with 1.8.1.** It chose one Sol to write the code and another to review it, and delivered in 16:45. Credit use rose 20–23%. Both no-kit controls were faster and cheaper. The second produced a different result from the original program on one of the 42 inputs. [Release report](evaluation/evidence/2026-11-27-release-1-9-1/REPORT.md) · [Author and reviewer activity](evaluation/evidence/2026-11-27-release-1-9-1/ROUTE-AUDIT.md)
 
-The four hidden checks are the task's acceptance tests. The 42 inputs are a separate comparison against the original behavior. Both no-kit Claude solutions were replayed offline after the release.
+**The two runs with explicitly assigned Sol roles were faster and cheaper than 1.8.1.** Two research runs appended the role instructions to the ordinary prompt. The sum of the two run times fell from 57:14 with 1.8.1 to 26:15 (−54.1%), and spend fell from 86.15 to 73.31 credits (−14.9%). Both 1.8.1 runs and both explicit-role runs passed all four hidden checks and matched the original behavior on all 42 inputs. [Two-run study](evaluation/evidence/2026-11-27-codex-owner-review-200323/REPORT.md) · [Calculation](evaluation/evidence/2026-11-27-codex-owner-review-200323/comparison-numbers.json)
 
-Claude costs are cold-start USD estimates. The release figure includes the external Sol reviewer. Codex costs use standard OpenAI credits. † The first no-kit Codex run shared a temporary path with another run. The other five runs passed the isolation check. [Release report and 1.8.1 comparison](evaluation/evidence/2026-11-27-release-1-9-1/REPORT.md) · [Per-run costs](evaluation/evidence/2026-11-27-release-1-9-1/spend.json) · [Hidden checks](evaluation/evidence/2026-11-27-release-1-9-1/COMPARISON.md) · [42-input replay of the Claude controls](evaluation/evidence/2026-11-27-release-1-9-1/baseline-behavior.json)
+**Claude Code with 1.9.1** passed all four hidden checks at an estimated $3.95. Without the kit, it passed two and three at higher cost. The release time and cost both fell between the two 1.8.1 results. [Per-run costs](evaluation/evidence/2026-11-27-release-1-9-1/spend.json)
+
+Task acceptance requires a clean committed change, green CI and four hidden checks. A separate replay compares return values and exceptions on 42 inputs. Both no-kit Claude solutions were replayed offline after the release. Each CLI ran once on the 1.9.1 release build. This series measured one large task. The longest individual run in the published measurements was 43:10 with an experimental Codex configuration. [Hidden checks](evaluation/evidence/2026-11-27-release-1-9-1/COMPARISON.md) · [Replay of the two Claude controls](evaluation/evidence/2026-11-27-release-1-9-1/baseline-behavior.json) · [Original metrics](evaluation/evidence/2026-11-27-codex-consumption-144110/metrics.json)
+
+Claude costs use cold-start USD estimates and include external Sol spend wherever a reviewer ran. Codex costs use standard OpenAI credits. † The first no-kit Codex run and both 1.8.1 Codex runs used a shared temporary path. The other nine runs passed the isolation check.
 
 The earlier four-task series has its own [October charts and table](https://github.com/shanja-glinka/agent-cooperator/blob/v1.8.1/README.md#measured-with-and-without-the-kit).
 
@@ -60,6 +70,7 @@ The public evidence includes token counts for each request, timings and quality 
 git clone https://github.com/shanja-glinka/agent-cooperator.git
 cd agent-cooperator
 node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-11-27-release-1-9-1
+node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-11-27-codex-owner-review-200323
 node evaluation/evidence/2026-11-27-release-1-9-1/spend.mjs
 node docs/images/charts.mjs
 ```

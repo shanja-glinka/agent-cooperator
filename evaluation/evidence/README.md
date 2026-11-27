@@ -14,7 +14,7 @@ node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-21-v11
 node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-20-v9
 ```
 
-The current README compares one 1.9.1 release run per CLI with two same-day no-kit controls on the same large task. [Release report](2026-11-27-release-1-9-1/REPORT.md)
+The current README compares each 1.9.1 release run with two no-kit runs and two 1.8.1 runs on the same large task. It also shows two Codex research runs that explicitly assigned a Sol author and a Sol reviewer, with per-run costs and times. [Release report](2026-11-27-release-1-9-1/REPORT.md) · [Explicit-role study](2026-11-27-codex-owner-review-200323/REPORT.md)
 
 In the October series, the Opus numbers with the kit come from the 1.5.0 run (`2026-10-21-v11`),
 its Sol numbers from the 1.4.1 run (`2026-10-20-v9`). On 2026-10-21 the OpenAI
