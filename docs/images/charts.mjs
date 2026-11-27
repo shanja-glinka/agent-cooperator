@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds the README charts: the kit against the same model without it, light and dark. Numbers
+// Builds historical README charts and the current 1.9.1 large-task comparison, light and dark. Numbers
 // are the measured means of three runs per task and model, clean runs only, at the cold-start
 // price: no kit from 2026-10-19; with the kit, Opus from 1.5.0 (2026-10-21,
 // evaluation/evidence/2026-10-21-v11/COMPARISON.md) and Sol from 1.4.1 (2026-10-20,
@@ -8,7 +8,7 @@
 // marked * is the actual spend of runs that shared /tmp with other runs. Contract: runs that met
 // the task's contract (the suite's checks, plus on the large task a hidden test of the behavior it
 // must keep).
-// usage: node docs/images/charts.mjs   writes docs/images/{suite,tasks}-{light,dark}.svg
+// usage: node docs/images/charts.mjs   writes docs/images/{suite,tasks,release-1.9.1}-{light,dark}.svg
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -115,5 +115,112 @@ for (const theme of Object.keys(THEMES)) {
     subtitle: 'Mean of three runs per task and model; Opus is Claude Code (Hybrid, kit 1.5.0), Sol is Codex (Economy, kit 1.4.1)',
     note,
   }));
+}
+
+// The current primary comparison uses each measured run individually: two no-kit repeats and
+// one 1.9.1 run per runtime. Time has one shared 0-30 minute scale; costs stay in native units.
+const EVIDENCE = path.resolve(OUT, '../../evaluation/evidence/2026-11-27-release-1-9-1');
+const readJson = (name) => JSON.parse(fs.readFileSync(path.join(EVIDENCE, name), 'utf8'));
+const spend = readJson('spend.json');
+const noKitMetrics = readJson('prev-metrics-2026-11-27-codex-consumption-144110.json');
+const releaseMetrics = readJson('metrics.json');
+const metricById = new Map([...noKitMetrics.cells, ...releaseMetrics.cells].map((cell) => [cell.id, cell]));
+const spendById = new Map([...spend.controls, ...spend.release].map((run) => [run.id, run]));
+const comparison = [
+  {
+    title: 'Claude Code · Opus 5.5',
+    costHeading: 'Claude cold USD estimate · incl. Sol reviewer',
+    cost: (run) => `$${run.usdColdEstimate.toFixed(2)}`,
+    runs: [
+      ['big-nokit-opus-r1', 'No kit · R1'],
+      ['big-nokit-opus-r2', 'No kit · R2'],
+      ['big-release191-opus-r1', 'Release 1.9.1 · R1'],
+    ],
+  },
+  {
+    title: 'Codex · GPT-6.2 Sol',
+    costHeading: 'OpenAI credits',
+    cost: (run) => `${run.openAiCredits.toFixed(2)} cr`,
+    runs: [
+      ['big-nokit-sol-r1', 'No kit · R1*'],
+      ['big-nokit-sol-r2', 'No kit · R2'],
+      ['big-release191-sol-r1', 'Release 1.9.1 · R1'],
+    ],
+  },
+].map((section) => ({
+  ...section,
+  runs: section.runs.map(([id, label]) => {
+    const spendRun = spendById.get(id);
+    const metric = metricById.get(id);
+    if (!spendRun || !metric || !Number.isFinite(spendRun.seconds) || !Number.isFinite(spendRun.usdColdEstimate) || !Number.isFinite(spendRun.openAiCredits)) {
+      throw new Error(`Missing or invalid release chart source data for ${id}`);
+    }
+    const hiddenCases = metric.quality?.['T1–T4 пройдены']?.match(/^(\d+) из 4$/);
+    if (!hiddenCases || metric.quality?.CI !== 'зелёный') throw new Error(`Missing hidden-case or CI outcome for ${id}`);
+    return { id, label, seconds: spendRun.seconds, cost: section.cost(spendRun), release: id.includes('release191'), hiddenPassed: Number(hiddenCases[1]) };
+  }),
+}));
+
+function releaseChart(theme) {
+  const t = THEMES[theme];
+  const W = 400, H = 820;
+  const inkMuted = theme === 'light' ? '#6d6c65' : '#b0aea5';
+  const releaseColor = theme === 'light' ? '#2a78d6' : '#69a4ed';
+  const card = theme === 'light' ? '#f3f2ed' : '#222220';
+  const outcome = { yes: theme === 'light' ? '#267446' : '#75c690', partial: theme === 'light' ? '#a63e34' : '#f18b80' };
+  const timeX = 25, timeW = 200, costX = 300, rowH = 62, rowGap = 7;
+  const scaleTime = (seconds) => (seconds / (30 * 60)) * timeW;
+  const mmssSeconds = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+  const out = [];
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">`);
+  out.push('<title id="t">Large task: no kit vs release 1.9.1</title>');
+  out.push('<desc id="d">Claude Code and Codex each ran the same large task without the kit twice, labeled R1 and R2, and with release 1.9.1 once, labeled R1. Each row is an individual run, not an average. Bars show wall time on one shared zero to thirty minute scale and labels show minutes and seconds. Costs use native units: Claude cold USD estimate includes Sol reviewer spend, while Codex uses OpenAI credits. Outcome labels report hidden T1 through T4 cases passed out of four; CI passed for all runs. Source: evaluation/evidence/2026-11-27-release-1-9-1 spend.json, prev-metrics-2026-11-27-codex-consumption-144110.json, and metrics.json.</desc>');
+  out.push(`<rect width="${W}" height="${H}" rx="8" fill="${t.surface}"/>`);
+  out.push(`<text x="20" y="31" font-size="20" font-weight="650" fill="${t.ink}">Large task: no kit vs release 1.9.1</text>`);
+  out.push(`<text x="20" y="53" font-size="12.5" fill="${t.ink2}">Same task per runtime · each result is one run</text>`);
+  out.push(`<rect x="20" y="68" width="12" height="12" rx="3" fill="${inkMuted}"/>`);
+  out.push(`<text x="38" y="78" font-size="12.5" fill="${t.ink}">No kit, R1 and R2 repeats</text>`);
+  out.push(`<rect x="222" y="68" width="12" height="12" rx="3" fill="${releaseColor}"/>`);
+  out.push(`<text x="240" y="78" font-size="12.5" fill="${t.ink}">Release 1.9.1, one run</text>`);
+
+  comparison.forEach((section, sectionIndex) => {
+    const sectionY = 111 + sectionIndex * 294;
+    const sectionRowsTop = sectionY + 53;
+    out.push(`<text x="20" y="${sectionY}" font-size="16" font-weight="650" fill="${t.ink}">${esc(section.title)}</text>`);
+    out.push(`<text x="20" y="${sectionY + 19}" font-size="11.5" fill="${t.ink2}">${esc(section.costHeading)}</text>`);
+    out.push(`<text x="${timeX}" y="${sectionY + 40}" font-size="11" fill="${t.ink2}">Wall time · mm:ss</text>`);
+    out.push(`<text x="${costX}" y="${sectionY + 40}" font-size="11" fill="${t.ink2}">Cost</text>`);
+    for (const tick of [0, 10, 20, 30]) {
+      const x = timeX + (tick / 30) * timeW;
+      out.push(`<text x="${x}" y="${sectionY + 52}" font-size="10.5" fill="${t.ink2}" text-anchor="middle" style="font-variant-numeric: tabular-nums">${tick}</text>`);
+    }
+    section.runs.forEach((run, index) => {
+      const y = sectionRowsTop + index * (rowH + rowGap);
+      const fill = run.release ? releaseColor : inkMuted;
+      const resultColor = run.hiddenPassed === 4 ? outcome.yes : outcome.partial;
+      out.push(`<rect x="14" y="${y}" width="372" height="${rowH}" rx="7" fill="${card}"/>`);
+      for (const tick of [0, 10, 20, 30]) {
+        const x = timeX + (tick / 30) * timeW;
+        out.push(`<line x1="${x}" y1="${y + 28}" x2="${x}" y2="${y + 55}" stroke="${t.grid}" stroke-width="1"/>`);
+      }
+      out.push(`<text x="25" y="${y + 19}" font-size="12.5" font-weight="600" fill="${t.ink}">${esc(run.label)}</text>`);
+      out.push(`<text x="375" y="${y + 19}" font-size="11.5" font-weight="650" fill="${resultColor}" text-anchor="end">Hidden T1–T4: ${run.hiddenPassed}/4</text>`);
+      out.push(bar(timeX, y + 32, scaleTime(run.seconds), 10, fill));
+      out.push(`<text x="232" y="${y + 41}" font-size="11.5" fill="${t.ink}" style="font-variant-numeric: tabular-nums">${mmssSeconds(run.seconds)}</text>`);
+      out.push(`<text x="${costX}" y="${y + 41}" font-size="11.5" fill="${t.ink}" style="font-variant-numeric: tabular-nums">${esc(run.cost)}</text>`);
+    });
+  });
+  out.push(`<text x="20" y="707" font-size="11.5" fill="${t.ink2}">Time bars share a 0–30 min scale. No averages or extra repeats.</text>`);
+  out.push(`<text x="20" y="726" font-size="11.5" fill="${t.ink2}">Claude cold USD estimate includes Sol reviewer spend.</text>`);
+  out.push(`<text x="20" y="745" font-size="11.5" fill="${t.ink2}">Codex cost is native OpenAI credits.</text>`);
+  out.push(`<text x="20" y="764" font-size="11.5" fill="${t.ink2}">* Codex no-kit R1 used a shared /tmp path.</text>`);
+  out.push(`<text x="20" y="783" font-size="11.5" fill="${t.ink2}">CI passed for every run; outcomes show hidden T1–T4 checks only.</text>`);
+  out.push(`<text x="20" y="802" font-size="10.5" fill="${t.ink2}">Source: release evidence · 2026-11-27.</text>`);
+  out.push('</svg>');
+  return out.join('\n') + '\n';
+}
+
+for (const theme of Object.keys(THEMES)) {
+  fs.writeFileSync(path.join(OUT, `release-1.9.1-${theme}.svg`), releaseChart(theme));
 }
 console.log(`charts written to ${OUT}`);

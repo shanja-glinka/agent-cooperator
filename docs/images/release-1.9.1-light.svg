@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="820" viewBox="0 0 400 820" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="t">Large task: no kit vs release 1.9.1</title>
+<desc id="d">Claude Code and Codex each ran the same large task without the kit twice, labeled R1 and R2, and with release 1.9.1 once, labeled R1. Each row is an individual run, not an average. Bars show wall time on one shared zero to thirty minute scale and labels show minutes and seconds. Costs use native units: Claude cold USD estimate includes Sol reviewer spend, while Codex uses OpenAI credits. Outcome labels report hidden T1 through T4 cases passed out of four; CI passed for all runs. Source: evaluation/evidence/2026-11-27-release-1-9-1 spend.json, prev-metrics-2026-11-27-codex-consumption-144110.json, and metrics.json.</desc>
+<rect width="400" height="820" rx="8" fill="#fcfcfb"/>
+<text x="20" y="31" font-size="20" font-weight="650" fill="#0b0b0b">Large task: no kit vs release 1.9.1</text>
+<text x="20" y="53" font-size="12.5" fill="#52514e">Same task per runtime · each result is one run</text>
+<rect x="20" y="68" width="12" height="12" rx="3" fill="#6d6c65"/>
+<text x="38" y="78" font-size="12.5" fill="#0b0b0b">No kit, R1 and R2 repeats</text>
+<rect x="222" y="68" width="12" height="12" rx="3" fill="#2a78d6"/>
+<text x="240" y="78" font-size="12.5" fill="#0b0b0b">Release 1.9.1, one run</text>
+<text x="20" y="111" font-size="16" font-weight="650" fill="#0b0b0b">Claude Code · Opus 5.5</text>
+<text x="20" y="130" font-size="11.5" fill="#52514e">Claude cold USD estimate · incl. Sol reviewer</text>
+<text x="25" y="151" font-size="11" fill="#52514e">Wall time · mm:ss</text>
+<text x="300" y="151" font-size="11" fill="#52514e">Cost</text>
+<text x="25" y="163" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<text x="91.66666666666666" y="163" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">10</text>
+<text x="158.33333333333331" y="163" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">20</text>
+<text x="225" y="163" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">30</text>
+<rect x="14" y="164" width="372" height="62" rx="7" fill="#f3f2ed"/>
+<line x1="25" y1="192" x2="25" y2="219" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="91.66666666666666" y1="192" x2="91.66666666666666" y2="219" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="158.33333333333331" y1="192" x2="158.33333333333331" y2="219" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="225" y1="192" x2="225" y2="219" stroke="#e1e0d9" stroke-width="1"/>
+<text x="25" y="183" font-size="12.5" font-weight="600" fill="#0b0b0b">No kit · R1</text>
+<text x="375" y="183" font-size="11.5" font-weight="650" fill="#a63e34" text-anchor="end">Hidden T1–T4: 2/4</text>
+<path d="M25,196 h118.22222222222223 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-118.22222222222223 z" fill="#6d6c65"/>
+<text x="232" y="205" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">18:20</text>
+<text x="300" y="205" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">$4.90</text>
+<rect x="14" y="233" width="372" height="62" rx="7" fill="#f3f2ed"/>
+<line x1="25" y1="261" x2="25" y2="288" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="91.66666666666666" y1="261" x2="91.66666666666666" y2="288" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="158.33333333333331" y1="261" x2="158.33333333333331" y2="288" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="225" y1="261" x2="225" y2="288" stroke="#e1e0d9" stroke-width="1"/>
+<text x="25" y="252" font-size="12.5" font-weight="600" fill="#0b0b0b">No kit · R2</text>
+<text x="375" y="252" font-size="11.5" font-weight="650" fill="#a63e34" text-anchor="end">Hidden T1–T4: 3/4</text>
+<path d="M25,265 h94.77777777777777 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-94.77777777777777 z" fill="#6d6c65"/>
+<text x="232" y="274" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">14:49</text>
+<text x="300" y="274" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">$4.17</text>
+<rect x="14" y="302" width="372" height="62" rx="7" fill="#f3f2ed"/>
+<line x1="25" y1="330" x2="25" y2="357" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="91.66666666666666" y1="330" x2="91.66666666666666" y2="357" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="158.33333333333331" y1="330" x2="158.33333333333331" y2="357" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="225" y1="330" x2="225" y2="357" stroke="#e1e0d9" stroke-width="1"/>
+<text x="25" y="321" font-size="12.5" font-weight="600" fill="#0b0b0b">Release 1.9.1 · R1</text>
+<text x="375" y="321" font-size="11.5" font-weight="650" fill="#267446" text-anchor="end">Hidden T1–T4: 4/4</text>
+<path d="M25,334 h192.33333333333334 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-192.33333333333334 z" fill="#2a78d6"/>
+<text x="232" y="343" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">29:27</text>
+<text x="300" y="343" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">$3.95</text>
+<text x="20" y="405" font-size="16" font-weight="650" fill="#0b0b0b">Codex · GPT-6.2 Sol</text>
+<text x="20" y="424" font-size="11.5" fill="#52514e">OpenAI credits</text>
+<text x="25" y="445" font-size="11" fill="#52514e">Wall time · mm:ss</text>
+<text x="300" y="445" font-size="11" fill="#52514e">Cost</text>
+<text x="25" y="457" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">0</text>
+<text x="91.66666666666666" y="457" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">10</text>
+<text x="158.33333333333331" y="457" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">20</text>
+<text x="225" y="457" font-size="10.5" fill="#52514e" text-anchor="middle" style="font-variant-numeric: tabular-nums">30</text>
+<rect x="14" y="458" width="372" height="62" rx="7" fill="#f3f2ed"/>
+<line x1="25" y1="486" x2="25" y2="513" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="91.66666666666666" y1="486" x2="91.66666666666666" y2="513" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="158.33333333333331" y1="486" x2="158.33333333333331" y2="513" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="225" y1="486" x2="225" y2="513" stroke="#e1e0d9" stroke-width="1"/>
+<text x="25" y="477" font-size="12.5" font-weight="600" fill="#0b0b0b">No kit · R1*</text>
+<text x="375" y="477" font-size="11.5" font-weight="650" fill="#267446" text-anchor="end">Hidden T1–T4: 4/4</text>
+<path d="M25,490 h54.22222222222222 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-54.22222222222222 z" fill="#6d6c65"/>
+<text x="232" y="499" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">08:44</text>
+<text x="300" y="499" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">19.76 cr</text>
+<rect x="14" y="527" width="372" height="62" rx="7" fill="#f3f2ed"/>
+<line x1="25" y1="555" x2="25" y2="582" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="91.66666666666666" y1="555" x2="91.66666666666666" y2="582" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="158.33333333333331" y1="555" x2="158.33333333333331" y2="582" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="225" y1="555" x2="225" y2="582" stroke="#e1e0d9" stroke-width="1"/>
+<text x="25" y="546" font-size="12.5" font-weight="600" fill="#0b0b0b">No kit · R2</text>
+<text x="375" y="546" font-size="11.5" font-weight="650" fill="#267446" text-anchor="end">Hidden T1–T4: 4/4</text>
+<path d="M25,559 h57 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-57 z" fill="#6d6c65"/>
+<text x="232" y="568" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">09:09</text>
+<text x="300" y="568" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">21.65 cr</text>
+<rect x="14" y="596" width="372" height="62" rx="7" fill="#f3f2ed"/>
+<line x1="25" y1="624" x2="25" y2="651" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="91.66666666666666" y1="624" x2="91.66666666666666" y2="651" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="158.33333333333331" y1="624" x2="158.33333333333331" y2="651" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="225" y1="624" x2="225" y2="651" stroke="#e1e0d9" stroke-width="1"/>
+<text x="25" y="615" font-size="12.5" font-weight="600" fill="#0b0b0b">Release 1.9.1 · R1</text>
+<text x="375" y="615" font-size="11.5" font-weight="650" fill="#267446" text-anchor="end">Hidden T1–T4: 4/4</text>
+<path d="M25,628 h107.66666666666667 a4,4 0 0 1 4,4 v2 a4,4 0 0 1 -4,4 h-107.66666666666667 z" fill="#2a78d6"/>
+<text x="232" y="637" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">16:45</text>
+<text x="300" y="637" font-size="11.5" fill="#0b0b0b" style="font-variant-numeric: tabular-nums">52.25 cr</text>
+<text x="20" y="707" font-size="11.5" fill="#52514e">Time bars share a 0–30 min scale. No averages or extra repeats.</text>
+<text x="20" y="726" font-size="11.5" fill="#52514e">Claude cold USD estimate includes Sol reviewer spend.</text>
+<text x="20" y="745" font-size="11.5" fill="#52514e">Codex cost is native OpenAI credits.</text>
+<text x="20" y="764" font-size="11.5" fill="#52514e">* Codex no-kit R1 used a shared /tmp path.</text>
+<text x="20" y="783" font-size="11.5" fill="#52514e">CI passed for every run; outcomes show hidden T1–T4 checks only.</text>
+<text x="20" y="802" font-size="10.5" fill="#52514e">Source: release evidence · 2026-11-27.</text>
+</svg>

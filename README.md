@@ -26,99 +26,43 @@ Independent community project; not affiliated with Anthropic or OpenAI.
 
 ## Measured: with and without the kit
 
-Four tasks in one private TypeScript project (a Telegram bot), three runs per
-task and model, each in its own clean checkout: the same task text and the same
-model, once with the kit (default profiles: Claude Code Hybrid with an Opus
-cooperator, Codex Economy with a Sol cooperator) and once without it. The Opus
-runs with the kit are of 1.5.0 (2026-10-21). The Sol runs with the kit are of
-1.4.1 (2026-10-20): on 2026-10-21 the OpenAI API answered 20–60% slower per
-request, so Sol's wall time that day is not comparable. Price
-is at API list prices; for Codex it is the lower bound. One run without the kit
-found its whole prompt already cached by an earlier session: the part beyond the
-prefix every run shares is priced as a cache write, as if that session had not
-run. A run met the contract when the task's own checks passed and, on the
-large task, a hidden test confirmed that the defensive checks on database and
-JSON data were kept.
+On 27 November 2026, Claude Code (Opus) and Codex (GPT-6.2 Sol) ran the same large TypeScript cleanup. The task required removing lint warnings while preserving runtime behavior. Each CLI ran twice without the kit and once with release **1.9.1**, using the same starting code, prompt and checks.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/suite-dark.svg">
-  <img alt="All four tasks: with Opus, $5.93 and 9 of 12 runs that met the contract without the kit against $4.70 and 12 of 12 with it; with Sol, $1.59 and 12 of 12 without the kit against $2.68 and 12 of 12 with it. Wall time is longer with the kit." src="docs/images/suite-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/release-1.9.1-dark.svg">
+  <img alt="Time and cost on the large cleanup. Claude Code with 1.9.1 took longer and cost less than either no-kit run. Codex with 1.9.1 took longer and used more credits. The table gives each run and its quality checks." src="docs/images/release-1.9.1-light.svg">
 </picture>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/tasks-dark.svg">
-  <img alt="Per task: price, wall time, and runs that met the contract, without and with the kit, for eight task and model pairs; the values are in the table below." src="docs/images/tasks-light.svg">
-</picture>
+| CLI | Run | Time | Cost | Hidden checks | Behavior matches |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Claude Code | No kit · 1 | 18:20 | $4.90 | 2/4 | 36/42 |
+| Claude Code | No kit · 2 | 14:49 | $4.17 | 3/4 | 42/42 |
+| Claude Code | **1.9.1** | **29:27** | **$3.95** | **4/4** | **42/42** |
+| Codex | No kit · 1† | 8:44 | 19.76 credits | 4/4 | 42/42 |
+| Codex | No kit · 2 | 9:09 | 21.65 credits | 4/4 | 41/42 |
+| Codex | **1.9.1** | **16:45** | **52.25 credits** | **4/4** | **42/42** |
 
-| Task · model | Without the kit | With the kit |
-| --- | --- | --- |
-| Small fix · Opus | $0.69 · 4:23 · 3 of 3 | $0.91 · 6:53 · 3 of 3 |
-| Small fix · Sol | $0.39* · 3:57* · 3 of 3 | $0.60 · 9:00 · 3 of 3 |
-| Large cleanup · Opus | $4.43 · 12:24 · 0 of 3 | $2.91 · 24:00 · 3 of 3 |
-| Large cleanup · Sol | $0.74* · 7:35* · 3 of 3 | $1.08 · 17:34 · 3 of 3 |
-| Unknown bug · Opus | $0.43 · 2:29 · 3 of 3 | $0.46 · 2:20 · 3 of 3 |
-| Unknown bug · Sol | $0.21 · 2:13 · 3 of 3 | $0.52 · 7:32 · 3 of 3 |
-| Patch review · Opus | $0.38 · 2:26 · 3 of 3 | $0.43 · 2:05 · 3 of 3 |
-| Patch review · Sol | $0.26* · 3:00* · 3 of 3 | $0.49 · 5:28 · 3 of 3 |
-| **All four · Opus** | $5.93 · 21.7 min · 9 of 12 | $4.70 · 35.3 min · 12 of 12 |
-| **All four · Sol** | $1.59* · 16.7 min* · 12 of 12 | $2.68 · 39.6 min · 12 of 12 |
+Claude Code with 1.9.1 passed all four hidden checks at a lower estimated cost than either no-kit run. Codex passed those checks in all three runs. The release took longer and used more credits than either no-kit run. It matched the original behavior on all 42 inputs, as did the first no-kit Codex run. Each release run delivered one clean commit and passed project CI.
 
-Each cell: mean price · mean wall time · runs that met the contract. \* Actual
-spend: those runs without the kit shared `/tmp` with other runs, so they are not
-a clean comparison.
+The four hidden checks are the task's acceptance tests. The 42 inputs are a separate comparison against the original behavior. Both no-kit Claude solutions were replayed offline after the release.
 
-- **Claude Code.** On the large task the kit costs 34% less ($2.91 against
-  $4.43) and keeps the required behavior in 3 runs of 3, where Opus alone kept
-  it in none. Over all four tasks it costs 21% less and meets the contract in 12
-  runs of 12 against 9. It takes about 1.6 times as long. A small task now runs
-  in the session in 2 runs of 3; the third went through a worker and a review
-  and cost twice as much.
-- **Codex.** GPT-6.1 Sol alone is cheap on these tasks and met every contract;
-  with the kit it meets the same contracts at about 1.7 times the price and 2.4
-  times the time.
-- **Against the previous kit version (1.4.1)** on the same tasks, 1.5.0 met the
-  contract, by the checks above, in 24 runs of 24, as 1.4.1 did. It does a task
-  of about 20 turns in the session instead of sending it through a worker and a
-  review, and sends every change made after a review back to the reviewer. The
-  Opus line cost 3% less ($4.70 against $4.85), within the run-to-run spread.
-  On Sol the bug hunt and the patch review cost about half ($0.24 against $0.52
-  and $0.26 against $0.49), and the whole Sol line 12% less ($2.37 against
-  $2.68); its time is not comparable, so the Sol rows above stay those of 1.4.1.
-  One Opus run of 1.5.0 was repeated after its model looped on one reply up to
-  the 128k-token output limit; with that run the Opus line would be $6.30. Both
-  are recorded in the evidence.
-- One project, four tasks, three runs per cell: an indication, not a guarantee.
-  Method: [benchmark](evaluation/BENCHMARK.md); history: [research](docs/research.md).
-  Regenerate the charts with `node docs/images/charts.mjs`. The data and a
-  command that recomputes it: [Check it yourself](#check-it-yourself).
+Claude costs are cold-start USD estimates. The release figure includes the external Sol reviewer. Codex costs use standard OpenAI credits. † The first no-kit Codex run shared a temporary path with another run. The other five runs passed the isolation check. [Release report and 1.8.1 comparison](evaluation/evidence/2026-11-27-release-1-9-1/REPORT.md) · [Per-run costs](evaluation/evidence/2026-11-27-release-1-9-1/spend.json) · [Hidden checks](evaluation/evidence/2026-11-27-release-1-9-1/COMPARISON.md) · [42-input replay of the Claude controls](evaluation/evidence/2026-11-27-release-1-9-1/baseline-behavior.json)
 
-Release verification: [1.9.1 report](evaluation/evidence/2026-11-27-release-1-9-1/REPORT.md).
+The earlier four-task series has its own [October charts and table](https://github.com/shanja-glinka/agent-cooperator/blob/v1.8.1/README.md#measured-with-and-without-the-kit).
 
 ## Check it yourself
 
 ### Recompute these numbers
 
-The data behind the charts is in [`evaluation/evidence/`](evaluation/evidence/).
-It holds every cell's metrics and the token counts of every model request. The
-project itself is left out: no code, task texts, transcripts, file names, paths,
-or commits. The evidence lives in the repository only and is not part of the
-npm package that `npx` installs.
-
-One command recomputes every price from the token counts at the list prices in
-[`prices.mjs`](evaluation/bench/prices.mjs), checks the sums per agent and per
-run, and rebuilds the comparison tables byte for byte:
+The public evidence includes token counts for each request, timings and quality results. These commands verify the cost calculations and report tables, print the per-run spend and rebuild the charts. The behavioral checks use the private project. [Release evidence](evaluation/evidence/2026-11-27-release-1-9-1/) · [Verification method](evaluation/evidence/README.md)
 
 ```sh
 git clone https://github.com/shanja-glinka/agent-cooperator.git
 cd agent-cooperator
-node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-21-v11
-node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-10-20-v9
+node evaluation/bench/verify-evidence.mjs evaluation/evidence/2026-11-27-release-1-9-1
+node evaluation/evidence/2026-11-27-release-1-9-1/spend.mjs
+node docs/images/charts.mjs
 ```
-
-The first is the 1.5.0 run (the Opus numbers above), the second the 1.4.1 run
-(the Sol numbers). Each checks the arithmetic and the tables. The contract
-verdicts come from hidden tests of the private project, and those are not
-published.
 
 ### Measure your own project
 
