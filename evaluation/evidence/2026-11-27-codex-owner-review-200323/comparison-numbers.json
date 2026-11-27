@@ -1,0 +1,13 @@
+{
+  "diagnosticPairCredits": "73.30512",
+  "releasedPairCredits": "86.1498470",
+  "relativeCreditsChangePercent": "-14.90975021696788387795976004",
+  "diagnosticPairWallSeconds": 1575,
+  "releasedPairWallSeconds": 3434,
+  "relativeTimeChangePercent": "-54.13511939429237041351193943",
+  "twoBigCreditBudget": "82.6164470",
+  "headroomAfterPair": "9.3113270",
+  "projectedEightCredits": "115.41076",
+  "projectedEightSeconds": 2846,
+  "projectedOnly": true
+}

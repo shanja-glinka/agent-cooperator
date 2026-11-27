@@ -1,0 +1,300 @@
+{
+  "cells": [
+    {
+      "repeat": 1,
+      "original": {
+        "exitCode": 0,
+        "commits": 1,
+        "dirtyFiles": 0,
+        "contractPassed": true,
+        "hiddenCases": {
+          "passed": 4,
+          "total": 4
+        },
+        "wallSeconds": 800,
+        "originalTaskInRootMessages": true,
+        "taskFileEndsWithFrozenRoute": true,
+        "frozenRouteInRootMessages": true
+      },
+      "proofOfRootPatchEdits": {
+        "editEvents": 0,
+        "uniquePaths": 0,
+        "deliveredPaths": 49,
+        "deliveredPathsInRootEvents": 0,
+        "confirmedRootCommitCommands": 1
+      },
+      "ownerDiffBeforeReview": {
+        "finalFiles": 49,
+        "fileDiffsSeen": 15,
+        "matchingFinalBlobPairs": 15,
+        "exactFinalFileDiffs": 12
+      },
+      "ownerAnchoredDiffFileCommandsBeforeReview": 0,
+      "isolation": "clean",
+      "actual": [
+        {
+          "role": "root",
+          "models": [
+            "gpt-6.2-sol"
+          ],
+          "efforts": [
+            "high"
+          ],
+          "rolloutFiles": 1,
+          "turns": 1,
+          "usage": {
+            "requests": 45,
+            "fresh": 147709,
+            "cached": 4539008,
+            "output": 22139,
+            "reasoning": 6093,
+            "cacheWrite": 0,
+            "credits": 24.26772
+          },
+          "editToolCalls": 0,
+          "writeCommandIndicators": 8,
+          "nestedCommandEvents": 57,
+          "successfulProgrammaticWriteCommands": 5,
+          "programmaticWritesBeforeReviewer": 5,
+          "programmaticWritesAfterLastReview": 0,
+          "nestedEditEvents": 0,
+          "nestedEditedPaths": 0,
+          "nestedFinalPathsEdited": 0,
+          "nestedEditsAfterLastReview": 0
+        },
+        {
+          "role": "reviewer",
+          "models": [
+            "gpt-6.2-sol"
+          ],
+          "efforts": [
+            "xhigh"
+          ],
+          "rolloutFiles": 1,
+          "turns": 1,
+          "usage": {
+            "requests": 17,
+            "fresh": 129835,
+            "cached": 1215232,
+            "output": 10834,
+            "reasoning": 3048,
+            "cacheWrite": 0,
+            "credits": 12.23833
+          },
+          "editToolCalls": 0,
+          "writeCommandIndicators": 0,
+          "nestedCommandEvents": 35,
+          "successfulProgrammaticWriteCommands": 0,
+          "programmaticWritesBeforeReviewer": 0,
+          "programmaticWritesAfterLastReview": 0,
+          "nestedEditEvents": 0,
+          "nestedEditedPaths": 0,
+          "nestedFinalPathsEdited": 0,
+          "nestedEditsAfterLastReview": 0,
+          "reports": [
+            {
+              "acceptance": "accepted",
+              "mentionsContract": false,
+              "mentionsBehaviorOrPreservation": true,
+              "mentionsGuards": true,
+              "mentionsFallbacks": true,
+              "mentionsChecks": true,
+              "citesTree": true,
+              "treeIdenticalToDelivery": true,
+              "mentionsFinalTreeOrCommit": true
+            }
+          ],
+          "reviewToolOutputs": {
+            "finalFiles": 49,
+            "fileDiffsSeen": 49,
+            "matchingFinalBlobPairs": 49,
+            "exactFinalFileDiffs": 49,
+            "canonicalDiffLines": 1871,
+            "exactNumberedLines": 0,
+            "readsFullTaskText": false,
+            "fullTaskTextInArchivedMessages": false,
+            "sawFinalTreeOrCommit": true,
+            "outputsWithTruncationIndicator": 2
+          }
+        }
+      ],
+      "creditTotals": {
+        "canonicalUsageMatches": true,
+        "totalRequests": 62,
+        "credits": 36.50605
+      },
+      "spawnBriefs": [
+        {
+          "model": "gpt-6.2-sol",
+          "effort": "xhigh",
+          "history": "none",
+          "characters": 7460,
+          "archivedTextOpaque": true,
+          "finalFiles": 49,
+          "fileDiffsSeen": 0,
+          "matchingFinalBlobPairs": 0,
+          "exactFinalFileDiffs": 0
+        }
+      ],
+      "reviewFollowups": [],
+      "finalSnapshot": {
+        "rootSuccessfulConditionalClosesForFinalTree": 0,
+        "filesWithMtimeAfterLastReviewReport": 0,
+        "recordedPatchMatches": true
+      }
+    },
+    {
+      "repeat": 2,
+      "original": {
+        "exitCode": 0,
+        "commits": 1,
+        "dirtyFiles": 0,
+        "contractPassed": true,
+        "hiddenCases": {
+          "passed": 4,
+          "total": 4
+        },
+        "wallSeconds": 775,
+        "originalTaskInRootMessages": true,
+        "taskFileEndsWithFrozenRoute": true,
+        "frozenRouteInRootMessages": true
+      },
+      "proofOfRootPatchEdits": {
+        "editEvents": 0,
+        "uniquePaths": 0,
+        "deliveredPaths": 49,
+        "deliveredPathsInRootEvents": 0,
+        "confirmedRootCommitCommands": 1
+      },
+      "ownerDiffBeforeReview": {
+        "finalFiles": 49,
+        "fileDiffsSeen": 20,
+        "matchingFinalBlobPairs": 16,
+        "exactFinalFileDiffs": 15
+      },
+      "ownerAnchoredDiffFileCommandsBeforeReview": 1,
+      "isolation": "clean",
+      "actual": [
+        {
+          "role": "root",
+          "models": [
+            "gpt-6.2-sol"
+          ],
+          "efforts": [
+            "high"
+          ],
+          "rolloutFiles": 1,
+          "turns": 1,
+          "usage": {
+            "requests": 48,
+            "fresh": 141169,
+            "cached": 4859136,
+            "output": 23230,
+            "reasoning": 6874,
+            "cacheWrite": 0,
+            "credits": 25.01379
+          },
+          "editToolCalls": 0,
+          "writeCommandIndicators": 6,
+          "nestedCommandEvents": 63,
+          "successfulProgrammaticWriteCommands": 5,
+          "programmaticWritesBeforeReviewer": 5,
+          "programmaticWritesAfterLastReview": 0,
+          "nestedEditEvents": 0,
+          "nestedEditedPaths": 0,
+          "nestedFinalPathsEdited": 0,
+          "nestedEditsAfterLastReview": 0
+        },
+        {
+          "role": "reviewer",
+          "models": [
+            "gpt-6.2-sol"
+          ],
+          "efforts": [
+            "xhigh"
+          ],
+          "rolloutFiles": 1,
+          "turns": 1,
+          "usage": {
+            "requests": 17,
+            "fresh": 128108,
+            "cached": 1252352,
+            "output": 8996,
+            "reasoning": 2731,
+            "cacheWrite": 0,
+            "credits": 11.78528
+          },
+          "editToolCalls": 0,
+          "writeCommandIndicators": 0,
+          "nestedCommandEvents": 45,
+          "successfulProgrammaticWriteCommands": 0,
+          "programmaticWritesBeforeReviewer": 0,
+          "programmaticWritesAfterLastReview": 0,
+          "nestedEditEvents": 0,
+          "nestedEditedPaths": 0,
+          "nestedFinalPathsEdited": 0,
+          "nestedEditsAfterLastReview": 0,
+          "reports": [
+            {
+              "acceptance": "accepted",
+              "mentionsContract": false,
+              "mentionsBehaviorOrPreservation": true,
+              "mentionsGuards": true,
+              "mentionsFallbacks": true,
+              "mentionsChecks": true,
+              "citesTree": true,
+              "treeIdenticalToDelivery": true,
+              "mentionsFinalTreeOrCommit": true
+            }
+          ],
+          "reviewToolOutputs": {
+            "finalFiles": 49,
+            "fileDiffsSeen": 13,
+            "matchingFinalBlobPairs": 13,
+            "exactFinalFileDiffs": 13,
+            "canonicalDiffLines": 1834,
+            "exactNumberedLines": 1834,
+            "readsFullTaskText": false,
+            "fullTaskTextInArchivedMessages": false,
+            "sawFinalTreeOrCommit": true,
+            "outputsWithTruncationIndicator": 2
+          }
+        }
+      ],
+      "creditTotals": {
+        "canonicalUsageMatches": true,
+        "totalRequests": 65,
+        "credits": 36.79907
+      },
+      "spawnBriefs": [
+        {
+          "model": "gpt-6.2-sol",
+          "effort": "xhigh",
+          "history": "none",
+          "characters": 7224,
+          "archivedTextOpaque": true,
+          "finalFiles": 49,
+          "fileDiffsSeen": 0,
+          "matchingFinalBlobPairs": 0,
+          "exactFinalFileDiffs": 0
+        }
+      ],
+      "reviewFollowups": [
+        {
+          "kind": "send_message",
+          "characters": 740,
+          "archivedTextOpaque": true,
+          "finalFiles": 49,
+          "fileDiffsSeen": 0,
+          "matchingFinalBlobPairs": 0,
+          "exactFinalFileDiffs": 0
+        }
+      ],
+      "finalSnapshot": {
+        "rootSuccessfulConditionalClosesForFinalTree": 0,
+        "filesWithMtimeAfterLastReviewReport": 0,
+        "recordedPatchMatches": true
+      }
+    }
+  ]
+}

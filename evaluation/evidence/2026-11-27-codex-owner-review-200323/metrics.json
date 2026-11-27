@@ -1,0 +1,364 @@
+{
+ "run": "2026-11-27-codex-owner-review-200323",
+ "suite": "private suite",
+ "variants": [
+  "ownerreview=44a78bd44702046ab3710657823468be4129d50c"
+ ],
+ "coldStartPrefix": null,
+ "cells": [
+  {
+   "id": "big-ownerreview-sol-r1",
+   "task": "big",
+   "variant": "ownerreview",
+   "model": "sol",
+   "repeat": 1,
+   "actors": [
+    {
+     "role": "cooperator",
+     "model": "gpt-6.2-sol",
+     "effort": "high",
+     "background": false,
+     "seconds": 797,
+     "turns": 1,
+     "toolCalls": 58,
+     "tools": {
+      "exec_command": 55,
+      "exec": 1,
+      "spawn_agent": 1,
+      "wait_agent": 1
+     },
+     "requests": 45,
+     "input": 147709,
+     "cacheWrite": null,
+     "cacheRead": 4539008,
+     "output": 22139,
+     "thinking": 6093,
+     "maxPrompt": 149575,
+     "overTier": 0,
+     "compactions": 0,
+     "usd": 0.9707088000000003,
+     "usdHigh": 1.0445632999999996,
+     "tierPremium": 0,
+     "modelSeconds": 547.155
+    },
+    {
+     "role": "reviewer",
+     "model": "gpt-6.2-sol",
+     "effort": "xhigh",
+     "background": false,
+     "seconds": 249,
+     "turns": 1,
+     "toolCalls": 35,
+     "tools": {
+      "exec_command": 35
+     },
+     "requests": 17,
+     "input": 129835,
+     "cacheWrite": null,
+     "cacheRead": 1215232,
+     "output": 10834,
+     "thinking": 3048,
+     "maxPrompt": 127643,
+     "overTier": 0,
+     "compactions": 0,
+     "usd": 0.48953319999999995,
+     "usdHigh": 0.5544507,
+     "tierPremium": 0,
+     "modelSeconds": 244.969
+    }
+   ],
+   "skills": [],
+   "kitFiles": {
+    "workforce-orchestrate/SKILL.md": 1,
+    "codex-workforce/profiles.json": 2,
+    "workforce-orchestrate/references/tools.md": 1,
+    "workforce-review/SKILL.md": 2
+   },
+   "kitChars": 138270,
+   "handoffs": 0,
+   "messagesToAgents": 0,
+   "messagesFromAgents": 0,
+   "waits": {
+    "sleep": 0,
+    "sleepSeconds": 0,
+    "wait_agent": 1,
+    "timedOut": 0,
+    "wakeRequests": 0,
+    "wakeUsd": 0,
+    "afterTimeout": {}
+   },
+   "accept": {
+    "snapshots": 1,
+    "runs": 1,
+    "closes": 1,
+    "closed": 1,
+    "open": 0,
+    "unknown": 0
+   },
+   "briefs": {
+    "total": 0,
+    "withConstraints": 0,
+    "withContract": 0
+   },
+   "reviewModes": [
+    "block"
+   ],
+   "exitCode": 0,
+   "wallSeconds": 800,
+   "thinking": 9141,
+   "totals": {
+    "agents": 1,
+    "toolCallsCooperator": 58,
+    "toolCallsAgents": 35,
+    "toolCalls": 93,
+    "requests": 62,
+    "input": 277544,
+    "cacheWrite": null,
+    "cacheRead": 5754240,
+    "output": 32973,
+    "thinking": 9141,
+    "usd": 1.4602420000000003,
+    "usdHigh": 1.5990139999999995,
+    "usdAgents": 0.4895332,
+    "usdByRole": {
+     "cooperator": 0.9707088000000003,
+     "worker": 0,
+     "auditor": 0,
+     "reviewer": 0.48953319999999995,
+     "probe": 0,
+     "other": 0
+    },
+    "workers": 0,
+    "workerTurns": 0,
+    "auditorTurns": 0,
+    "reviewerTurns": 1,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 12.158999999999999,
+     "worker": null,
+     "reviewer": 14.409941176470587
+    },
+    "cooperatorRequests": 45,
+    "cooperatorTurns": 1,
+    "workerMaxPrompt": 0,
+    "workerOverTier": 0,
+    "workerRequests": 0,
+    "compactions": 0,
+    "inputTotal": 6031784,
+    "usdCold": 1.4602420000000003
+   },
+   "route": "solo+review",
+   "postReview": {
+    "files": 0,
+    "total": 49
+   },
+   "review": {
+    "blocks": 1,
+    "rounds": 1,
+    "findings": 0,
+    "real": 0,
+    "realMissing": 0,
+    "sites": 178,
+    "open": 0
+   },
+   "warmStart": null,
+   "quality": {
+    "Решено": "да",
+    "CI": "зелёный",
+    "Тестов прошло": 2079,
+    "Осталось предупреждений": 0,
+    "Точечных исключений": 38,
+    "Без причины": 0,
+    "Рискованных замен на ?? (проверить вручную)": 16,
+    "Удалено ?.": 24,
+    "T1–T4 пройдены": "4 из 4",
+    "Ловушки T1–T4": "нет",
+    "Контракт выполнен": "да",
+    "Коммитов": 1,
+    "Незакоммичено файлов": 0
+   },
+   "provenance": {
+    "claude": "2.1.332 (Claude Code)",
+    "codex": "codex-cli 0.172.0",
+    "tmpJail": true,
+    "kitDelivery": "codex-home",
+    "taskAsFile": false,
+    "codexLaunch": "workforce-standard",
+    "policySets": "",
+    "setup": "deps 4ec3d0870b972c71, built 2026-10-20T10:23:45Z node v24.22.0 npm 11.8.0"
+   }
+  },
+  {
+   "id": "big-ownerreview-sol-r2",
+   "task": "big",
+   "variant": "ownerreview",
+   "model": "sol",
+   "repeat": 2,
+   "actors": [
+    {
+     "role": "cooperator",
+     "model": "gpt-6.2-sol",
+     "effort": "high",
+     "background": false,
+     "seconds": 772,
+     "turns": 1,
+     "toolCalls": 67,
+     "tools": {
+      "exec_command": 63,
+      "exec": 1,
+      "spawn_agent": 1,
+      "send_message": 1,
+      "wait_agent": 1
+     },
+     "requests": 48,
+     "input": 141169,
+     "cacheWrite": null,
+     "cacheRead": 4859136,
+     "output": 23230,
+     "thinking": 6874,
+     "maxPrompt": 143352,
+     "overTier": 0,
+     "compactions": 0,
+     "usd": 1.0005516,
+     "usdHigh": 1.0711361,
+     "tierPremium": 0,
+     "modelSeconds": 604.8749999999999
+    },
+    {
+     "role": "reviewer",
+     "model": "gpt-6.2-sol",
+     "effort": "xhigh",
+     "background": false,
+     "seconds": 210,
+     "turns": 1,
+     "toolCalls": 45,
+     "tools": {
+      "exec_command": 45
+     },
+     "requests": 17,
+     "input": 128108,
+     "cacheWrite": null,
+     "cacheRead": 1252352,
+     "output": 8996,
+     "thinking": 2731,
+     "maxPrompt": 125806,
+     "overTier": 0,
+     "compactions": 0,
+     "usd": 0.4714111999999999,
+     "usdHigh": 0.5354652,
+     "tierPremium": 0,
+     "modelSeconds": 206.426
+    }
+   ],
+   "skills": [],
+   "kitFiles": {},
+   "kitChars": 0,
+   "handoffs": 0,
+   "messagesToAgents": 1,
+   "messagesFromAgents": 0,
+   "waits": {
+    "sleep": 0,
+    "sleepSeconds": 0,
+    "wait_agent": 1,
+    "timedOut": 0,
+    "wakeRequests": 0,
+    "wakeUsd": 0,
+    "afterTimeout": {}
+   },
+   "accept": {
+    "snapshots": 2,
+    "runs": 2,
+    "closes": 2,
+    "closed": 2,
+    "open": 0,
+    "unknown": 0
+   },
+   "briefs": {
+    "total": 0,
+    "withConstraints": 0,
+    "withContract": 0
+   },
+   "reviewModes": [
+    "block"
+   ],
+   "exitCode": 0,
+   "wallSeconds": 775,
+   "thinking": 9605,
+   "totals": {
+    "agents": 1,
+    "toolCallsCooperator": 67,
+    "toolCallsAgents": 45,
+    "toolCalls": 112,
+    "requests": 65,
+    "input": 269277,
+    "cacheWrite": null,
+    "cacheRead": 6111488,
+    "output": 32226,
+    "thinking": 9605,
+    "usd": 1.4719628,
+    "usdHigh": 1.6066013,
+    "usdAgents": 0.4714111999999999,
+    "usdByRole": {
+     "cooperator": 1.0005516,
+     "worker": 0,
+     "auditor": 0,
+     "reviewer": 0.4714111999999999,
+     "probe": 0,
+     "other": 0
+    },
+    "workers": 0,
+    "workerTurns": 0,
+    "auditorTurns": 0,
+    "reviewerTurns": 1,
+    "workerContinuations": 0,
+    "tierPremium": 0,
+    "secPerRequest": {
+     "cooperator": 12.601562499999998,
+     "worker": null,
+     "reviewer": 12.14270588235294
+    },
+    "cooperatorRequests": 48,
+    "cooperatorTurns": 1,
+    "workerMaxPrompt": 0,
+    "workerOverTier": 0,
+    "workerRequests": 0,
+    "compactions": 0,
+    "inputTotal": 6380765,
+    "usdCold": 1.4719628
+   },
+   "route": "solo+review",
+   "postReview": {
+    "files": 0,
+    "total": 49
+   },
+   "review": null,
+   "warmStart": null,
+   "quality": {
+    "Решено": "да",
+    "CI": "зелёный",
+    "Тестов прошло": 2079,
+    "Осталось предупреждений": 0,
+    "Точечных исключений": 49,
+    "Без причины": 0,
+    "Рискованных замен на ?? (проверить вручную)": 14,
+    "Удалено ?.": 24,
+    "T1–T4 пройдены": "4 из 4",
+    "Ловушки T1–T4": "нет",
+    "Контракт выполнен": "да",
+    "Коммитов": 1,
+    "Незакоммичено файлов": 0
+   },
+   "provenance": {
+    "claude": "2.1.332 (Claude Code)",
+    "codex": "codex-cli 0.172.0",
+    "tmpJail": true,
+    "kitDelivery": "codex-home",
+    "taskAsFile": false,
+    "codexLaunch": "workforce-standard",
+    "policySets": "",
+    "setup": "deps 4ec3d0870b972c71, built 2026-10-20T10:23:45Z node v24.22.0 npm 11.8.0"
+   }
+  }
+ ]
+}

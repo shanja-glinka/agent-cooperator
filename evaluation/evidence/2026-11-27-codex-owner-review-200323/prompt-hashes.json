@@ -1,0 +1,9 @@
+{
+  "originalTaskSha256": "525d98e6be588e471518d93526a4c5585138abca157e50c8d33d14d7ac3983e6",
+  "effectivePromptTemplateSha256": "1ba7684fc0393266f6e9c595bb1a7758650ca5b26c6ca182b98fe7f2e7b81026",
+  "routeInstructionSha256": "848b6e5cb931f6fdb525044176f4bc39d6bee2c919336aa124f6e38106525113",
+  "originalTaskIsByteExactPrefix": true,
+  "checksChanged": false,
+  "kitCommit": "44a78bd44702046ab3710657823468be4129d50c",
+  "nativeLaunch": "workforce-standard"
+}

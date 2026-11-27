@@ -1,0 +1,102 @@
+{
+  "method": "Immutable candidate-tree vs base-tree unit comparisons. Values or caught exceptions must match. One fixture was selected from a reviewer after the original trials began. Isolated local runner with infrastructure imports stubbed. These checks supplement the preregistered task acceptance.",
+  "fixtureSha256": "dd66551932a7dd777442c8da4155efd3e662bb2f39eae8c06698e95d262be4f0",
+  "baseSelfComparison": {
+    "pairs": 42,
+    "equal": 42,
+    "differences": 0,
+    "byCategory": {
+      "navigation actions": {
+        "pairs": 10,
+        "equal": 10,
+        "mismatches": 0
+      },
+      "configuration values": {
+        "pairs": 6,
+        "equal": 6,
+        "mismatches": 0
+      },
+      "mode and owner combinations": {
+        "pairs": 16,
+        "equal": 16,
+        "mismatches": 0
+      },
+      "message context": {
+        "pairs": 6,
+        "equal": 6,
+        "mismatches": 0
+      },
+      "conversation options": {
+        "pairs": 4,
+        "equal": 4,
+        "mismatches": 0
+      }
+    }
+  },
+  "results": {
+    "big-ownerreview-sol-r1": {
+      "pairs": 42,
+      "equal": 42,
+      "differences": 0,
+      "byCategory": {
+        "navigation actions": {
+          "pairs": 10,
+          "equal": 10,
+          "mismatches": 0
+        },
+        "configuration values": {
+          "pairs": 6,
+          "equal": 6,
+          "mismatches": 0
+        },
+        "mode and owner combinations": {
+          "pairs": 16,
+          "equal": 16,
+          "mismatches": 0
+        },
+        "message context": {
+          "pairs": 6,
+          "equal": 6,
+          "mismatches": 0
+        },
+        "conversation options": {
+          "pairs": 4,
+          "equal": 4,
+          "mismatches": 0
+        }
+      }
+    },
+    "big-ownerreview-sol-r2": {
+      "pairs": 42,
+      "equal": 42,
+      "differences": 0,
+      "byCategory": {
+        "navigation actions": {
+          "pairs": 10,
+          "equal": 10,
+          "mismatches": 0
+        },
+        "configuration values": {
+          "pairs": 6,
+          "equal": 6,
+          "mismatches": 0
+        },
+        "mode and owner combinations": {
+          "pairs": 16,
+          "equal": 16,
+          "mismatches": 0
+        },
+        "message context": {
+          "pairs": 6,
+          "equal": 6,
+          "mismatches": 0
+        },
+        "conversation options": {
+          "pairs": 4,
+          "equal": 4,
+          "mismatches": 0
+        }
+      }
+    }
+  }
+}
