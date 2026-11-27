@@ -1,0 +1,459 @@
+{
+  "repeat": 1,
+  "original": {
+    "exitCode": 0,
+    "commits": 1,
+    "dirtyFiles": 0,
+    "contractPassed": true,
+    "hiddenCases": {
+      "passed": 4,
+      "total": 4
+    },
+    "wallSeconds": 1005,
+    "originalTaskInRootMessages": true,
+    "taskFileEndsWithFrozenRoute": false,
+    "frozenRouteInRootMessages": false
+  },
+  "proofOfRootPatchEdits": {
+    "editEvents": 5,
+    "uniquePaths": 19,
+    "deliveredPaths": 51,
+    "deliveredPathsInRootEvents": 19,
+    "confirmedRootCommitCommands": 1
+  },
+  "ownerDiffBeforeReview": {
+    "finalFiles": 51,
+    "fileDiffsSeen": 9,
+    "matchingFinalBlobPairs": 7,
+    "exactFinalFileDiffs": 6
+  },
+  "ownerAnchoredDiffFileCommandsBeforeReview": 0,
+  "isolation": "unavailable",
+  "actual": [
+    {
+      "role": "root",
+      "models": [
+        "gpt-6.2-sol"
+      ],
+      "efforts": [
+        "high"
+      ],
+      "rolloutFiles": 1,
+      "turns": 1,
+      "usage": {
+        "requests": 67,
+        "fresh": 174721,
+        "cached": 7936384,
+        "output": 35189,
+        "reasoning": 12510,
+        "cacheWrite": 0,
+        "credits": 37.37426
+      },
+      "editToolCalls": 5,
+      "writeCommandIndicators": 11,
+      "nestedCommandEvents": 81,
+      "successfulProgrammaticWriteCommands": 6,
+      "programmaticWritesBeforeReviewer": 5,
+      "programmaticWritesAfterLastReview": 0,
+      "nestedEditEvents": 5,
+      "nestedEditedPaths": 19,
+      "nestedFinalPathsEdited": 19,
+      "nestedEditsAfterLastReview": 0
+    },
+    {
+      "role": "reviewer",
+      "models": [
+        "gpt-6.2-sol"
+      ],
+      "efforts": [
+        "xhigh"
+      ],
+      "rolloutFiles": 1,
+      "turns": 2,
+      "usage": {
+        "requests": 21,
+        "fresh": 134750,
+        "cached": 1766016,
+        "output": 14885,
+        "reasoning": 4660,
+        "cacheWrite": 0,
+        "credits": 14.87379
+      },
+      "editToolCalls": 0,
+      "writeCommandIndicators": 0,
+      "nestedCommandEvents": 43,
+      "successfulProgrammaticWriteCommands": 0,
+      "programmaticWritesBeforeReviewer": 0,
+      "programmaticWritesAfterLastReview": 0,
+      "nestedEditEvents": 0,
+      "nestedEditedPaths": 0,
+      "nestedFinalPathsEdited": 0,
+      "nestedEditsAfterLastReview": 0,
+      "reports": [
+        {
+          "acceptance": "not-accepted",
+          "mentionsContract": false,
+          "mentionsBehaviorOrPreservation": true,
+          "mentionsGuards": true,
+          "mentionsFallbacks": true,
+          "mentionsChecks": true,
+          "citesTree": true,
+          "treeIdenticalToDelivery": false,
+          "mentionsFinalTreeOrCommit": false
+        },
+        {
+          "acceptance": "accepted",
+          "mentionsContract": false,
+          "mentionsBehaviorOrPreservation": true,
+          "mentionsGuards": false,
+          "mentionsFallbacks": true,
+          "mentionsChecks": true,
+          "citesTree": true,
+          "treeIdenticalToDelivery": true,
+          "mentionsFinalTreeOrCommit": true
+        }
+      ],
+      "reviewToolOutputs": {
+        "finalFiles": 51,
+        "fileDiffsSeen": 51,
+        "matchingFinalBlobPairs": 48,
+        "exactFinalFileDiffs": 48,
+        "canonicalDiffLines": 2382,
+        "exactNumberedLines": 0,
+        "readsFullTaskText": false,
+        "fullTaskTextInArchivedMessages": false,
+        "sawFinalTreeOrCommit": true,
+        "outputsWithTruncationIndicator": 3
+      }
+    }
+  ],
+  "creditTotals": {
+    "canonicalUsageMatches": null,
+    "totalRequests": 88,
+    "credits": 52.24805
+  },
+  "spawnBriefs": [
+    {
+      "model": "gpt-6.2-sol",
+      "effort": "xhigh",
+      "history": "none",
+      "characters": 5796,
+      "archivedTextOpaque": true,
+      "finalFiles": 51,
+      "fileDiffsSeen": 0,
+      "matchingFinalBlobPairs": 0,
+      "exactFinalFileDiffs": 0
+    }
+  ],
+  "reviewFollowups": [
+    {
+      "kind": "send_message",
+      "characters": 548,
+      "archivedTextOpaque": true,
+      "finalFiles": 51,
+      "fileDiffsSeen": 0,
+      "matchingFinalBlobPairs": 0,
+      "exactFinalFileDiffs": 0
+    },
+    {
+      "kind": "send_message",
+      "characters": 484,
+      "archivedTextOpaque": true,
+      "finalFiles": 51,
+      "fileDiffsSeen": 0,
+      "matchingFinalBlobPairs": 0,
+      "exactFinalFileDiffs": 0
+    },
+    {
+      "kind": "followup_task",
+      "characters": 1912,
+      "archivedTextOpaque": true,
+      "finalFiles": 51,
+      "fileDiffsSeen": 0,
+      "matchingFinalBlobPairs": 0,
+      "exactFinalFileDiffs": 0
+    }
+  ],
+  "finalSnapshot": {
+    "rootSuccessfulConditionalClosesForFinalTree": 0,
+    "filesWithMtimeAfterLastReviewReport": 0,
+    "recordedPatchMatches": true
+  },
+  "additional": {
+    "ordinaryStandardLaunch": true,
+    "exactOriginalTaskInput": true,
+    "otherUserChunksAreOrdinaryContext": true,
+    "frozenTaskFilesMatched": true,
+    "frozenDependencyAndBaseMatched": true,
+    "releaseOwnerRuleVisibleBeforeFirstSpawn": true,
+    "projectCiGreen": true,
+    "observedFullCiCommands": [
+      {
+        "exitCode": 0,
+        "completedBeforeFirstReview": true
+      },
+      {
+        "exitCode": 0,
+        "completedBeforeFirstReview": false
+      },
+      {
+        "exitCode": 0,
+        "completedBeforeFirstReview": false
+      }
+    ],
+    "explicitReviewerSnapshots": [
+      [
+        {
+          "mode": "block",
+          "snapshot": "different-reference",
+          "acceptanceLine": true
+        },
+        {
+          "mode": "block",
+          "snapshot": "matches-delivered",
+          "acceptanceLine": true
+        }
+      ]
+    ]
+  },
+  "canonical": {
+    "matches": true,
+    "source": "independent-benchmark-recount"
+  },
+  "diffAudit": {
+    "reviewedFinalIsDelivered": true,
+    "deltaReconstructsInitialTree": true,
+    "initialCoverage": {
+      "finalFiles": 50,
+      "fileDiffsSeen": 50,
+      "matchingFinalBlobPairs": 50,
+      "exactFinalFileDiffs": 50,
+      "canonicalDiffLines": 1997,
+      "exactNumberedLines": 0
+    },
+    "deltaCoverage": {
+      "finalFiles": 4,
+      "fileDiffsSeen": 4,
+      "matchingFinalBlobPairs": 4,
+      "exactFinalFileDiffs": 4,
+      "canonicalDiffLines": 447,
+      "exactNumberedLines": 0
+    }
+  },
+  "phaseAudit": {
+    "candidate": {
+      "author": {
+        "requests": 67,
+        "credits": 37.37426
+      },
+      "authorBeforeReview": {
+        "requests": 46,
+        "credits": 25.20715
+      },
+      "authorAfterReviewStarts": {
+        "requests": 21,
+        "credits": 12.16711
+      },
+      "authorAfterFirstReviewReport": {
+        "requests": 6,
+        "credits": 3.55421
+      },
+      "authorActionsDuringInitialReview": {
+        "exec": {
+          "requests": 11,
+          "credits": 6.61644
+        },
+        "send_message": {
+          "requests": 2,
+          "credits": 0.95725
+        },
+        "wait_agent": {
+          "requests": 2,
+          "credits": 1.03921
+        }
+      },
+      "authorFileChangesDuringInitialReview": {
+        "events": 1,
+        "paths": 3
+      },
+      "reviewer": {
+        "requests": 21,
+        "credits": 14.87379
+      },
+      "reviewerTurns": [
+        {
+          "requests": 17,
+          "credits": 12.09186
+        },
+        {
+          "requests": 4,
+          "credits": 2.78193
+        }
+      ],
+      "reviewerReportCounts": [
+        {
+          "rounds": 1,
+          "findings": 1,
+          "sites": 203,
+          "open": 1
+        },
+        {
+          "rounds": 2,
+          "findings": 1,
+          "sites": 285,
+          "open": 0
+        }
+      ],
+      "rootCiCommands": [
+        {
+          "phase": "before-review",
+          "exitCode": 0
+        },
+        {
+          "phase": "during-initial-review",
+          "exitCode": 0
+        },
+        {
+          "phase": "during-follow-up-review",
+          "exitCode": 0
+        }
+      ],
+      "wallSeconds": 1005
+    },
+    "explicitR1": {
+      "author": {
+        "requests": 45,
+        "credits": 24.26772
+      },
+      "authorBeforeReview": {
+        "requests": 41,
+        "credits": 22.09286
+      },
+      "authorAfterReviewStarts": {
+        "requests": 4,
+        "credits": 2.17486
+      },
+      "authorAfterFirstReviewReport": {
+        "requests": 2,
+        "credits": 1.1401
+      },
+      "authorActionsDuringInitialReview": {
+        "exec": {
+          "requests": 1,
+          "credits": 0.54961
+        },
+        "wait_agent": {
+          "requests": 1,
+          "credits": 0.48515
+        }
+      },
+      "authorFileChangesDuringInitialReview": {
+        "events": 0,
+        "paths": 0
+      },
+      "reviewer": {
+        "requests": 17,
+        "credits": 12.23833
+      },
+      "reviewerTurns": [
+        {
+          "requests": 17,
+          "credits": 12.23833
+        }
+      ],
+      "reviewerReportCounts": [
+        {
+          "rounds": 1,
+          "findings": 0,
+          "sites": 178,
+          "open": 0
+        }
+      ],
+      "rootCiCommands": [
+        {
+          "phase": "before-review",
+          "exitCode": 0
+        },
+        {
+          "phase": "after-last-review-report",
+          "exitCode": 0
+        }
+      ],
+      "wallSeconds": 800
+    },
+    "explicitR2": {
+      "author": {
+        "requests": 48,
+        "credits": 25.01379
+      },
+      "authorBeforeReview": {
+        "requests": 41,
+        "credits": 21.58426
+      },
+      "authorAfterReviewStarts": {
+        "requests": 7,
+        "credits": 3.42953
+      },
+      "authorAfterFirstReviewReport": {
+        "requests": 2,
+        "credits": 1.00608
+      },
+      "authorActionsDuringInitialReview": {
+        "exec": {
+          "requests": 3,
+          "credits": 1.58293
+        },
+        "send_message": {
+          "requests": 1,
+          "credits": 0.46153
+        },
+        "wait_agent": {
+          "requests": 1,
+          "credits": 0.37899
+        }
+      },
+      "authorFileChangesDuringInitialReview": {
+        "events": 0,
+        "paths": 0
+      },
+      "reviewer": {
+        "requests": 17,
+        "credits": 11.78528
+      },
+      "reviewerTurns": [
+        {
+          "requests": 17,
+          "credits": 11.78528
+        }
+      ],
+      "reviewerReportCounts": [
+        {
+          "rounds": 1,
+          "findings": 0,
+          "sites": 164,
+          "open": 0
+        }
+      ],
+      "rootCiCommands": [
+        {
+          "phase": "before-review",
+          "exitCode": 1
+        },
+        {
+          "phase": "before-review",
+          "exitCode": 0
+        },
+        {
+          "phase": "before-review",
+          "exitCode": 0
+        },
+        {
+          "phase": "after-last-review-report",
+          "exitCode": 0
+        }
+      ],
+      "wallSeconds": 775
+    }
+  },
+  "officialIsolationAfterBatch": "clean"
+}

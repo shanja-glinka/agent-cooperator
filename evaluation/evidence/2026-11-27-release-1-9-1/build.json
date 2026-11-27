@@ -1,0 +1,38 @@
+{
+  "testedKitCommit": "4c58a4966c1f03c0ec9b0fdf31115f005fbc5fd4",
+  "testedTree": "aeb59164525a49da75fde3e569efb0a4757c3e85",
+  "independentCodeReview": {
+    "model": "gpt-6.2-sol",
+    "effort": "xhigh",
+    "status": "accepted",
+    "localTestsPassed": 73,
+    "localTestsSkipped": 0
+  },
+  "installedSwitchPairs": [
+    "on/on",
+    "off/on",
+    "on/off",
+    "off/off"
+  ],
+  "testedSwitchRuntimes": [
+    "claude",
+    "codex"
+  ],
+  "githubActions": {
+    "sourceCommit": "fa3d43c50fd429742a85a0dcc024b83fdffe2e79",
+    "url": "https://github.com/shanja-glinka/agent-cooperator/actions/runs/46070986505",
+    "conclusion": "success",
+    "jobs": {
+      "commit-messages": "success",
+      "test (macos-latest, 22)": "success",
+      "test (windows-latest, 22)": "success",
+      "test (ubuntu-latest, 22)": "success",
+      "test (windows-latest, 24)": "success",
+      "test (ubuntu-latest, 24)": "success",
+      "test (macos-latest, 24)": "success"
+    }
+  },
+  "postBenchmarkSourceDelta": "The cross-platform test normalizes both sides of a working-directory assertion. A Windows temporary-directory alias and its expanded spelling refer to the same directory. This change is confined to tests.",
+  "archiveIdenticalAfterTestOnlyFix": true,
+  "archiveSha512": "ce919826794b00aff4b65ef27471fa15c1542e4205db1eca74fde348637bbe56dda0326ea5d100a9607011081333c1745223c17f43bc0caf627fa7da392eed30"
+}

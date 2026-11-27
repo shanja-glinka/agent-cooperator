@@ -44,6 +44,13 @@ from the private project's hidden tests, which are not published.
 | `*/EXPECTATIONS.md` | What the run was expected to show, written before it started; what happened during the run is added below it. |
 | `contract-recheck/summary.txt` | The large task's contract for the earlier runs, rechecked by one hidden test on their final code. |
 
+## Release 1.9.1
+
+- [Joint release check](2026-11-27-release-1-9-1/REPORT.md). One original large task per runtime, on the same release candidate.
+- [Eight-task historical comparison](2026-11-27-codex-standard-fix-181748/REPORT.md). Includes both Codex profiles, Claude, and the separate cost of interrupted attempts.
+- [Two explicit Sol author/reviewer trials](2026-11-27-codex-owner-review-200323/REPORT.md). Includes independent whole-diff review evidence and observed cost against the published 1.8.1.
+- [Stopped routing experiment](2026-11-27-codex-native-standard-203757/REPORT.md). Preserves a quality regression, the before/after comparison, and the partial request ledger.
+
 ## What is left out
 
 The project behind the suite is private. These files hold no code, task texts,

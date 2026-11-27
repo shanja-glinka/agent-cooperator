@@ -1,0 +1,14 @@
+{
+  "package": "agent-cooperator",
+  "version": "1.9.1",
+  "fileCount": 62,
+  "integrity": "sha512-zpGYJnlLAK/0tl7ydHH6FcFULkIF2x7KdP3jSGN7vlbdoDJupdEAqWBwEQgTM8F0UiPBf0O8DK9if6faOS7tMA==",
+  "archiveSha512": "ce919826794b00aff4b65ef27471fa15c1542e4205db1eca74fde348637bbe56dda0326ea5d100a9607011081333c1745223c17f43bc0caf627fa7da392eed30",
+  "packageSizeBytes": 143925,
+  "unpackedBytes": 516656,
+  "installedFromPackedTarball": [
+    "claude",
+    "codex"
+  ],
+  "ownerCommandLinked": true
+}

@@ -150,7 +150,9 @@ const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.
 const comparison = [`# Сравнение: ${data.run}`, '', `Без кита | ${prev ?? '—'} | ${next}${extras.length ? ` | ${extras.join(' | ')}` : ''}. ${legend}`, '', `Источники: ${sources()}.`, ''];
 // Cells taken from earlier runs ran on another day and under those runs' conditions.
 for (const p of data.prev) {
-  const line = `Колонки ${p.variants.map((v) => label(v.split('=')[0])).join(' и ')} — из прогона ${p.run}, не перезапускались: другой день, условия того прогона, своя пометка изоляции.`;
+  const sameDay = /^\d{4}-\d{2}-\d{2}/.exec(data.run)?.[0];
+  const timing = sameDay && p.run.startsWith(sameDay) ? 'тот же день' : 'другой день';
+  const line = `Колонки ${p.variants.map((v) => label(v.split('=')[0])).join(' и ')} — из прогона ${p.run}, не перезапускались: ${timing}, условия того прогона, своя пометка изоляции.`;
   metrics.push(line); comparison.push(line);
 }
 if (data.prev.length) { metrics.push(''); comparison.push(''); }
