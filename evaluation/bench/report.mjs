@@ -15,10 +15,17 @@ const out = process.argv[2];
 const data = loadRun(out);
 const names = data.variants.map((v) => v.split('=')[0]);
 const prevNames = data.prev.flatMap((p) => p.variants.map((v) => v.split('=')[0]));
-const runKits = data.runVariants.map((v) => v.split('=')[0]).filter((n) => n !== 'nokit');
-const next = runKits[0];
-const extras = runKits.slice(1);
-const prev = prevNames.filter((n) => n !== 'nokit').at(-1) ?? null;
+const runKitSpecs = data.runVariants.filter((v) => v.split('=')[0] !== 'nokit');
+const runKits = runKitSpecs.map((v) => v.split('=')[0]);
+const taskScoped = (spec) => spec.slice(spec.indexOf('=') + 1).split('+', 1)[0].includes('@');
+// A full batch is the leading nokit plus two unscoped kit specs: previous, then new.
+// Task-scoped first or second kit specs keep candidate-plus-ablation ordering.
+const fullBatch = data.prev.length === 0 && runKits.length >= 2
+  && data.runVariants[0]?.split('=')[0] === 'nokit'
+  && !runKitSpecs.slice(0, 2).some(taskScoped);
+const prev = fullBatch ? runKits[0] : prevNames.filter((n) => n !== 'nokit').at(-1) ?? null;
+const next = fullBatch ? runKits[1] : runKits[0];
+const extras = fullBatch ? runKits.slice(2) : runKits.slice(1);
 const label = (n) => (n === 'nokit' ? 'Без кита' : n);
 const k = (n) => (n == null || Number.isNaN(n) ? '—' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : Number.isInteger(n) || n >= 100 ? String(Math.round(n)) : n.toFixed(1));
 const usd = (n) => (n == null || Number.isNaN(n) ? '—' : `$${n.toFixed(2)}`);
@@ -75,7 +82,8 @@ const route = (c) => {
   for (const a of agents) { const key = `${a.role} ${a.model ?? ''}`.trim(); counts[key] = (counts[key] ?? 0) + 1; }
   return Object.entries(counts).map(([r, n]) => (n > 1 ? `${n}× ${r}` : r)).join(', ');
 };
-const cellsOf = (task, model, name) => data.cells.filter((c) => c.task === task && c.model === model && c.variant === name);
+const rootModel = (c) => c.rootModel ?? (c.model === 'opus' ? 'opus' : c.actors.find((a) => a.role === 'cooperator')?.model ?? c.provenance?.rootModel ?? c.model);
+const cellsOf = (task, model, name) => data.cells.filter((c) => c.task === task && rootModel(c) === model && c.variant === name);
 const mean = (vals) => (vals.length && vals.every((v) => v != null) ? vals.reduce((a, b) => a + b, 0) / vals.length : null);
 const admitted = (cs) => { const clean = cs.filter(isClean); return clean.length ? clean : null; };
 const show = (cs, get, fmt) => {
@@ -134,8 +142,8 @@ const sources = () => ['metrics.json', ...fs.readdirSync(out).filter((f) => /^pr
 // Tasks in the suite's order, as bench.sh recorded it.
 const order = fs.existsSync(path.join(out, 'tasks.txt')) ? fs.readFileSync(path.join(out, 'tasks.txt'), 'utf8').split('\n').filter(Boolean) : [];
 const tasks = [...new Set(data.cells.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
-const models = [...new Set(data.cells.map((c) => c.model))];
-const modelName = (m) => (m === 'opus' ? 'Opus 5.5' : m === 'sol' ? 'GPT-6.2 Sol' : m);
+const models = [...new Set(data.cells.map(rootModel))];
+const modelName = (m) => ({ opus: 'Opus 5.5', sol: 'GPT-6.2 Sol', 'gpt-6.2-sol': 'GPT-6.2 Sol', 'gpt-6.1-sol': 'GPT-6.1 Sol' }[m] ?? m);
 
 const legend = 'Значения — по ячейкам с чистой изоляцией; группа без таких ячеек помечена * (фактический расход), её разницы не считаются. Разница в процентах; в пределах ±5% — «без изм.». При нескольких повторах — среднее (мин–макс). Цена — по API-прайсу (prices.mjs); у Codex нижняя оценка, верхняя — отдельной строкой, если отличается. Цена с холодным стартом кэша — без чужого прогрева: если первый запрос кооператора Claude нашёл весь свой префикс уже в кэше (его записала более ранняя сессия с тем же префиксом, например прерванный запуск тех же путей), часть префикса сверх общей для всех ячеек прогона (определения инструментов) оценена как запись в кэш; общая часть остаётся чтением; строка есть, только когда такие ячейки были. Цена корректного результата — расход всех ячеек группы, делённый на число ячеек с выполненным контрактом. Надбавка за длинный промпт — что добавили запросы выше тарифного порога (Haiku выше 100k, OpenAI выше 272k) против тех же токенов по базовому тарифу. Секунд на запрос — время ответа модели на один запрос без работы инструментов и ожидания агентов: скорость API в день прогона. Продолжения воркеров — ходы воркеров сверх первого задания: исправления, уточнения и продолжения вместе. Файлов результата записано после начала последнего ревью — файлы итогового диффа, время последней записи которых позже начала последнего хода ревьюера.';
 const metrics = [`# Метрики: ${data.run}`, '', `Варианты: ${data.variants.join(', ')}. Полные данные — metrics.json. ${legend}`, '', `Источники: ${sources()}.`, ''];

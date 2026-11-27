@@ -60,13 +60,14 @@ function claude(logs) {
 function codex(logs) {
   const mainId = jsonl(path.join(logs, 'codex.events.jsonl')).find((e) => e.type === 'thread.started')?.thread_id;
   const dir = path.join(logs, 'rollouts');
-  const entries = []; const spawns = []; let final = '';
+  const entries = []; const spawns = []; let final = ''; let rootModel = null;
   for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
     const lines = jsonl(path.join(dir, f));
     const meta = lines.find((l) => l.type === 'session_meta')?.payload;
     if (!meta || (meta.id !== mainId && meta.session_id !== mainId)) continue;
     const isMain = meta.id === mainId;
     const ctx = lines.find((l) => l.type === 'turn_context')?.payload ?? {};
+    if (isMain) rootModel = ctx.model ?? rootModel;
     const spawn = meta.source?.subagent?.thread_spawn;
     const who = isMain ? COOP : `${spawn?.agent_role ?? 'agent'} / ${ctx.model}:${ctx.effort ?? ctx.reasoning_effort}`;
     let last = '';
@@ -103,7 +104,7 @@ function codex(logs) {
       if (end) entries.push({ t: end.t, who, kind: 'сдаёт', text: clip(last, 1500) });
     }
   }
-  return { entries, spawns, final };
+  return { entries, spawns, final, rootModel };
 }
 
 // Codex runs the Claude kit starts through codex-run.mjs (Hybrid auditors, reviewers, escalated
@@ -152,15 +153,16 @@ const cells = fs.readdirSync(path.join(out, 'cells')).sort().filter((id) => fs.e
   const at = (t) => { const s = Math.max(0, Math.round((new Date(t) - start) / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
   fs.writeFileSync(path.join(dir, 'timeline.md'), [`# ${id}`, '', ...r.entries.map((e) => `- \`${at(e.t)}\` **${e.who}** ${e.kind}: ${e.text.replace(/\n/g, '\n  ')}`), '', '## Итоговый отчёт', '', r.final, ''].join('\n'));
   const quality = JSON.parse(read(path.join(dir, 'check.json')) || '{}');
-  return { id, task, variant, model, repeat, quality, ...r, at };
+  return { id, task, variant, model, repeat, quality, ...r, rootModel: model === 'opus' ? 'opus' : r.rootModel ?? model, at };
 });
 // Tasks in the suite's order, as bench.sh recorded it.
 const order = read(path.join(out, 'tasks.txt')).split('\n').filter(Boolean);
 const tasks = [...new Set(cells.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
-for (const task of tasks) for (const model of [...new Set(cells.map((c) => c.model))]) {
-  const group = cells.filter((c) => c.task === task && c.model === model);
+const modelName = (model) => ({ opus: 'Opus 5.5', sol: 'GPT-6.2 Sol', 'gpt-6.2-sol': 'GPT-6.2 Sol', 'gpt-6.1-sol': 'GPT-6.1 Sol' }[model] ?? model);
+for (const task of tasks) for (const model of [...new Set(cells.map((c) => c.rootModel))]) {
+  const group = cells.filter((c) => c.task === task && c.rootModel === model);
   if (!group.length) continue;
-  md.push(`## ${task} — ${model === 'opus' ? 'Opus 5.5' : 'GPT-6.2 Sol'}`, '', '| Ячейка | Решено | Маршрут |', '|---|---|---|');
+  md.push(`## ${task} — ${modelName(model)}`, '', '| Ячейка | Решено | Маршрут |', '|---|---|---|');
   for (const c of group) {
     const route = c.spawns.length ? `сам + ${c.spawns.map((s) => `${s.role} (${s.model}${s.effort ? `:${s.effort}` : ''})`).join(', ')}` : 'сам, без агентов';
     md.push(`| ${c.variant} r${c.repeat} | ${c.quality['Решено'] ?? '—'} | ${route.replace(/\|/g, '\\|')} |`);

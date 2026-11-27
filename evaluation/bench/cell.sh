@@ -32,6 +32,10 @@ KIT=$OUT/kits/$VARIANT
 SETS=(); [[ -s $OUT/sets/$VARIANT.txt ]] && for kv in $(<$OUT/sets/$VARIANT.txt); do SETS+=(--set $kv); done
 # Signed-in Claude config dir and Codex auth file; the suite may set both.
 CLAUDE_DIR=${BENCH_CLAUDE_CONFIG_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}}
+CLAUDE_CONFIG_ENV=()
+if [[ -n ${BENCH_CLAUDE_CONFIG_DIR:-} || -n ${CLAUDE_CONFIG_DIR:-} ]]; then
+  CLAUDE_CONFIG_ENV=("CLAUDE_CONFIG_DIR=$CLAUDE_DIR")
+fi
 CODEX_AUTH=${BENCH_CODEX_AUTH:-${CODEX_HOME:-$HOME/.codex}/auth.json}
 # The cell's own /tmp: every zsh its agents start reads tmpjail/zshenv first (ZDOTDIR), which
 # moves /tmp paths of a command into $CTMP; Claude Code's file tools go there through the hook,
@@ -96,7 +100,7 @@ fi
 # agent starts inherits BENCH_CELL, so the ones it leaves behind can be found.
 CLEAN=(-u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_MESSAGING_SOCKET -u CLAUDE_CODE_MESSAGING_TOKEN -u CLAUDE_CODE_SESSION_ATTENDED -u CLAUDE_PID -u CLAUDE_EFFORT -u CLAUDE_CODE_ENTRYPOINT)
 if [[ $MODEL == opus ]]; then
-  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=$CLAUDE_DIR CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
+  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 $CLAUDE_CONFIG_ENV CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
   # A Claude project directory left from an earlier cell with the same path would carry its
   # sessions and memory into this one.
   STALE=$CLAUDE_DIR/projects/${WT//[^A-Za-z0-9]/-}

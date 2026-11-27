@@ -80,6 +80,12 @@ suite has run.
 
 ## Run
 
+For a full batch, put `nokit` first, the unscoped previous kit second, and the unscoped new
+kit third; later kit variants are extra columns and may be task-scoped. If either of the first
+two kit specs uses `@task`, the run stays candidate-first, even when `nokit` is present. For
+example, `nokit candidate=<commit> candidate-noreview=<commit>@big` compares the candidate
+with its partial ablation; it does not mark the candidate as the previous version.
+
 ```sh
 evaluation/bench/bench.sh <suite-dir> <label> nokit <prev>=<commit> <new>=<commit>
 # REPEATS=3 PARALLEL=4 MODELS="opus sol" ...
@@ -238,8 +244,10 @@ A suite directory holds:
 
 - `suite.env` with `REPO`, `BASE`, `TASKS=(…)`, optional `BASE_<task>` for a task
   with its own base commit, `BENCH_MAXTURNS`, the CLI versions
-  (`CLAUDE_CODE_VERSION`, `CODEX_VERSION`), the signed-in Claude config dir
-  (`BENCH_CLAUDE_CONFIG_DIR`; its login stays in the keychain, nothing to create)
+  (`CLAUDE_CODE_VERSION`, `CODEX_VERSION`), an optional signed-in Claude config dir
+  override (`BENCH_CLAUDE_CONFIG_DIR`; otherwise an explicitly set caller or suite
+  `CLAUDE_CONFIG_DIR` is used, or Claude Code's default if neither is set; login stays in
+  the keychain),
   and the Codex `auth.json` (`BENCH_CODEX_AUTH`, linked so that a token refresh
   writes through to the same file);
 - `setup.sh`, run in each fresh checkout to provide the project's dependencies

@@ -4,8 +4,9 @@
 # usage: evaluation/bench/bench.sh <suite-dir> <label> <variant> [<variant> ...]
 #   variant: nokit | <name>=<kit commit>[@task,task][+key=value,key=value]
 #   @task,task runs that variant on those tasks only; +key=value installs it with that
-#   install-policy switch (installer --set), e.g. v7nr=abc123@big+reviewBlock=off,reviewStage=off. The comparison treats the first kit
-#   variant of the run as the new version; a later one is shown beside it on its tasks.
+#   install-policy switch (installer --set), e.g. v7nr=abc123@big+reviewBlock=off,reviewStage=off.
+#   A full batch starts `nokit <previous> <new>` with both kit specs unscoped; later variants
+#   are extra columns. If either first kit spec uses `@task`, the first kit remains the candidate.
 # env:   MODELS="opus sol"  REPEATS=1  PARALLEL=4  DRY=1 (set up and clean up, no agents)
 #        PREV_RUNS="<run dir>:<variant>,<variant> ...": take those variants' cells from earlier
 #        runs of the same suite instead of running them again (PREV_RUN with PREV_VARIANTS

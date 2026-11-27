@@ -27,7 +27,11 @@ const route = (c) => {
   for (const a of agents) { const key = `${a.role} ${a.model ?? ''}`.trim(); counts[key] = (counts[key] ?? 0) + 1; }
   return `сам + ${Object.entries(counts).map(([r, n]) => (n > 1 ? `${n}× ${r}` : r)).join(', ')}`;
 };
-const modelName = (m) => (m === 'opus' ? 'Opus 5.5 (Claude Code)' : m === 'sol' ? 'GPT-6.2 Sol (Codex)' : m);
+const rootModel = (c) => c.rootModel ?? (c.model === 'opus' ? 'opus' : c.actors.find((a) => a.role === 'cooperator')?.model ?? c.provenance?.rootModel ?? c.model);
+const modelName = (m, cs) => {
+  const root = rootModel(cs[0] ?? { model: m, actors: [] });
+  return ({ opus: 'Opus 5.5 (Claude Code)', sol: 'GPT-6.2 Sol (Codex)', 'gpt-6.2-sol': 'GPT-6.2 Sol (Codex)', 'gpt-6.1-sol': 'GPT-6.1 Sol (Codex)' }[root] ?? root);
+};
 const cell = (v) => String(v).replace(/\|/g, '\\|');
 const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.map(cell).join(' | ')} |`)].join('\n');
 
@@ -35,13 +39,21 @@ const base = data.cells.filter((c) => c.variant === 'nokit');
 // Tasks in the suite's order, as bench.sh recorded it.
 const order = fs.existsSync(path.join(out, 'tasks.txt')) ? fs.readFileSync(path.join(out, 'tasks.txt'), 'utf8').split('\n').filter(Boolean) : [];
 const tasks = [...new Set(base.map((c) => c.task))].sort((a, b) => (order.indexOf(a) + 1 || 1e9) - (order.indexOf(b) + 1 || 1e9));
-const models = [...new Set(base.map((c) => c.model))];
+const models = [...new Set(base.map(rootModel))];
+const modelKeys = models.map((model) => {
+  const cells = base.filter((c) => rootModel(c) === model);
+  const aliases = [...new Set(cells.map((c) => c.model))];
+  const legacy = ['opus', 'sol'].find((alias) => aliases.includes(alias));
+  if (legacy && new Set(base.filter((c) => c.model === legacy).map(rootModel)).size === 1) return legacy;
+  if (aliases.length !== 1) return model;
+  return new Set(base.filter((c) => c.model === aliases[0]).map(rootModel)).size === 1 ? aliases[0] : model;
+});
 const json = { run: data.run, suite: data.suite, tasks: {} };
 const md = [`# База без кита: ${data.run}`, '',
   'Что модели делают на задачах набора без кита — фактический результат, с которым сравнивается любая версия кита. Каждая ячейка — отдельный чистый репозиторий, одна и та же формулировка задачи, повторы подряд в одном прогоне. Числа: среднее (мин–макс) по повторам; качество — значение каждого повтора по порядку.', ''];
 for (const task of tasks) {
   json.tasks[task] = {};
-  const groups = models.map((m) => base.filter((c) => c.task === task && c.model === m).sort((a, b) => a.repeat - b.repeat));
+  const groups = models.map((m) => base.filter((c) => c.task === task && rootModel(c) === m).sort((a, b) => a.repeat - b.repeat));
   const qkeys = [...new Set(groups.flat().flatMap((c) => Object.keys(c.quality ?? {})))];
   const rows = [
     ['Повторов', ...groups.map((cs) => cs.length)],
@@ -49,10 +61,10 @@ for (const task of tasks) {
     ['Как работала', ...groups.map((cs) => cs.map(route).join(' · '))],
     ...METRICS.map(([title, get, fmt]) => [title, ...groups.map((cs) => show(stat(cs.map(get)), fmt))]),
   ];
-  md.push(`## ${task}`, '', table(['', ...models.map(modelName)], rows), '');
+  md.push(`## ${task}`, '', table(['', ...models.map((m, i) => modelName(m, groups[i]))], rows), '');
   models.forEach((m, i) => {
     const cs = groups[i];
-    json.tasks[task][m] = {
+    json.tasks[task][modelKeys[i]] = {
       repeats: cs.length,
       quality: Object.fromEntries(qkeys.map((q) => [q, cs.map((c) => c.quality?.[q] ?? null)])),
       routes: cs.map(route),
