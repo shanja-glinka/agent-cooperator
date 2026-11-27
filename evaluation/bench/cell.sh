@@ -100,13 +100,13 @@ fi
 # agent starts inherits BENCH_CELL, so the ones it leaves behind can be found.
 CLEAN=(-u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u CLAUDE_CODE_CHILD_SESSION -u CLAUDE_CODE_MESSAGING_SOCKET -u CLAUDE_CODE_MESSAGING_TOKEN -u CLAUDE_CODE_SESSION_ATTENDED -u CLAUDE_PID -u CLAUDE_EFFORT -u CLAUDE_CODE_ENTRYPOINT)
 if [[ $MODEL == opus ]]; then
-  AGENT=(env $CLEAN BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 $CLAUDE_CONFIG_ENV CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
+  AGENT=(env $CLEAN CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=${CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS-0} BENCH_CELL=$ID DISABLE_AUTOUPDATER=1 $CLAUDE_CONFIG_ENV CODEX_HOME=$CH $JAIL ${CLAUDE_BIN:-claude})
   # A Claude project directory left from an earlier cell with the same path would carry its
   # sessions and memory into this one.
   STALE=$CLAUDE_DIR/projects/${WT//[^A-Za-z0-9]/-}
   [[ -e $STALE ]] && { echo "$STALE exists" > $LOG/stale-project.txt; echo "cell $ID: stale Claude project dir $STALE" >&2; rm -rf $WORK; exit 1; }
 else
-  AGENT=(env $CLEAN -u CLAUDE_CONFIG_DIR BENCH_CELL=$ID HOME=$HOMES/home CODEX_HOME=$CH $JAIL ${CODEX_BIN:-codex})
+  AGENT=(env $CLEAN -u CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS -u CLAUDE_CONFIG_DIR BENCH_CELL=$ID HOME=$HOMES/home CODEX_HOME=$CH $JAIL ${CODEX_BIN:-codex})
 fi
 # A dry run starts the same command, only with --version.
 [[ -n ${DRY:-} ]] && { (cd $WT && $AGENT --version) > $LOG/dry-agent.txt 2>&1 || echo "cell $ID: the agent command does not start: $(<$LOG/dry-agent.txt)" >&2; }
