@@ -347,13 +347,25 @@ test('update installs the real contextual policy into existing consumers and pre
   const policy = JSON.parse(await fs.readFile(path.join(fixture.codexHome, 'codex-workforce/profiles.json'), 'utf8'));
   assert.equal(policy.selection, 'contextual');
   assert.equal(policy.selectionRules.default, 'economy');
+  assert.deepEqual([policy.profiles.standard.worker.model, policy.profiles.standard.worker.effort], ['gpt-6-luna', 'xhigh']);
+  assert.deepEqual(policy.profiles.standard.workerLadder, ['gpt-6-luna', 'gpt-6.2-sol']);
+  assert.deepEqual(policy.profiles.complex.worker.effortByBlock, {
+    low: 'An exact, fully specified edit with no unresolved design or tracing.',
+    medium: 'Bounded design or tracing inside one clear write set.',
+    high: 'Interacting constraints or complex concurrency.',
+  });
+  assert.deepEqual(policy.profiles.complex.workerLadder, ['gpt-6.2-sol']);
+  assert.match(policy.selectionRules.automatic, /Complex[^.]*genuinely difficult independently delegated/);
+  assert.match(policy.selectionRules.authoringRouting, /small independently provable single edit/);
+  assert.match(policy.selectionRules.authoringRouting, /fresh independent Sol xhigh review of the full immutable diff/);
+  assert.match(policy.selectionRules.authoringRouting, /genuinely independent deliverables.*Luna xhigh/);
+  assert.match(policy.review.authoredBlocks, /reviewBlock and reviewStage do not disable it/);
   assert.deepEqual([policy.profiles.economy.worker.model, policy.profiles.economy.worker.effort], ['gpt-6-luna', 'xhigh']);
   // Policy 1.15.0: the cooperator chooses the reviewer's effort, high or xhigh, for each review.
   const reviewer = policy.profiles.economy.blockReviewer;
   assert.deepEqual([reviewer.model, reviewer.effort, reviewer.effortUp], ['gpt-6.2-sol', 'high', 'xhigh']);
-  // Policy 1.14.0: no Astra anywhere, Sol owns reviews and progress criticism, the ladder ends at Sol, and the
-  // Enhanced launch layer an older install left behind is removed.
-  assert.deepEqual(Object.keys(policy.profiles), ['standard', 'economy']);
+  // Codex policy 1.17.2: Standard delegates independent blocks to Luna; Complex is available for difficult work.
+  assert.deepEqual(Object.keys(policy.profiles), ['standard', 'economy', 'complex']);
   assert.deepEqual([policy.profiles.economy.stageReviewer.model, policy.profiles.economy.stageReviewer.effort, policy.profiles.economy.stageReviewer.effortUp], ['gpt-6.2-sol', 'high', 'xhigh']);
   assert.deepEqual(policy.profiles.economy.workerLadder, ['gpt-6-luna', 'gpt-6.2-sol']);
   assert.equal(fssync.existsSync(path.join(fixture.codexHome, 'workforce-enhanced.config.toml')), false);
@@ -361,7 +373,7 @@ test('update installs the real contextual policy into existing consumers and pre
   const walk = async (dir) => { for (const e of await fs.readdir(dir, { withFileTypes: true })) { const p = path.join(dir, e.name); if (e.isDirectory()) await walk(p); else installed.push([p, await fs.readFile(p, 'utf8')]); } };
   await walk(fixture.codexHome);
   assert.deepEqual(installed.filter(([, text]) => /gpt-6(\.\d+)?-astra/.test(text)).map(([p]) => p), []);
-  for (const layer of ['workforce-economy.config.toml', 'workforce-standard.config.toml']) {
+  for (const layer of ['workforce-economy.config.toml', 'workforce-standard.config.toml', 'workforce-complex.config.toml']) {
     const text = await fs.readFile(path.join(fixture.codexHome, layer), 'utf8');
     const [min, def, max] = ['min', 'default', 'max'].map((k) => Number(text.match(new RegExp(`^${k}_wait_timeout_ms = (\\d+)`, 'm'))?.[1]));
     assert.ok(min <= def && def <= max && min >= 1200000, `${layer}: ${min} ${def} ${max}`);
@@ -370,4 +382,27 @@ test('update installs the real contextual policy into existing consumers and pre
   assert.ok(routing.includes('economy (default): worker gpt-6-luna xhigh; block review gpt-6.2-sol high/xhigh; stage review gpt-6.2-sol high/xhigh; progress critic gpt-6.2-sol xhigh; ladder gpt-6-luna → gpt-6.2-sol'), routing.join('\n'));
   assert.equal((await runCommand('status', options)).exitCode, 0);
   assert.deepEqual((await runCommand('update', options)).actions, []);
+});
+
+test('the connected-owner review remains installed when delegated review switches are off', async (t) => {
+  const fixture = await makeFixture();
+  t.after(() => fs.rm(fixture.temp, { recursive: true, force: true }));
+  const packageRoot = path.resolve(import.meta.dirname, '..');
+
+  const installed = await runCommand('install', {
+    ...fixture.options,
+    packageRoot,
+    set: { reviewBlock: false, reviewStage: false },
+  });
+  assert.equal(installed.exitCode, 0, installed.issues.join('\n'));
+
+  const policy = JSON.parse(await fs.readFile(path.join(fixture.codexHome, 'codex-workforce/profiles.json'), 'utf8'));
+  assert.deepEqual(policy.policy, { reviewBlock: false, reviewStage: false });
+  assert.match(policy.review.authoredBlocks, /independent GPT-6\.2 Sol xhigh review/);
+  assert.match(policy.review.authoredBlocks, /reviewBlock and reviewStage do not disable it/);
+
+  const skill = await fs.readFile(path.join(fixture.codexHome, 'skills/workforce-orchestrate/SKILL.md'), 'utf8');
+  assert.match(skill, /connected deliverable whose semantic preservation can only be accepted on\s+combined behavior/);
+  assert.match(skill, /independent of `reviewBlock`/);
+  assert.match(skill, /explicit user\s+prohibition on review overrides it/);
 });

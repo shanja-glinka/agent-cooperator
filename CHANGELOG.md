@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.1 — 2026-11-27
+
+- Codex chooses how to staff a task from its acceptance criteria. GPT-6.2 Sol can implement one connected deliverable and have a second Sol review the complete change. Standard uses Luna for separately deliverable implementation blocks. Complex uses GPT-6.2 Sol workers at low, medium or high effort according to the block.
+- The optional `codex-workforce-owner` command makes the author and reviewer choice explicit. The default workflow can make that choice from the task itself.
+- Claude Code carries forward the routing measured on the [earlier eight-task series](evaluation/evidence/2026-11-27-codex-standard-fix-181748/REPORT.md). The [release check](evaluation/evidence/2026-11-27-release-1-9-1/REPORT.md) compares both CLIs on the same large task.
+
 ## 1.8.1 — 2026-11-17
 
 - Astra is named GPT-6.2 Astra (`gpt-6.2-astra`) where the kit says that no

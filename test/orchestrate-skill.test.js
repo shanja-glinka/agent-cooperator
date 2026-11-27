@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import test from 'node:test';
+import { renderPolicySections } from '../lib/installer.js';
 
 const read = (p) => fs.readFileSync(new URL(`../payload/${p}`, import.meta.url), 'utf8');
 const editions = ['claude', 'codex'];
@@ -84,9 +85,82 @@ test('the cooperator chooses the reviewer\'s effort, high or xhigh, for each rev
 });
 
 test('the Codex launch layers set the models for delegation, not delegation itself', () => {
-  for (const layer of ['economy', 'standard']) {
+  for (const layer of ['economy', 'standard', 'complex']) {
     const text = read(`codex/config/workforce-${layer}.config.toml`);
     assert.match(text, /Whether to delegate follows the skill; doing a step yourself is part of the profile\./);
   }
   assert.match(read('codex/config/workforce-economy.config.toml'), /when you delegate, Luna workers at xhigh/);
+  const complexLaunch = read('codex/config/workforce-complex.config.toml');
+  assert.match(complexLaunch, /Use PROFILE=complex/);
+  assert.match(complexLaunch, /low.*medium.*high/s);
+  assert.match(complexLaunch, /Never use xhigh/);
+});
+
+test('Codex routes by acceptance boundary while preserving the ordinary Economy and Standard worker routes', () => {
+  const profiles = JSON.parse(read('codex/profiles.json'));
+  assert.equal(profiles.policyVersion, '1.17.2');
+  assert.equal(profiles.selectionRules.default, 'economy');
+  assert.deepEqual([profiles.profiles.economy.worker.model, profiles.profiles.economy.worker.effort], ['gpt-6-luna', 'xhigh']);
+  assert.deepEqual([profiles.profiles.standard.worker.model, profiles.profiles.standard.worker.effort], ['gpt-6-luna', 'xhigh']);
+  assert.deepEqual(profiles.profiles.standard.workerLadder, ['gpt-6-luna', 'gpt-6.2-sol']);
+
+  const route = profiles.selectionRules.authoringRouting;
+  assert.match(route, /regardless of layer/);
+  assert.match(route, /small independently provable single edit and check stays with the cooperator without a default reviewer/);
+  assert.match(route, /one connected deliverable[^]*combined behavior[^]*sole author[^]*fresh independent Sol xhigh review/);
+  assert.match(route, /full immutable diff[^]*original observable contract and project checks/);
+  assert.match(route, /unless the user explicitly prohibits review/);
+  assert.match(route, /genuinely independent deliverables[^]*end-to-end acceptance and checks use the selected Economy or Standard Luna xhigh route/);
+  assert.match(route, /Writable directories, file count, or per-slice lint alone do not establish independent acceptance/);
+  assert.match(profiles.workClasses.build, /connected-owner/);
+  assert.match(profiles.workClasses.build, /progress critic applies after 45 minutes/);
+
+  const complex = profiles.profiles.complex;
+  assert.equal(complex.worker.model, 'gpt-6.2-sol');
+  assert.deepEqual(Object.keys(complex.worker.effortByBlock), ['low', 'medium', 'high']);
+  assert.equal(complex.worker.effort, undefined);
+  assert.match(complex.worker.selection, /independently for each block/);
+  assert.match(complex.worker.effortContract, /Never use xhigh unless the user explicitly overrides/);
+  assert.deepEqual(complex.workerLadder, ['gpt-6.2-sol']);
+  assert.match(complex.selection, /difficult independently delegated work/);
+  assert.match(profiles.selectionRules.automatic, /no explicit task.{0,2}launch profile/);
+  assert.match(profiles.selectionRules.automatic, /genuinely difficult independently delegated blocks/);
+  assert.match(profiles.selectionRules.automatic, /Explicit Economy, Standard, Complex, codex-workforce-owner/);
+  assert.match(profiles.review.authoredBlocks, /fresh independent GPT-6\.2 Sol xhigh review/);
+  assert.match(profiles.review.authoredBlocks, /reviewBlock and reviewStage do not disable it/);
+  assert.match(profiles.review.delegatedBlocks, /including a Complex Sol worker block/);
+
+  const skillText = skill('codex');
+  assert.match(skillText, /invocation through\s+`codex-workforce-owner` wins/);
+  assert.match(skillText, /regardless of launch-layer name/);
+  assert.match(skillText, /a fresh independent Sol reviewer at xhigh/);
+  assert.match(skillText, /A writable directory, file count, or\s+per-slice lint alone does not establish independent acceptance/);
+  assert.match(skillText, /previously working normal input at the\s+changed boundary and the edge case/);
+  assert.match(read('codex/global-instructions.md'), /choose the authoring route by each deliverable's\s+acceptance boundary, regardless of launch-layer name/);
+  assert.match(dispatch('codex'), /`gpt-6-luna`, xhigh for independently accepted blocks \| `gpt-6\.2-sol`, low\/medium\/high by block/);
+  assert.match(dispatch('codex'), /BASE: immutable revision before the implementation/);
+  assert.match(dispatch('codex'), /REVIEW \(reviewer\): acceptance of a worker block \| connected-owner/);
+  assert.match(read('codex/skills/workforce-orchestrate/references/complex.md'), /Explicit Economy,\s+Standard, `codex-workforce-owner`/);
+
+  const cases = JSON.parse(fs.readFileSync(new URL('../evaluation/cases.json', import.meta.url), 'utf8')).cases;
+  const scenario = cases.find((item) => item.id === 'codex-acceptance-boundary-routing');
+  assert.ok(scenario);
+  assert.match(scenario.expected, /small edit is direct.*connected serializer is cooperator-authored.*package blocks use Luna xhigh/s);
+  assert.match(scenario.expected, /explicit Standard wins over automatic Complex/i);
+  const ownerCritic = cases.find((item) => item.id === 'codex-connected-owner-progress-critic');
+  assert.ok(ownerCritic);
+  assert.match(ownerCritic.expected, /WORK_CLASS=build/);
+  assert.match(ownerCritic.expected, /progress critic is due at 45 minutes/);
+});
+
+test('installed review switches affect delegated blocks but do not silently disable connected-owner review', () => {
+  const template = skill('codex');
+  const on = renderPolicySections(template, { reviewBlock: true, reviewStage: true }, 'Codex SKILL.md');
+  const off = renderPolicySections(template, { reviewBlock: false, reviewStage: false }, 'Codex SKILL.md');
+  assert.match(on, /A block a light worker submitted is accepted after an independent review/);
+  assert.match(off, /Block review is off in this install/);
+  for (const rendered of [on, off]) {
+    assert.match(rendered, /This route's review is independent of `reviewBlock`/);
+    assert.match(rendered, /explicit user\s+prohibition on review overrides it/);
+  }
 });

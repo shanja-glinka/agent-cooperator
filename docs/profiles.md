@@ -1,19 +1,13 @@
 # Profiles, models, and task ownership
 
-The product name and role names are independent of model generations. The current
-release uses GPT-6.2 Sol and GPT-6 Luna for Codex. The Claude Code edition uses the
-shared worker, probe, auditor, and reviewer roles with Claude model tiers; see
+The product name and role names are independent of model generations. Codex uses
+GPT-6.2 Sol and GPT-6 Luna. This 1.9.1 release updates Codex task routing; the
+Claude Code payload remains the one shipped with 1.8.1. See
 [claude-code.md](claude-code.md) for its profile table and [research.md](research.md)
-for the evidence behind it. The progress critic is Codex-only.
-Future
-releases can update model policy without changing the install command or renaming
-your agents. Codex policy 1.12.0 removes GPT-6 Astra and the Enhanced profile. The
-escalation ceiling is Sol xhigh, and stage review runs only for an integration part no
-block review covered. Codex policy 1.14.0 adds a separate progress critic for active
-implementation tasks; Claude policy 1.11.0 is unchanged by this Codex-only workflow.
-Codex policy 1.15.0 and Claude policy 1.12.0: the cooperator runs the project-wide
-checks once per iteration and sends each failure to the worker that owns the failing
-file, and it chooses the reviewer's effort, high or xhigh, for each review.
+for the evidence behind it. The progress critic is Codex-only. Codex has no
+GPT-6.2 Astra route or Enhanced profile. Stage review runs only for an integration
+part no block review covered. The cooperator runs project-wide checks once per
+iteration and sends each failure to the worker that owns the failing file.
 
 [`payload/codex/profiles.json`](../payload/codex/profiles.json) is the machine-readable routing
 policy. [`dispatch.md`](../payload/codex/skills/workforce-orchestrate/references/dispatch.md)
@@ -32,14 +26,28 @@ routing to the task, available capabilities, and user limits, or use a custom se
 without a named profile. Only separately explicit model/effort/budget constraints
 make those settings mandatory. Keep review independence and verification requirements.
 
-Standard is the user's choice. Use it when the requirements and solution are
-sufficiently described. GPT-6.2 Sol high owns orchestration, GPT-6 Luna owns
-read-only lookups (Sol when judgment is needed), Sol implements at xhigh, and Sol
-independently reviews complete blocks, at high or xhigh as the cooperator chooses. A build or pipeline gets one Sol
-xhigh progress critic from 45 minutes of work on, every 45 minutes and after each
-compaction: it checks whether the work still moves toward the user's outcome.
-Stage review, also on Sol, runs only for an integration part no block review
-covered. The Sol orchestrator is a deliberate cost choice for the longest context.
+Standard is the user's choice. GPT-6.2 Sol high owns orchestration and GPT-6 Luna
+handles read-only lookups (Sol when judgment is needed). Choose authorship by the
+deliverable's acceptance boundary:
+
+- A small, independently provable edit with its own check stays with the
+  cooperator; it has no default reviewer.
+- A connected deliverable whose semantic preservation can only be accepted on
+  combined behavior stays with the Sol cooperator as sole author. After project
+  checks pass, a fresh independent Sol reviewer at xhigh reads the whole immutable
+  diff, the original observable contract, and the check results. This review is
+  independent of `reviewBlock`; an explicit user prohibition on review overrides
+  it. Corrections are checked by the same reviewer on the delta after affected
+  checks pass.
+- Genuinely independent deliverables with their own end-to-end acceptance and
+  checks may go to Luna workers at xhigh. Do not split shared behavior just to
+  parallelize it. General delegated block and stage reviews follow the installed
+  switches.
+
+A build or pipeline gets one Sol xhigh progress critic from 45 minutes of work on,
+every 45 minutes and after each compaction. It checks whether the work still moves
+toward the user's outcome. Stage review, also on Sol, runs only for an integration
+part no block review covered.
 
 ## Enhanced (removed)
 
@@ -61,6 +69,20 @@ has dug in. The critic does not replace review. Sol is the stage reviewer, and o
 integration part no block review covered (`reviewStage` on). A Luna
 worker has 600 tool calls per run, 1800 per block, three attempts, and 400k tokens
 per block; a block that exhausts it moves to Sol xhigh.
+
+## Complex
+
+Complex is Codex routing for a genuinely difficult, independently acceptable
+delegated block: interacting constraints, complex concurrency, long tracing, or
+bounded design decisions. In the absence of an explicit profile, active task
+choice, or applicable standing preference, Codex uses Economy for described work
+and selects Complex automatically when that difficult-block criterion applies;
+large mechanical volume alone is not enough.
+The cooperator remains on Sol and chooses low, medium, or high effort for each
+Sol worker from the task. An explicit Economy or Standard choice takes precedence.
+A connected deliverable stays with the Sol owner route, and an explicit
+`codex-workforce-owner` launch keeps its single Sol author even when Complex might
+otherwise apply.
 
 ## Worker ladder and handoff
 
@@ -88,17 +110,24 @@ has the details, including the auditor handoff at 400k.
 
 ## Selection contract
 
+This selection contract applies to Codex. Claude Code keeps its own routing in
+[claude-code.md](claude-code.md).
+
 Reuse an explicit task or native launch profile, active task choice, or applicable
-standing preference. Concrete, sufficiently specified tasks and small fixes proceed
-with Economy without asking. Autonomous instructions and unattended execution
-allow the agent to choose Economy for described work. Standard is chosen by the
-user. Preserve the choice and its source across continuations.
+standing preference; explicit model, effort, and budget limits remain binding.
+Otherwise Codex uses Economy for described work, including autonomous instructions
+and unattended execution. When a genuinely difficult independently acceptable
+delegated block meets the Complex criterion above, the cooperator selects Complex
+for that block without asking the user. A connected deliverable follows the
+same single-owner route across profiles and in an unprofiled session. An explicit `codex-workforce-owner` launch selects
+the same single-owner route. Preserve the applicable choice and its source across
+continuations.
 
 Ask once only for long-running, multi-stage work with substantial unresolved solution
-choices where the profile materially changes approach or resource use, if no prior
-choice or delegated selection applies. Explain both profiles and wait for an explicit
-answer before dependent work. Continue independent authorized prerequisites. Duration,
-production risk, urgency, and step count alone do not justify the question.
+choices and material approach or resource impact, when no explicit choice or
+applicable automatic route resolves it. State the unresolved decision and wait before
+dependent work. Continue independent authorized prerequisites. Duration, production
+risk, urgency, and step count alone do not justify asking the user to choose a profile.
 
 The installer does not change base model settings or invent a permanent user preference.
 Economy is a routing default, not evidence that the running model changed. Examples:
@@ -112,19 +141,27 @@ Analyze these options only. Do not edit files.
 ```
 
 The first two proceed without a profile question; the third honors Standard; the
-fourth qualifies for the question absent a preference or delegated selection; the
-fifth remains analysis-only.
+fourth qualifies for a question only if no existing choice or automatic route
+resolves its substantial design uncertainty; the fifth remains analysis-only.
 
 ## Actual model settings
 
-Current Codex CLI supports named config layers. The kit installs two optional layers:
+Current Codex CLI supports named config layers. The kit installs three optional layers:
 
 ```sh
 codex -p workforce-standard
 codex -p workforce-economy
+codex -p workforce-complex
 ```
 
-Both layers set `[features.multi_agent_v2]` wait limits: a wait returns as soon as an
+For one explicitly selected connected deliverable, the package also provides
+`codex-workforce-owner`. It launches Codex with `workforce-standard` and appends a
+packaged instruction that assigns the full task to one Sol author followed by an
+independent Sol xhigh full-diff review. The command takes the task as one argument;
+its `exec` form forwards native Codex options. It is optional and is not invoked by
+ordinary installed instructions. See [installation](installation.md).
+
+All three layers set `[features.multi_agent_v2]` wait limits: a wait returns as soon as an
 agent sends a message or finishes, and otherwise lasts 20 minutes.
 
 Launching one is an explicit profile choice. It sets the root model/effort for that

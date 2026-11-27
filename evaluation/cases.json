@@ -186,7 +186,8 @@
     {
       "id": "sol-routine-effort",
       "input": "Codex implementation and independent block review with no unresolved hard reasoning problem.",
-      "expected": "Economy workers use gpt-6-luna xhigh, Standard workers gpt-6.2-sol xhigh; block and stage review are Sol at high, at xhigh only where the review criteria call for it, and lookup is Luna medium. No tier above Sol exists."
+      "expected": "Economy and Standard use gpt-6-luna xhigh for independently acceptable delegated blocks; Complex uses gpt-6.2-sol at low, medium, or high by block. Connected-owner work is authored by the Sol cooperator and receives a fresh Sol xhigh review of the full immutable diff against the original observable contract and project checks. Delegated review uses reviewBlock; probes use Luna medium. No tier above Sol exists.",
+      "runtime": "codex"
     },
     {
       "id": "codex-probe-tier",
@@ -277,7 +278,25 @@
       "id": "codex-standard-workers",
       "runtime": "codex",
       "input": "Codex Standard, implementation block.",
-      "expected": "Cooperator gpt-6.2-sol high; worker gpt-6.2-sol xhigh; reviewers Sol, at high or xhigh, for blocks and, when an integration part needs it, for the stage."
+      "expected": "Standard cooperator gpt-6.2-sol high. Route by acceptance boundary regardless of launch-layer name: small independently provable edit/check stays direct without default review; one connected deliverable accepted only on combined behavior is authored by the cooperator and independently reviewed by a fresh Sol xhigh reviewer against the original observable contract, full immutable diff, and project-check results, unless the user explicitly prohibits review; genuinely independent blocks with their own end-to-end acceptance use Luna xhigh and follow reviewBlock. File count, directory ownership, or slice lint alone does not establish independence."
+    },
+    {
+      "id": "codex-acceptance-boundary-routing",
+      "runtime": "codex",
+      "input": "In a native Codex Standard session with no owner hint, a small local edit has one direct check; a serializer change touches two directories but values and errors are accepted only on their combined consumer behavior; two separate packages each have their own end-to-end checks. A second task has no explicit profile and contains a difficult independent concurrency block. Compare the explicit codex-workforce-owner command.",
+      "expected": "Route each deliverable by its acceptance boundary regardless of the Standard launch layer: the small edit is direct with no default reviewer; the connected serializer is cooperator-authored and gets a fresh independent Sol xhigh full-diff review against its original observable contract and project checks; the independently accepted package blocks use Luna xhigh and reviewBlock. `codex-workforce-owner` explicitly selects the same single-author route and does not get duplicated review. Without an explicit profile, the difficult independent concurrency block may select Complex at Sol high; explicit Standard wins over automatic Complex. Directory count, writable paths, and per-slice lint alone do not prove independence."
+    },
+    {
+      "id": "codex-complex-efforts",
+      "runtime": "codex",
+      "input": "One explicit Complex task has three independently accepted blocks: an exact specified edit, a bounded tracing/design block in one write set, and an invariant under racing operations.",
+      "expected": "Spawn GPT-6.2 Sol workers at low, medium, and high respectively with explicit effort per block. Never use xhigh automatically. An effort change uses a fresh Sol thread and preserves the block attempts, tokens, and tool calls. Review each submitted worker block when reviewBlock is on; with it off, use required checks and whole-diff reading unless review is separately required."
+    },
+    {
+      "id": "codex-connected-owner-progress-critic",
+      "runtime": "codex",
+      "input": "A Codex Standard connected-owner build has run for 52 minutes. The cooperator authored the change and a fresh Sol reviewer is checking the full diff; required project checks are still running.",
+      "expected": "Classify the cooperator-authored connected deliverable plus required independent review as WORK_CLASS=build, not direct; the progress critic is due at 45 minutes even though no worker authored the code. Continue the same critic with the outcome and OPEN list; do not replace or duplicate the required review."
     },
     {
       "id": "submitted-at-ceiling",
@@ -443,7 +462,7 @@
     },
     {
       "id": "mechanical-multi-file-delegated",
-      "runtime": "both",
+      "runtime": "claude-code",
       "input": "/workforce-orchestrate: CI is red on 9 lint errors in 3 files; also wrap 25 async route handlers in a helper so rejections reach the framework. The exact edit is known.",
       "expected": "WORK_CLASS=build, or pipeline for the two disjoint parts: the cooperator briefs light workers with the exact edits, the rules, and the CI command; each block goes through the audit and the Sol review; the cooperator accepts and commits. It does not type the 25 wrappers itself."
     },
@@ -461,7 +480,7 @@
     },
     {
       "id": "known-large-change-delegated",
-      "runtime": "both",
+      "runtime": "claude-code",
       "input": "Kit active. 178 lint warnings across 49 files in four directories; the safe rewrite for each kind is known; the project's CI is the gate.",
       "expected": "pipeline: the four directories split into blocks with disjoint WRITE_SETs for parallel light workers, each briefed with the rules and the traps (a rewrite that changes behavior); each block audited and reviewed; CI is the gate. The cooperator does not make the 178 edits itself."
     },

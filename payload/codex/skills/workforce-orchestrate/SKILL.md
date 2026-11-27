@@ -6,10 +6,14 @@ description: "Cooperator workflow for implementation, refactoring, and automatio
 # Workforce orchestration
 
 You are the cooperator: the user-facing session, the brain and the integrator
-of the task. You decide, brief, integrate, and accept; light models at xhigh
-effort do the reading and the typing. By default (Economy) workers and probes
-run on GPT-6 Luna{{#reviewBlock}}, and the reviewer of their results on GPT-6.2 Sol, at
-high or xhigh as you choose{{/reviewBlock}}. Forwarding results from one agent to the next is not orchestration.
+of the task. You decide, brief, integrate, and accept. Economy and Standard use
+GPT-6 Luna at xhigh for independently acceptable delegated blocks and Luna at
+medium for probes{{#reviewBlock}}; their worker reviews run on GPT-6.2 Sol at
+high or xhigh as you choose{{/reviewBlock}}. A connected deliverable may stay
+with the Sol cooperator for authorship and independent review; choose by its
+acceptance boundary below. Load [Complex routing](references/complex.md) only
+when Complex is explicit or the no-profile automatic rule may apply. Forwarding
+results from one agent to the next is not orchestration.
 The repository's own rules (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`)
 override this kit. An analysis-only request ends with the analysis.
 
@@ -34,6 +38,40 @@ Look first, but only as far as the brief needs: the goal, the boundaries, the
 rules and checks that apply, where the change lives. Do not solve the task in
 your head to dictate it.
 
+Resolve explicit selection before automatic routing. A task or launch profile,
+active task choice, standing preference, or invocation through
+`codex-workforce-owner` wins; in particular, explicit Economy or Standard does
+not become Complex automatically. With no explicit selection, use the same
+acceptance-boundary route below; Economy is the default for independently
+acceptable delegated blocks, except that genuinely difficult blocks may use
+Complex as described in [Complex routing](references/complex.md).
+
+For every ordinary Codex task, regardless of launch-layer name, choose the
+authoring route per deliverable's acceptance boundary:
+
+- A small, independently provable single edit with its own check stays with
+  the cooperator and has no default reviewer.
+- A connected deliverable whose semantic preservation can only be accepted on
+  combined behavior stays with the GPT-6.2 Sol cooperator as sole author. After
+  the project checks pass, a fresh independent Sol reviewer at xhigh gets the
+  full immutable diff, the original observable contract, and the check results.
+  This route's review is independent of `reviewBlock`; an explicit user
+  prohibition on review overrides it. If `codex-workforce-owner` already set
+  this route, reuse its review only if a fresh Sol xhigh reviewer checked the
+  original contract, complete final diff, all project checks, and verified
+  corrections after affected checks; a generic high review does not substitute.
+  Do not duplicate a review that already meets those same requirements.
+- Genuinely independent deliverables with their own end-to-end acceptance and
+  checks use the selected profile’s worker: Luna at xhigh under Economy or Standard,
+  GPT-6.2 Sol at low, medium, or high per block under Complex. A writable directory, file count, or
+  per-slice lint alone does not establish independent acceptance. Do not split
+  one shared behavior contract merely to parallelize it.
+
+For any reviewer correction, verify the previously working normal input at the
+changed boundary and the edge case that exposed the concern. Preserve observable
+values, identity, errors, and propagation as applicable; the reviewer checks
+the correction on its delta after affected checks run.
+
 - **Yourself:** work the whole route would cost more than doing: a question,
   an analysis, a config or doc edit, a change you already know that a few
   edits finish, and a task of about 20 turns: a small fix, a bug with a clear
@@ -41,11 +79,15 @@ your head to dictate it.
 - **Worker blocks:** work several times that size: a feature, a mechanical
   change over many files or sites, a bug whose cause needs long tracing;
   verifiable inside a clear WRITE_SET, when the route is cheaper or sooner.
-  Parts with disjoint WRITE_SETs run in parallel; decide open design first.
+  Decide open design first. Run blocks in parallel only when each has its own
+  end-to-end acceptance and their WRITE_SETs are disjoint.
 - **A probe:** a bounded lookup whose answer you need before you brief.
 
-The work class records the route: `direct` you did it, `build` one worker
-block, `pipeline` several blocks. Before your first agent, read
+The work class records the route: `direct` you did it without an agent, `build`
+one owned implementation deliverable that may be worker-authored or
+cooperator-authored with a separate reviewer, `pipeline` several independent
+blocks. A connected-owner route is a `build`, so its progress critic starts
+after 45 minutes and on the other build triggers. Before your first agent, read
 [delegation](references/delegation.md) in full: the profile, the brief,
 budgets and the ladder, acceptance, and audits on demand.
 [dispatch](references/dispatch.md) has the models and the packet fields,
@@ -226,29 +268,27 @@ third parties need the user's authorization.
 
 ## Examples
 
-**Mechanical change.** "Clear 120 lint warnings in four directories without
-changing behavior." You read the rules, the CI script, and one file of each
-kind, split the directories into two blocks with disjoint WRITE_SETs, and
-spawn two Luna workers at xhigh with the rules, the CONTRACT from the task
-(behavior stays; defensive checks on database and JSON data stay), the size
-limit of the one large file they will grow with its current length, the trap
-you saw (`||` to `??` changes behavior for an empty string), and the one
-check each runs itself: lint on its own directories. They run in parallel and
-leave the test suite alone. When both have submitted, you run `npm run ci`
-once; one test fails in the second block's directory and goes back to that
-worker with the log lines{{#reviewBlock}}. With CI green, both blocks go to one review at one
-snapshot, at xhigh, because the diff changes fallbacks the CONTRACT protects;
-the reviewer lists the 14 changed fallbacks, finds one that no longer maps an
-empty string to NULL, and you restore that one line yourself; the reviewer
-checks the delta and ends with `accepted_if npm run ci`, which you close with
-`accept.mjs` once CI passed on that tree{{/reviewBlock}}{{^reviewBlock}}. With CI green, you read both diffs, send one finding back, and
-check the fix{{/reviewBlock}}; both blocks are accepted.
+**One shared acceptance boundary.** A behavior-preserving migration touches
+two directories, but every changed call path shares one observable contract;
+the directory lints do not exercise that contract independently. Treat the
+combined behavior as one deliverable: the Standard Sol cooperator owns the
+implementation, runs the project's checks once, then a fresh Sol reviewer at
+xhigh reads the full immutable diff against the original observable contract
+and those results{{#reviewBlock}}. A real correction is checked by the same
+reviewer on its delta after affected checks run{{/reviewBlock}}{{^reviewBlock}}.
+An explicit user prohibition on review overrides this route's default review;
+report that independent review was prohibited{{/reviewBlock}}. If separate
+deliverables each have their own end-to-end acceptance and check, delegate those
+blocks to Luna at xhigh and review them under the installed switch. Directory
+count alone does not decide.
 
 **Unknown cause.** "`--total` double-counts tax." The report names the
-command and the symptom: you reproduce it, find the cause in the tax module,
-fix it, add a regression test, and run the checks; about 20 turns, no agents.
-A bug whose cause needs long tracing across modules goes to one Luna worker
-with the symptom, the reproduction, and the check that must turn green.
+command and symptom. A small fix with an independently provable check stays
+direct. If several modules form one connected deliverable whose behavior must
+be accepted together, the Sol cooperator owns it and obtains the required full
+diff review. If independent blocks each have their own end-to-end checks, use
+Luna workers; when their delegated work is genuinely difficult and no explicit
+profile applies, see [Complex routing](references/complex.md).
 
 **Yourself.** "The README still names the old `--verbose` flag." One line you
 know: you edit it and run the docs check. No agents.

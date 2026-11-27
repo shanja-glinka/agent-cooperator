@@ -3,7 +3,9 @@
 Read this in full before your first agent; the orchestration skill says which
 work goes to whom. [dispatch](dispatch.md) holds the models, efforts, budgets,
 and the work packet; [tools](tools.md) shows the real spawn, follow-up, and
-wait calls. Product code in a delegated block is written by its worker.
+wait calls. Product code in a delegated block is written by its worker. A
+connected-owner route in SKILL.md is written by the Sol cooperator and reviewed
+separately.
 
 ## Flow
 
@@ -44,13 +46,22 @@ Required checks passed → report (stage review is off in this install)
 
 ## Steps
 
-1. **Profile.** Reuse an explicit choice, native launch profile, or standing
-   preference; otherwise Economy: you on Sol, workers and probes on Luna{{#reviewBlock}},
-   the reviewer on Sol at high or xhigh{{/reviewBlock}}. Standard (Sol workers) on the user's
-   choice; a stored choice of Enhanced, removed in policy 1.12.0, runs as
-   Standard. Say which applies. Ask only when the choice materially changes a
+1. **Profile and authoring route.** Reuse an explicit task or launch choice,
+   active task choice, or standing preference; `codex-workforce-owner` is an
+   explicit connected-owner selection. Economy is the default for described
+   work. Standard uses Luna xhigh for independently acceptable delegated
+   blocks. Before dispatch, choose per deliverable: direct for a small
+   independently provable edit/check, connected-owner for one shared behavior
+   contract accepted on combined behavior, and independent workers only when
+   each block has its own end-to-end acceptance and check. Directory ownership
+   and slice lint do not prove that. When no explicit profile applies, use
+   [Complex routing](complex.md) for genuinely difficult independently
+   delegated work; explicit Economy, Standard, Complex, owner selection, and
+   strict constraints win. Enhanced, removed in policy 1.12.0, runs as
+   Standard. Say what applies. Ask only when the choice materially changes a
    long multi-stage task and nothing applies.
-2. **Brief.** Fill the packet from dispatch: outcome, acceptance example,
+2. **Brief.** First confirm each worker block has an independent acceptance
+   boundary; otherwise keep it with the connected owner. Fill the packet from dispatch: outcome, acceptance example,
    SCOPE and OUT_OF_SCOPE, exact inputs and what you already found, WRITE_SET,
    CHECKS (the narrow checks this worker runs itself, with cwd and the
    expected result; the project-wide checks are yours, step 5), PROJECT_RULES
@@ -72,8 +83,9 @@ Required checks passed → report (stage review is off in this install)
    they depend on. Start a fresh worker for the rest of a block only when that
    is cheaper than the knowledge it would have to rebuild. Decide open design
    questions before briefing. Set model and reasoning effort on every spawn;
-   spawn with an empty fork and the packet. Independent blocks launch in one
-   turn. In a pipeline, keep the OPEN list in the task state file and reread
+   spawn with an empty fork and the packet. Blocks with independent end-to-end
+   acceptance and disjoint dependencies may launch in one turn. In a pipeline,
+   keep the OPEN list in the task state file and reread
    it after compaction or resume. A build or pipeline gets one progress critic
    after 45 minutes of work, again every 45 minutes, and at once on a trigger
    (SKILL.md, "Progress critic"); keep its due time and reports in the task
@@ -112,8 +124,20 @@ Required checks passed → report (stage review is off in this install)
    the log lines that show it, bundled with that block's review findings
    when both are in hand; a failure no block explains is yours to trace.
    After the fixes, run again the checks they affect.
+   For a connected-owner deliverable, the cooperator is the sole author. After
+   the project checks pass, a fresh independent Sol reviewer at xhigh receives
+   the original task and observable contract, immutable `BASE` and `SNAPSHOT`,
+   the complete `BASE..SNAPSHOT` diff, and all project-check results. This
+   review is required unless the user explicitly prohibits it; `reviewBlock`
+   and `reviewStage` do not disable it. A prior review substitutes only if a
+   fresh Sol xhigh reviewer checked the original contract, complete final diff,
+   all project checks, and verified corrections after affected checks; a generic high review does not
+   substitute. Do not duplicate a review that meets every requirement. The
+   same reviewer checks corrections after affected checks, including the
+   previously working normal input and the edge case at the changed boundary.
 {{#reviewBlock}}
-   The review starts once the checks pass, or beside them when they are slow.
+   For worker-authored blocks, the review starts once checks pass, or beside
+   them when they are slow.
    The reviewer (`workforce_reviewer` on GPT-6.2 Sol, MODE=block; reasoning
    effort `high` or `xhigh`, chosen as SKILL.md says and set on the spawn)
    gets the packet with `REVIEW: acceptance of a light worker's block`, or
@@ -172,7 +196,8 @@ Required checks passed → report (stage review is off in this install)
    project's required checks pass on the whole change, report.
 {{/reviewStage}}
 8. **Report** also: submitted → accepted per block{{#reviewBlock}}, the `REVIEW:` line
-   and the effort each review ran at{{/reviewBlock}},
+   and the effort each review ran at{{/reviewBlock}}, plus any connected-owner
+   route and its independent review,
    audit lenses you added and what each covered, escalations with their
    cause, actual routing when it differed from the plan, and the progress
    critic's reports with what you did about each. Interrupt the critic when
@@ -196,15 +221,14 @@ Required checks passed → report (stage review is off in this install)
 
 ## Examples
 
-**two blocks, one acceptance.** Two Luna workers at xhigh own `src/a` and
-`src/b`; both briefs name the CI's file-size check (`scripts/check-size.cjs`,
-3000 lines) and give each worker one check of its own: the tests of its
-directory. Both submit close together. You run `npm run ci` once; its one
-failing test is in `src/a` and goes back to that worker with the log lines{{#reviewBlock}}.
-With CI green, one Sol review at high reads both diffs, finds one real defect
-in `src/b`, its worker fixes it, and the same reviewer checks the fix.
-`REVIEW: rounds=2 findings=1 real=1`{{/reviewBlock}}{{^reviewBlock}}. With CI green, you read both diffs,
-find one real defect in `src/b`, its worker fixes it, and you check the fix{{/reviewBlock}}.
+**One shared acceptance boundary.** A change touches two directories, but the
+normal and exceptional paths share one observable contract and neither
+directory has its own end-to-end check. Do not infer independent acceptance
+from WRITE_SET or slice lint. The Sol cooperator implements the combined
+deliverable, runs the project checks once, then sends the original task,
+observable contract, full immutable diff, and results to a fresh Sol xhigh
+reviewer. If an independent block has its own end-to-end acceptance and check,
+it may use a Luna worker; directory count alone does not decide.
 
 **escalation.** Block "rewrite the date parser". The Luna worker returns
 `STATUS: handoff` at its 600-call budget twice (two attempts), and the third

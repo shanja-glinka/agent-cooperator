@@ -6,56 +6,79 @@ Read the record only to route outside the defaults below.
 
 ## Presets
 
-| Role | Economy (default) | Standard |
-| --- | --- | --- |
-| Cooperator (user-facing session) | `gpt-6.2-sol`, high | `gpt-6.2-sol`, high |
-| Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.2-sol` when judgment is needed | same |
-| Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6.2-sol`, xhigh |
-| Worker ladder | Luna → Sol | Sol |
-| Audit lens (`workforce_auditor`, on demand) | `gpt-6-luna`, xhigh | same |
-| Progress critic (`workforce_progress_critic`, build/pipeline from 45 minutes) | `gpt-6.2-sol`, xhigh | same |
-| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.2-sol`, high or xhigh | same |
-| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.2-sol`, high or xhigh, only for an integration part no block review covered | same |
-| Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | same |
+| Role | Economy (default) | Standard | Complex |
+| --- | --- | --- | --- |
+| Cooperator (user-facing session) | `gpt-6.2-sol`, high | `gpt-6.2-sol`, high | `gpt-6.2-sol`, high |
+| Probe (`workforce_probe`) | `gpt-6-luna`, medium; `gpt-6.2-sol` when judgment is needed | same | same |
+| Worker (`workforce_worker`) | `gpt-6-luna`, xhigh | `gpt-6-luna`, xhigh for independently accepted blocks | `gpt-6.2-sol`, low/medium/high by block |
+| Worker ladder | Luna → Sol | Luna → Sol | Sol only; re-plan at its limits |
+| Audit lens (`workforce_auditor`, on demand) | `gpt-6-luna`, xhigh | same | same |
+| Progress critic (`workforce_progress_critic`, build/pipeline from 45 minutes) | `gpt-6.2-sol`, xhigh | same | same |
+| Block reviewer (`workforce_reviewer`, MODE=block) | `gpt-6.2-sol`, high or xhigh | same | same, when reviewBlock is on or separately required |
+| Stage reviewer (`workforce_reviewer`, MODE=stage) | `gpt-6.2-sol`, high or xhigh, only for an integration part no block review covered | same | same |
+| Open design | you decide architecture, block boundaries, and how blocks interact before briefing; the worker keeps bounded search, reproduction, the local way to implement, and testing its hypotheses | same | same |
 
-Presets are starting recommendations. A named profile is an approach preference;
-the user's explicit model, effort, and budget limits are binding. Economy is the
-default: Sol thinks, judges, and integrates, and Luna reads and types at
-xhigh{{#reviewBlock}}; Sol reviews the blocks light workers submit, at high or xhigh as the
-cooperator chooses for each review (SKILL.md, "Acceptance of delegated
-blocks"){{/reviewBlock}}{{^reviewBlock}}; block review
-is off in this install{{/reviewBlock}}{{^reviewStage}}, and so is stage review{{/reviewStage}}. Audit lenses run only on demand
-(delegation, step 6). The native launch layers `codex -p workforce-economy` and
-`codex -p workforce-standard` set the cooperator's model and effort for that
-launch and the wait limits (tools); a prompt never changes the running model,
-so report a mismatch instead of claiming one. No model above Sol is in this
-kit. The progress critic is a separate goal monitor, not a reviewer; it does
-not accept blocks or replace required reviews. If Sol is
+Presets are starting recommendations; explicit task or launch choices, active
+task choice, applicable standing preference, and explicit model, effort, or
+budget limits take precedence. Economy is the default for described work.
+Standard uses Luna for independently acceptable delegated blocks. Complex uses
+Sol at low, medium, or high per difficult block, with no automatic xhigh; load
+[Complex routing](complex.md) for its selection and effort contract. A user
+invocation through `codex-workforce-owner` is an explicit connected-owner
+route. The native `codex -p workforce-standard` sets the cooperator's model and
+effort for that launch, but the cooperator still chooses authorship by the
+deliverable's acceptance boundary, not by the layer name. See SKILL.md for the
+small-direct, connected-owner, and independent-block rules. {{#reviewBlock}}The
+installed `reviewBlock` switch applies to delegated worker blocks, including
+Complex Sol workers; it does not disable the connected-owner review.{{/reviewBlock}}{{^reviewBlock}}The
+installed `reviewBlock` switch disables ordinary delegated block review; the
+connected-owner review still runs unless the user explicitly prohibits it.{{/reviewBlock}}{{^reviewStage}}, and
+stage review is off in this install{{/reviewStage}}. Audit lenses run only on demand
+(delegation, step 6). A prompt never changes the running model, so report a
+mismatch instead of claiming one. No model above Sol is in this kit. The
+progress critic is a separate goal monitor, not a reviewer; it does not accept
+blocks or replace required reviews. If Sol is
 unavailable for a required review, say the block is not independently reviewed
 and ask the user; your own reading of the diff is not an independent review.
 If Sol is unavailable for the progress critic, report that missing capability
 instead of claiming independent coverage.
 
+The connected-owner route gets a fresh Sol xhigh review after project checks,
+with the original task and observable contract, `BASE`, `SNAPSHOT`, the complete
+immutable `BASE..SNAPSHOT` diff, and all required project-check results. This
+review is required unless the user explicitly prohibits it, independent of
+`reviewBlock` and `reviewStage`. A previous review substitutes only if it was
+fresh Sol xhigh and checked the original contract, complete final diff, all
+project checks, and verified corrections after affected checks; a generic high review is not enough. Do not
+duplicate a review that meets all of those requirements.
+
 Prices per MTok (checked 2026-10-20): GPT-6.1 Sol $2 in / $10 out, cached
 $0.10 (GPT-6.2 Sol had no published price on 2026-11-17); GPT-6 Luna $0.10 / $0.50, cached $0.01 (effort up to xhigh); above 272k
 input tokens a request costs about twice. Role files omit model and effort on
 purpose: the spawn sets them. Sol and Luna default to medium, so set effort on
-every spawn: workers, auditors, and the progress critic run at xhigh, a
-reviewer at high or xhigh, chosen for each review.
+every spawn: Economy and Standard workers, auditors, and the progress critic
+run at xhigh; Complex workers use their per-block effort; a reviewer runs at
+high or xhigh, chosen for each review.
 
 ## Selection
 
-1. Explicit choice, native launch profile, active task choice, or standing
-   preference wins; the latest instruction takes precedence.
-2. Otherwise Economy, also for "work autonomously", "choose yourself", and
-   unattended runs.
-3. Standard on the user's choice. A stored or launched choice of Enhanced
-   (removed in policy 1.12.0) runs as Standard; say so.
+1. Explicit task/launch profile, active task choice, standing preference, and
+   `codex-workforce-owner` selection win; the latest instruction takes
+   precedence. Explicit Standard uses Luna for independently accepted blocks;
+   explicit Complex uses Sol at the selected effort per block.
+2. Without an explicit selection, apply the same acceptance-boundary route:
+   direct for a small provable edit, connected-owner for one shared behavior
+   contract, and Economy/Luna for independent blocks. Genuinely difficult
+   independent blocks may select Complex automatically. Large mechanical
+   volume alone does not qualify; choose ownership by the contract, not layer.
+3. A stored or launched choice of Enhanced (removed in policy 1.12.0) runs as
+   Standard; say so.
 4. Ask once, in the user's language, only before long multi-stage work where
    the choice materially changes the approach and nothing above applies.
 
-Keep PROFILE, its source, and WORK_CLASS in the task state; agents inherit them
-and never ask the user.
+Keep PROFILE, its source, WORK_CLASS, and authoring route (`direct`,
+`connected-owner`, or `independent-worker`) in the task state; agents inherit
+them and never ask the user.
 
 ## Escalation and budgets
 
@@ -64,7 +87,8 @@ Worker budgets per block, counted by the cooperator:
 | Tier | Tool calls | Attempts | Token ceiling | Next tier |
 | --- | --- | --- | --- | --- |
 | Luna | 600 per run, 1800 per block | 3 | 400k | Sol xhigh |
-| Sol | no cap | 3 | 500k | the cooperator re-plans or asks the user |
+| Sol, Economy/Standard escalation | no cap | 3 | 500k | the cooperator re-plans or asks the user |
+| Sol, Complex block | no cap | 3 | 500k | the cooperator re-plans or asks the user; no automatic xhigh |
 
 An attempt is spent only by a run that ends without a result: the worker hit
 its BUDGET, returned `STATUS: handoff`, or its fix left the finding open. A
@@ -100,7 +124,8 @@ cooperator. Report usage from `/usage` when asked.
 TASK: identifier and assignment version; task state file (pipeline)
 TIER / RUN: worker model; run number and attempts spent on this block (worker)
 WORK_CLASS: build | pipeline
-PROFILE / PROFILE_SOURCE: economy | standard | custom; explicit | inherited | preference | automatic
+PROFILE / PROFILE_SOURCE: economy | standard | complex | custom; explicit | inherited | preference | automatic
+AUTHOR_ROUTE: direct | connected-owner | independent-worker; basis in acceptance boundary
 REQUEST_KIND: analysis | implementation
 ROOT / BRANCH: absolute checkout and agreed branch
 USER_OUTCOME: what the user asked for
@@ -109,14 +134,15 @@ ACCEPTANCE_EXAMPLE: concrete before/after
 SCOPE / OUT_OF_SCOPE: what this block covers; what it must not do
 PROJECT_RULES: repository instruction files to read first
 CONTRACT: what the change must keep (behavior, interfaces, data at the boundaries), quoted with its source (the task, a rule file)
-INPUTS / SNAPSHOT: exact sources, revision, relevant dirty diff; the tree to read (reviewer: tree:<hash> from scripts/accept.mjs snapshot)
+BASE: immutable revision before the implementation; for an owner review, the full diff is BASE..SNAPSHOT
+INPUTS / SNAPSHOT: exact sources, revision, relevant dirty diff; the immutable tree to read (reviewer: tree:<hash> from scripts/accept.mjs snapshot)
 WRITE_SET / DO_NOT_TOUCH: owned files; exclusions
 CHECKS: the commands this worker runs itself, with cwd and expected result: the narrow check of its own files; the project-wide checks only when it writes alone and the packet assigns them (otherwise the cooperator runs those once for all blocks)
 CONSTRAINTS: the limits of the touched areas that can change how the work is done, each once with its scope and source: a check and the files it covers; a size limit with the file's current value (bot.ts 2998 of 3000 lines, scripts/check-architecture.cjs:351); a limit still to find, as the worker's first step
 TRAPS: what you saw that can go wrong (a behavior-changing rewrite)
 RETURN: concise result, evidence, gaps
 MODE: block | stage (reviewer)   LENS: docs | task | conventions (auditor)
-REVIEW (reviewer): acceptance of a light worker's block | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run and the tree they ran on; the audit log
+REVIEW (reviewer): acceptance of a worker block | connected-owner | required (<rule or request>) | question (<what is in doubt>); what is already fixed; checks already run and the tree they ran on; for connected-owner, original task/contract, BASE, SNAPSHOT, complete diff, all project checks, and corrections
 FILES / BUDGET (auditor): assigned files; tool calls before returning STATUS: partial
 BUDGET (worker on a budgeted tier): tool calls before returning STATUS: handoff
 APPROACH / HANDOFF (escalated worker): the cooperator's decision; the previous tier's handoff

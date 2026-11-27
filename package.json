@@ -1,11 +1,12 @@
 {
   "name": "agent-cooperator",
-  "version": "1.8.1",
+  "version": "1.9.1",
   "description": "Agent Cooperator: a cooperator-led agent workflow for Claude Code and Codex, with roles, skills, routing profiles, and managed global instructions.",
   "type": "module",
   "bin": {
     "agent-cooperator": "./bin/agent-cooperator.js",
     "codex-workforce": "./bin/codex-workforce.js",
+    "codex-workforce-owner": "./bin/codex-workforce-owner.js",
     "claude-workforce": "./bin/claude-workforce.js"
   },
   "scripts": {

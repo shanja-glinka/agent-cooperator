@@ -1,6 +1,6 @@
 # Agent Cooperator
 
-**The session decides, briefs, and accepts. Light models read and type at xhigh effort. Hard blocks climb a ladder with a handoff.**
+**The cooperator decides, briefs, and accepts. It keeps small work direct, keeps connected work under one owner with independent review, and delegates independent blocks to workers.**
 
 [Русский](README.ru.md) · [Profiles and workflow](docs/profiles.md) · [Claude Code edition](docs/claude-code.md) · [Research](docs/research.md) · [Installer contract](docs/installation.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
@@ -8,13 +8,16 @@ Agent Cooperator is a small, inspectable set of roles, skills, and routing
 profiles for agentic development in **Claude Code** and **Codex**, shipped as
 one package with one installer.
 
-The user-facing session is the **cooperator**. It is the brain and the
-integrator: it reads the repository's rules, looks only as far as the brief
-needs, and decides. It does the direct work itself. Any other verifiable block
-goes to a light worker at xhigh effort with a brief (goal, boundaries, sources,
-checks, traps). The cooperator judges what comes back, integrates it, re-plans
-when a block is harder than it looked, and accepts. Light models do the reading
-and the typing; the cooperator thinks and does not forward results.
+The user-facing session is the **cooperator**. It reads the repository's rules,
+looks only as far as the brief needs, and chooses the route by the acceptance
+boundary. In Codex, a small edit with its own check stays direct. A connected
+deliverable whose behavior can only be accepted as a whole stays with the Sol
+cooperator, then gets an independent Sol xhigh review of the full diff.
+Independent deliverables normally go to Luna workers at xhigh. The cooperator judges
+results, integrates independent blocks, re-plans when work is harder than it
+looked, and accepts. This 1.9.1 routing change applies to Codex; Claude Code
+keeps its existing routing and 1.8.1 payload. Routing is instruction policy,
+not runtime enforcement.
 
 No API proxy, background service, or task-management engine: an instruction
 pack with a Node.js installer. Routing and token budgets are instruction policy,
@@ -88,6 +91,8 @@ a clean comparison.
   Method: [benchmark](evaluation/BENCHMARK.md); history: [research](docs/research.md).
   Regenerate the charts with `node docs/images/charts.mjs`. The data and a
   command that recomputes it: [Check it yourself](#check-it-yourself).
+
+Release verification: [1.9.1 report](evaluation/evidence/2026-11-27-release-1-9-1/REPORT.md).
 
 ## Check it yourself
 
@@ -179,9 +184,11 @@ Task
   │
   ▼
 Cooperator: read the repository's rules, look as far as the brief needs
-  direct   → a question, analysis, config or doc edit, a few known lines:
+  direct   → a question, analysis, config or doc edit, a small clear change:
              it does the work, no agents
-  build    → one worker block: a fix, a feature, a bug with an unknown cause
+  connected Codex deliverable → Sol owns the whole result; an independent
+             Sol xhigh reviewer checks the full diff and original contract
+  build    → one independent worker block: a fix, feature, or bug with an unknown cause
   pipeline → blocks with disjoint write sets, run in parallel
   │
   ▼
@@ -211,8 +218,10 @@ wait, and accept (each one rereads its whole context), the worker, the review
 of its result, and the fix rounds. The user's limits, permissions, and required
 project rules come first. The cooperator does by itself only work whose whole
 route would cost more than doing it: a question, an analysis, a config or doc edit,
-or a few lines it already knows exactly. Any other verifiable block goes to a
-light worker, and parts with disjoint write sets run in parallel. The brief
+or a few lines it already knows exactly. In Codex, the acceptance boundary
+also determines ownership: one connected result stays with the Sol cooperator
+and receives independent full-diff review; independently acceptable results can
+go to Luna workers, and parts with disjoint write sets can run in parallel. The brief
 gives the goal, the boundaries, the sources, the check, and the project's
 constraints (CI steps, lint and size rules, frozen areas), each with the file
 that sets it. It does not hand over the solution or add requirements the
@@ -233,7 +242,10 @@ writes alone may get the full check as its last step. A failure no block
 explains is the cooperator's to trace.
 
 **Review.** With the default policy (`reviewBlock` on), every block a light
-worker submits is reviewed before it is accepted. The reviewer is GPT-6.2 Sol
+worker submits is reviewed before it is accepted. A connected Standard
+deliverable also gets its required independent Sol xhigh full-diff review,
+regardless of `reviewBlock`; only an explicit user prohibition overrides that
+route. The reviewer is GPT-6.2 Sol
 in the Codex presets and in Claude Hybrid (through the Codex CLI from Claude
 Code), or opus in Claude Standard and Enhanced. The cooperator chooses its
 effort for each review: high is the working level, and xhigh is for a review
@@ -304,7 +316,7 @@ without it, Hybrid keeps `haiku` workers and runs the reviews on `opus` high
 through Agent, marked as the fallback. Standard and Enhanced run only when you
 choose them, never as an automatic replacement for Hybrid. Codex runs go through the bundled
 `codex-run.mjs` wrapper. The kit is opt-in: an ordinary session spawns nothing.
-Claude policy 1.12.0 is the current routing policy.
+The installed Claude routing policy is 1.13.0.
 Details: [docs/claude-code.md](docs/claude-code.md).
 
 ## Codex
@@ -313,8 +325,9 @@ Details: [docs/claude-code.md](docs/claude-code.md).
 | --- | --- | --- |
 | Cooperator (your session) | GPT-6.2 Sol high | GPT-6.2 Sol high |
 | Probe | Luna medium, Sol for judgment | same |
-| Worker | Luna xhigh | Sol xhigh |
-| Worker ladder | Luna → Sol | Sol |
+| Independent worker blocks | Luna xhigh | Luna xhigh |
+| Connected deliverable | Sol authors the whole result and independent Sol xhigh reviews the full diff | same |
+| Worker ladder | Luna → Sol | Luna → Sol |
 | Audit lens (on demand) | Luna xhigh | same |
 | Progress critic (build/pipeline, from 45 minutes) | Sol xhigh | same |
 | Block review | Sol high or xhigh | same |
@@ -322,11 +335,16 @@ Details: [docs/claude-code.md](docs/claude-code.md).
 
 Worker budgets per block: Luna 600 tool calls per run, 1800 per block, 3 attempts,
 400k tokens, then Sol xhigh; Sol 3 attempts, 500k tokens, then the cooperator
-re-plans or asks you. Economy is the default. Enhanced was removed in policy 1.12.0;
+re-plans or asks you. Economy is the default. Without an explicit profile, task
+choice, or standing preference, Codex selects Complex automatically for a
+genuinely difficult independently delegated block; Sol uses low, medium, or high
+effort according to the task. Large mechanical volume alone does not qualify.
+Enhanced was removed in policy 1.12.0;
 a stored or launched choice of it runs as Standard. Native launch layers:
-`codex -p workforce-economy` and `workforce-standard`. Both set the agent wait: a
-wait returns as soon as an agent sends a message or finishes, and otherwise lasts 20
-minutes. A prompt never changes the running model. No profile uses GPT-6.2 Astra.
+`codex -p workforce-economy`, `workforce-standard`, and `workforce-complex`. All
+three set the agent wait: a wait returns as soon as an agent sends a message or
+finishes, and otherwise lasts 20 minutes. A prompt never changes the running model.
+No profile uses GPT-6.2 Astra.
 A build or pipeline gets one read-only progress critic after 45 minutes of work,
 then every 45 minutes and at once after a compaction, a third identical failure,
 or a check period with nothing closed. It checks with a fresh context whether the
@@ -334,7 +352,13 @@ work still moves toward your outcome or has dug in (the same action repeated, a
 detour that closes nothing you asked for, a context compacted again and again)
 and names one remedy, which the cooperator applies or answers. It does not
 replace block or stage review. Claude's workflow is unchanged.
-Details: [docs/profiles.md](docs/profiles.md).
+The optional `codex-workforce-owner` command explicitly selects the connected
+single-owner route for one task. It launches the `workforce-standard` profile
+and appends the packaged owner instructions; ordinary Codex Standard chooses
+the same route from the task's acceptance boundary, so this command is not needed
+for that routing. It is not invoked automatically.
+Details: [docs/profiles.md](docs/profiles.md) and
+[installation](docs/installation.md).
 
 ## What gets installed
 
@@ -342,7 +366,7 @@ Details: [docs/profiles.md](docs/profiles.md).
 | --- | --- | --- |
 | Roles | `agents/workforce-{worker,worker-lite,probe,auditor,reviewer}.md` | `agents/workforce_{worker,probe,auditor,reviewer,progress_critic}.toml` |
 | Skills | `skills/workforce-*/` | `skills/workforce-*/` (including `workforce-progress-critic`), linked into `~/.agents/skills` |
-| Launch layers | none | `workforce-{standard,economy}.config.toml` |
+| Launch layers | none | `workforce-{standard,economy,complex}.config.toml` |
 | Policy and manifest | `claude-workforce/profiles.json`, `manifest.json` | `codex-workforce/profiles.json`, `manifest.json` |
 | Instructions | marked block in `CLAUDE.md` | marked block in `AGENTS.md` (or `AGENTS.override.md`) |
 

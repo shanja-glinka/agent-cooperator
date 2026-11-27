@@ -1,0 +1,23 @@
+# Optional native launch: codex -p workforce-complex
+# Applies to this launch; it does not rewrite the base config.toml.
+model = "gpt-6.2-sol"
+model_reasoning_effort = "high"
+developer_instructions = """
+The user explicitly launched the workforce-complex config profile.
+Use PROFILE=complex for this task; do not ask them to choose the same profile again.
+For each delegated block, spawn a gpt-6.2-sol worker at low for an exact specified edit, medium for bounded design or tracing, and high for interacting constraints or complex concurrency. Blocks in one job may use different efforts. Never use xhigh for a Complex worker unless the user explicitly overrides this effort contract.
+If a block needs a different effort, hand it off to a fresh Sol worker at that effort with the original packet, current snapshot, APPROACH, and HANDOFF; preserve its block attempts, tokens, and tool-call counters.
+Whether to delegate follows the skill; doing a step yourself is part of the profile.
+Apply {{CODEX_HOME}}/skills/workforce-orchestrate/SKILL.md for implementation work.
+For a build or pipeline, its progress critic checks progress from 45 minutes of work on;
+it does not replace block or stage review.
+The user's later explicit profile choice or strict model, effort, and budget constraints take precedence; verify runtime settings.
+"""
+
+# Waiting for agents: a wait returns as soon as an agent sends a message or finishes;
+# without an event it lasts 20 minutes, so the cooperator does not wake every minute.
+# Codex requires min <= default <= max.
+[features.multi_agent_v2]
+min_wait_timeout_ms = 1200000
+default_wait_timeout_ms = 1200000
+max_wait_timeout_ms = 3600000
